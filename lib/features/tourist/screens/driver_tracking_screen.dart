@@ -1,0 +1,859 @@
+import 'dart:async';
+import 'dart:ui' as ui;
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart' as geo;
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../../core/config/mapbox_config.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/services/map_route_service.dart';
+import '../../../core/widgets/app_button.dart';
+import '../../../core/utils/app_translations.dart';
+import '../../../core/prototype/prototype_session.dart';
+import '../../../core/widgets/web_map_fallback.dart';
+import '../../../models/booking_model.dart';
+import 'booking_detail_screen.dart';
+
+class DriverTrackingScreen extends StatefulWidget {
+  final String bookingId;
+  const DriverTrackingScreen({super.key, required this.bookingId});
+
+  @override
+  State<DriverTrackingScreen> createState() => _DriverTrackingScreenState();
+}
+
+class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
+  BookingModel? _booking;
+  MapboxMap? _mapboxMap;
+  PointAnnotationManager? _annotationManager;
+  PolylineAnnotationManager? _routeManager;
+  PointAnnotation? _driverPin;
+  bool _creatingDriverPin = false;
+  Timer? _routeRefreshDebounce;
+  Timer? _freshnessTimer;
+  bool get _locationFresh {
+    final driver = PrototypeSession.adminDrivers.value
+        .where((d) => d['id'] == _booking?.driverId)
+        .firstOrNull;
+    final updated = DateTime.tryParse(
+      driver?['locationUpdatedAt'] as String? ?? '',
+    );
+    return updated != null &&
+        DateTime.now().difference(updated).inSeconds >= 0 &&
+        DateTime.now().difference(updated).inSeconds < 60;
+  }
+
+  StreamSubscription<geo.Position>? _touristPositionSubscription;
+  bool _routeLoading = false;
+  bool _usingRouteFallback = false;
+  bool _completionHandled = false;
+  MapRoutePlan? _routePlan;
+
+  double _currentDriverLat = 14.9520;
+  double _currentDriverLng = 120.9250;
+  double _driverSpeedMetersPerSecond = 0;
+  double _pickupLat = MapboxConfig.bustosLat;
+  double _pickupLng = MapboxConfig.bustosLng;
+  int _etaMinutes = 3;
+
+  Map<String, dynamic>? get _assignedDriver {
+    final driverName = _booking?.driverName ?? 'Assigned driver';
+    return PrototypeSession.adminDrivers.value
+        .where(
+          (driver) =>
+              driver['id'] == _booking?.driverId ||
+              driver['name'] == driverName,
+        )
+        .firstOrNull;
+  }
+
+  double get _distanceToRelevantPoint {
+    final touristLat = PrototypeSession.userLatitude.value;
+    final touristLng = PrototypeSession.userLongitude.value;
+    final trackTourist =
+        _booking?.status == BookingStatus.ongoing &&
+        touristLat != null &&
+        touristLng != null;
+    return geo.Geolocator.distanceBetween(
+      _currentDriverLat,
+      _currentDriverLng,
+      trackTourist ? touristLat : _pickupLat,
+      trackTourist ? touristLng : _pickupLng,
+    );
+  }
+
+  String get _distanceLabel {
+    final distance = _distanceToRelevantPoint;
+    return distance < 1000
+        ? '${distance.round()} m'
+        : '${(distance / 1000).toStringAsFixed(1)} km';
+  }
+
+  int? get _locationAgeSeconds {
+    final updated = DateTime.tryParse(
+      _assignedDriver?['locationUpdatedAt'] as String? ?? '',
+    );
+    if (updated == null) return null;
+    return DateTime.now().difference(updated).inSeconds.clamp(0, 9999);
+  }
+
+  String _movementTitle(bool isFilipino) {
+    if (!_locationFresh) {
+      return isFilipino
+          ? 'Naghihintay ng live location'
+          : 'Waiting for live location';
+    }
+    if (_distanceToRelevantPoint <= 50) {
+      if (_booking?.status == BookingStatus.ongoing) {
+        return isFilipino ? 'Magkasama na kayo' : 'You are together';
+      }
+      return isFilipino ? 'Dumating na ang driver' : 'Driver has arrived';
+    }
+    if (_driverSpeedMetersPerSecond >= 0.8) {
+      return isFilipino ? 'Papalapit ang driver' : 'Driver is moving';
+    }
+    return isFilipino ? 'Huminto ang driver' : 'Driver is stopped';
+  }
+
+  String _movementSubtitle(bool isFilipino) {
+    if (!_locationFresh) {
+      return isFilipino
+          ? 'Huling lokasyon ay mahigit isang minuto na'
+          : 'Last location is more than a minute old';
+    }
+    final age = _locationAgeSeconds ?? 0;
+    final target = _booking?.status == BookingStatus.ongoing
+        ? (isFilipino ? 'mula sa iyo' : 'from you')
+        : (isFilipino ? 'mula sa pickup' : 'from pickup');
+    final updated = isFilipino
+        ? 'na-update ${age}s ang nakalipas'
+        : 'updated ${age}s ago';
+    return '$_distanceLabel $target | $updated';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    try {
+      _booking = PrototypeSession.bookings.value.firstWhere(
+        (b) => b.id == widget.bookingId,
+      );
+    } catch (_) {
+      _booking = null;
+    }
+
+    _pickupLat = _booking?.pickupLat ?? MapboxConfig.bustosLat;
+    _pickupLng = _booking?.pickupLng ?? MapboxConfig.bustosLng;
+
+    final driverName = _booking?.driverName ?? 'Assigned driver';
+    Map<String, dynamic>? assignedDriver;
+    try {
+      assignedDriver = PrototypeSession.adminDrivers.value.firstWhere(
+        (d) => d['id'] == _booking?.driverId || d['name'] == driverName,
+      );
+    } catch (_) {}
+
+    _currentDriverLat = (assignedDriver?['lat'] as num?)?.toDouble() ?? 14.9520;
+    _currentDriverLng =
+        (assignedDriver?['lng'] as num?)?.toDouble() ?? 120.9250;
+    _driverSpeedMetersPerSecond =
+        (assignedDriver?['speed'] as num?)
+            ?.toDouble()
+            .clamp(0, 80)
+            .toDouble() ??
+        0;
+
+    PrototypeSession.adminDrivers.addListener(_syncDriverLocation);
+    PrototypeSession.bookings.addListener(_onBookingUpdated);
+    _ensureLocationPermission();
+    _freshnessTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    PrototypeSession.adminDrivers.removeListener(_syncDriverLocation);
+    PrototypeSession.bookings.removeListener(_onBookingUpdated);
+    _freshnessTimer?.cancel();
+    _routeRefreshDebounce?.cancel();
+    _touristPositionSubscription?.cancel();
+    _annotationManager?.deleteAll();
+    _routeManager?.deleteAll();
+    super.dispose();
+  }
+
+  Future<void> _ensureLocationPermission() async {
+    if (!await geo.Geolocator.isLocationServiceEnabled()) return;
+    var permission = await geo.Geolocator.checkPermission();
+    if (permission == geo.LocationPermission.denied) {
+      permission = await geo.Geolocator.requestPermission();
+    }
+    if (permission != geo.LocationPermission.always &&
+        permission != geo.LocationPermission.whileInUse) {
+      return;
+    }
+    await _touristPositionSubscription?.cancel();
+    _touristPositionSubscription =
+        geo.Geolocator.getPositionStream(
+          locationSettings: const geo.LocationSettings(
+            accuracy: geo.LocationAccuracy.high,
+            distanceFilter: 8,
+          ),
+        ).listen((position) {
+          PrototypeSession.userLatitude.value = position.latitude;
+          PrototypeSession.userLongitude.value = position.longitude;
+          if (mounted) setState(() {});
+          _scheduleRouteRefresh();
+        });
+  }
+
+  void _onBookingUpdated() {
+    final updated = PrototypeSession.bookings.value
+        .where((booking) => booking.id == widget.bookingId)
+        .firstOrNull;
+    if (updated == null || !mounted) return;
+    setState(() => _booking = updated);
+    _scheduleRouteRefresh();
+    if (!updated.isActive && !_completionHandled) {
+      _completionHandled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          context.pushReplacement('/tourist/bookings/${widget.bookingId}');
+        }
+      });
+    }
+  }
+
+  void _syncDriverLocation() {
+    final driverName = _booking?.driverName ?? 'Assigned driver';
+    Map<String, dynamic>? driver;
+    for (final candidate in PrototypeSession.adminDrivers.value) {
+      if (candidate['id'] == _booking?.driverId ||
+          candidate['name'] == driverName) {
+        driver = candidate;
+        break;
+      }
+    }
+    final lat = (driver?['lat'] as num?)?.toDouble();
+    final lng = (driver?['lng'] as num?)?.toDouble();
+    if (lat == null || lng == null) return;
+    if (mounted) {
+      setState(() {
+        _currentDriverLat = lat;
+        _currentDriverLng = lng;
+        _driverSpeedMetersPerSecond =
+            (driver?['speed'] as num?)?.toDouble().clamp(0, 80).toDouble() ?? 0;
+      });
+    }
+    _updateDriverPin();
+    _scheduleRouteRefresh();
+  }
+
+  void _scheduleRouteRefresh() {
+    if (_routeRefreshDebounce?.isActive ?? false) return;
+    _routeRefreshDebounce = Timer(const Duration(seconds: 6), _drawDriverRoute);
+  }
+
+  Future<void> _updateDriverPin() async {
+    final manager = _annotationManager;
+    if (manager == null || !_locationFresh || !mounted || _creatingDriverPin) {
+      return;
+    }
+    if (_driverPin == null) {
+      _creatingDriverPin = true;
+      try {
+        final bitmap = await _buildPinBitmap(
+          AppColors.primary,
+          Icons.electric_rickshaw,
+        );
+        if (!mounted) return;
+        _driverPin = await manager.create(
+          PointAnnotationOptions(
+            geometry: Point(
+              coordinates: Position(_currentDriverLng, _currentDriverLat),
+            ),
+            image: bitmap,
+            iconSize: 1,
+            iconAnchor: IconAnchor.BOTTOM,
+          ),
+        );
+      } finally {
+        _creatingDriverPin = false;
+      }
+    } else {
+      _driverPin!.geometry = Point(
+        coordinates: Position(_currentDriverLng, _currentDriverLat),
+      );
+      await manager.update(_driverPin!);
+    }
+  }
+
+  Future<void> _onMapCreated(MapboxMap mapboxMap) async {
+    _mapboxMap = mapboxMap;
+    await mapboxMap.compass.updateSettings(CompassSettings(enabled: false));
+    await mapboxMap.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
+    await mapboxMap.location.updateSettings(
+      LocationComponentSettings(
+        enabled: true,
+        pulsingEnabled: true,
+        puckBearingEnabled: true,
+      ),
+    );
+    await mapboxMap.gestures.updateSettings(
+      GesturesSettings(rotateEnabled: false, pitchEnabled: false),
+    );
+
+    _annotationManager = await mapboxMap.annotations
+        .createPointAnnotationManager();
+    _routeManager = await mapboxMap.annotations
+        .createPolylineAnnotationManager();
+    await _addPins();
+    await _drawDriverRoute(fitCamera: true);
+  }
+
+  Future<void> _addPins() async {
+    if (_annotationManager == null) return;
+
+    final userBitmap = await _buildPinBitmap(
+      AppColors.danger,
+      Icons.location_on_rounded,
+    );
+    await _annotationManager!.create(
+      PointAnnotationOptions(
+        geometry: Point(coordinates: Position(_pickupLng, _pickupLat)),
+        image: userBitmap,
+        iconSize: 1.0,
+        iconAnchor: IconAnchor.BOTTOM,
+      ),
+    );
+
+    await _updateDriverPin();
+  }
+
+  Future<void> _drawDriverRoute({bool fitCamera = false}) async {
+    final map = _mapboxMap;
+    final manager = _routeManager;
+    if (map == null || manager == null || !_locationFresh || _routeLoading) {
+      return;
+    }
+    if (_booking?.interruptedAt != null) {
+      await manager.deleteAll();
+      if (mounted) setState(() => _routePlan = null);
+      return;
+    }
+    if (mounted) setState(() => _routeLoading = true);
+
+    final waypoints = [
+      Position(_currentDriverLng, _currentDriverLat),
+      if (_booking?.status == BookingStatus.ongoing)
+        ..._booking!.stops
+            .skip(_booking!.trip.confirmedStops)
+            .map((s) => Position(s.longitude, s.latitude))
+      else
+        Position(_pickupLng, _pickupLat),
+    ];
+    if (waypoints.length < 2) {
+      if (mounted) setState(() => _routeLoading = false);
+      return;
+    }
+    late final MapRoutePlan plan;
+    try {
+      plan = await MapRouteService.tricyclePreferred(waypoints);
+    } catch (_) {
+      await manager.deleteAll();
+      if (mounted) {
+        setState(() {
+          _routeLoading = false;
+          _usingRouteFallback = true;
+          _routePlan = null;
+        });
+      }
+      return;
+    }
+
+    if (!mounted) return;
+    await manager.deleteAll();
+    await manager.create(
+      PolylineAnnotationOptions(
+        geometry: LineString(coordinates: plan.geometry),
+        lineColor: AppColors.primary.toARGB32(),
+        lineBorderColor: Colors.white.toARGB32(),
+        lineBorderWidth: 2,
+        lineWidth: 7,
+        lineJoin: LineJoin.ROUND,
+      ),
+    );
+    if (fitCamera) {
+      final camera = await map.cameraForCoordinatesPadding(
+        waypoints.map((position) => Point(coordinates: position)).toList(),
+        CameraOptions(bearing: 0, pitch: 0),
+        MbxEdgeInsets(top: 170, left: 42, bottom: 350, right: 42),
+        16,
+        null,
+      );
+      await map.setCamera(camera);
+    }
+    if (mounted) {
+      setState(() {
+        _routeLoading = false;
+        _usingRouteFallback = plan.restrictionViolation;
+        _routePlan = plan;
+        _etaMinutes = plan.etaMinutes;
+      });
+    }
+  }
+
+  Future<Uint8List> _buildPinBitmap(Color color, IconData iconData) async {
+    const double w = 60;
+    const double h = 76;
+    const double cx = w / 2;
+    const double r = 24.0;
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder, const Rect.fromLTWH(0, 0, w, h));
+
+    final shadowPaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.22)
+      ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 4.0);
+    canvas.drawOval(Rect.fromLTWH(cx - 16, h - 12, 32, 12), shadowPaint);
+
+    final path = Path()
+      ..addOval(Rect.fromCircle(center: Offset(cx, r), radius: r));
+    final pointerPath = Path()
+      ..moveTo(cx - 8, r + 16)
+      ..quadraticBezierTo(cx, h - 2, cx + 8, r + 16)
+      ..close();
+
+    final fill = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(path, fill);
+    canvas.drawPath(pointerPath, fill);
+
+    final border = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
+    canvas.drawPath(path, border);
+    canvas.drawPath(pointerPath, border);
+
+    final iconPainter = TextPainter(textDirection: TextDirection.ltr);
+    iconPainter.text = TextSpan(
+      text: String.fromCharCode(iconData.codePoint),
+      style: TextStyle(
+        fontSize: 28,
+        fontFamily: iconData.fontFamily,
+        package: iconData.fontPackage,
+        color: Colors.white,
+      ),
+    );
+    iconPainter.layout();
+    iconPainter.paint(
+      canvas,
+      Offset(cx - (iconPainter.width / 2), r - (iconPainter.height / 2)),
+    );
+
+    final picture = recorder.endRecording();
+    final img = await picture.toImage(w.toInt(), h.toInt());
+    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
+    return byteData!.buffer.asUint8List();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_booking == null || !_booking!.isActive || _booking!.driverId == null) {
+      return BookingDetailScreen(bookingId: widget.bookingId);
+    }
+    final driverName = _booking?.driverName ?? 'Assigned driver';
+    final driverPlate = _booking?.driverPlate ?? 'ABC 1234';
+
+    Map<String, dynamic>? assignedDriver;
+    try {
+      assignedDriver = PrototypeSession.adminDrivers.value.firstWhere(
+        (d) => d['id'] == _booking?.driverId || d['name'] == driverName,
+      );
+    } catch (_) {}
+    final phoneNumber =
+        assignedDriver?['phoneNumber'] ??
+        assignedDriver?['contactNumber'] ??
+        '';
+
+    final centerLat = _booking?.pickupLat ?? MapboxConfig.bustosLat;
+    final centerLng = _booking?.pickupLng ?? MapboxConfig.bustosLng;
+
+    return ValueListenableBuilder<bool>(
+      valueListenable: PrototypeSession.isFilipino,
+      builder: (context, isFilipino, _) => Scaffold(
+        body: Stack(
+          children: [
+            kIsWeb
+                ? const WebMapFallback(
+                    title: 'Driver tracking preview',
+                    subtitle:
+                        'Live Mapbox tracking is available in the mobile app.',
+                  )
+                : MapWidget(
+                    styleUri: MapboxConfig.mapStyle,
+                    onMapCreated: _onMapCreated,
+                    viewport: CameraViewportState(
+                      center: Point(
+                        coordinates: Position(centerLng, centerLat),
+                      ),
+                      zoom: 14.0,
+                    ),
+                  ),
+
+            // Live route status
+            Positioned(
+              top: 110,
+              right: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    if (_routeLoading)
+                      const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    else
+                      const Icon(
+                        Icons.route_outlined,
+                        color: Colors.white,
+                        size: 14,
+                      ),
+                    const SizedBox(width: 4),
+                    Text(
+                      _routeLoading
+                          ? 'Updating route...'
+                          : _usingRouteFallback
+                          ? 'Check road restrictions'
+                          : _routePlan != null
+                          ? '${_routePlan!.distanceLabel} | ${_routePlan!.etaMinutes} min'
+                          : _locationFresh
+                          ? 'Preparing driver route'
+                          : 'Location unavailable',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (_booking?.interruptedAt != null)
+              Positioned(
+                top: 160,
+                left: 16,
+                right: 16,
+                child: Material(
+                  color: AppColors.dangerLight,
+                  borderRadius: BorderRadius.circular(14),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      'Trip paused: ${_booking?.interruptionReason ?? 'vehicle problem'}. Open Trip controls to choose whether to wait or end safely.',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              )
+            else if (_booking?.lastRouteDeviationAt != null &&
+                DateTime.now()
+                        .difference(_booking!.lastRouteDeviationAt!)
+                        .inMinutes <
+                    10)
+              Positioned(
+                top: 160,
+                left: 16,
+                right: 16,
+                child: Material(
+                  color: AppColors.warningLight,
+                  borderRadius: BorderRadius.circular(14),
+                  child: const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Text(
+                      'The driver moved away from the planned route and navigation was recalculated. Live tracking remains active.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black12, blurRadius: 8),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color:
+                                (_locationFresh
+                                        ? AppColors.success
+                                        : AppColors.textSecondary)
+                                    .withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            _driverSpeedMetersPerSecond >= 0.8
+                                ? Icons.electric_rickshaw_rounded
+                                : Icons.location_searching_rounded,
+                            color: _locationFresh
+                                ? AppColors.success
+                                : AppColors.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _movementTitle(isFilipino),
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _movementSubtitle(isFilipino),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 16,
+              bottom: 300,
+              child: FloatingActionButton.small(
+                heroTag: 'tourist_tracking_recenter',
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.primary,
+                onPressed: _locationFresh
+                    ? () => _drawDriverRoute(fitCamera: true)
+                    : null,
+                child: const Icon(Icons.center_focus_strong_rounded),
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: const BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 10,
+                      offset: Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          const CircleAvatar(
+                            radius: 24,
+                            backgroundColor: AppColors.primary,
+                            child: Icon(Icons.person, color: Colors.white),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  driverName,
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                Text(
+                                  driverPlate,
+                                  style: GoogleFonts.poppins(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.phone,
+                              color: AppColors.primary,
+                            ),
+                            onPressed: phoneNumber.toString().isEmpty
+                                ? null
+                                : () async {
+                                    final uri = Uri(
+                                      scheme: 'tel',
+                                      path: phoneNumber,
+                                    );
+                                    if (await canLaunchUrl(uri)) {
+                                      await launchUrl(uri);
+                                    } else {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              context.tr(
+                                                'Could not open phone dialer.',
+                                                'Hindi mabuksan ang phone dialer.',
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.message,
+                              color: AppColors.primary,
+                            ),
+                            onPressed: phoneNumber.toString().isEmpty
+                                ? null
+                                : () async {
+                                    final uri = Uri(
+                                      scheme: 'sms',
+                                      path: phoneNumber,
+                                    );
+                                    if (!await launchUrl(uri) &&
+                                        context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            context.tr(
+                                              'Could not open messages.',
+                                              'Hindi mabuksan ang mga mensahe.',
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                          ),
+                        ],
+                      ),
+                      const Divider(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            context.tr('ETA', 'Tinatayang Oras ng Pagdating'),
+                            style: GoogleFonts.poppins(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          Text(
+                            context.tr(
+                              _locationFresh
+                                  ? '$_etaMinutes min | ${_routePlan?.distanceLabel ?? _distanceLabel}'
+                                  : 'Unavailable',
+                              _locationFresh
+                                  ? '$_etaMinutes min | ${_routePlan?.distanceLabel ?? _distanceLabel}'
+                                  : 'Hindi available',
+                            ),
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: AppButton(
+                              label: context.tr('Emergency', 'Emerhensiya'),
+                              type: AppButtonType.outline,
+                              onPressed: () =>
+                                  context.push('/tourist/emergency'),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: AppButton(
+                              label: 'Trip & payment',
+                              type: AppButtonType.primary,
+                              onPressed: () => context.push(
+                                '/tourist/bookings/${widget.bookingId}',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

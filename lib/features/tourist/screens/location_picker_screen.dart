@@ -1,0 +1,445 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart' as geo;
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/app_text_field.dart';
+import '../../../core/prototype/prototype_session.dart';
+import '../../../core/widgets/web_map_fallback.dart';
+
+class LocationPickerScreen extends StatefulWidget {
+  const LocationPickerScreen({super.key});
+
+  @override
+  State<LocationPickerScreen> createState() => _LocationPickerScreenState();
+}
+
+class _LocationPickerScreenState extends State<LocationPickerScreen> {
+  MapboxMap? _mapboxMap;
+  final _streetCtrl = TextEditingController();
+  String _selectedBarangay = 'Poblacion';
+  bool _hasSelectedPin = false;
+
+  final List<String> _barangays = [
+    'Bonga Mayor',
+    'Bonga Menor',
+    'Buisan',
+    'Camachilihan',
+    'Cambaog',
+    'Catacte',
+    'Liciada',
+    'Malamig',
+    'Malawak',
+    'Poblacion',
+    'San Pedro',
+    'Talampas',
+    'Tanawan',
+    'Tibagan',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    final parts = (PrototypeSession.customPickupAddress.value ?? '').split(',');
+    _hasSelectedPin =
+        PrototypeSession.customPickupLat != null &&
+        PrototypeSession.customPickupLng != null;
+    if (parts.isNotEmpty &&
+        parts[0].isNotEmpty &&
+        parts[0] != 'Current Location') {
+      _streetCtrl.text = parts[0].trim();
+    }
+  }
+
+  @override
+  void dispose() {
+    _streetCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onMapCreated(MapboxMap mapboxMap) async {
+    _mapboxMap = mapboxMap;
+    final lat =
+        PrototypeSession.customPickupLat ??
+        PrototypeSession.userLatitude.value ??
+        14.9520;
+    final lng =
+        PrototypeSession.customPickupLng ??
+        PrototypeSession.userLongitude.value ??
+        120.9180;
+
+    await mapboxMap.compass.updateSettings(CompassSettings(enabled: false));
+    await mapboxMap.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
+    await mapboxMap.location.updateSettings(
+      LocationComponentSettings(
+        enabled: true,
+        pulsingEnabled: true,
+        puckBearingEnabled: true,
+      ),
+    );
+    await mapboxMap.setCamera(
+      CameraOptions(center: Point(coordinates: Position(lng, lat)), zoom: 15.0),
+    );
+  }
+
+  Future<void> _goToCurrentLocation() async {
+    if (!await geo.Geolocator.isLocationServiceEnabled()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Turn on Location Services to use your current position.',
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
+    var permission = await geo.Geolocator.checkPermission();
+    if (permission == geo.LocationPermission.denied) {
+      permission = await geo.Geolocator.requestPermission();
+    }
+    if (permission == geo.LocationPermission.denied ||
+        permission == geo.LocationPermission.deniedForever) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Location permission is needed to use your current position.',
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
+    final position = await geo.Geolocator.getCurrentPosition(
+      locationSettings: const geo.LocationSettings(
+        accuracy: geo.LocationAccuracy.high,
+      ),
+    );
+    PrototypeSession.userLatitude.value = position.latitude;
+    PrototypeSession.userLongitude.value = position.longitude;
+    if (mounted) setState(() => _hasSelectedPin = true);
+    await _mapboxMap?.flyTo(
+      CameraOptions(
+        center: Point(
+          coordinates: Position(position.longitude, position.latitude),
+        ),
+        zoom: 16,
+      ),
+      MapAnimationOptions(duration: 700),
+    );
+  }
+
+  void _onSaveLocation() async {
+    if (_mapboxMap == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Wait for the mobile map to load before confirming an exact pickup pin.',
+          ),
+        ),
+      );
+      return;
+    }
+    if (_streetCtrl.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter your street or house number'),
+        ),
+      );
+      return;
+    }
+    if (!_hasSelectedPin) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Move the map pin or use your current location before saving.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    double lat = 14.9520;
+    double lng = 120.9180;
+
+    if (_mapboxMap != null) {
+      final cameraState = await _mapboxMap!.getCameraState();
+      final point = cameraState.center;
+      lng = point.coordinates.lng.toDouble();
+      lat = point.coordinates.lat.toDouble();
+    }
+
+    final fullAddress =
+        '${_streetCtrl.text.trim()}, $_selectedBarangay, Bustos, Bulacan';
+
+    PrototypeSession.customPickupAddress.value = fullAddress;
+    PrototypeSession.customPickupLat = lat;
+    PrototypeSession.customPickupLng = lng;
+
+    if (mounted) {
+      context.pop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: Text(
+          'Select Address',
+          style: GoogleFonts.poppins(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: AppColors.surface,
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        elevation: 0,
+      ),
+      body: Column(
+        children: [
+          // 40% Map area
+          Expanded(
+            flex: 4,
+            child: Stack(
+              children: [
+                if (kIsWeb)
+                  const WebMapFallback(
+                    title: 'Pickup location preview',
+                    subtitle: 'Enter the pickup address below.',
+                  )
+                else
+                  MapWidget(
+                    key: const ValueKey('locationPickerMap'),
+                    onMapCreated: _onMapCreated,
+                    onScrollListener: (scrollEventData) {
+                      if (!_hasSelectedPin) {
+                        setState(() => _hasSelectedPin = true);
+                      }
+                    },
+                  ),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 40),
+                    child: Icon(
+                      Icons.location_on,
+                      size: 50,
+                      color: AppColors.primary,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black26,
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 16,
+                  left: 16,
+                  right: 16,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            kIsWeb
+                                ? 'Choose a barangay and enter the exact address below'
+                                : 'Drag the map to pin your exact location',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (!kIsWeb)
+                  Positioned(
+                    right: 16,
+                    bottom: 16,
+                    child: FloatingActionButton.small(
+                      heroTag: 'pickupCurrentLocation',
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppColors.primary,
+                      tooltip: 'Use my current location',
+                      onPressed: _goToCurrentLocation,
+                      child: const Icon(Icons.my_location_rounded),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          // 60% Form area
+          Expanded(
+            flex: 6,
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    offset: Offset(0, -4),
+                  ),
+                ],
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Address Details',
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildLockedDropdown('Province', 'Bulacan'),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildLockedDropdown('Municipality', 'Bustos'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Barangay',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _selectedBarangay,
+                          isExpanded: true,
+                          icon: const Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            color: AppColors.primary,
+                          ),
+                          items: _barangays
+                              .map(
+                                (b) => DropdownMenuItem(
+                                  value: b,
+                                  child: Text(b, style: GoogleFonts.poppins()),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (val) {
+                            if (val != null) {
+                              setState(() => _selectedBarangay = val);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Street Name, Building, House No.',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    AppTextField(
+                      controller: _streetCtrl,
+                      label: 'Street/House No.',
+                      hint: 'e.g. 123 Rizal St. near the bakery',
+                    ),
+                    const SizedBox(height: 32),
+                    AppButton(
+                      label: 'Confirm Location',
+                      onPressed: _onSaveLocation,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLockedDropdown(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            value,
+            style: GoogleFonts.poppins(color: Colors.grey.shade600),
+          ),
+        ),
+      ],
+    );
+  }
+}
