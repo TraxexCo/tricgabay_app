@@ -1,10 +1,10 @@
 # Tric-Gabay final field-testing checklist
 
-Updated: 22 October 2026.
+Updated: 23 October 2026.
 
-Use two physical Android phones (tourist and driver) and one admin session. Run
-the checks below only after the Brevo sender is verified and its server secrets
-are installed. Record the test account, booking ID, device models, Android
+Use two physical Android phones (tourist and driver) and one admin session. The
+Brevo sender and its server secrets are configured for the Tric-Gabay test
+environment. Record the test account, booking ID, device models, Android
 versions, network type, start/end time, expected result, actual result, and a
 screenshot for every failure.
 

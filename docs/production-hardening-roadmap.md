@@ -1,6 +1,6 @@
 # Tric-Gabay production-hardening roadmap
 
-Updated: 22 October 2026.
+Updated: 23 October 2026.
 
 This checklist tracks implementation status. A feature is marked complete only
 when its database rule, Flutter flow, and automated validation agree.
@@ -29,8 +29,8 @@ when its database rule, Flutter flow, and automated validation agree.
 - [x] Sustained route-deviation detection, route recalculation warning, and tourist notification.
 - [x] PayMongo status reconciliation, provider-submitted refunds, honest test-mode rejection handling, and immutable financial ledger.
 - [x] Test-mode refund completion with immutable ledger records and admin-only authorization.
-- [x] Branded lifecycle email queue, retry handling, and logo-backed templates (provider activation requires Brevo credentials).
-- [x] FCM client lifecycle, privacy-safe payloads, foreground display, token rotation/revocation, and protected deep links (provider activation requires Firebase credentials).
+- [x] Branded lifecycle email queue, retry handling, logo-backed templates, verified Brevo sender, and encrypted provider secrets.
+- [x] FCM client lifecycle, privacy-safe payloads, foreground display, token rotation/revocation, protected deep links, and encrypted Firebase service credentials.
 - [x] Driver document expiry, service areas, capacity, reliability scoring, and compliance-blocked matching.
 
 ## Next implementation batches

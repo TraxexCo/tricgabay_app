@@ -43,8 +43,10 @@ internally so test and live payment activity remain distinguishable.
 ## Branded service email
 
 The `dispatch-communications` function sends lifecycle email through Brevo's
-free transactional-email API.
-Set these server-side secrets before expecting delivery:
+free transactional-email API. The Tric-Gabay test environment uses the verified
+sender `tricgabay.bustos@gmail.com`; its API key and sender identity were
+installed as encrypted Supabase Edge Function secrets on 23 October 2026.
+For a new environment, set the same server-side secret names:
 
 ```text
 BREVO_API_KEY=xkeysib-...
@@ -53,8 +55,10 @@ EMAIL_FROM_NAME=Tric-Gabay
 ```
 
 The function displays `tric_gabay_logo.png` from the public, read-only
-`app-assets` bucket. Email jobs remain queued when the provider is not configured, and booking actions do
-not fail merely because email delivery is unavailable.
+`app-assets` bucket. Email jobs remain queued when the provider is not configured,
+and booking actions do not fail merely because email delivery is unavailable.
+Never copy the Brevo API key into Flutter, documentation, screenshots, or source
+control.
 
 ## Flutter configuration
 
