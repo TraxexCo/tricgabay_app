@@ -148,20 +148,51 @@ class AuthService {
     required Uint8List licenseBytes,
     required Uint8List vehicleRegistrationBytes,
   }) async {
-    final response = await _client.auth.signUp(
-      email: email.trim(),
-      password: password,
-      data: {
-        'full_name': name.trim(),
-        'phone': phone.trim(),
-        'requested_role': AppRole.driver.name,
-      },
-    );
-    final user = response.user;
-    if (user == null) {
+    const maxDocumentBytes = 5 * 1024 * 1024;
+    if (licenseBytes.isEmpty || vehicleRegistrationBytes.isEmpty) {
+      throw const AuthException('Both driver documents are required.');
+    }
+    if (licenseBytes.length > maxDocumentBytes ||
+        vehicleRegistrationBytes.length > maxDocumentBytes) {
+      throw const AuthException(
+        'Each driver document must be 5 MB or smaller.',
+      );
+    }
+
+    final normalizedEmail = email.trim().toLowerCase();
+    AuthResponse? response;
+    final existing = _client.auth.currentUser;
+    if (existing != null && existing.email?.toLowerCase() != normalizedEmail) {
+      throw const AuthException(
+        'Another account is already signed in. Sign out before registering a driver.',
+      );
+    }
+    if (existing == null) {
+      try {
+        // A correct password resumes an application interrupted after account
+        // creation or during either document upload.
+        response = await _client.auth.signInWithPassword(
+          email: normalizedEmail,
+          password: password,
+        );
+      } on AuthException {
+        response = await _client.auth.signUp(
+          email: normalizedEmail,
+          password: password,
+          data: {
+            'full_name': name.trim(),
+            'phone': phone.trim(),
+            'requested_role': AppRole.driver.name,
+          },
+        );
+      }
+    }
+    final user = response?.user;
+    final authenticatedUser = user ?? existing;
+    if (authenticatedUser == null) {
       throw const AuthException('Registration did not complete.');
     }
-    if (response.session == null) {
+    if (_client.auth.currentSession == null) {
       throw const AuthException(
         'Driver document upload needs an authenticated registration session. '
         'For this closed test environment, disable mandatory email confirmation '
@@ -169,37 +200,55 @@ class AuthService {
       );
     }
 
-    final prefix = user.id;
-    final licensePath =
-        '$prefix/license-${DateTime.now().microsecondsSinceEpoch}.jpg';
-    final registrationPath =
-        '$prefix/vehicle-${DateTime.now().microsecondsSinceEpoch}.jpg';
+    final profile = await _client
+        .from('profiles')
+        .select('role,status')
+        .eq('id', authenticatedUser.id)
+        .single();
+    if (profile['role'] != AppRole.driver.name ||
+        profile['status'] != 'pending') {
+      await _client.auth.signOut();
+      throw const AuthException(
+        'Only a pending driver application can be resumed from this form.',
+      );
+    }
+
+    final prefix = authenticatedUser.id;
+    final licensePath = '$prefix/license.jpg';
+    final registrationPath = '$prefix/vehicle-registration.jpg';
     await _client.storage
         .from('driver-documents')
         .uploadBinary(
           licensePath,
           licenseBytes,
-          fileOptions: const FileOptions(upsert: false),
+          fileOptions: const FileOptions(
+            upsert: true,
+            contentType: 'image/jpeg',
+          ),
         );
     await _client.storage
         .from('driver-documents')
         .uploadBinary(
           registrationPath,
           vehicleRegistrationBytes,
-          fileOptions: const FileOptions(upsert: false),
+          fileOptions: const FileOptions(
+            upsert: true,
+            contentType: 'image/jpeg',
+          ),
         );
-    await _client.from('driver_profiles').upsert({
-      'profile_id': user.id,
-      'plate_number': plateNumber.trim().toUpperCase(),
-      'franchise_number': franchiseNumber.trim(),
-      'license_expires_on': _dateOnly(licenseExpiresOn),
-      'franchise_expires_on': _dateOnly(franchiseExpiresOn),
-      'passenger_capacity': passengerCapacity,
-      'accepts_accessibility_requests': acceptsAccessibilityRequests,
-      'license_document_path': licensePath,
-      'vehicle_document_path': registrationPath,
-      'approval_status': 'pending',
-    });
+    await _client.rpc(
+      'submit_driver_application',
+      params: {
+        'p_plate_number': plateNumber.trim(),
+        'p_franchise_number': franchiseNumber.trim(),
+        'p_license_expires_on': _dateOnly(licenseExpiresOn),
+        'p_franchise_expires_on': _dateOnly(franchiseExpiresOn),
+        'p_passenger_capacity': passengerCapacity,
+        'p_accepts_accessibility_requests': acceptsAccessibilityRequests,
+        'p_license_document_path': licensePath,
+        'p_vehicle_document_path': registrationPath,
+      },
+    );
     await _client.auth.signOut();
   }
 
@@ -209,7 +258,20 @@ class AuthService {
       '${value.day.toString().padLeft(2, '0')}';
 
   static Future<void> sendPasswordReset(String email) =>
-      _client.auth.resetPasswordForEmail(email.trim());
+      _client.auth.resetPasswordForEmail(
+        email.trim(),
+        redirectTo: 'tricgabay://auth-callback',
+      );
+
+  static Future<void> updateRecoveredPassword(String password) async {
+    if (_client.auth.currentSession == null) {
+      throw const AuthException(
+        'This password-reset link is invalid or expired. Request a new one.',
+      );
+    }
+    await _client.auth.updateUser(UserAttributes(password: password));
+    await _client.auth.signOut();
+  }
 
   static Future<void> signOut() => _client.auth.signOut();
 }

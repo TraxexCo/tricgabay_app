@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'core/constants/app_routes.dart';
 import 'core/prototype/prototype_session.dart';
@@ -12,6 +13,7 @@ import 'features/auth/screens/register_role_screen.dart';
 import 'features/auth/screens/register_tourist_screen.dart';
 import 'features/auth/screens/register_driver_screen.dart';
 import 'features/auth/screens/forgot_password_screen.dart';
+import 'features/auth/screens/reset_password_screen.dart';
 
 // Tourist screens
 import 'features/tourist/screens/tourist_shell_screen.dart';
@@ -73,7 +75,8 @@ final _adminNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'admin');
 final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: AppRoutes.splash,
-  debugLogDiagnostics: true,
+  debugLogDiagnostics: kDebugMode,
+  refreshListenable: PrototypeSession.authRevision,
   redirect: (context, state) {
     final path = state.uri.path;
     final role = PrototypeSession.authenticatedRole;
@@ -116,6 +119,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.forgotPassword,
       builder: (context, state) => const ForgotPasswordScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.resetPassword,
+      builder: (context, state) => const ResetPasswordScreen(),
     ),
 
     // ─── Tourist Shell ───────────────────────────────────────

@@ -82,6 +82,7 @@ async function firebaseAccessToken(service: Record<string, string>): Promise<str
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer", assertion }),
+    signal: AbortSignal.timeout(15_000),
   });
   const data = await response.json();
   if (!response.ok || !data.access_token) throw new Error(data.error_description ?? "Firebase authorization failed.");
@@ -139,6 +140,7 @@ Deno.serve(async (request) => {
               htmlContent: emailHtml(delivery, booking),
               headers: { "X-Tric-Gabay-Delivery-ID": delivery.id },
             }),
+            signal: AbortSignal.timeout(15_000),
           });
           const data = await response.json();
           if (!response.ok) throw new Error(data.message ?? "Email provider rejected the message.");
@@ -162,6 +164,7 @@ Deno.serve(async (request) => {
                 data: { route_path: delivery.route_path ?? "", notification_id: delivery.id },
                 android: { priority: "high", notification: { channel_id: "tric_gabay_updates", visibility: "PRIVATE" } },
               } }),
+              signal: AbortSignal.timeout(15_000),
             });
             const data = await response.json();
             if (response.ok) sent++;

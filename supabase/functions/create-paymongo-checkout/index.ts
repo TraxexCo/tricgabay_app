@@ -80,8 +80,10 @@ Deno.serve(async (request) => {
         Authorization: `Basic ${btoa(`${paymongoKey}:`)}`,
         "Content-Type": "application/json",
         Accept: "application/json",
+        "Idempotency-Key": `tricgabay-checkout-${booking.id}`,
       },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(15_000),
     });
     const paymongo = await response.json();
     if (!response.ok) {
@@ -98,7 +100,21 @@ Deno.serve(async (request) => {
       amount_centavos: booking.quoted_amount_centavos,
       status: "checkout_created",
     });
-    if (insertError) throw insertError;
+    if (insertError) {
+      // Another request may have completed while PayMongo was responding.
+      // Return the authoritative stored checkout instead of surfacing a false
+      // failure or encouraging the tourist to create another payment session.
+      const { data: raced } = await admin
+        .from("payments")
+        .select("checkout_url")
+        .eq("booking_id", booking.id)
+        .in("status", ["checkout_created", "processing"])
+        .maybeSingle();
+      if (raced?.checkout_url) {
+        return json({ checkout_url: raced.checkout_url, reused: true });
+      }
+      throw insertError;
+    }
     const { error: statusError } = await admin.from("bookings")
       .update({ payment_status: "checkout_created" }).eq("id", booking.id);
     if (statusError) throw statusError;

@@ -56,6 +56,7 @@ class PrototypeSession {
   static final bookings = ValueNotifier<List<BookingModel>>([]);
   static final notifications = ValueNotifier<List<NotificationItem>>([]);
   static final currentUserName = ValueNotifier<String>('');
+  static final authRevision = ValueNotifier<int>(0);
   static String? authenticatedUserId;
   static String? authenticatedRole;
 
@@ -161,6 +162,10 @@ class PrototypeSession {
   static final storageError = ValueNotifier<String?>(null);
   static SharedPreferences? _preferences;
   static Future<void> _queue = Future.value();
+  static Future<void>? _syncInFlight;
+  static bool _syncAgain = false;
+  static int _sessionGeneration = 0;
+  static String? _subscribedUserId;
   static const _storageKey = 'tric_gabay_transactions_v1';
 
   static Future<void> initialize() async {
@@ -198,8 +203,40 @@ class PrototypeSession {
     }
   }
 
-  static Future<void> syncRemoteState() async {
-    if (!BackendConfig.isConfigured || authenticatedUserId == null) return;
+  static Future<void> syncRemoteState() {
+    if (!BackendConfig.isConfigured || authenticatedUserId == null) {
+      return Future.value();
+    }
+    final existing = _syncInFlight;
+    if (existing != null) {
+      _syncAgain = true;
+      return existing;
+    }
+    final completer = Completer<void>();
+    _syncInFlight = completer.future;
+    unawaited(_runSyncLoop(completer));
+    return completer.future;
+  }
+
+  static Future<void> _runSyncLoop(Completer<void> completer) async {
+    try {
+      do {
+        _syncAgain = false;
+        await _syncRemoteStateOnce();
+      } while (_syncAgain && authenticatedUserId != null);
+      completer.complete();
+    } catch (error, stackTrace) {
+      if (!completer.isCompleted) completer.completeError(error, stackTrace);
+    } finally {
+      _syncInFlight = null;
+    }
+  }
+
+  static Future<void> _syncRemoteStateOnce() async {
+    final userId = authenticatedUserId;
+    final role = authenticatedRole;
+    final generation = _sessionGeneration;
+    if (userId == null) return;
     try {
       await BackendRepository.rpc('activate_due_scheduled_bookings', const {});
       final results = await Future.wait([
@@ -209,11 +246,16 @@ class PrototypeSession {
         BackendRepository.loadBookings(),
         BackendRepository.loadDirectory(),
         BackendRepository.loadNotifications(),
-        if (authenticatedRole == 'admin')
+        if (role == 'admin')
           BackendRepository.loadFeedback()
         else
           Future.value(<Map<String, dynamic>>[]),
       ]);
+      if (generation != _sessionGeneration ||
+          userId != authenticatedUserId ||
+          userId != BackendConfig.client.auth.currentUser?.id) {
+        return;
+      }
       farePolicy.value = results[0] as FarePolicy;
       cancellationPolicy.value = results[1] as CancellationPolicy;
       allSpots.value = results[2] as List<TouristSpotModel>;
@@ -241,13 +283,34 @@ class PrototypeSession {
           )
           .toList();
       adminFeedbacks.value = results[6] as List<Map<String, dynamic>>;
+      if (role == 'driver') {
+        final ownDriver = directory.drivers
+            .where((driver) => driver['id'] == userId)
+            .firstOrNull;
+        isDriverOnline.value = ownDriver?['isOnline'] == true;
+      }
       _restoreActiveIds();
+      if (role == 'tourist') {
+        final retained = bookings.value
+            .where((booking) => booking.touristId == userId && booking.isActive)
+            .map((booking) => booking.id)
+            .toSet();
+        await BackendRepository.purgePickupCodes(
+          userId: userId,
+          retained: retained,
+        );
+      }
       storageError.value = null;
-      BackendRepository.subscribe(() {
-        unawaited(syncRemoteState());
-      });
+      if (_subscribedUserId != userId) {
+        _subscribedUserId = userId;
+        BackendRepository.subscribe(() {
+          unawaited(syncRemoteState());
+        });
+      }
     } catch (error) {
-      storageError.value = 'Could not synchronize with the server: $error';
+      if (generation == _sessionGeneration && userId == authenticatedUserId) {
+        storageError.value = 'Could not synchronize with the server: $error';
+      }
       rethrow;
     }
   }
@@ -671,7 +734,13 @@ class PrototypeSession {
         'p_pickup_code': code,
       });
       await syncRemoteState();
-      return bookingById(id);
+      final booking = bookingById(id);
+      if (booking.status != BookingStatus.ongoing) {
+        throw StateError(
+          'That pickup code is incorrect or temporarily locked after repeated attempts.',
+        );
+      }
+      return booking;
     }
     return _change(id, TripActor.driver, (b) => TripRules.start(b, code));
   }
@@ -1058,8 +1127,17 @@ class PrototypeSession {
     required String email,
     String? plateNumber,
   }) {
+    if (authenticatedUserId != id) {
+      _sessionGeneration++;
+      _subscribedUserId = null;
+      // The unconfigured in-memory adapter is retained only for isolated unit
+      // tests. Real builds always clear the previous account before applying
+      // another user's state.
+      if (BackendConfig.isConfigured) _clearUserScopedState();
+    }
     authenticatedUserId = id;
     authenticatedRole = role;
+    authRevision.value++;
     if (role == 'driver') {
       currentDriverName.value = name;
     } else if (role == 'tourist') {
@@ -1092,11 +1170,43 @@ class PrototypeSession {
   }
 
   static void clearAuthenticatedUser() {
+    _sessionGeneration++;
+    _subscribedUserId = null;
     authenticatedUserId = null;
     authenticatedRole = null;
+    _clearUserScopedState();
+    authRevision.value++;
+  }
+
+  static Future<void> handleSessionEnded() async {
+    await PushNotificationService.deactivate();
+    await BackendRepository.dispose();
+    clearAuthenticatedUser();
+  }
+
+  static void _clearUserScopedState() {
     currentUserName.value = '';
     currentDriverName.value = '';
     isDriverOnline.value = false;
+    bookings.value = [];
+    notifications.value = [];
+    adminDrivers.value = [];
+    adminTourists.value = [];
+    adminFeedbacks.value = [];
+    favorites.value = {};
+    itinerary.value = [];
+    activePackageId = null;
+    activeBookingId = null;
+    activeDriverBookingId = null;
+    customPickupAddress.value = null;
+    customPickupLat = null;
+    customPickupLng = null;
+    passengerCount = 1;
+    luggageNotes = '';
+    accessibilityNeeds = '';
+    userLatitude.value = null;
+    userLongitude.value = null;
+    focusedSpotId.value = null;
     scheduledAt = null;
   }
 
@@ -1104,16 +1214,11 @@ class PrototypeSession {
     if (BackendConfig.isConfigured) {
       await PushNotificationService.deactivate();
       await BackendRepository.dispose();
+      clearAuthenticatedUser();
       await AuthService.signOut();
+      return;
     }
     clearAuthenticatedUser();
-    bookings.value = [];
-    notifications.value = [];
-    adminDrivers.value = [];
-    adminTourists.value = [];
-    adminFeedbacks.value = [];
-    activeBookingId = null;
-    activeDriverBookingId = null;
   }
 
   // ── Admin Specific Methods ────────────────────────────────────────────────

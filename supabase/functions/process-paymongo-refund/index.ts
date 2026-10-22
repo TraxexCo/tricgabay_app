@@ -60,6 +60,7 @@ Deno.serve(async (request) => {
           "Idempotency-Key": `tricgabay-refund-${reservation.refund_id}`,
         },
         body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(15_000),
       });
       provider = await response.json();
     } catch (error) {

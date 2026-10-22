@@ -9,6 +9,7 @@ class AppRoutes {
   static const String registerTourist = '/register/tourist';
   static const String registerDriver = '/register/driver';
   static const String forgotPassword = '/forgot-password';
+  static const String resetPassword = '/reset-password';
 
   // Tourist shell
   static const String touristShell = '/tourist';

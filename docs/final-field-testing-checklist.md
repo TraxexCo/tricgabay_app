@@ -13,6 +13,12 @@ screenshot for every failure.
 - Install the release APK on both phones and confirm login, logout, session
   restore, Android back navigation, notification permission, and precise and
   background location permission flows.
+- Request a password-reset email, open it on Android, set a new password, then
+  verify successful login. Reopen the same link and test an expired link; both
+  must fail safely and offer a new request path.
+- Switch from account A to account B on the same phone and confirm that A's
+  bookings, pickup codes, notifications, favorites, and push destinations never
+  appear for B.
 - Register a driver, upload every required document, and confirm that an admin
   cannot approve missing or expired documents.
 - Verify that rejected, suspended, expired, and manually blocked drivers cannot
@@ -23,6 +29,9 @@ screenshot for every failure.
 - Test immediate and scheduled bookings, passenger capacity, luggage,
   accessibility needs, service-area boundaries, and no-driver availability.
 - Send one offer to competing eligible drivers and confirm only one can accept.
+- Before acceptance, confirm an offered driver cannot query the tourist's
+  profile, phone, email, status, or avatar; after acceptance, confirm only the
+  trip identity fields used by the UI are available.
 - Let an offer and a search expire, then retry without duplicate bookings or
   charges.
 - Test driver replacement before pickup and confirm tourist consent, preserved
@@ -35,6 +44,9 @@ screenshot for every failure.
 - Verify stale/inaccurate locations are labelled and never treated as arrival.
 - Confirm arrival requires fresh GPS proximity and the pickup code is required
   before trip start.
+- Enter four wrong pickup codes and confirm the trip remains accepted. Enter a
+  fifth wrong code and confirm a 15-minute server lock, audit event, and tourist
+  warning; verify the correct code works only after the lock expires.
 - Follow the local-road-preferred route, deliberately deviate, and confirm the
   recalculation warning and tourist notification.
 - Revoke location permission mid-trip and confirm the app gives a safe recovery

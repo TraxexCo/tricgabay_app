@@ -75,15 +75,17 @@ class PushNotificationService {
           iOS: DarwinInitializationSettings(),
         ),
         onDidReceiveNotificationResponse: (response) {
-          final route = response.payload;
-          if (route != null && route.startsWith('/')) onOpenRoute(route);
+          final route = validateNotificationRoute(response.payload);
+          if (route != null) onOpenRoute(route);
         },
       );
       await _messaging.requestPermission(alert: true, badge: true, sound: true);
       _foregroundSubscription = FirebaseMessaging.onMessage.listen((message) {
         final notification = message.notification;
         if (notification == null) return;
-        final route = message.data['route_path']?.toString();
+        final route = validateNotificationRoute(
+          message.data['route_path']?.toString(),
+        );
         unawaited(
           _local.show(
             message.messageId.hashCode,
@@ -108,12 +110,16 @@ class PushNotificationService {
       _openedSubscription = FirebaseMessaging.onMessageOpenedApp.listen((
         message,
       ) {
-        final route = message.data['route_path']?.toString();
-        if (route != null && route.startsWith('/')) onOpenRoute(route);
+        final route = validateNotificationRoute(
+          message.data['route_path']?.toString(),
+        );
+        if (route != null) onOpenRoute(route);
       });
       final initial = await _messaging.getInitialMessage();
-      final initialRoute = initial?.data['route_path']?.toString();
-      if (initialRoute != null && initialRoute.startsWith('/')) {
+      final initialRoute = validateNotificationRoute(
+        initial?.data['route_path']?.toString(),
+      );
+      if (initialRoute != null) {
         WidgetsBinding.instance.addPostFrameCallback(
           (_) => onOpenRoute(initialRoute),
         );
@@ -151,6 +157,40 @@ class PushNotificationService {
       platform: platform,
       deviceLabel: '${defaultTargetPlatform.name} app',
     );
+  }
+
+  @visibleForTesting
+  static String? validateNotificationRoute(String? candidate) {
+    if (candidate == null || candidate.length > 200) return null;
+    final uri = Uri.tryParse(candidate);
+    if (uri == null ||
+        uri.hasScheme ||
+        uri.hasAuthority ||
+        uri.query.isNotEmpty ||
+        uri.fragment.isNotEmpty) {
+      return null;
+    }
+    final segments = uri.pathSegments;
+    if (segments.length == 2 &&
+        segments[0] == 'driver' &&
+        (segments[1] == 'bookings' || segments[1] == 'account')) {
+      return uri.path;
+    }
+    if (segments.length != 3) return null;
+    final id = segments[2];
+    final uuid = RegExp(
+      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+    );
+    if (!uuid.hasMatch(id)) return null;
+    final tourist =
+        segments[0] == 'tourist' &&
+        (segments[1] == 'bookings' || segments[1] == 'tracking');
+    final driver =
+        segments[0] == 'driver' &&
+        (segments[1] == 'bookings' ||
+            segments[1] == 'incoming' ||
+            segments[1] == 'trip');
+    return tourist || driver ? uri.path : null;
   }
 
   static Future<void> refreshRegistration() async {

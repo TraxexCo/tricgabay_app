@@ -37,7 +37,10 @@ Deno.serve(async (request) => {
 
     const response = await fetch(
       `https://api.paymongo.com/v1/checkout_sessions/${encodeURIComponent(payment.provider_checkout_id)}`,
-      { headers: { Authorization: `Basic ${btoa(`${paymongoKey}:`)}`, Accept: "application/json" } },
+      {
+        headers: { Authorization: `Basic ${btoa(`${paymongoKey}:`)}`, Accept: "application/json" },
+        signal: AbortSignal.timeout(15_000),
+      },
     );
     const provider = await response.json() as Record<string, unknown>;
     if (!response.ok) {

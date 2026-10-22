@@ -184,8 +184,26 @@ class BackendRepository {
           .toList();
       final pendingRouteChange = routeChangeRows.firstOrNull;
       final driverId = row['driver_id'] as String?;
-      final pickupCode =
-          await _secureStorage.read(key: 'pickup_code_$id') ?? '';
+      final currentUserId = _client.auth.currentUser?.id;
+      final scopedPickupKey = currentUserId == null
+          ? null
+          : 'pickup_code_${currentUserId}_$id';
+      var pickupCode = scopedPickupKey == null
+          ? null
+          : await _secureStorage.read(key: scopedPickupKey);
+      // One-time migration from the original unscoped key. Only the tourist
+      // who owns the booking may claim it, so account switching cannot expose
+      // a previous user's pickup code.
+      if (pickupCode == null &&
+          currentUserId != null &&
+          row['tourist_id'] == currentUserId) {
+        final legacyKey = 'pickup_code_$id';
+        pickupCode = await _secureStorage.read(key: legacyKey);
+        if (pickupCode != null) {
+          await _secureStorage.write(key: scopedPickupKey!, value: pickupCode);
+          await _secureStorage.delete(key: legacyKey);
+        }
+      }
       final receivedCents = paymentRows
           .where((p) => p['status'] == 'paid' || p['status'] == 'cash_paid')
           .fold<int>(0, (sum, p) => sum + (p['amount_centavos'] as int));
@@ -272,7 +290,7 @@ class BackendRepository {
           trip: TripRecord(
             fareRevision: revisions[row['fare_revision_id']] ?? 1,
             packageId: row['package_id'],
-            pickupCode: pickupCode,
+            pickupCode: pickupCode ?? '',
             pickupArrivedAt: _date(row['driver_arrived_at']),
             pickupWaitExpiresAt: _date(row['pickup_wait_expires_at']),
             confirmedStops: row['confirmed_stop_count'] ?? 0,
@@ -754,7 +772,12 @@ class BackendRepository {
     );
     final id = response['booking_id'] as String;
     final pickupCode = response['pickup_code'] as String;
-    await _secureStorage.write(key: 'pickup_code_$id', value: pickupCode);
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) throw StateError('The booking session expired.');
+    await _secureStorage.write(
+      key: 'pickup_code_${userId}_$id',
+      value: pickupCode,
+    );
     final bookings = await loadBookings();
     return BookingCreationResult(
       bookings.firstWhere((booking) => booking.id == id),
@@ -786,22 +809,35 @@ class BackendRepository {
   }) async {
     final user = _client.auth.currentUser;
     if (user == null) return;
-    await _client.from('push_tokens').upsert({
-      'token': token,
-      'profile_id': user.id,
-      'platform': platform,
-      'device_label': deviceLabel,
-      'last_seen_at': DateTime.now().toUtc().toIso8601String(),
-      'revoked_at': null,
-    });
+    await _client.rpc(
+      'register_push_token',
+      params: {
+        'p_token': token,
+        'p_platform': platform,
+        'p_device_label': deviceLabel,
+      },
+    );
     unawaited(dispatchCommunications());
   }
 
   static Future<void> revokePushToken(String token) async {
-    await _client
-        .from('push_tokens')
-        .update({'revoked_at': DateTime.now().toUtc().toIso8601String()})
-        .eq('token', token);
+    await _client.rpc('revoke_push_token', params: {'p_token': token});
+  }
+
+  static Future<void> purgePickupCodes({
+    required String userId,
+    Set<String> retained = const {},
+  }) async {
+    final values = await _secureStorage.readAll();
+    final prefix = 'pickup_code_${userId}_';
+    final removals = values.keys.where(
+      (key) =>
+          key.startsWith(prefix) &&
+          !retained.contains(key.substring(prefix.length)),
+    );
+    for (final key in removals) {
+      await _secureStorage.delete(key: key);
+    }
   }
 
   static Future<String> completePayMongoTestRefund({

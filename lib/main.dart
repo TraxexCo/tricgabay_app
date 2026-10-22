@@ -5,9 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 import 'core/config/mapbox_config.dart';
 import 'core/config/backend_config.dart';
+import 'core/constants/app_routes.dart';
 import 'core/theme/app_theme.dart';
 import 'core/prototype/prototype_session.dart';
 import 'core/services/auth_service.dart';
@@ -70,17 +72,33 @@ class TricGabayApp extends StatefulWidget {
 class _TricGabayAppState extends State<TricGabayApp>
     with WidgetsBindingObserver {
   bool _refreshing = false;
+  StreamSubscription<AuthState>? _authSubscription;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    if (BackendConfig.isConfigured) {
+      _authSubscription = BackendConfig.client.auth.onAuthStateChange.listen((
+        state,
+      ) {
+        if (state.event == AuthChangeEvent.passwordRecovery) {
+          appRouter.go(AppRoutes.resetPassword);
+          return;
+        }
+        if (state.event == AuthChangeEvent.signedOut &&
+            PrototypeSession.authenticatedUserId != null) {
+          unawaited(PrototypeSession.handleSessionEnded());
+        }
+      });
+    }
     unawaited(PushNotificationService.activate(onOpenRoute: appRouter.go));
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _authSubscription?.cancel();
     super.dispose();
   }
 

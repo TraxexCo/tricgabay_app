@@ -72,21 +72,24 @@ void main() {
     expect(results.whereType<TripRuleException>().length, 1);
     expect(PrototypeSession.bookings.value.length, 1);
   });
-  test('scheduled booking preserves its pickup time and blocks duplicates', () async {
-    final pickup = DateTime.now().add(const Duration(hours: 3));
-    PrototypeSession.scheduledAt = pickup;
-    final scheduled = await book();
-    expect(scheduled.status, BookingStatus.scheduled);
-    expect(scheduled.scheduledAt, pickup);
-    expect(scheduled.isActive, isTrue);
-    await expectLater(book(), throwsA(isA<TripRuleException>()));
-    final cancelled = await PrototypeSession.cancelBooking(
-      scheduled.id,
-      actor: TripActor.tourist,
-      reason: 'Schedule changed',
-    );
-    expect(cancelled.paymentStatus, PaymentStatus.waived);
-  });
+  test(
+    'scheduled booking preserves its pickup time and blocks duplicates',
+    () async {
+      final pickup = DateTime.now().add(const Duration(hours: 3));
+      PrototypeSession.scheduledAt = pickup;
+      final scheduled = await book();
+      expect(scheduled.status, BookingStatus.scheduled);
+      expect(scheduled.scheduledAt, pickup);
+      expect(scheduled.isActive, isTrue);
+      await expectLater(book(), throwsA(isA<TripRuleException>()));
+      final cancelled = await PrototypeSession.cancelBooking(
+        scheduled.id,
+        actor: TripActor.tourist,
+        reason: 'Schedule changed',
+      );
+      expect(cancelled.paymentStatus, PaymentStatus.waived);
+    },
+  );
   test('one driver cannot accept two live bookings', () async {
     final b = await book();
     final other = b.copyWith(id: 'another', touristId: 'u2');
@@ -254,4 +257,30 @@ void main() {
       expect(PrototypeSession.bookingById(b.id).totalFare, 70);
     },
   );
+
+  test('ending a session clears all user-scoped state', () async {
+    await book();
+    PrototypeSession.notifications.value = [
+      NotificationItem(
+        id: 'private',
+        title: 'Private update',
+        subtitle: 'Only for this account',
+        time: DateTime.now(),
+        type: NotificationType.booking,
+      ),
+    ];
+    PrototypeSession.favorites.value = {'s1'};
+    PrototypeSession.userLatitude.value = 14.95;
+    PrototypeSession.userLongitude.value = 120.92;
+
+    PrototypeSession.clearAuthenticatedUser();
+
+    expect(PrototypeSession.authenticatedUserId, isNull);
+    expect(PrototypeSession.bookings.value, isEmpty);
+    expect(PrototypeSession.notifications.value, isEmpty);
+    expect(PrototypeSession.favorites.value, isEmpty);
+    expect(PrototypeSession.itinerary.value, isEmpty);
+    expect(PrototypeSession.userLatitude.value, isNull);
+    expect(PrototypeSession.userLongitude.value, isNull);
+  });
 }

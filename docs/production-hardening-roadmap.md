@@ -35,11 +35,21 @@ when its database rule, Flutter flow, and automated validation agree.
 
 ## Next implementation batches
 
+- [ ] Replace the global `PrototypeSession` facade with authenticated, feature-scoped controllers and repositories.
+- [ ] Add Supabase/RLS role-matrix tests and Edge Function contract/integration tests.
+- [ ] Add active-trip process-death recovery and explicit stale-tracking warnings.
+- [ ] Verify the configured mobile password-recovery redirect end to end on Android.
+- [x] Add pickup-code attempt throttling and suspicious-attempt alerts.
+- [x] Minimize pre-acceptance participant PII exposed to offered drivers.
+- [ ] Add an independent scheduled communication dispatcher and delivery health alerts.
 - [ ] Trusted contacts, trip sharing, incident evidence, and safety case management.
 - [ ] Structured attraction schedules, temporary closures, and package validation.
 - [ ] Persistent offline action queue and conflict-safe replay.
 - [ ] Admin operations queues, role separation, exports, audit views, and health checks.
 - [ ] Crash monitoring, webhook alerts, backup verification, retention jobs, and cleanup jobs.
 - [ ] Rate limiting, upload validation, RLS regression tests, privacy retention, and GPS anomaly detection.
-- [ ] Replace the global PrototypeSession facade with domain controllers and repositories.
 - [ ] Full accessibility, localization, low-end-device, weak-network, and two-phone field testing.
+
+The evidence-backed readiness decision and scenario matrix are in
+`docs/advanced-engineering-audit.md`. This roadmap is not proof of runtime
+behavior by itself.
