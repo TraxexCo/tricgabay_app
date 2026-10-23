@@ -124,8 +124,7 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
         entranceFee: '₱${_entranceFeeController.text.trim()}',
         tips: widget.spot?.tips ?? [_addressController.text.trim()],
         isActive: _isActive,
-        availabilityStatus:
-            widget.spot?.availabilityStatus ?? 'open',
+        availabilityStatus: widget.spot?.availabilityStatus ?? 'open',
         closedUntil: widget.spot?.closedUntil,
         closureReason: widget.spot?.closureReason,
       );

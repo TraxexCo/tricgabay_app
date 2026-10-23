@@ -17,6 +17,20 @@ class BookingCreationResult {
   const BookingCreationResult(this.booking, this.pickupCode);
 }
 
+class DataPage<T> {
+  final List<T> items;
+  final int page;
+  final int pageSize;
+  final bool hasMore;
+
+  const DataPage({
+    required this.items,
+    required this.page,
+    required this.pageSize,
+    required this.hasMore,
+  });
+}
+
 class BackendRepository {
   BackendRepository._();
 
@@ -58,12 +72,19 @@ class BackendRepository {
     );
   }
 
-  static Future<List<TouristSpotModel>> loadSpots() async {
+  static Future<List<TouristSpotModel>> loadSpots({
+    int page = 0,
+    int pageSize = 200,
+  }) async {
+    final safePage = page < 0 ? 0 : page;
+    final safeSize = pageSize.clamp(1, 200).toInt();
+    final start = safePage * safeSize;
     final rows = await _client
         .from('tourist_spots')
         .select()
         .eq('is_active', true)
-        .order('name');
+        .order('name')
+        .range(start, start + safeSize - 1);
     return rows.map<TouristSpotModel>((row) {
       final map = Map<String, dynamic>.from(row);
       return TouristSpotModel(
@@ -95,13 +116,20 @@ class BackendRepository {
         orElse: () => SpotCategory.other,
       );
 
-  static Future<List<BookingModel>> loadBookings() async {
+  static Future<List<BookingModel>> loadBookings({
+    int page = 0,
+    int pageSize = 200,
+  }) async {
+    final safePage = page < 0 ? 0 : page;
+    final safeSize = pageSize.clamp(1, 200).toInt();
+    final start = safePage * safeSize;
     final rows = await _client
         .from('bookings')
         .select(
           '*,booking_stops(*),booking_offers(*),booking_route_changes(*),trip_events(*),payments(*),refunds(*),cash_confirmations(*),booking_reviews(*)',
         )
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .range(start, start + safeSize - 1);
     final profileIds = <String>{};
     for (final row in rows) {
       profileIds.add(row['tourist_id'] as String);
@@ -324,13 +352,18 @@ class BackendRepository {
   loadDirectory() async {
     final profiles = await _client
         .from('profiles')
-        .select('id,full_name,email,role,status,phone,created_at');
+        .select('id,full_name,email,role,status,phone,created_at')
+        .limit(500);
     final driverProfiles = await _client
         .from('driver_profiles')
         .select(
           'profile_id,plate_number,franchise_number,license_document_path,vehicle_document_path,approval_status,rating_average,is_online,last_seen_at,passenger_capacity,accepts_accessibility_requests,license_expires_on,franchise_expires_on,vehicle_inspection_expires_on,service_area_name,service_area_latitude,service_area_longitude,service_area_radius_km,matching_blocked_until,matching_blocked_reason,compliance_reviewed_at,completed_trip_count,driver_cancelled_trip_count,reliability_score',
-        );
-    final locations = await _client.from('driver_locations').select();
+        )
+        .limit(500);
+    final locations = await _client
+        .from('driver_locations')
+        .select()
+        .limit(500);
     final byDriver = {
       for (final row in driverProfiles) row['profile_id'] as String: row,
     };
@@ -484,27 +517,68 @@ class BackendRepository {
     'p_review_note': reviewNote,
   });
 
-  static Future<void> setTouristStatus(String id, String status) async {
-    await _client.from('profiles').update({'status': status}).eq('id', id);
+  static Future<void> setTouristStatus(
+    String id,
+    String status, {
+    required String reason,
+  }) => rpc('admin_set_tourist_status', {
+    'p_tourist_id': id,
+    'p_status': status,
+    'p_reason': reason,
+  });
+
+  static Future<Set<String>> loadAdminCapabilities() async {
+    final user = _client.auth.currentUser;
+    if (user == null) return const {};
+    final rows = await _client
+        .from('admin_capabilities')
+        .select('capability')
+        .eq('profile_id', user.id);
+    return rows.map((row) => row['capability'] as String).toSet();
+  }
+
+  static Future<List<Map<String, dynamic>>> loadOperationalAlerts({
+    int limit = 100,
+  }) async {
+    final rows = await _client
+        .from('operational_alerts')
+        .select()
+        .isFilter('resolved_at', null)
+        .order('last_seen_at', ascending: false)
+        .limit(limit.clamp(1, 200).toInt());
+    return rows.map((row) => Map<String, dynamic>.from(row)).toList();
   }
 
   static Future<void> sendAnnouncement(String title, String body) =>
       rpc('send_announcement', {'p_title': title, 'p_body': body});
 
-  static Future<List<Map<String, dynamic>>> loadNotifications() async {
+  static Future<List<Map<String, dynamic>>> loadNotifications({
+    int page = 0,
+    int pageSize = 100,
+  }) async {
+    final safePage = page < 0 ? 0 : page;
+    final safeSize = pageSize.clamp(1, 100).toInt();
+    final start = safePage * safeSize;
     final rows = await _client
         .from('notifications')
         .select()
         .order('created_at', ascending: false)
-        .limit(100);
+        .range(start, start + safeSize - 1);
     return rows.map((row) => Map<String, dynamic>.from(row)).toList();
   }
 
-  static Future<List<Map<String, dynamic>>> loadFeedback() async {
+  static Future<List<Map<String, dynamic>>> loadFeedback({
+    int page = 0,
+    int pageSize = 100,
+  }) async {
+    final safePage = page < 0 ? 0 : page;
+    final safeSize = pageSize.clamp(1, 100).toInt();
+    final start = safePage * safeSize;
     final rows = await _client
         .from('feedback')
         .select('id,category,message,created_at,author_id')
-        .order('created_at', ascending: false);
+        .order('created_at', ascending: false)
+        .range(start, start + safeSize - 1);
     return rows.map((row) => Map<String, dynamic>.from(row)).toList();
   }
 
@@ -532,7 +606,10 @@ class BackendRepository {
   }) async {
     String? imageUrl = spot.imageUrls.firstOrNull;
     if (imageBytes != null) {
-      final path = '${spot.id}/${DateTime.now().microsecondsSinceEpoch}.jpg';
+      if (imageBytes.length > 5 * 1024 * 1024) {
+        throw StateError('Tourist spot images must be 5 MB or smaller.');
+      }
+      final path = '${spot.id}/cover.jpg';
       await _client.storage
           .from('tourist-spots')
           .uploadBinary(
@@ -540,7 +617,7 @@ class BackendRepository {
             imageBytes,
             fileOptions: const FileOptions(
               contentType: 'image/jpeg',
-              upsert: false,
+              upsert: true,
             ),
           );
       imageUrl = _client.storage.from('tourist-spots').getPublicUrl(path);
@@ -564,6 +641,18 @@ class BackendRepository {
       'closed_until': spot.closedUntil?.toUtc().toIso8601String(),
       'closure_reason': spot.closureReason,
     });
+    if (imageBytes != null) {
+      final files = await _client.storage
+          .from('tourist-spots')
+          .list(path: spot.id);
+      final obsolete = files
+          .where((file) => file.name != 'cover.jpg')
+          .map((file) => '${spot.id}/${file.name}')
+          .toList();
+      if (obsolete.isNotEmpty) {
+        await _client.storage.from('tourist-spots').remove(obsolete);
+      }
+    }
   }
 
   static Future<void> setSpotAvailability({
@@ -612,13 +701,19 @@ class BackendRepository {
     if (user == null) throw StateError('Sign in first.');
     String? avatarPath;
     if (avatarBytes != null) {
-      avatarPath = '${user.id}/${DateTime.now().microsecondsSinceEpoch}.jpg';
+      if (avatarBytes.length > 5 * 1024 * 1024) {
+        throw StateError('Profile images must be 5 MB or smaller.');
+      }
+      avatarPath = '${user.id}/avatar.jpg';
       await _client.storage
           .from('profile-images')
           .uploadBinary(
             avatarPath,
             avatarBytes,
-            fileOptions: const FileOptions(contentType: 'image/jpeg'),
+            fileOptions: const FileOptions(
+              contentType: 'image/jpeg',
+              upsert: true,
+            ),
           );
     }
     await rpc('update_own_profile', {
@@ -640,6 +735,11 @@ class BackendRepository {
 
   static Future<void> deleteSpot(String id) async {
     await _client.from('tourist_spots').delete().eq('id', id);
+    final files = await _client.storage.from('tourist-spots').list(path: id);
+    final paths = files.map((file) => '$id/${file.name}').toList();
+    if (paths.isNotEmpty) {
+      await _client.storage.from('tourist-spots').remove(paths);
+    }
   }
 
   static Future<String> createDriverDocumentUrl(String path) =>

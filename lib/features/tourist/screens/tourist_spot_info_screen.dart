@@ -414,20 +414,19 @@ class TouristSpotInfoScreen extends StatelessWidget {
                   onPressed: spot.isTemporarilyClosed
                       ? null
                       : () {
-                    final alreadyAdded = PrototypeSession.itinerary.value.any(
-                      (item) => item.id == spot.id,
-                    );
-                    PrototypeSession.toggleItinerary(spot);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          alreadyAdded
-                              ? 'Removed from your itinerary'
-                              : 'Added to your itinerary!',
-                        ),
-                      ),
-                    );
-                  },
+                          final alreadyAdded = PrototypeSession.itinerary.value
+                              .any((item) => item.id == spot.id);
+                          PrototypeSession.toggleItinerary(spot);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                alreadyAdded
+                                    ? 'Removed from your itinerary'
+                                    : 'Added to your itinerary!',
+                              ),
+                            ),
+                          );
+                        },
                 ),
               ),
             ],

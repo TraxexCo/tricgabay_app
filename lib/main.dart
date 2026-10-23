@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
@@ -14,11 +15,13 @@ import 'core/theme/app_theme.dart';
 import 'core/prototype/prototype_session.dart';
 import 'core/services/auth_service.dart';
 import 'core/services/push_notification_service.dart';
+import 'core/services/telemetry_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await BackendConfig.initialize();
   await PushNotificationService.initializeCore();
+  await TelemetryService.initialize();
   await PrototypeSession.initialize();
   if (BackendConfig.isConfigured) {
     try {
@@ -127,35 +130,52 @@ class _TricGabayAppState extends State<TricGabayApp>
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Tric Gabay',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      routerConfig: appRouter,
-      builder: (context, child) => ValueListenableBuilder<String?>(
-        valueListenable: PrototypeSession.storageError,
-        builder: (context, error, _) => Column(
-          children: [
-            if (error != null)
-              Material(
-                child: SafeArea(
-                  bottom: false,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      children: [
-                        Text(error),
-                        TextButton(
-                          onPressed: PrototypeSession.initialize,
-                          child: const Text('Retry storage'),
+    return ValueListenableBuilder<bool>(
+      valueListenable: PrototypeSession.isFilipino,
+      builder: (context, isFilipino, _) => MaterialApp.router(
+        title: 'Tric Gabay',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        locale: Locale(isFilipino ? 'fil' : 'en'),
+        supportedLocales: const [Locale('en'), Locale('fil')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        routerConfig: appRouter,
+        builder: (context, child) => ValueListenableBuilder<String?>(
+          valueListenable: PrototypeSession.storageError,
+          builder: (context, error, _) => Column(
+            children: [
+              if (error != null)
+                Material(
+                  child: SafeArea(
+                    bottom: false,
+                    child: Semantics(
+                      liveRegion: true,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          children: [
+                            Text(error),
+                            TextButton(
+                              onPressed: PrototypeSession.initialize,
+                              child: Text(
+                                isFilipino
+                                    ? 'Subukan muli ang storage'
+                                    : 'Retry storage',
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            Expanded(child: child ?? const SizedBox.shrink()),
-          ],
+              Expanded(child: child ?? const SizedBox.shrink()),
+            ],
+          ),
         ),
       ),
     );

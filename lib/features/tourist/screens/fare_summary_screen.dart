@@ -24,9 +24,7 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
   @override
   void initState() {
     super.initState();
-    _luggageNotes = TextEditingController(
-      text: PrototypeSession.luggageNotes,
-    );
+    _luggageNotes = TextEditingController(text: PrototypeSession.luggageNotes);
     _accessibilityNeeds = TextEditingController(
       text: PrototypeSession.accessibilityNeeds,
     );
@@ -62,10 +60,18 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
       helpText: 'Choose pickup time',
     );
     if (time == null || !mounted) return;
-    final chosen = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    final chosen = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
     if (chosen.isBefore(DateTime.now().add(const Duration(hours: 1)))) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Schedule pickup at least 1 hour from now.')),
+        const SnackBar(
+          content: Text('Schedule pickup at least 1 hour from now.'),
+        ),
       );
       return;
     }
@@ -208,7 +214,8 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
               initialValue: _passengerCount,
               decoration: const InputDecoration(
                 labelText: 'Passengers',
-                helperText: 'Maximum capacity is checked before offering the booking.',
+                helperText:
+                    'Maximum capacity is checked before offering the booking.',
                 border: OutlineInputBorder(),
               ),
               items: const [
@@ -306,7 +313,8 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                       setState(() => _busy = true);
                       try {
                         PrototypeSession.passengerCount = _passengerCount;
-                        PrototypeSession.luggageNotes = _luggageNotes.text.trim();
+                        PrototypeSession.luggageNotes = _luggageNotes.text
+                            .trim();
                         PrototypeSession.accessibilityNeeds =
                             _accessibilityNeeds.text.trim();
                         PrototypeSession.scheduledAt = _scheduledAt;

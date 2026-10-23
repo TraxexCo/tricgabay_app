@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, json, message } from "../_shared/http.ts";
+import { isSchedulerRequest } from "../_shared/scheduler_auth.ts";
 
 type Delivery = {
   id: string;
@@ -99,10 +100,17 @@ Deno.serve(async (request) => {
     const authHeader = request.headers.get("Authorization") ?? "";
     const userClient = createClient(url, anonKey, { global: { headers: { Authorization: authHeader } } });
     const admin = createClient(url, serviceKey);
-    const { data: { user } } = await userClient.auth.getUser();
-    if (!user) return json({ error: "Authentication required." }, 401);
-    const { data: profile } = await userClient.from("profiles").select("status").eq("id", user.id).single();
-    if (profile?.status !== "active") return json({ error: "Active account required." }, 403);
+    const schedulerHeader = request.headers.get("x-tricgabay-scheduler") ?? "";
+    const { data: scheduler } = schedulerHeader
+      ? await admin.from("internal_scheduler_tokens").select("token").eq("name", "communications").maybeSingle()
+      : { data: null };
+    const scheduled = isSchedulerRequest(request.headers, scheduler?.token);
+    if (!scheduled) {
+      const { data: { user } } = await userClient.auth.getUser();
+      if (!user) return json({ error: "Authentication required." }, 401);
+      const { data: profile } = await userClient.from("profiles").select("status").eq("id", user.id).single();
+      if (profile?.status !== "active") return json({ error: "Active account required." }, 403);
+    }
 
     const brevoKey = Deno.env.get("BREVO_API_KEY") ?? "";
     const emailFrom = Deno.env.get("EMAIL_FROM") ?? "";

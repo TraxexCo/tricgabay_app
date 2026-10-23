@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/role_navigation_bar.dart';
+import '../../../core/prototype/prototype_session.dart';
 
 class AdminShellScreen extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -22,6 +23,25 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
   }
 
   void _selectTab(int index) {
+    final required = switch (index) {
+      1 => 'driver_compliance',
+      2 => 'content',
+      3 => 'operations',
+      _ => null,
+    };
+    if (required != null && !PrototypeSession.hasAdminCapability(required)) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Your administrator role does not include this area.',
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      return;
+    }
     final isCurrent = index == widget.navigationShell.currentIndex;
     if (!isCurrent) _rememberTab(index);
     widget.navigationShell.goBranch(index, initialLocation: isCurrent);

@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -17,8 +17,7 @@ import '../../tourist/screens/booking_detail_screen.dart';
 import '../../../core/prototype/prototype_session.dart';
 import '../../../models/booking_model.dart';
 import '../../../core/widgets/web_map_fallback.dart';
-import '../../../core/config/backend_config.dart';
-import '../../../core/services/backend_repository.dart';
+import '../../../core/services/active_trip_tracking_service.dart';
 import '../../../core/services/map_route_service.dart';
 
 class ActiveTripScreen extends ConsumerStatefulWidget {
@@ -39,32 +38,13 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
   DateTime? _deviationSince;
   DateTime? _lastDeviationReport;
   bool _offRoute = false;
-  StreamSubscription<geo.Position>? _driverPositionSubscription;
   Timer? _routeRefreshTimer;
-
-  geo.LocationSettings get _liveTripLocationSettings {
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      return geo.AndroidSettings(
-        accuracy: geo.LocationAccuracy.bestForNavigation,
-        distanceFilter: 5,
-        intervalDuration: Duration(seconds: 5),
-        foregroundNotificationConfig: geo.ForegroundNotificationConfig(
-          notificationTitle: 'Tric-Gabay live trip',
-          notificationText: 'Sharing your location with the assigned tourist',
-          enableWakeLock: true,
-        ),
-      );
-    }
-    return const geo.LocationSettings(
-      accuracy: geo.LocationAccuracy.bestForNavigation,
-      distanceFilter: 5,
-    );
-  }
 
   @override
   void initState() {
     super.initState();
     PrototypeSession.bookings.addListener(_bookingChanged);
+    ActiveTripTrackingService.position.addListener(_driverPositionChanged);
     _startDriverLocationTracking();
   }
 
@@ -73,7 +53,6 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
         .where((b) => b.id == widget.bookingId)
         .firstOrNull;
     if (booking == null || !booking.isActive) {
-      _driverPositionSubscription?.cancel();
       _routeRefreshTimer?.cancel();
       return;
     }
@@ -83,69 +62,45 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
   @override
   void dispose() {
     PrototypeSession.bookings.removeListener(_bookingChanged);
-    _driverPositionSubscription?.cancel();
+    ActiveTripTrackingService.position.removeListener(_driverPositionChanged);
     _routeRefreshTimer?.cancel();
     _routeManager?.deleteAll();
     super.dispose();
   }
 
   Future<void> _startDriverLocationTracking() async {
-    if (!await geo.Geolocator.isLocationServiceEnabled()) return;
-    var permission = await geo.Geolocator.checkPermission();
-    if (permission == geo.LocationPermission.denied) {
-      permission = await geo.Geolocator.requestPermission();
-    }
-    if (permission != geo.LocationPermission.always &&
-        permission != geo.LocationPermission.whileInUse) {
-      return;
-    }
-    await _driverPositionSubscription?.cancel();
-    _driverPositionSubscription =
-        geo.Geolocator.getPositionStream(
-          locationSettings: _liveTripLocationSettings,
-        ).listen((position) {
-          PrototypeSession.userLatitude.value = position.latitude;
-          PrototypeSession.userLongitude.value = position.longitude;
-          _checkRouteDeviation(position);
-          if (BackendConfig.isConfigured) {
-            unawaited(
-              BackendRepository.publishLocation(
-                latitude: position.latitude,
-                longitude: position.longitude,
-                accuracy: position.accuracy,
-                heading: position.heading,
-                speed: position.speed,
-                recordedAt: position.timestamp,
-              ).catchError((Object _) {
-                // Realtime/GPS updates continue; a later position retries.
-              }),
-            );
-          }
-          final driverName = PrototypeSession.currentDriverName.value;
-          PrototypeSession.adminDrivers.value = PrototypeSession
-              .adminDrivers
-              .value
-              .map(
-                (driver) => driver['name'] == driverName
-                    ? {
-                        ...driver,
-                        'lat': position.latitude,
-                        'lng': position.longitude,
-                        'locationUpdatedAt': DateTime.now().toIso8601String(),
-                        'heading': position.heading,
-                        'speed': position.speed,
-                      }
-                    : driver,
-              )
-              .toList();
-          if (_routeRefreshTimer?.isActive ?? false) return;
-          _routeRefreshTimer = Timer(const Duration(seconds: 6), () {
-            final booking = PrototypeSession.bookings.value
-                .where((item) => item.id == widget.bookingId)
-                .firstOrNull;
-            if (booking != null) _drawRoute(booking);
-          });
-        });
+    await ActiveTripTrackingService.start(widget.bookingId);
+    _driverPositionChanged();
+  }
+
+  void _driverPositionChanged() {
+    final position = ActiveTripTrackingService.position.value;
+    if (position == null) return;
+    PrototypeSession.userLatitude.value = position.latitude;
+    PrototypeSession.userLongitude.value = position.longitude;
+    _checkRouteDeviation(position);
+    final driverName = PrototypeSession.currentDriverName.value;
+    PrototypeSession.adminDrivers.value = PrototypeSession.adminDrivers.value
+        .map(
+          (driver) => driver['name'] == driverName
+              ? {
+                  ...driver,
+                  'lat': position.latitude,
+                  'lng': position.longitude,
+                  'locationUpdatedAt': DateTime.now().toIso8601String(),
+                  'heading': position.heading,
+                  'speed': position.speed,
+                }
+              : driver,
+        )
+        .toList();
+    if (_routeRefreshTimer?.isActive ?? false) return;
+    _routeRefreshTimer = Timer(const Duration(seconds: 6), () {
+      final booking = PrototypeSession.bookings.value
+          .where((item) => item.id == widget.bookingId)
+          .firstOrNull;
+      if (booking != null) _drawRoute(booking);
+    });
   }
 
   void _checkRouteDeviation(geo.Position position) {
@@ -180,14 +135,16 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
     _deviationSince ??= DateTime.now();
     if (DateTime.now().difference(_deviationSince!).inSeconds < 30) return;
     if (!_offRoute && mounted) setState(() => _offRoute = true);
-    final mayReport = _lastDeviationReport == null ||
+    final mayReport =
+        _lastDeviationReport == null ||
         DateTime.now().difference(_lastDeviationReport!).inMinutes >= 5;
     if (mayReport) {
       _lastDeviationReport = DateTime.now();
       unawaited(
-        PrototypeSession.reportRouteDeviation(booking!.id, nearest).catchError(
-          (Object _) {},
-        ),
+        PrototypeSession.reportRouteDeviation(
+          booking!.id,
+          nearest,
+        ).catchError((Object _) {}),
       );
     }
   }

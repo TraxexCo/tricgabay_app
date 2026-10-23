@@ -230,10 +230,8 @@ class StatusBadge extends StatelessWidget {
       'scheduled' => (AppColors.infoLight, AppColors.info),
       'pending' => (AppColors.warningLight, AppColors.warning),
       'accepted' => (AppColors.successLight, AppColors.success),
-      'replacementpending' || 'replacement_pending' => (
-        AppColors.dangerLight,
-        AppColors.danger,
-      ),
+      'replacementpending' ||
+      'replacement_pending' => (AppColors.dangerLight, AppColors.danger),
       'ongoing' => (AppColors.infoLight, AppColors.info),
       'completed' => (const Color(0xFFEDE7F6), const Color(0xFF8E44AD)),
       'cancelled' => (AppColors.dangerLight, AppColors.danger),

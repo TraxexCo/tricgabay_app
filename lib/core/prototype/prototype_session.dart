@@ -12,34 +12,14 @@ import '../services/backend_repository.dart';
 import '../config/backend_config.dart';
 import '../services/auth_service.dart';
 import '../services/push_notification_service.dart';
+import '../services/active_trip_tracking_service.dart';
+import '../state/offline_state_store.dart';
+import '../state/feature_controllers.dart';
 import '../../models/tourist_spot_model.dart';
 import '../../models/booking_model.dart';
+import '../../models/notification_item.dart';
 
-// ---------------------------------------------------------------------------
-// Notification Model
-// ---------------------------------------------------------------------------
-
-enum NotificationType { booking, driver, promo, system }
-
-class NotificationItem {
-  final String id;
-  final String title;
-  final String subtitle;
-  final DateTime time;
-  final NotificationType type;
-  bool isRead;
-  final String? routePath; // Where to navigate on tap
-
-  NotificationItem({
-    required this.id,
-    required this.title,
-    required this.subtitle,
-    required this.time,
-    required this.type,
-    this.isRead = false,
-    this.routePath,
-  });
-}
+export '../../models/notification_item.dart';
 
 // ---------------------------------------------------------------------------
 // Application session
@@ -50,25 +30,29 @@ class NotificationItem {
 class PrototypeSession {
   PrototypeSession._();
 
-  static final itinerary = ValueNotifier<List<TouristSpotModel>>([]);
-  static final favorites = ValueNotifier<Set<String>>({});
+  static final itinerary = AppFeatureControllers.catalog.itinerary;
+  static final favorites = AppFeatureControllers.catalog.favorites;
 
-  static final bookings = ValueNotifier<List<BookingModel>>([]);
-  static final notifications = ValueNotifier<List<NotificationItem>>([]);
-  static final currentUserName = ValueNotifier<String>('');
-  static final authRevision = ValueNotifier<int>(0);
+  static final bookings = AppFeatureControllers.booking.bookings;
+  static final notifications = AppFeatureControllers.booking.notifications;
+  static final currentUserName = AppFeatureControllers.auth.currentUserName;
+  static final authRevision = AppFeatureControllers.auth.revision;
   static String? authenticatedUserId;
   static String? authenticatedRole;
 
   static String? activeBookingId;
   static String? activePackageId;
-  static final userLatitude = ValueNotifier<double?>(null);
-  static final userLongitude = ValueNotifier<double?>(null);
-  static final adminFeedbacks = ValueNotifier<List<Map<String, dynamic>>>([]);
-  static final focusedSpotId = ValueNotifier<String?>(null);
+  static final userLatitude = AppFeatureControllers.booking.userLatitude;
+  static final userLongitude = AppFeatureControllers.booking.userLongitude;
+  static final adminFeedbacks = AppFeatureControllers.admin.feedback;
+  static final adminCapabilities = AppFeatureControllers.admin.capabilities;
+  static final operationalAlerts =
+      AppFeatureControllers.admin.operationalAlerts;
+  static final focusedSpotId = AppFeatureControllers.catalog.focusedSpotId;
 
   // Authentication State
-  static final customPickupAddress = ValueNotifier<String?>(null);
+  static final customPickupAddress =
+      AppFeatureControllers.booking.customPickupAddress;
   static double? customPickupLat;
   static double? customPickupLng;
   static int passengerCount = 1;
@@ -78,10 +62,9 @@ class PrototypeSession {
 
   // ── Fare ────────────────────────────────────────────────────────────────
 
-  static final farePolicy = ValueNotifier<FarePolicy>(const FarePolicy());
-  static final cancellationPolicy = ValueNotifier<CancellationPolicy>(
-    const CancellationPolicy(),
-  );
+  static final farePolicy = AppFeatureControllers.booking.farePolicy;
+  static final cancellationPolicy =
+      AppFeatureControllers.booking.cancellationPolicy;
   static double get estimatedFare => itinerary.value.isEmpty
       ? 0
       : farePolicy.value.quote(activePackageId) / 100;
@@ -159,7 +142,7 @@ class PrototypeSession {
   // ── Bookings ──────────────────────────────────────────────────────────────
 
   static String get currentTouristId => authenticatedUserId ?? '';
-  static final storageError = ValueNotifier<String?>(null);
+  static final storageError = AppFeatureControllers.auth.storageError;
   static SharedPreferences? _preferences;
   static Future<void> _queue = Future.value();
   static Future<void>? _syncInFlight;
@@ -167,11 +150,24 @@ class PrototypeSession {
   static int _sessionGeneration = 0;
   static String? _subscribedUserId;
   static const _storageKey = 'tric_gabay_transactions_v1';
+  static const _languageKey = 'tric_gabay_language_v1';
+  static bool _languagePersistenceAttached = false;
 
   static Future<void> initialize() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       _preferences = prefs;
+      isFilipino.value = prefs.getBool(_languageKey) ?? false;
+      if (!_languagePersistenceAttached) {
+        _languagePersistenceAttached = true;
+        isFilipino.addListener(() {
+          final preferences = _preferences;
+          if (preferences != null) {
+            unawaited(preferences.setBool(_languageKey, isFilipino.value));
+          }
+        });
+      }
+      await OfflineStateStore.initialize();
       if (BackendConfig.isConfigured) {
         bookings.value = [];
         activeBookingId = null;
@@ -250,6 +246,14 @@ class PrototypeSession {
           BackendRepository.loadFeedback()
         else
           Future.value(<Map<String, dynamic>>[]),
+        if (role == 'admin')
+          BackendRepository.loadAdminCapabilities()
+        else
+          Future.value(<String>{}),
+        if (role == 'admin')
+          BackendRepository.loadOperationalAlerts()
+        else
+          Future.value(<Map<String, dynamic>>[]),
       ]);
       if (generation != _sessionGeneration ||
           userId != authenticatedUserId ||
@@ -283,6 +287,8 @@ class PrototypeSession {
           )
           .toList();
       adminFeedbacks.value = results[6] as List<Map<String, dynamic>>;
+      adminCapabilities.value = results[7] as Set<String>;
+      operationalAlerts.value = results[8] as List<Map<String, dynamic>>;
       if (role == 'driver') {
         final ownDriver = directory.drivers
             .where((driver) => driver['id'] == userId)
@@ -290,6 +296,21 @@ class PrototypeSession {
         isDriverOnline.value = ownDriver?['isOnline'] == true;
       }
       _restoreActiveIds();
+      if (role == 'driver') {
+        final active = bookings.value
+            .where(
+              (booking) =>
+                  booking.id == activeDriverBookingId &&
+                  (booking.status == BookingStatus.accepted ||
+                      booking.status == BookingStatus.ongoing),
+            )
+            .firstOrNull;
+        if (active == null) {
+          await ActiveTripTrackingService.stop();
+        } else {
+          await ActiveTripTrackingService.start(active.id);
+        }
+      }
       if (role == 'tourist') {
         final retained = bookings.value
             .where((booking) => booking.touristId == userId && booking.isActive)
@@ -307,9 +328,41 @@ class PrototypeSession {
           unawaited(syncRemoteState());
         });
       }
+      await OfflineStateStore.saveSnapshot(
+        userId: userId,
+        bookings: bookings.value,
+        spots: allSpots.value,
+        farePolicy: farePolicy.value,
+        cancellationPolicy: cancellationPolicy.value,
+      );
+      await OfflineStateStore.replay(userId, (command) async {
+        switch (command.type) {
+          case 'notification_read':
+            await BackendRepository.markNotificationRead(
+              command.payload['notification_id'] as String,
+            );
+            return;
+          case 'notifications_read_all':
+            await BackendRepository.markAllNotificationsRead();
+            return;
+          default:
+            throw StateError('Unsupported offline command.');
+        }
+      });
     } catch (error) {
       if (generation == _sessionGeneration && userId == authenticatedUserId) {
-        storageError.value = 'Could not synchronize with the server: $error';
+        final cached = await OfflineStateStore.restoreSnapshot(userId);
+        if (cached != null && !cached.isStale && bookings.value.isEmpty) {
+          bookings.value = cached.bookings;
+          allSpots.value = cached.spots;
+          farePolicy.value = cached.farePolicy;
+          cancellationPolicy.value = cached.cancellationPolicy;
+          _restoreActiveIds();
+          storageError.value =
+              'Offline mode · showing saved data from ${cached.savedAt}. Critical actions require a connection.';
+        } else {
+          storageError.value = 'Could not synchronize with the server: $error';
+        }
       }
       rethrow;
     }
@@ -1006,8 +1059,8 @@ class PrototypeSession {
     });
   }
 
-  static final isDriverOnline = ValueNotifier<bool>(false);
-  static final currentDriverName = ValueNotifier<String>('');
+  static final isDriverOnline = AppFeatureControllers.driver.isOnline;
+  static final currentDriverName = AppFeatureControllers.driver.currentName;
   static String? activeDriverBookingId;
 
   static double get driverEarnings => bookings.value
@@ -1079,10 +1132,23 @@ class PrototypeSession {
 
   static void markAllNotificationsRead() {
     if (BackendConfig.isConfigured) {
+      for (final notification in notifications.value) {
+        notification.isRead = true;
+      }
+      notifications.value = [...notifications.value];
+      final userId = authenticatedUserId;
       unawaited(
-        BackendRepository.markAllNotificationsRead().then(
-          (_) => syncRemoteState(),
-        ),
+        BackendRepository.markAllNotificationsRead()
+            .then((_) => syncRemoteState())
+            .catchError((Object _) async {
+              if (userId != null) {
+                await OfflineStateStore.enqueue(
+                  userId: userId,
+                  id: 'notifications_read_all',
+                  type: 'notifications_read_all',
+                );
+              }
+            }),
       );
       return;
     }
@@ -1094,10 +1160,24 @@ class PrototypeSession {
 
   static void markNotificationRead(String id) {
     if (BackendConfig.isConfigured) {
+      for (final notification in notifications.value) {
+        if (notification.id == id) notification.isRead = true;
+      }
+      notifications.value = [...notifications.value];
+      final userId = authenticatedUserId;
       unawaited(
         BackendRepository.markNotificationRead(
           id,
-        ).then((_) => syncRemoteState()),
+        ).then((_) => syncRemoteState()).catchError((Object _) async {
+          if (userId != null) {
+            await OfflineStateStore.enqueue(
+              userId: userId,
+              id: 'notification_read:$id',
+              type: 'notification_read',
+              payload: {'notification_id': id},
+            );
+          }
+        }),
       );
       return;
     }
@@ -1185,6 +1265,7 @@ class PrototypeSession {
   }
 
   static void _clearUserScopedState() {
+    unawaited(ActiveTripTrackingService.stop());
     currentUserName.value = '';
     currentDriverName.value = '';
     isDriverOnline.value = false;
@@ -1193,6 +1274,8 @@ class PrototypeSession {
     adminDrivers.value = [];
     adminTourists.value = [];
     adminFeedbacks.value = [];
+    adminCapabilities.value = {};
+    operationalAlerts.value = [];
     favorites.value = {};
     itinerary.value = [];
     activePackageId = null;
@@ -1223,15 +1306,17 @@ class PrototypeSession {
 
   // ── Admin Specific Methods ────────────────────────────────────────────────
 
-  static final isFilipino = ValueNotifier<bool>(false);
+  static final isFilipino = AppFeatureControllers.preferences.isFilipino;
 
-  static final allSpots = ValueNotifier<List<TouristSpotModel>>(
-    TouristSpotModel.catalog,
-  );
+  static final allSpots = AppFeatureControllers.catalog.spots;
 
-  static final adminDrivers = ValueNotifier<List<Map<String, dynamic>>>([]);
+  static final adminDrivers = AppFeatureControllers.admin.drivers;
 
-  static final adminTourists = ValueNotifier<List<Map<String, dynamic>>>([]);
+  static final adminTourists = AppFeatureControllers.admin.tourists;
+
+  static bool hasAdminCapability(String capability) =>
+      adminCapabilities.value.contains('super_admin') ||
+      adminCapabilities.value.contains(capability);
 
   static void approveDriver(String id) {
     if (BackendConfig.isConfigured) {
@@ -1304,6 +1389,9 @@ class PrototypeSession {
           BackendRepository.setTouristStatus(
             id,
             status,
+            reason: status == 'suspended'
+                ? 'Administrator suspended account access after a support review.'
+                : 'Administrator restored account access after a support review.',
           ).then((_) => syncRemoteState()),
         );
       }

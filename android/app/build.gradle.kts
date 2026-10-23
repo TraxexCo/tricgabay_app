@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -25,13 +28,48 @@ android {
         versionName = flutter.versionName
     }
 
-    buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+    val signingProperties = Properties()
+    val signingPropertiesFile = rootProject.file("key.properties")
+    if (signingPropertiesFile.exists()) {
+        signingProperties.load(FileInputStream(signingPropertiesFile))
+    }
+
+    signingConfigs {
+        if (signingPropertiesFile.exists()) {
+            create("release") {
+                keyAlias = signingProperties["keyAlias"] as String
+                keyPassword = signingProperties["keyPassword"] as String
+                storeFile = file(signingProperties["storeFile"] as String)
+                storePassword = signingProperties["storePassword"] as String
+            }
         }
     }
+
+    buildTypes {
+        release {
+            signingConfig = if (signingPropertiesFile.exists()) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
+        }
+    }
+
+    tasks.matching { it.name == "assembleRelease" || it.name == "bundleRelease" }
+        .configureEach {
+            doFirst {
+                if (!signingPropertiesFile.exists() &&
+                    System.getenv("ALLOW_DEBUG_RELEASE_SIGNING") != "true") {
+                    throw GradleException(
+                        "Release signing is not configured. Create android/key.properties " +
+                            "or set ALLOW_DEBUG_RELEASE_SIGNING=true only for a local test build."
+                    )
+                }
+                if (!signingPropertiesFile.exists()) {
+                    logger.warn("Release is debug-signed for local validation only.")
+                }
+            }
+        }
 }
 
 kotlin {

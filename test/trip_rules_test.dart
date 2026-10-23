@@ -78,8 +78,10 @@ void main() {
     );
     expect(openAgain.isTemporarilyClosed, isFalse);
     expect(
-      TouristSpotModel.fromMap(openAgain.toMap(), openAgain.id)
-          .isTemporarilyClosed,
+      TouristSpotModel.fromMap(
+        openAgain.toMap(),
+        openAgain.id,
+      ).isTemporarilyClosed,
       isFalse,
     );
   });

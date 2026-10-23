@@ -1272,13 +1272,13 @@ class _SpotInfoSheet extends StatelessWidget {
                               onPressed: spot.isTemporarilyClosed
                                   ? null
                                   : () {
-                                PrototypeSession.startCustomItinerary();
-                                PrototypeSession.toggleItinerary(
-                                  spot,
-                                ); // ADD THE SPOT FIRST
-                                Navigator.pop(context);
-                                context.push('/tourist/itinerary');
-                              },
+                                      PrototypeSession.startCustomItinerary();
+                                      PrototypeSession.toggleItinerary(
+                                        spot,
+                                      ); // ADD THE SPOT FIRST
+                                      Navigator.pop(context);
+                                      context.push('/tourist/itinerary');
+                                    },
                               icon: const Icon(Icons.add_rounded, size: 16),
                               label: Text(
                                 spot.isTemporarilyClosed

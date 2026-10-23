@@ -85,11 +85,12 @@ class AdminDashboardScreen extends StatelessWidget {
                               ],
                             ),
                           ),
-                          IconButton(
-                            onPressed: () =>
-                                context.push('/admin/announcements'),
-                            icon: const Icon(Icons.campaign_outlined),
-                          ),
+                          if (PrototypeSession.hasAdminCapability('support'))
+                            IconButton(
+                              onPressed: () =>
+                                  context.push('/admin/announcements'),
+                              icon: const Icon(Icons.campaign_outlined),
+                            ),
                           IconButton(
                             onPressed: () async {
                               await PrototypeSession.signOut();
@@ -99,6 +100,34 @@ class AdminDashboardScreen extends StatelessWidget {
                           ),
                         ],
                       ),
+                      if (PrototypeSession.hasAdminCapability('operations') &&
+                          PrototypeSession.operationalAlerts.value.isNotEmpty)
+                        Container(
+                          margin: const EdgeInsets.only(top: 14),
+                          padding: const EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF4E5),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: const Color(0xFFF5B041)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.health_and_safety_outlined,
+                                color: Color(0xFFA65F00),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  '${PrototypeSession.operationalAlerts.value.length} operational alert(s) need review',
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       const SizedBox(height: 22),
                       InkWell(
                         onTap: () => context.push('/admin/live-map'),
@@ -221,46 +250,52 @@ class AdminDashboardScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 11),
-                      _action(
-                        context,
-                        Icons.verified_user_outlined,
-                        'Review pending drivers',
-                        '$verifications documents are waiting for verification',
-                        '/admin/drivers',
-                        AppColors.warning,
-                      ),
-                      _action(
-                        context,
-                        Icons.campaign_outlined,
-                        'Send an announcement',
-                        'Share an update with drivers or tourists',
-                        '/admin/announcements',
-                        AppColors.primary,
-                      ),
-                      _action(
-                        context,
-                        Icons.people_outline,
-                        'Manage tourists',
-                        'View and manage tourist accounts',
-                        '/admin/tourists',
-                        AppColors.success,
-                      ),
-                      _action(
-                        context,
-                        Icons.forum_outlined,
-                        'Ratings & feedback',
-                        'Respond to community concerns',
-                        '/admin/ratings',
-                        AppColors.secondary,
-                      ),
-                      _action(
-                        context,
-                        Icons.map_outlined,
-                        'Live Driver Tracking',
-                        'View active drivers on the map',
-                        '/admin/live-map',
-                        const Color(0xFF8E44AD),
-                      ),
+                      if (PrototypeSession.hasAdminCapability(
+                        'driver_compliance',
+                      ))
+                        _action(
+                          context,
+                          Icons.verified_user_outlined,
+                          'Review pending drivers',
+                          '$verifications documents are waiting for verification',
+                          '/admin/drivers',
+                          AppColors.warning,
+                        ),
+                      if (PrototypeSession.hasAdminCapability('support')) ...[
+                        _action(
+                          context,
+                          Icons.campaign_outlined,
+                          'Send an announcement',
+                          'Share an update with drivers or tourists',
+                          '/admin/announcements',
+                          AppColors.primary,
+                        ),
+                        _action(
+                          context,
+                          Icons.people_outline,
+                          'Manage tourists',
+                          'View and manage tourist accounts',
+                          '/admin/tourists',
+                          AppColors.success,
+                        ),
+                        _action(
+                          context,
+                          Icons.forum_outlined,
+                          'Ratings & feedback',
+                          'Respond to community concerns',
+                          '/admin/ratings',
+                          AppColors.secondary,
+                        ),
+                      ],
+                      if (PrototypeSession.hasAdminCapability('operations'))
+                        _action(
+                          context,
+                          Icons.map_outlined,
+                          'Live Driver Tracking',
+                          'View active drivers on the map',
+                          '/admin/live-map',
+                          const Color(0xFF8E44AD),
+                        ),
                       const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,

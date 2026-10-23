@@ -87,7 +87,33 @@ final appRouter = GoRouter(
         : path.startsWith('/admin/') && path != AppRoutes.adminLogin
         ? 'admin'
         : null;
-    if (protectedRole == null || role == protectedRole) return null;
+    if (protectedRole == null || role == protectedRole) {
+      if (role == 'admin') {
+        final requiredCapability = switch (path) {
+          final value when value.startsWith('/admin/drivers') =>
+            'driver_compliance',
+          final value when value.startsWith('/admin/spots') => 'content',
+          final value when value.startsWith('/admin/fare-settings') =>
+            'finance',
+          final value
+              when value.startsWith('/admin/tourists') ||
+                  value.startsWith('/admin/announcements') ||
+                  value.startsWith('/admin/ratings') =>
+            'support',
+          final value
+              when value.startsWith('/admin/booking') ||
+                  value.startsWith('/admin/live-map') ||
+                  value.startsWith('/admin/reports') =>
+            'operations',
+          _ => null,
+        };
+        if (requiredCapability != null &&
+            !PrototypeSession.hasAdminCapability(requiredCapability)) {
+          return AppRoutes.adminDashboard;
+        }
+      }
+      return null;
+    }
     return protectedRole == 'admin' ? AppRoutes.adminLogin : AppRoutes.login;
   },
   routes: [
