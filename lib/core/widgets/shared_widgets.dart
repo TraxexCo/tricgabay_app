@@ -13,6 +13,17 @@ class AppLogo extends StatelessWidget {
 
   const AppLogo({super.key, this.size = 56, this.showShadow = false});
 
+  static const _asset = 'assets/images/tric_gabay_logo.png';
+
+  /// The exact image this logo draws at [size], so callers can precache it
+  /// and the logo never flashes blank while decoding.
+  static ImageProvider provider(BuildContext context, double size) =>
+      ResizeImage.resizeIfNeeded(
+        null,
+        (size * MediaQuery.devicePixelRatioOf(context)).ceil(),
+        const AssetImage(_asset),
+      );
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -33,11 +44,10 @@ class AppLogo extends StatelessWidget {
             : null,
       ),
       clipBehavior: Clip.antiAlias,
-      child: Image.asset(
-        'assets/images/tric_gabay_logo.png',
+      child: Image(
+        image: provider(context, size),
         fit: BoxFit.cover,
         alignment: Alignment.center,
-        cacheHeight: (size * MediaQuery.devicePixelRatioOf(context)).ceil(),
       ),
     );
   }

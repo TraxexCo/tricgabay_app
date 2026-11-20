@@ -172,7 +172,7 @@ final appRouter = GoRouter(
     // ─── Auth ───────────────────────────────────────────────
     GoRoute(
       path: AppRoutes.splash,
-      builder: (context, state) => const SplashScreen(),
+      pageBuilder: (context, state) => _launchFade(state, const SplashScreen()),
     ),
     GoRoute(
       path: AppRoutes.onboarding,
@@ -522,7 +522,8 @@ CustomTransitionPage<void> _launchFade(GoRouterState state, Widget child) =>
       key: state.pageKey,
       child: child,
       transitionDuration: const Duration(milliseconds: 700),
-      reverseTransitionDuration: const Duration(milliseconds: 300),
+      // The splash leaves quickly so its tagline never ghosts over the form.
+      reverseTransitionDuration: const Duration(milliseconds: 200),
       transitionsBuilder: (context, animation, _, child) => FadeTransition(
         opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
         child: child,
