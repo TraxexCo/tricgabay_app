@@ -423,7 +423,7 @@ class BackendRepository {
                       spotName: stop['spot_name_snapshot'],
                       latitude: (stop['latitude_snapshot'] as num).toDouble(),
                       longitude: (stop['longitude_snapshot'] as num).toDouble(),
-                      fare: 0,
+                      fareCents: 0,
                     ),
                   )
                   .toList(),
@@ -433,8 +433,8 @@ class BackendRepository {
               passengerCount: row['passenger_count'] as int? ?? 1,
               luggageNotes: row['luggage_notes'] as String? ?? '',
               accessibilityNeeds: row['accessibility_needs'] as String? ?? '',
-              baseFare: quoted / 100,
-              totalFare: quoted / 100,
+              baseFareCents: quoted,
+              totalFareCents: quoted,
               paymentMethod: switch (row['payment_method']) {
                 'cash' => PaymentMethod.cash,
                 'paymongo' => PaymentMethod.online,

@@ -168,7 +168,7 @@ class _BookingList extends StatelessWidget {
                         Flexible(
                           child: Text(
                             context.message(
-                              '₱${AppFormatters.amount(b.totalFare)}',
+                              '₱${AppFormatters.amount(b.totalFareCents / 100)}',
                             ),
                             style: GoogleFonts.poppins(
                               fontWeight: FontWeight.bold,

@@ -254,7 +254,7 @@ void main() {
       expect(PrototypeSession.bookingById(b.id).status, BookingStatus.accepted);
       expect(PrototypeSession.activeBookingId, b.id);
       expect(PrototypeSession.farePolicy.value.customFareCents, 11000);
-      expect(PrototypeSession.bookingById(b.id).totalFare, 70);
+      expect(PrototypeSession.bookingById(b.id).totalFareCents, 7000);
     },
   );
 

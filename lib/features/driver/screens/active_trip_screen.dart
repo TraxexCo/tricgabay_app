@@ -774,7 +774,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
                                   Flexible(
                                     child: Text(
                                       context.message(
-                                        '₱ ${AppFormatters.amount(booking.totalFare)}',
+                                        '₱ ${AppFormatters.amount(booking.totalFareCents / 100)}',
                                       ),
                                       style: GoogleFonts.poppins(
                                         fontWeight: FontWeight.bold,

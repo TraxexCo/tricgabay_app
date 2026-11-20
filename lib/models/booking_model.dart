@@ -13,6 +13,19 @@ enum BookingStatus {
   cancelled,
 }
 
+/// Reads an integer centavo amount. Offline snapshots written before amounts
+/// were stored in centavos hold pesos as a double under [legacyPesosKey].
+int readCents(
+  Map<String, dynamic> map,
+  String key, {
+  required String legacyPesosKey,
+}) {
+  final cents = map[key];
+  if (cents is num) return cents.round();
+  final pesos = map[legacyPesosKey];
+  return pesos is num ? (pesos * 100).round() : 0;
+}
+
 enum PaymentMethod { unknown, cash, online, gcashDirect }
 
 enum PaymentStatus {
@@ -39,7 +52,7 @@ class BookingStop {
   final String spotName;
   final double latitude;
   final double longitude;
-  final double fare;
+  final int fareCents;
 
   const BookingStop({
     this.id = '',
@@ -47,7 +60,7 @@ class BookingStop {
     required this.spotName,
     required this.latitude,
     required this.longitude,
-    required this.fare,
+    required this.fareCents,
   });
 
   factory BookingStop.fromMap(Map<String, dynamic> map) => BookingStop(
@@ -56,7 +69,7 @@ class BookingStop {
     spotName: map['spotName'] ?? '',
     latitude: (map['latitude'] ?? 0.0).toDouble(),
     longitude: (map['longitude'] ?? 0.0).toDouble(),
-    fare: (map['fare'] ?? 0.0).toDouble(),
+    fareCents: readCents(map, 'fareCents', legacyPesosKey: 'fare'),
   );
 
   Map<String, dynamic> toMap() => {
@@ -65,7 +78,7 @@ class BookingStop {
     'spotName': spotName,
     'latitude': latitude,
     'longitude': longitude,
-    'fare': fare,
+    'fareCents': fareCents,
   };
 }
 
@@ -130,8 +143,8 @@ class BookingModel {
   final int passengerCount;
   final String luggageNotes;
   final String accessibilityNeeds;
-  final double baseFare;
-  final double totalFare;
+  final int baseFareCents;
+  final int totalFareCents;
   final PaymentMethod paymentMethod;
   final PaymentStatus paymentStatus;
   final BookingStatus status;
@@ -167,7 +180,7 @@ class BookingModel {
       status == BookingStatus.accepted ||
       status == BookingStatus.replacementPending ||
       status == BookingStatus.ongoing;
-  int get quotedCents => (totalFare * 100).round();
+  int get quotedCents => totalFareCents;
   int get amountDueCents => trip.reviewRequired
       ? 0
       : ((trip.finalChargeCents ?? 0) - trip.receivedCents).clamp(
@@ -207,8 +220,8 @@ class BookingModel {
     this.passengerCount = 1,
     this.luggageNotes = '',
     this.accessibilityNeeds = '',
-    required this.baseFare,
-    required this.totalFare,
+    required this.baseFareCents,
+    required this.totalFareCents,
     required this.paymentMethod,
     this.paymentStatus = PaymentStatus.unpaid,
     this.status = BookingStatus.pending,
@@ -256,8 +269,16 @@ class BookingModel {
       passengerCount: map['passengerCount'] ?? 1,
       luggageNotes: map['luggageNotes'] ?? '',
       accessibilityNeeds: map['accessibilityNeeds'] ?? '',
-      baseFare: (map['baseFare'] ?? 0.0).toDouble(),
-      totalFare: (map['totalFare'] ?? 0.0).toDouble(),
+      baseFareCents: readCents(
+        map,
+        'baseFareCents',
+        legacyPesosKey: 'baseFare',
+      ),
+      totalFareCents: readCents(
+        map,
+        'totalFareCents',
+        legacyPesosKey: 'totalFare',
+      ),
       paymentMethod: PaymentMethod.values.firstWhere(
         (p) => p.name == map['paymentMethod'],
         orElse: () => PaymentMethod.unknown,
@@ -337,8 +358,8 @@ class BookingModel {
     'passengerCount': passengerCount,
     'luggageNotes': luggageNotes,
     'accessibilityNeeds': accessibilityNeeds,
-    'baseFare': baseFare,
-    'totalFare': totalFare,
+    'baseFareCents': baseFareCents,
+    'totalFareCents': totalFareCents,
     'paymentMethod': paymentMethod.name,
     'paymentStatus': paymentStatus.name,
     'status': status.name,
@@ -381,8 +402,8 @@ class BookingModel {
     int? passengerCount,
     String? luggageNotes,
     String? accessibilityNeeds,
-    double? baseFare,
-    double? totalFare,
+    int? baseFareCents,
+    int? totalFareCents,
     PaymentMethod? paymentMethod,
     PaymentStatus? paymentStatus,
     BookingStatus? status,
@@ -424,8 +445,8 @@ class BookingModel {
       passengerCount: passengerCount ?? this.passengerCount,
       luggageNotes: luggageNotes ?? this.luggageNotes,
       accessibilityNeeds: accessibilityNeeds ?? this.accessibilityNeeds,
-      baseFare: baseFare ?? this.baseFare,
-      totalFare: totalFare ?? this.totalFare,
+      baseFareCents: baseFareCents ?? this.baseFareCents,
+      totalFareCents: totalFareCents ?? this.totalFareCents,
       paymentMethod: paymentMethod ?? this.paymentMethod,
       paymentStatus: paymentStatus ?? this.paymentStatus,
       status: status ?? this.status,

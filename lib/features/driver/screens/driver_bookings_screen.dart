@@ -177,7 +177,7 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
             isThreeLine: true,
             trailing: Text(
               context.l10n.agreedValue(
-                context.message((AppFormatters.amount(b.totalFare)).toString()),
+                context.message((AppFormatters.amount(b.totalFareCents / 100)).toString()),
               ),
               textAlign: TextAlign.end,
             ),

@@ -828,7 +828,7 @@ class PrototypeSession {
             spotName: s.name,
             latitude: s.latitude,
             longitude: s.longitude,
-            fare: 0,
+            fareCents: 0,
           ),
         ),
       ),
@@ -838,8 +838,8 @@ class PrototypeSession {
       passengerCount: passengerCount,
       luggageNotes: luggageNotes,
       accessibilityNeeds: accessibilityNeeds,
-      baseFare: cents / 100,
-      totalFare: cents / 100,
+      baseFareCents: cents,
+      totalFareCents: cents,
       paymentMethod: PaymentMethod.cash,
       createdAt: ServerClock.now(),
       scheduledAt: scheduledAt,
@@ -860,7 +860,7 @@ class PrototypeSession {
       booking,
       TripActor.tourist,
       MessageCode.fixedFareAcceptedCancellationPaymentPolicyV1AcceptedValue(
-        (AppFormatters.amount(booking.totalFare)).toString(),
+        (AppFormatters.amount(booking.totalFareCents / 100)).toString(),
       ),
     );
     await _persist([booking, ...bookings.value], farePolicy.value);

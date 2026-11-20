@@ -258,8 +258,8 @@ void main() {
         pickupLat: 14.95,
         pickupLng: 120.9,
         pickupAddress: 'Test',
-        baseFare: 100,
-        totalFare: 100,
+        baseFareCents: 10000,
+        totalFareCents: 10000,
         paymentMethod: PaymentMethod.cash,
         createdAt: DateTime.utc(2026),
       );

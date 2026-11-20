@@ -235,7 +235,7 @@ class IncomingBookingScreen extends ConsumerWidget {
                               const SizedBox(height: 24),
                               Text(
                                 context.message(
-                                  '₱ ${AppFormatters.amount(booking.totalFare)}',
+                                  '₱ ${AppFormatters.amount(booking.totalFareCents / 100)}',
                                 ),
                                 style: GoogleFonts.poppins(
                                   fontSize: 32,

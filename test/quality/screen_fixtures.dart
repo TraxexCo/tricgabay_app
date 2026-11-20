@@ -29,8 +29,8 @@ void seedScreen(String role, String name) {
     touristName: 'María Victoria dela Cruz',
     driverName: 'Alejandro dela Cruz',
     pickupAddress: 'Bustos Municipal Hall, Poblacion, Bustos, Bulacan',
-    baseFare: 12345.67,
-    totalFare: 12345.67,
+    baseFareCents: 1234567,
+    totalFareCents: 1234567,
     status: name.contains('Incoming')
         ? BookingStatus.pending
         : BookingStatus.accepted,
