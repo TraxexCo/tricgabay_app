@@ -1,5 +1,9 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import 'package:tricgabay_app/core/widgets/map_surface.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../../core/services/backend_repository.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -24,8 +28,8 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   bool _hasSelectedPin = false;
 
   final List<String> _barangays = [
-    'Bonga Mayor',
-    'Bonga Menor',
+    MessageCode.bongaMayor,
+    MessageCode.bongaMenor,
     'Buisan',
     'Camachilihan',
     'Cambaog',
@@ -34,7 +38,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
     'Malamig',
     'Malawak',
     'Poblacion',
-    'San Pedro',
+    MessageCode.sanPedro,
     'Talampas',
     'Tanawan',
     'Tibagan',
@@ -49,7 +53,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
         PrototypeSession.customPickupLng != null;
     if (parts.isNotEmpty &&
         parts[0].isNotEmpty &&
-        parts[0] != 'Current Location') {
+        parts[0] != MessageCode.currentLocation) {
       _streetCtrl.text = parts[0].trim();
     }
   }
@@ -89,9 +93,9 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
     if (!await geo.Geolocator.isLocationServiceEnabled()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Turn on Location Services to use your current position.',
+              context.l10n.turnOnLocationServicesToUseYourCurrentPosition,
             ),
           ),
         );
@@ -107,9 +111,9 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
         permission == geo.LocationPermission.deniedForever) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Location permission is needed to use your current position.',
+              context.l10n.locationPermissionIsNeededToUseYourCurrentPosition,
             ),
           ),
         );
@@ -125,6 +129,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
     PrototypeSession.userLatitude.value = position.latitude;
     PrototypeSession.userLongitude.value = position.longitude;
     if (mounted) setState(() => _hasSelectedPin = true);
+    if (!mounted) return;
     await _mapboxMap?.flyTo(
       CameraOptions(
         center: Point(
@@ -132,59 +137,111 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
         ),
         zoom: 16,
       ),
-      MapAnimationOptions(duration: 700),
+      MapAnimationOptions(
+        duration: MediaQuery.disableAnimationsOf(context) ? 0 : 700,
+      ),
     );
   }
 
   void _onSaveLocation() async {
-    if (_mapboxMap == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Wait for the mobile map to load before confirming an exact pickup pin.',
+    try {
+      if (_mapboxMap == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context
+                  .l10n
+                  .waitForTheMobileMapToLoadBeforeConfirmingAnExactPickupPin,
+            ),
           ),
-        ),
-      );
-      return;
-    }
-    if (_streetCtrl.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter your street or house number'),
-        ),
-      );
-      return;
-    }
-    if (!_hasSelectedPin) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Move the map pin or use your current location before saving.',
+        );
+        return;
+      }
+      if (_streetCtrl.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.pleaseEnterYourStreetOrHouseNumber),
           ),
+        );
+        return;
+      }
+      if (!_hasSelectedPin) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.moveTheMapPinOrUseYourCurrentLocationBeforeSaving,
+            ),
+          ),
+        );
+        return;
+      }
+
+      double lat = 14.9520;
+      double lng = 120.9180;
+
+      if (_mapboxMap != null) {
+        final cameraState = await _mapboxMap!.getCameraState();
+        final point = cameraState.center;
+        lng = point.coordinates.lng.toDouble();
+        lat = point.coordinates.lat.toDouble();
+      }
+
+      final area = await BackendRepository.loadPickupServiceArea();
+      if (!area.contains(lat, lng)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                context
+                    .l10n
+                    .thisPickupPinIsOutsideTheServiceAreaMoveThePinCloserTo,
+              ),
+            ),
+          );
+        }
+        return;
+      }
+      if (!mounted) return;
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(context.l10n.confirmThePickupPin),
+          content: Text(
+            context
+                .l10n
+                .theDriverWillFollowTheSelectedPinConfirmThatItMatchesTheAddress,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(context.l10n.adjustPin),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(context.l10n.addressMatchesPin),
+            ),
+          ],
         ),
       );
-      return;
-    }
+      if (confirmed != true) return;
+      final fullAddress =
+          '${_streetCtrl.text.trim()}, $_selectedBarangay, Bustos, Bulacan';
 
-    double lat = 14.9520;
-    double lng = 120.9180;
+      PrototypeSession.customPickupAddress.value = fullAddress;
+      PrototypeSession.customPickupLat = lat;
+      PrototypeSession.customPickupLng = lng;
 
-    if (_mapboxMap != null) {
-      final cameraState = await _mapboxMap!.getCameraState();
-      final point = cameraState.center;
-      lng = point.coordinates.lng.toDouble();
-      lat = point.coordinates.lat.toDouble();
-    }
-
-    final fullAddress =
-        '${_streetCtrl.text.trim()}, $_selectedBarangay, Bustos, Bulacan';
-
-    PrototypeSession.customPickupAddress.value = fullAddress;
-    PrototypeSession.customPickupLat = lat;
-    PrototypeSession.customPickupLng = lng;
-
-    if (mounted) {
-      context.pop();
+      if (mounted) {
+        context.pop();
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.message(ErrorMessages.forError(error))),
+          ),
+        );
+      }
     }
   }
 
@@ -194,7 +251,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          'Select Address',
+          context.l10n.selectAddress,
           style: GoogleFonts.poppins(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.bold,
@@ -212,19 +269,21 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
             child: Stack(
               children: [
                 if (kIsWeb)
-                  const WebMapFallback(
-                    title: 'Pickup location preview',
-                    subtitle: 'Enter the pickup address below.',
+                  WebMapFallback(
+                    title: context.l10n.pickupLocationPreview,
+                    subtitle: context.l10n.enterThePickupAddressBelow,
                   )
                 else
-                  MapWidget(
-                    key: const ValueKey('locationPickerMap'),
-                    onMapCreated: _onMapCreated,
-                    onScrollListener: (scrollEventData) {
-                      if (!_hasSelectedPin) {
-                        setState(() => _hasSelectedPin = true);
-                      }
-                    },
+                  MapSurface(
+                    builder: (context) => MapWidget(
+                      key: const ValueKey('locationPickerMap'),
+                      onMapCreated: _onMapCreated,
+                      onScrollListener: (scrollEventData) {
+                        if (!_hasSelectedPin) {
+                          setState(() => _hasSelectedPin = true);
+                        }
+                      },
+                    ),
                   ),
                 Center(
                   child: Padding(
@@ -273,9 +332,13 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            kIsWeb
-                                ? 'Choose a barangay and enter the exact address below'
-                                : 'Drag the map to pin your exact location',
+                            context.message(
+                              kIsWeb
+                                  ? MessageCode
+                                        .chooseABarangayAndEnterTheExactAddressBelow
+                                  : MessageCode
+                                        .dragTheMapToPinYourExactLocation,
+                            ),
                             style: GoogleFonts.poppins(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
@@ -294,7 +357,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                       heroTag: 'pickupCurrentLocation',
                       backgroundColor: Colors.white,
                       foregroundColor: AppColors.primary,
-                      tooltip: 'Use my current location',
+                      tooltip: MessageCode.useMyCurrentLocation,
                       onPressed: _goToCurrentLocation,
                       child: const Icon(Icons.my_location_rounded),
                     ),
@@ -324,7 +387,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Address Details',
+                      context.l10n.addressDetails,
                       style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -335,17 +398,23 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: _buildLockedDropdown('Province', 'Bulacan'),
+                          child: _buildLockedDropdown(
+                            MessageCode.province,
+                            'Bulacan',
+                          ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: _buildLockedDropdown('Municipality', 'Bustos'),
+                          child: _buildLockedDropdown(
+                            MessageCode.municipality,
+                            'Bustos',
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Barangay',
+                      context.l10n.barangay,
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -371,7 +440,10 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                               .map(
                                 (b) => DropdownMenuItem(
                                   value: b,
-                                  child: Text(b, style: GoogleFonts.poppins()),
+                                  child: Text(
+                                    context.message(b),
+                                    style: GoogleFonts.poppins(),
+                                  ),
                                 ),
                               )
                               .toList(),
@@ -385,7 +457,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Street Name, Building, House No.',
+                      context.l10n.streetNameBuildingHouseNo,
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -395,12 +467,12 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                     const SizedBox(height: 6),
                     AppTextField(
                       controller: _streetCtrl,
-                      label: 'Street/House No.',
-                      hint: 'e.g. 123 Rizal St. near the bakery',
+                      label: context.l10n.streetHouseNo,
+                      hint: context.l10n.eG123RizalStNearTheBakery,
                     ),
                     const SizedBox(height: 32),
                     AppButton(
-                      label: 'Confirm Location',
+                      label: context.l10n.confirmLocation,
                       onPressed: _onSaveLocation,
                     ),
                   ],
@@ -418,7 +490,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
+          context.message(label),
           style: GoogleFonts.poppins(
             fontSize: 13,
             fontWeight: FontWeight.w600,
@@ -435,7 +507,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            value,
+            context.message(value),
             style: GoogleFonts.poppins(color: Colors.grey.shade600),
           ),
         ),

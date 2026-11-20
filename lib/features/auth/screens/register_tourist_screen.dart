@@ -1,3 +1,6 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/widgets/registration_privacy.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -40,13 +43,17 @@ class _RegisterTouristScreenState extends ConsumerState<RegisterTouristScreen> {
     if (!_formKey.currentState!.validate() || !_agreed) return;
     if (!BackendConfig.isConfigured) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Server setup is incomplete.')),
+        SnackBar(content: Text(context.l10n.serverSetupIsIncomplete)),
       );
       return;
     }
+    final consent = await requestRegistrationConsent(context);
+    if (consent == null || !mounted) return;
     setState(() => _isLoading = true);
     try {
       await AuthService.registerTourist(
+        privacyVersion: consent.version,
+        privacyLanguage: consent.shownLanguage!,
         name: _nameCtrl.text,
         email: _emailCtrl.text,
         phone: _phoneCtrl.text,
@@ -54,16 +61,18 @@ class _RegisterTouristScreenState extends ConsumerState<RegisterTouristScreen> {
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Account created. Confirm your email, then sign in.'),
+        SnackBar(
+          content: Text(context.l10n.accountCreatedConfirmYourEmailThenSignIn),
         ),
       );
       context.go('/login');
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.toString())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.message(ErrorMessages.forError(error))),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -80,14 +89,14 @@ class _RegisterTouristScreenState extends ConsumerState<RegisterTouristScreen> {
         leading: const BackButton(color: AppColors.textPrimary),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 96),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Create Tourist Account',
+                context.l10n.createTouristAccount,
                 style: GoogleFonts.poppins(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -97,68 +106,72 @@ class _RegisterTouristScreenState extends ConsumerState<RegisterTouristScreen> {
               const SizedBox(height: 24),
               AppTextField(
                 controller: _nameCtrl,
-                label: 'Full Name',
-                hint: 'John Doe',
+                label: context.l10n.fullName,
+                hint: context.l10n.johnDoe,
                 textInputAction: TextInputAction.next,
                 validator: (v) => v == null || v.trim().length < 2
-                    ? 'Enter your full name'
+                    ? MessageCode.enterYourFullName
                     : null,
               ),
               const SizedBox(height: 16),
               AppTextField(
                 controller: _emailCtrl,
-                label: 'Email',
-                hint: 'john@example.com',
+                label: context.l10n.email,
+                hint: context.l10n.johnExampleCom,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
                 validator: (v) => v == null || !v.contains('@')
-                    ? 'Enter a valid email'
+                    ? MessageCode.enterAValidEmail
                     : null,
               ),
               const SizedBox(height: 16),
               AppTextField(
                 controller: _phoneCtrl,
-                label: 'Phone Number',
+                label: context.l10n.phoneNumber,
                 hint: '+63 912 345 6789',
                 keyboardType: TextInputType.phone,
                 textInputAction: TextInputAction.next,
                 validator: (v) =>
                     v == null || v.replaceAll(RegExp(r'\D'), '').length < 10
-                    ? 'Enter a valid phone number'
+                    ? MessageCode.enterAValidPhoneNumber
                     : null,
               ),
               const SizedBox(height: 16),
               AppTextField(
                 controller: _passwordCtrl,
-                label: 'Password',
-                hint: 'Min. 8 characters',
+                label: context.l10n.password,
+                hint: context.l10n.min8Characters,
                 obscureText: true,
                 textInputAction: TextInputAction.next,
                 validator: (v) => v == null || v.length < 8
-                    ? 'Password must be at least 8 characters'
+                    ? MessageCode.passwordMustBeAtLeast8Characters
                     : null,
               ),
               const SizedBox(height: 16),
               AppTextField(
                 controller: _confirmCtrl,
-                label: 'Confirm Password',
-                hint: 'Retype password',
+                label: context.l10n.confirmPassword,
+                hint: context.l10n.retypePassword,
                 obscureText: true,
                 textInputAction: TextInputAction.done,
-                validator: (v) =>
-                    v != _passwordCtrl.text ? 'Passwords do not match' : null,
+                validator: (v) => v != _passwordCtrl.text
+                    ? MessageCode.passwordsDoNotMatch
+                    : null,
               ),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Checkbox(
-                    value: _agreed,
-                    onChanged: (v) => setState(() => _agreed = v ?? false),
-                    activeColor: AppColors.primary,
+                  Semantics(
+                    label: context.l10n.iAgreeToTheTermsAndConditions,
+                    child: Checkbox(
+                      value: _agreed,
+                      onChanged: (v) => setState(() => _agreed = v ?? false),
+                      activeColor: AppColors.primary,
+                    ),
                   ),
                   Expanded(
                     child: Text(
-                      'I agree to the Terms and Conditions',
+                      context.l10n.iAgreeToTheTermsAndConditions,
                       style: GoogleFonts.poppins(
                         color: AppColors.textSecondary,
                       ),
@@ -168,7 +181,7 @@ class _RegisterTouristScreenState extends ConsumerState<RegisterTouristScreen> {
               ),
               const SizedBox(height: 24),
               AppButton(
-                label: 'Register',
+                label: context.l10n.register,
                 isLoading: _isLoading,
                 onPressed: _agreed ? _register : null,
               ),
@@ -176,17 +189,23 @@ class _RegisterTouristScreenState extends ConsumerState<RegisterTouristScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    'Already have an account?',
-                    style: GoogleFonts.poppins(color: AppColors.textSecondary),
-                  ),
-                  TextButton(
-                    onPressed: () => context.go('/login'),
+                  Flexible(
                     child: Text(
-                      'Login',
+                      context.l10n.alreadyHaveAnAccount,
                       style: GoogleFonts.poppins(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  Flexible(
+                    child: TextButton(
+                      onPressed: () => context.go('/login'),
+                      child: Text(
+                        context.l10n.login,
+                        style: GoogleFonts.poppins(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),

@@ -1,4 +1,6 @@
+import 'package:tricgabay_app/core/l10n/message_codes.g.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'build_environment.dart';
 
 /// Public client configuration supplied at build time.
 ///
@@ -9,17 +11,21 @@ class BackendConfig {
 
   static bool _initialized = false;
 
-  static const supabaseUrl = String.fromEnvironment(
-    'SUPABASE_URL',
-    defaultValue: 'https://xcsrjuqzwequmeqzedzd.supabase.co',
-  );
+  static const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
   static const supabasePublishableKey = String.fromEnvironment(
     'SUPABASE_PUBLISHABLE_KEY',
-    defaultValue: 'REDACTED',
   );
 
   static bool get hasConfiguration =>
-      supabaseUrl.startsWith('https://') && supabasePublishableKey.isNotEmpty;
+      (supabaseUrl.startsWith('https://') ||
+          (BuildEnvironment.isDevelopment && _isLocalHttp(supabaseUrl))) &&
+      supabasePublishableKey.isNotEmpty;
+
+  static bool _isLocalHttp(String value) {
+    final uri = Uri.tryParse(value);
+    return uri?.scheme == 'http' &&
+        const ['localhost', '127.0.0.1', '10.0.2.2'].contains(uri?.host);
+  }
 
   /// Whether the client is configured and has completed initialization.
   ///
@@ -40,7 +46,7 @@ class BackendConfig {
   static SupabaseClient get client {
     if (!isConfigured) {
       throw const BackendUnavailableException(
-        'The server is not configured on this build. Add the Supabase URL and publishable key, then rebuild the app.',
+        MessageCode.theServerIsNotConfiguredOnThisBuildAddTheSupabaseUrlAnd,
       );
     }
     return Supabase.instance.client;

@@ -1,3 +1,4 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -5,8 +6,11 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/shared_widgets.dart';
+import '../../../core/widgets/list_skeleton.dart';
+import '../../../core/services/realtime_refresh_policy.dart';
 import '../../../models/tourist_spot_model.dart';
 import '../../../core/prototype/prototype_session.dart';
+import '../spot_filters.dart';
 
 class TouristSearchScreen extends StatefulWidget {
   const TouristSearchScreen({super.key});
@@ -17,64 +21,41 @@ class TouristSearchScreen extends StatefulWidget {
 
 class _TouristSearchScreenState extends State<TouristSearchScreen> {
   final _searchCtrl = TextEditingController();
-  String _selectedCategory = 'All';
+  String _selectedCategory = MessageCode.all;
   List<TouristSpotModel> _results = PrototypeSession.allSpots.value;
   Timer? _debounce;
 
   @override
+  void initState() {
+    super.initState();
+    PrototypeSession.allSpots.addListener(_filter);
+  }
+
+  @override
   void dispose() {
+    PrototypeSession.allSpots.removeListener(_filter);
     _debounce?.cancel();
     _searchCtrl.dispose();
     super.dispose();
   }
 
-  void _filter() {
-    final query = _searchCtrl.text.toLowerCase();
-    setState(() {
-      _results = PrototypeSession.allSpots.value.where((spot) {
-        bool matchesCat = true;
-        if (_selectedCategory == 'Church') {
-          matchesCat = spot.category == SpotCategory.church;
-        } else if (_selectedCategory == 'Heritage') {
-          matchesCat = spot.category == SpotCategory.heritage;
-        } else if (_selectedCategory == 'Farms/Nature') {
-          matchesCat =
-              spot.category == SpotCategory.nature ||
-              spot.name.toLowerCase().contains('farm') ||
-              spot.name.toLowerCase().contains('park');
-        } else if (_selectedCategory == 'Market') {
-          matchesCat = spot.category == SpotCategory.market;
-        } else if (_selectedCategory == 'Resorts') {
-          matchesCat = spot.name.toLowerCase().contains('resort');
-        } else if (_selectedCategory == 'Food & Cafes') {
-          matchesCat = spot.name.toLowerCase().contains('cafe');
-        } else if (_selectedCategory == 'Events') {
-          matchesCat =
-              spot.name.toLowerCase().contains('festival') ||
-              spot.name.toLowerCase().contains('event');
-        } else if (_selectedCategory != 'All') {
-          matchesCat = false;
-        }
+  void _filter() => _applyFilter(_selectedCategory);
 
-        final matchesQuery = spot.name.toLowerCase().contains(query);
-        return matchesCat && matchesQuery;
-      }).toList();
+  void _applyFilter(String category) {
+    _debounce?.cancel();
+    final results = filterSpots(
+      PrototypeSession.allSpots.value,
+      category,
+      query: _searchCtrl.text,
+    );
+    setState(() {
+      _selectedCategory = category;
+      _results = results;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final categories = [
-      'All',
-      'Church',
-      'Heritage',
-      'Farms/Nature',
-      'Market',
-      'Resorts',
-      'Food & Cafes',
-      'Events',
-    ];
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -85,21 +66,19 @@ class _TouristSearchScreenState extends State<TouristSearchScreen> {
           children: [
             Expanded(
               child: AppTextField(
-                label: 'Search',
+                label: context.l10n.search,
                 controller: _searchCtrl,
-                hint: 'Search spots...',
-                onChanged: (v) {
-                  if (_debounce?.isActive ?? false) _debounce!.cancel();
-                  _debounce = Timer(const Duration(milliseconds: 300), () {
-                    _filter();
-                  });
+                hint: context.l10n.searchSpots,
+                onChanged: (_) {
+                  _debounce?.cancel();
+                  _debounce = Timer(const Duration(milliseconds: 300), _filter);
                 },
                 autofocus: true,
               ),
             ),
             if (_searchCtrl.text.isNotEmpty)
               IconButton(
-                tooltip: 'Clear search',
+                tooltip: context.l10n.clearSearch,
                 icon: const Icon(Icons.clear, color: AppColors.textSecondary),
                 onPressed: () {
                   _searchCtrl.clear();
@@ -107,7 +86,7 @@ class _TouristSearchScreenState extends State<TouristSearchScreen> {
                 },
               ),
             IconButton(
-              tooltip: 'Map view',
+              tooltip: context.l10n.mapView,
               onPressed: () => context.go('/tourist/home'),
               icon: const Icon(Icons.map_outlined, color: AppColors.primary),
             ),
@@ -121,19 +100,18 @@ class _TouristSearchScreenState extends State<TouristSearchScreen> {
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: categories.length,
+              itemCount: spotFilters.length,
               itemBuilder: (context, index) {
-                final cat = categories[index];
+                final cat = spotFilters[index];
                 final isSelected = _selectedCategory == cat;
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: ChoiceChip(
-                    label: Text(cat),
+                    label: Text(context.message(cat)),
                     selected: isSelected,
                     showCheckmark: false,
-                    onSelected: (val) {
-                      setState(() => _selectedCategory = cat);
-                      _filter();
+                    onSelected: (selected) {
+                      if (selected) _applyFilter(cat);
                     },
                     selectedColor: AppColors.primary,
                     backgroundColor: AppColors.surface,
@@ -158,10 +136,18 @@ class _TouristSearchScreenState extends State<TouristSearchScreen> {
           ),
           Expanded(
             child: _results.isEmpty
-                ? const EmptyStateWidget(
-                    icon: Icons.search_off,
-                    title: 'No spots found',
-                    subtitle: 'Try adjusting your filters or search term.',
+                ? ValueListenableBuilder(
+                    valueListenable: PrototypeSession.loadingSections,
+                    builder: (context, sections, _) =>
+                        sections.contains(RemoteSection.spots)
+                        ? const ListSkeleton()
+                        : EmptyStateWidget(
+                            icon: Icons.search_off,
+                            title: context.l10n.noSpotsFound,
+                            subtitle: context
+                                .l10n
+                                .tryAdjustingYourFiltersOrSearchTerm,
+                          ),
                   )
                 : ListView.builder(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 118),
@@ -194,7 +180,7 @@ class _TouristSearchScreenState extends State<TouristSearchScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      spot.name,
+                                      context.message(spot.name),
                                       style: GoogleFonts.poppins(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16,
@@ -203,9 +189,11 @@ class _TouristSearchScreenState extends State<TouristSearchScreen> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      spot.category == SpotCategory.other
-                                          ? 'Resort & Café'
-                                          : spot.categoryLabel,
+                                      context.message(
+                                        spot.category == SpotCategory.other
+                                            ? MessageCode.resortCaf
+                                            : spot.categoryLabel,
+                                      ),
                                       style: GoogleFonts.poppins(
                                         color: AppColors.primary,
                                         fontSize: 12,
@@ -220,11 +208,18 @@ class _TouristSearchScreenState extends State<TouristSearchScreen> {
                                           color: AppColors.textSecondary,
                                         ),
                                         const SizedBox(width: 4),
-                                        Text(
-                                          '${spot.distanceFromTown} km away',
-                                          style: GoogleFonts.poppins(
-                                            color: AppColors.textSecondary,
-                                            fontSize: 12,
+                                        Flexible(
+                                          child: Text(
+                                            context.l10n.kmAwayValueLabel(
+                                              context.message(
+                                                (spot.distanceFromTown)
+                                                    .toString(),
+                                              ),
+                                            ),
+                                            style: GoogleFonts.poppins(
+                                              color: AppColors.textSecondary,
+                                              fontSize: 12,
+                                            ),
                                           ),
                                         ),
                                       ],

@@ -1,3 +1,9 @@
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/widgets/map_surface.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/server_clock.dart';
+import '../../../core/services/route_geometry.dart';
+import '../../../core/services/error_messages.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -35,6 +41,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
   bool _routeReady = false;
   bool _usingRouteFallback = false;
   MapRoutePlan? _routePlan;
+  final _routeRefreshPolicy = RouteRefreshPolicy();
   DateTime? _deviationSince;
   DateTime? _lastDeviationReport;
   bool _offRoute = false;
@@ -87,7 +94,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
                   ...driver,
                   'lat': position.latitude,
                   'lng': position.longitude,
-                  'locationUpdatedAt': DateTime.now().toIso8601String(),
+                  'locationUpdatedAt': ServerClock.now().toIso8601String(),
                   'heading': position.heading,
                   'speed': position.speed,
                 }
@@ -116,30 +123,24 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
       if (_offRoute && mounted) setState(() => _offRoute = false);
       return;
     }
-    var nearest = double.infinity;
-    for (var i = 0; i < geometry.length; i += 3) {
-      final point = geometry[i];
-      final distance = geo.Geolocator.distanceBetween(
-        position.latitude,
-        position.longitude,
-        point.lat.toDouble(),
-        point.lng.toDouble(),
-      );
-      if (distance < nearest) nearest = distance;
-    }
+    final nearest = distanceToRouteMeters(
+      position.latitude,
+      position.longitude,
+      geometry,
+    );
     if (nearest <= 150) {
       _deviationSince = null;
       if (_offRoute && mounted) setState(() => _offRoute = false);
       return;
     }
-    _deviationSince ??= DateTime.now();
-    if (DateTime.now().difference(_deviationSince!).inSeconds < 30) return;
+    _deviationSince ??= ServerClock.now();
+    if (ServerClock.now().difference(_deviationSince!).inSeconds < 30) return;
     if (!_offRoute && mounted) setState(() => _offRoute = true);
     final mayReport =
         _lastDeviationReport == null ||
-        DateTime.now().difference(_lastDeviationReport!).inMinutes >= 5;
+        ServerClock.now().difference(_lastDeviationReport!).inMinutes >= 5;
     if (mayReport) {
-      _lastDeviationReport = DateTime.now();
+      _lastDeviationReport = ServerClock.now();
       unawaited(
         PrototypeSession.reportRouteDeviation(
           booking!.id,
@@ -197,16 +198,9 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
     final manager = _routeManager;
     if (map == null || manager == null || _routeLoading || !mounted) return;
 
-    if (mounted) {
-      setState(() {
-        _routeLoading = true;
-        _routeReady = false;
-        _usingRouteFallback = false;
-        _routePlan = null;
-      });
-    }
-
     final waypoints = _waypointsFor(booking);
+    if (!fitCamera && _routeRefreshPolicy.canReuse(waypoints)) return;
+    setState(() => _routeLoading = true);
     if (waypoints.length < 2) {
       await manager.deleteAll();
       if (mounted) {
@@ -221,22 +215,22 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
     try {
       plan = await MapRouteService.tricyclePreferred(waypoints);
     } catch (error) {
-      await manager.deleteAll();
       if (mounted) {
         setState(() {
           _routeLoading = false;
-          _routeReady = false;
-          _usingRouteFallback = false;
-          _routePlan = null;
+          _usingRouteFallback = _routePlan == null;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Road route unavailable: $error')),
+          SnackBar(
+            content: Text(context.message(ErrorMessages.forError(error))),
+          ),
         );
       }
       return;
     }
 
     if (!mounted) return;
+    _routeRefreshPolicy.remember(waypoints, plan.geometry);
 
     await manager.deleteAll();
     await manager.create(
@@ -277,9 +271,9 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
         .firstOrNull;
     if (booking.status == BookingStatus.ongoing && nextStop == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'All stops are confirmed. Open Trip controls to finish.',
+            context.l10n.allStopsAreConfirmedOpenTripControlsToFinish,
           ),
         ),
       );
@@ -301,7 +295,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
     final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!opened && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open navigation.')),
+        SnackBar(content: Text(context.l10n.couldNotOpenNavigation)),
       );
     }
   }
@@ -317,10 +311,10 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
 
         if (booking == null) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Active Trip')),
-            body: const EmptyStateWidget(
-              title: 'No Active Trip',
-              subtitle: 'This trip could not be found or has been removed.',
+            appBar: AppBar(title: Text(context.l10n.activeTrip)),
+            body: EmptyStateWidget(
+              title: context.l10n.noActiveTrip,
+              subtitle: context.l10n.thisTripCouldNotBeFoundOrHasBeenRemoved,
               icon: Icons.error_outline,
             ),
           );
@@ -339,26 +333,29 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
             children: [
               Positioned.fill(
                 child: kIsWeb
-                    ? const WebMapFallback(
-                        title: 'Active trip route',
-                        subtitle:
-                            'Turn-by-turn mapping is available in the mobile app.',
+                    ? WebMapFallback(
+                        title: context.l10n.activeTripRoute,
+                        subtitle: context
+                            .l10n
+                            .turnByTurnMappingIsAvailableInTheMobileApp,
                       )
-                    : MapWidget(
-                        styleUri: MapboxConfig.mapStyle,
-                        onMapCreated: (mapboxMap) {
-                          _onMapCreated(mapboxMap, booking);
-                        },
-                        viewport: CameraViewportState(
-                          center: Point(
-                            coordinates: Position(
-                              booking.pickupLng,
-                              booking.pickupLat,
+                    : MapSurface(
+                        builder: (context) => MapWidget(
+                          styleUri: MapboxConfig.mapStyle,
+                          onMapCreated: (mapboxMap) {
+                            _onMapCreated(mapboxMap, booking);
+                          },
+                          viewport: CameraViewportState(
+                            center: Point(
+                              coordinates: Position(
+                                booking.pickupLng,
+                                booking.pickupLat,
+                              ),
                             ),
+                            zoom: 15.0,
+                            pitch: 0.0,
+                            bearing: 0.0,
                           ),
-                          zoom: 15.0,
-                          pitch: 0.0,
-                          bearing: 0.0,
                         ),
                       ),
               ),
@@ -395,16 +392,21 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
                         ),
                       const SizedBox(width: 6),
                       Text(
-                        _routeLoading
-                            ? 'Calculating local-road route...'
-                            : _usingRouteFallback
-                            ? 'Check road restrictions'
-                            : _routeReady
-                            ? '${_routePlan!.distanceLabel} | ${_routePlan!.etaMinutes} min'
-                            : 'Preparing route...',
+                        context.message(
+                          _routeLoading
+                              ? MessageCode.calculatingLocalRoadRoute
+                              : _usingRouteFallback
+                              ? MessageCode.checkRoadRestrictions
+                              : _routeReady
+                              ? MessageCode.minValue(
+                                  (_routePlan!.distanceLabel).toString(),
+                                  (_routePlan!.etaMinutes).toString(),
+                                )
+                              : MessageCode.preparingRoute,
+                        ),
                         style: GoogleFonts.poppins(
                           color: Colors.white,
-                          fontSize: 10,
+                          fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -420,10 +422,12 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
                   child: Material(
                     color: AppColors.warning,
                     borderRadius: BorderRadius.circular(14),
-                    child: const Padding(
+                    child: Padding(
                       padding: EdgeInsets.all(12),
                       child: Text(
-                        'Off the planned route · navigation is recalculating. Follow legal local roads and stop safely if unsure.',
+                        context
+                            .l10n
+                            .offThePlannedRouteNavigationIsRecalculatingFollowLegalLocalRoadsAndStop,
                         textAlign: TextAlign.center,
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
@@ -454,7 +458,11 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
                         ],
                       ),
                       child: Text(
-                        isAccepted ? 'Heading to Pickup' : 'Trip Ongoing',
+                        context.message(
+                          isAccepted
+                              ? MessageCode.headingToPickup
+                              : MessageCode.tripOngoing,
+                        ),
                         style: GoogleFonts.poppins(
                           color: isAccepted
                               ? AppColors.textOnSecondary
@@ -471,6 +479,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
                 top: 100,
                 right: 16,
                 child: FloatingActionButton(
+                  tooltip: context.l10n.emergencyHelp,
                   heroTag: 'driver_emergency',
                   backgroundColor: AppColors.danger,
                   mini: true,
@@ -482,6 +491,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
                 top: 158,
                 right: 16,
                 child: FloatingActionButton.small(
+                  tooltip: context.l10n.resetMap,
                   heroTag: 'driver_recenter',
                   backgroundColor: Colors.white,
                   foregroundColor: AppColors.primary,
@@ -509,174 +519,123 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
                     top: false,
                     child: Padding(
                       padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: MediaQuery.sizeOf(context).height * 0.62,
+                        ),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              CircleAvatar(
-                                radius: 24,
-                                backgroundColor: AppColors.primary.withValues(
-                                  alpha: 0.1,
-                                ),
-                                child: Text(
-                                  booking.touristName.isNotEmpty
-                                      ? booking.touristName[0].toUpperCase()
-                                      : 'T',
-                                  style: const TextStyle(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      booking.touristName,
-                                      style: GoogleFonts.poppins(
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 24,
+                                    backgroundColor: AppColors.primary
+                                        .withValues(alpha: 0.1),
+                                    child: Text(
+                                      context.message(
+                                        booking.touristName.isNotEmpty
+                                            ? booking.touristName[0]
+                                                  .toUpperCase()
+                                            : AppBrand.initial,
+                                      ),
+                                      style: const TextStyle(
+                                        color: AppColors.primary,
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 18,
                                       ),
                                     ),
-                                    Text(
-                                      'Tourist',
-                                      style: GoogleFonts.poppins(
-                                        color: AppColors.textSecondary,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.phone,
-                                  color: AppColors.success,
-                                ),
-                                onPressed: () async {
-                                  final phone =
-                                      PrototypeSession.adminTourists.value
-                                              .where(
-                                                (u) =>
-                                                    u['id'] ==
-                                                    booking.touristId,
-                                              )
-                                              .firstOrNull?['phoneNumber']
-                                          as String?;
-                                  if (phone == null || phone.isEmpty) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'No verified contact number is available for this tourist.',
-                                        ),
-                                      ),
-                                    );
-                                    return;
-                                  }
-                                  final uri = Uri(scheme: 'tel', path: phone);
-                                  if (await canLaunchUrl(uri)) {
-                                    await launchUrl(uri);
-                                  } else {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Could not launch phone dialer',
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          context.message(booking.touristName),
+                                          style: GoogleFonts.poppins(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
                                           ),
                                         ),
+                                        Text(
+                                          context.l10n.tourist,
+                                          style: GoogleFonts.poppins(
+                                            color: AppColors.textSecondary,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                    tooltip: context.l10n.call,
+                                    icon: const Icon(
+                                      Icons.phone,
+                                      color: AppColors.success,
+                                    ),
+                                    onPressed: () async {
+                                      final phone =
+                                          PrototypeSession.adminTourists.value
+                                                  .where(
+                                                    (u) =>
+                                                        u['id'] ==
+                                                        booking.touristId,
+                                                  )
+                                                  .firstOrNull?['phoneNumber']
+                                              as String?;
+                                      if (phone == null || phone.isEmpty) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              context
+                                                  .l10n
+                                                  .noVerifiedContactNumberIsAvailableForThisTourist,
+                                            ),
+                                          ),
+                                        );
+                                        return;
+                                      }
+                                      final uri = Uri(
+                                        scheme: 'tel',
+                                        path: phone,
                                       );
-                                    }
-                                  }
-                                },
-                                style: IconButton.styleFrom(
-                                  backgroundColor: AppColors.success.withValues(
-                                    alpha: 0.1,
+                                      if (await canLaunchUrl(uri)) {
+                                        await launchUrl(uri);
+                                      } else {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                context
+                                                    .l10n
+                                                    .couldNotLaunchPhoneDialer,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    },
+                                    style: IconButton.styleFrom(
+                                      backgroundColor: AppColors.success
+                                          .withValues(alpha: 0.1),
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
-                          ),
-                          const Divider(height: 32),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(
-                                Icons.location_on,
-                                color: AppColors.danger,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Heading to',
-                                      style: GoogleFonts.poppins(
-                                        color: AppColors.textSecondary,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    Text(
-                                      isAccepted
-                                          ? booking.pickupAddress
-                                          : (booking.stops.isNotEmpty
-                                                ? booking
-                                                      .stops[booking
-                                                          .trip
-                                                          .confirmedStops
-                                                          .clamp(
-                                                            0,
-                                                            booking
-                                                                    .stops
-                                                                    .length -
-                                                                1,
-                                                          )]
-                                                      .spotName
-                                                : 'Destination'),
-                                      style: GoogleFonts.poppins(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Bustos, Bulacan',
-                                      style: GoogleFonts.poppins(
-                                        color: AppColors.textSecondary,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (_routePlan != null) ...[
-                            const SizedBox(height: 16),
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(
-                                  alpha: 0.07,
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: AppColors.primary.withValues(
-                                    alpha: 0.14,
-                                  ),
-                                ),
-                              ),
-                              child: Row(
+                              const Divider(height: 32),
+                              Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Icon(
-                                    Icons.alt_route_rounded,
-                                    color: AppColors.primary,
+                                    Icons.location_on,
+                                    color: AppColors.danger,
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
@@ -685,20 +644,44 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          '${_routePlan!.distanceLabel} | ${_routePlan!.etaMinutes} min',
-                                          style: GoogleFonts.poppins(
-                                            fontWeight: FontWeight.w700,
-                                            color: AppColors.textPrimary,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          _routePlan!.nextInstruction ??
-                                              'Local roads are preferred. Follow road signs and your approved TODA or LGU route.',
+                                          context.l10n.headingTo,
                                           style: GoogleFonts.poppins(
                                             color: AppColors.textSecondary,
-                                            fontSize: 11,
-                                            height: 1.35,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        Text(
+                                          context.message(
+                                            isAccepted
+                                                ? booking.pickupAddress
+                                                : (booking.stops.isNotEmpty
+                                                      ? booking
+                                                            .stops[booking
+                                                                .trip
+                                                                .confirmedStops
+                                                                .clamp(
+                                                                  0,
+                                                                  booking
+                                                                          .stops
+                                                                          .length -
+                                                                      1,
+                                                                )]
+                                                            .spotName
+                                                      : MessageCode
+                                                            .destination),
+                                          ),
+                                          style: GoogleFonts.poppins(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        Text(
+                                          context.l10n.bustosBulacan,
+                                          style: GoogleFonts.poppins(
+                                            color: AppColors.textSecondary,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14,
                                           ),
                                         ),
                                       ],
@@ -706,59 +689,134 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
-                          const SizedBox(height: 24),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Total Fare',
-                                style: GoogleFonts.poppins(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              Text(
-                                '₱ ${booking.totalFare.toStringAsFixed(2)}',
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 24,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 1,
-                                child: AppButton(
-                                  label: 'Navigate',
-                                  onPressed: booking.interruptedAt == null
-                                      ? () => _openNavigation(booking)
-                                      : null,
-                                  type: AppButtonType.outline,
-                                  prefixIcon: Icons.navigation,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                flex: 2,
-                                child: AppButton(
-                                  label: isAccepted
-                                      ? 'Verify pickup'
-                                      : 'Trip controls',
-                                  prefixIcon: Icons.fact_check_outlined,
-                                  onPressed: () => context.push(
-                                    '/driver/bookings/${booking.id}',
+                              if (_routePlan != null) ...[
+                                const SizedBox(height: 16),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.07,
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: AppColors.primary.withValues(
+                                        alpha: 0.14,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(
+                                        Icons.alt_route_rounded,
+                                        color: AppColors.primary,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              context.l10n.minValue(
+                                                context.message(
+                                                  (_routePlan!.distanceLabel)
+                                                      .toString(),
+                                                ),
+                                                context.message(
+                                                  (_routePlan!.etaMinutes)
+                                                      .toString(),
+                                                ),
+                                              ),
+                                              style: GoogleFonts.poppins(
+                                                fontWeight: FontWeight.w700,
+                                                color: AppColors.textPrimary,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              context.message(
+                                                _routePlan!.nextInstruction ??
+                                                    MessageCode
+                                                        .localRoadsArePreferredFollowRoadSignsAndYourApprovedTodaOrLgu,
+                                              ),
+                                              style: GoogleFonts.poppins(
+                                                color: AppColors.textSecondary,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 14,
+                                                height: 1.35,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
+                              ],
+                              const SizedBox(height: 24),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      context.l10n.totalFare,
+                                      style: GoogleFonts.poppins(
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                  Flexible(
+                                    child: Text(
+                                      context.message(
+                                        '₱ ${AppFormatters.amount(booking.totalFare)}',
+                                      ),
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 24,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    flex: 1,
+                                    child: AppButton(
+                                      label: context.l10n.navigate,
+                                      onPressed: booking.interruptedAt == null
+                                          ? () => _openNavigation(booking)
+                                          : null,
+                                      type: AppButtonType.outline,
+                                      prefixIcon: Icons.navigation,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    flex: 2,
+                                    child: AppButton(
+                                      label: isAccepted
+                                          ? MessageCode.verifyPickup
+                                          : MessageCode.tripControls,
+                                      prefixIcon: Icons.fact_check_outlined,
+                                      onPressed: () => context.push(
+                                        '/driver/bookings/${booking.id}',
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),

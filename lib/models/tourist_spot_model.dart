@@ -1,3 +1,6 @@
+import '../core/constants/app_brand.dart';
+import 'package:tricgabay_app/core/l10n/message_codes.g.dart';
+
 enum SpotCategory { heritage, nature, church, park, market, other }
 
 class TouristSpotModel {
@@ -55,7 +58,7 @@ class TouristSpotModel {
       ),
       imageUrls: List<String>.from(map['imageUrls'] ?? []),
       openingHours: map['openingHours'] ?? '',
-      entranceFee: map['entranceFee'] ?? 'Check locally',
+      entranceFee: map['entranceFee'] ?? MessageCode.checkLocally,
       tips: List<String>.from(map['tips'] ?? []),
       distanceFromTown: (map['distanceFromTown'] ?? 0.0).toDouble(),
       isActive: map['isActive'] ?? true,
@@ -86,12 +89,12 @@ class TouristSpotModel {
   };
 
   String get categoryLabel => switch (category) {
-    SpotCategory.heritage => 'Heritage',
-    SpotCategory.nature => 'Nature',
-    SpotCategory.church => 'Church',
-    SpotCategory.park => 'Park',
-    SpotCategory.market => 'Market',
-    SpotCategory.other => 'Other',
+    SpotCategory.heritage => MessageCode.heritage,
+    SpotCategory.nature => MessageCode.nature,
+    SpotCategory.church => MessageCode.church,
+    SpotCategory.park => MessageCode.park,
+    SpotCategory.market => MessageCode.market,
+    SpotCategory.other => MessageCode.other,
   };
 
   static List<TouristSpotModel> get catalog => [
@@ -99,7 +102,7 @@ class TouristSpotModel {
       id: 'bustos-heritage-park',
       name: 'Bustos Heritage Park',
       description:
-          'A central heritage stop in Bustos and the starting point shared by all three Tric-Gabay tour packages.',
+          'A central heritage stop in Bustos and the starting point shared by all three ${AppBrand.name} tour packages.',
       history:
           'This public park highlights local identity and serves as a convenient orientation point for a tour of Bustos.',
       latitude: 14.9532835,
@@ -120,12 +123,12 @@ class TouristSpotModel {
       description:
           'A neighborhood chapel in Talampas, also mapped as Holy Cross Chapel, and included in the TRIC LAKBAY route.',
       history:
-          'A local faith stop included in the supplied Tric-Gabay tour package.',
+          'A local faith stop included in the supplied ${AppBrand.name} tour package.',
       latitude: 14.9344482,
       longitude: 120.9070123,
       category: SpotCategory.church,
       imageUrls: ['assets/images/san_isidro_labrador_parish.jpg'],
-      openingHours: 'Check locally',
+      openingHours: MessageCode.checkLocally,
       entranceFee: 'Free',
       tips: ['Dress respectfully', 'Keep voices low during services'],
       distanceFromTown: 2.4,
@@ -136,12 +139,12 @@ class TouristSpotModel {
       description:
           'A chapel in Bonga Mayor that appears in every supplied tour package.',
       history:
-          'A recurring faith stop on the official Tric-Gabay package routes.',
+          'A recurring faith stop on the official ${AppBrand.name} package routes.',
       latitude: 14.9578495,
       longitude: 120.9437551,
       category: SpotCategory.church,
       imageUrls: ['assets/images/sto_nino_tugyaw_festival.jpg'],
-      openingHours: 'Check locally',
+      openingHours: MessageCode.checkLocally,
       entranceFee: 'Free',
       tips: ['Dress respectfully', 'Confirm service times before visiting'],
       distanceFromTown: 2.8,
@@ -189,7 +192,7 @@ class TouristSpotModel {
       longitude: 120.9069568,
       category: SpotCategory.church,
       imageUrls: ['assets/images/san_isidro_labrador_parish.jpg'],
-      openingHours: 'Check locally',
+      openingHours: MessageCode.checkLocally,
       entranceFee: 'Free',
       tips: ['Dress respectfully', 'Confirm chapel access before visiting'],
       distanceFromTown: 1.8,
@@ -205,7 +208,7 @@ class TouristSpotModel {
       longitude: 120.9115939,
       category: SpotCategory.church,
       imageUrls: ['assets/images/sto_nino_tugyaw_festival.jpg'],
-      openingHours: 'Check locally',
+      openingHours: MessageCode.checkLocally,
       entranceFee: 'Free',
       tips: ['Dress respectfully', 'Confirm chapel access before visiting'],
       distanceFromTown: 0.9,
@@ -220,7 +223,7 @@ class TouristSpotModel {
       longitude: 120.9177589,
       category: SpotCategory.church,
       imageUrls: ['assets/images/san_isidro_labrador_parish.jpg'],
-      openingHours: 'Check locally',
+      openingHours: MessageCode.checkLocally,
       entranceFee: 'Free',
       tips: ['Dress respectfully', 'Keep voices low during services'],
       distanceFromTown: 0.2,
@@ -235,7 +238,7 @@ class TouristSpotModel {
       longitude: 120.9327939,
       category: SpotCategory.church,
       imageUrls: ['assets/images/sto_nino_tugyaw_festival.jpg'],
-      openingHours: 'Check locally',
+      openingHours: MessageCode.checkLocally,
       entranceFee: 'Free',
       tips: ['Dress respectfully', 'Confirm chapel access before visiting'],
       distanceFromTown: 1.6,
@@ -250,7 +253,7 @@ class TouristSpotModel {
       longitude: 120.9277048,
       category: SpotCategory.church,
       imageUrls: ['assets/images/san_isidro_labrador_parish.jpg'],
-      openingHours: 'Check locally',
+      openingHours: MessageCode.checkLocally,
       entranceFee: 'Free',
       tips: ['Dress respectfully', 'Keep voices low during services'],
       distanceFromTown: 2.2,
@@ -266,8 +269,8 @@ class TouristSpotModel {
       longitude: 120.9082740,
       category: SpotCategory.other,
       imageUrls: ['assets/images/galilee_wonderland_resort.jpg'],
-      openingHours: 'Check locally',
-      entranceFee: 'Check locally',
+      openingHours: MessageCode.checkLocally,
+      entranceFee: MessageCode.checkLocally,
       tips: ['Confirm access before visiting', 'Allow time for photos'],
       distanceFromTown: 1.6,
     ),
@@ -451,7 +454,7 @@ class TouristSpotModel {
       longitude: 120.9290193,
       category: SpotCategory.heritage,
       imageUrls: ['assets/images/cafe_apolonio_bahay_na_bato.jpg'],
-      openingHours: 'Temporarily Closed',
+      openingHours: MessageCode.temporarilyClosed,
       entranceFee: 'Free (Restaurant purchases)',
       tips: [
         'Check their social media for reopening updates',
@@ -660,7 +663,6 @@ class TourPackageModel {
   final String description;
   final String duration;
   final List<String> spotIds;
-  final double estimatedFare;
   final String imageUrl;
   final List<String> highlights;
 
@@ -670,10 +672,31 @@ class TourPackageModel {
     required this.description,
     required this.duration,
     required this.spotIds,
-    required this.estimatedFare,
     required this.imageUrl,
     required this.highlights,
   });
+
+  factory TourPackageModel.fromPublishedRow(Map<String, dynamic> row) {
+    final id = row['id'] as String;
+    final artwork = catalog.where((package) => package.id == id).firstOrNull;
+    final stops =
+        List<Map<String, dynamic>>.from(row['tour_package_stops'] as List)
+          ..sort(
+            (a, b) =>
+                (a['stop_order'] as int).compareTo(b['stop_order'] as int),
+          );
+    return TourPackageModel(
+      id: id,
+      name: row['name'] as String,
+      description: row['description'] as String,
+      duration: '',
+      spotIds: stops
+          .map((stop) => stop['spot_id'] as String)
+          .toList(growable: false),
+      imageUrl: artwork?.imageUrl ?? '',
+      highlights: const [],
+    );
+  }
 
   static List<TourPackageModel> get catalog => const [
     TourPackageModel(
@@ -689,7 +712,6 @@ class TourPackageModel {
         'sto-nino-church',
         'zenys-minasa',
       ],
-      estimatedFare: 700,
       imageUrl: 'assets/images/bustos_heritage_park.jpg',
       highlights: [
         'Fixed five-stop itinerary',
@@ -710,7 +732,6 @@ class TourPackageModel {
         'sto-nino-chapel',
         'zenys-minasa',
       ],
-      estimatedFare: 850,
       imageUrl: 'assets/images/sto_nino_tugyaw_festival.jpg',
       highlights: [
         'Fixed five-stop itinerary',
@@ -734,7 +755,6 @@ class TourPackageModel {
         'galilee-wailing-wall',
         'zenys-minasa',
       ],
-      estimatedFare: 1000,
       imageUrl: 'assets/images/galilee_wonderland_resort.jpg',
       highlights: [
         'Fixed eight-stop itinerary',

@@ -74,11 +74,11 @@ void main() {
         BookingDetailScreen(bookingId: b.id, viewer: TripActor.admin),
       );
       await tester.scrollUntilVisible(
-        find.text('Review & decide final charge'),
+        find.text('Review and decide final charge'),
         200,
         scrollable: find.byType(Scrollable).first,
       );
-      expect(find.text('Review & decide final charge'), findsOneWidget);
+      expect(find.text('Review and decide final charge'), findsOneWidget);
       expect(find.text('Confirm cash received'), findsNothing);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());

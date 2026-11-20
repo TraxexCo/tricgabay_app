@@ -1,3 +1,5 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/error_messages.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -8,10 +10,13 @@ import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/shared_widgets.dart';
 import '../../../core/prototype/prototype_session.dart';
 import '../../../models/tourist_spot_model.dart';
+import '../../../core/l10n/record_labels.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../core/services/backend_repository.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
+import '../../../core/utils/map_coordinate_validator.dart';
+import '../../../core/utils/validators.dart';
 
 class SpotFormScreen extends ConsumerStatefulWidget {
   final TouristSpotModel? spot;
@@ -99,9 +104,9 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
     if (_formKey.currentState!.validate()) {
       if (!BackendConfig.isConfigured) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Server setup is incomplete. The attraction was not saved.',
+              context.l10n.serverSetupIsIncompleteTheAttractionWasNotSaved,
             ),
           ),
         );
@@ -140,16 +145,22 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              isNew ? 'Tourist spot created' : 'Tourist spot updated',
+              context.message(
+                isNew
+                    ? MessageCode.touristSpotCreated
+                    : MessageCode.touristSpotUpdated,
+              ),
             ),
           ),
         );
         context.pop();
       } catch (error) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('$error')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.message(ErrorMessages.forError(error))),
+            ),
+          );
         }
       } finally {
         if (mounted) setState(() => _saving = false);
@@ -162,7 +173,11 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.spot == null ? 'Add Tourist Spot' : 'Edit Tourist Spot',
+          context.message(
+            widget.spot == null
+                ? MessageCode.addTouristSpot
+                : MessageCode.editTouristSpot,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -199,7 +214,7 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
                             fit: BoxFit.cover,
                           ),
                         )
-                      : const Column(
+                      : Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
@@ -209,7 +224,7 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
                             ),
                             SizedBox(height: 8),
                             Text(
-                              'Upload Image',
+                              context.l10n.uploadImage,
                               style: TextStyle(color: Colors.grey),
                             ),
                           ],
@@ -218,14 +233,21 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
               ),
               const SizedBox(height: 24),
               AppTextField(
-                label: 'Spot Name',
-                hint: 'e.g. Minasa Festival Grounds',
+                label: context.l10n.spotName,
+                hint: context.l10n.eGMinasaFestivalGrounds,
                 controller: _nameController,
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                maxLength: 120,
+                validator: (v) =>
+                    Validators.required(v, fieldName: MessageCode.spotName) ??
+                    Validators.maxLength(
+                      v,
+                      120,
+                      fieldName: MessageCode.spotName,
+                    ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Category',
+              Text(
+                context.l10n.category,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -235,7 +257,7 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
                 children: SpotCategory.values.map((cat) {
                   final isSelected = _category == cat;
                   return ChoiceChip(
-                    label: Text(cat.name.toUpperCase()),
+                    label: Text(spotCategoryLabel(context, cat)),
                     selected: isSelected,
                     onSelected: (selected) {
                       if (selected) setState(() => _category = cat);
@@ -245,24 +267,35 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
               ),
               const SizedBox(height: 16),
               AppTextField(
-                label: 'Description',
-                hint: 'Enter description...',
+                label: context.l10n.description,
+                hint: context.l10n.enterDescription,
                 maxLines: 4,
+                maxLength: 2000,
                 controller: _descController,
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                validator: (v) =>
+                    Validators.required(
+                      v,
+                      fieldName: MessageCode.description,
+                    ) ??
+                    Validators.maxLength(
+                      v,
+                      2000,
+                      fieldName: MessageCode.description,
+                    ),
               ),
               const SizedBox(height: 16),
               AppTextField(
-                label: 'Address',
-                hint: 'Enter address...',
+                label: context.l10n.address,
+                hint: context.l10n.enterAddress,
                 controller: _addressController,
+                maxLength: 300,
               ),
               const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
                     child: AppTextField(
-                      label: 'Latitude',
+                      label: context.l10n.latitude,
                       hint: '14.9500',
                       controller: _latitudeController,
                       keyboardType: const TextInputType.numberWithOptions(
@@ -270,9 +303,11 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
                         signed: true,
                       ),
                       validator: (value) {
-                        final number = double.tryParse(value ?? '');
+                        final number = MapCoordinateValidator.finiteNumber(
+                          value,
+                        );
                         return number == null || number < -90 || number > 90
-                            ? 'Invalid latitude'
+                            ? MessageCode.invalidLatitude
                             : null;
                       },
                     ),
@@ -280,7 +315,7 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: AppTextField(
-                      label: 'Longitude',
+                      label: context.l10n.longitude,
                       hint: '120.9200',
                       controller: _longitudeController,
                       keyboardType: const TextInputType.numberWithOptions(
@@ -288,9 +323,11 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
                         signed: true,
                       ),
                       validator: (value) {
-                        final number = double.tryParse(value ?? '');
+                        final number = MapCoordinateValidator.finiteNumber(
+                          value,
+                        );
                         return number == null || number < -180 || number > 180
-                            ? 'Invalid longitude'
+                            ? MessageCode.invalidLongitude
                             : null;
                       },
                     ),
@@ -299,9 +336,10 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
               ),
               const SizedBox(height: 16),
               AppTextField(
-                label: 'History',
-                hint: 'Enter history...',
+                label: context.l10n.history,
+                hint: context.l10n.enterHistory,
                 maxLines: 3,
+                maxLength: 3000,
                 controller: _historyController,
               ),
               const SizedBox(height: 16),
@@ -309,25 +347,27 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
                 children: [
                   Expanded(
                     child: AppTextField(
-                      label: 'Opening Hours',
-                      hint: '8:00 AM - 5:00 PM',
+                      label: context.l10n.openingHours,
+                      hint: context.l10n.exampleOperatingHours,
                       controller: _openingHoursController,
+                      maxLength: 120,
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: AppTextField(
-                      label: 'Entrance Fee',
+                      label: context.l10n.entranceFee,
                       hint: '0.00',
                       keyboardType: TextInputType.number,
                       controller: _entranceFeeController,
+                      maxLength: 40,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
               SwitchListTile(
-                title: const Text('Visible to Tourists'),
+                title: Text(context.l10n.visibleToTourists),
                 value: _isActive,
                 onChanged: (val) => setState(() => _isActive = val),
               ),
@@ -335,7 +375,7 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
               SizedBox(
                 width: double.infinity,
                 child: AppButton(
-                  label: 'Save Spot',
+                  label: context.l10n.saveSpot,
                   isLoading: _saving,
                   onPressed: _saveSpot,
                 ),

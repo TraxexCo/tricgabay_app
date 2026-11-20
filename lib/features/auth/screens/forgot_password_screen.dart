@@ -1,3 +1,5 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,7 +32,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (!BackendConfig.isConfigured) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Server setup is incomplete.')),
+        SnackBar(content: Text(context.l10n.serverSetupIsIncomplete)),
       );
       return;
     }
@@ -40,9 +42,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       if (mounted) setState(() => _sent = true);
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.toString())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.message(ErrorMessages.forError(error))),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -58,9 +62,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         elevation: 0,
         leading: const BackButton(color: AppColors.textPrimary),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: _sent ? _buildSuccess() : _buildForm(),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: _sent ? _buildSuccess() : _buildForm(),
+        ),
       ),
     );
   }
@@ -72,7 +78,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Forgot Password',
+            context.l10n.forgotPassword,
             style: GoogleFonts.poppins(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -81,7 +87,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Enter your email and we will send you a link to reset your password.',
+            context.l10n.enterYourEmailAndWeWillSendYouALinkToResetYour,
             style: GoogleFonts.poppins(
               fontSize: 16,
               color: AppColors.textSecondary,
@@ -90,16 +96,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           const SizedBox(height: 32),
           AppTextField(
             controller: _emailController,
-            label: 'Email Address',
-            hint: 'example@email.com',
+            label: context.l10n.emailAddress,
+            hint: context.l10n.exampleEmailCom,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.done,
-            validator: (v) =>
-                v == null || !v.contains('@') ? 'Enter a valid email' : null,
+            validator: (v) => v == null || !v.contains('@')
+                ? MessageCode.enterAValidEmail
+                : null,
           ),
           const SizedBox(height: 32),
           AppButton(
-            label: 'Send Reset Link',
+            label: context.l10n.sendResetLink,
             isLoading: _loading,
             onPressed: _sendReset,
           ),
@@ -116,7 +123,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         const Icon(Icons.check_circle, color: AppColors.success, size: 100),
         const SizedBox(height: 24),
         Text(
-          'Check your email',
+          context.l10n.checkYourEmail,
           style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -126,7 +133,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'We have sent password recovery instructions to your email.',
+          context.l10n.weHaveSentPasswordRecoveryInstructionsToYourEmail,
           style: GoogleFonts.poppins(
             fontSize: 16,
             color: AppColors.textSecondary,
@@ -135,7 +142,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 32),
         AppButton(
-          label: 'Back to Login',
+          label: context.l10n.backToLogin,
           onPressed: () => context.go('/login'),
         ),
       ],

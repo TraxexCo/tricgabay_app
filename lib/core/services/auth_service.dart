@@ -1,10 +1,18 @@
+import 'package:tricgabay_app/core/l10n/message_codes.g.dart';
+import 'privacy_service.dart';
+import 'image_upload_validator.dart';
+import '../config/auth_link_config.dart';
 import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/backend_config.dart';
+import 'auth_session_policy.dart';
+import '../utils/validators.dart';
 
 enum AppRole { tourist, driver, admin }
+
+enum DriverRegistrationOutcome { awaitingEmailConfirmation, submitted }
 
 class SignedInProfile {
   final String id;
@@ -13,6 +21,7 @@ class SignedInProfile {
   final AppRole role;
   final String status;
   final String? plateNumber;
+  final bool applicationPending;
 
   const SignedInProfile({
     required this.id,
@@ -21,6 +30,7 @@ class SignedInProfile {
     required this.role,
     required this.status,
     this.plateNumber,
+    this.applicationPending = false,
   });
 }
 
@@ -36,24 +46,44 @@ class AuthService {
         .from('profiles')
         .select('id,full_name,role,status')
         .eq('id', user.id)
-        .single();
-    final role = AppRole.values.byName(profile['role'] as String);
+        .single()
+        .timeout(const Duration(seconds: 8));
+    if (_client.auth.currentUser?.id != user.id) return null;
+    final roleName = profile['role'] as String;
+    final role = AppRole.values
+        .where((value) => value.name == roleName)
+        .firstOrNull;
+    final status = profile['status'] as String;
     String? plate;
-    if (role == AppRole.driver) {
+    String? driverApproval;
+    if (roleName == AppRole.driver.name) {
       final driver = await _client
           .from('driver_profiles')
-          .select('plate_number')
+          .select('plate_number,approval_status')
           .eq('profile_id', user.id)
-          .maybeSingle();
+          .maybeSingle()
+          .timeout(const Duration(seconds: 8));
+      if (_client.auth.currentUser?.id != user.id) return null;
+      driverApproval = driver?['approval_status'] as String?;
       plate = driver?['plate_number'] as String?;
+    }
+    final decision = evaluateAuthAccess(
+      role: roleName,
+      status: status,
+      driverApproval: driverApproval,
+    );
+    if (!decision.allowed || role == null) {
+      await _client.auth.signOut();
+      return null;
     }
     return SignedInProfile(
       id: user.id,
       name: profile['full_name'],
       email: user.email ?? '',
       role: role,
-      status: profile['status'],
+      status: status,
       plateNumber: plate,
+      applicationPending: decision.applicationPending,
     );
   }
 
@@ -67,41 +97,42 @@ class AuthService {
       password: password,
     );
     final user = response.user;
-    if (user == null) throw const AuthException('Sign-in did not complete.');
+    if (user == null) {
+      throw const AuthException(MessageCode.signInDidNotComplete);
+    }
     try {
       final profile = await _client
           .from('profiles')
           .select('id, full_name, role, status')
           .eq('id', user.id)
           .single();
-      final role = AppRole.values.byName(profile['role'] as String);
-      if (role != expectedRole) {
-        await _client.auth.signOut();
-        throw AuthException('This account belongs to the ${role.name} portal.');
-      }
+      final roleName = profile['role'] as String;
+      final role = AppRole.values
+          .where((value) => value.name == roleName)
+          .firstOrNull;
       final status = profile['status'] as String;
-      if (status != 'active') {
-        await _client.auth.signOut();
-        throw AuthException(
-          status == 'pending'
-              ? 'This account is still awaiting administrator approval.'
-              : 'This account is not currently allowed to sign in.',
-        );
-      }
       String? plateNumber;
-      if (role == AppRole.driver) {
+      String? driverApproval;
+      if (roleName == AppRole.driver.name) {
         final driver = await _client
             .from('driver_profiles')
             .select('plate_number, approval_status')
             .eq('profile_id', user.id)
-            .single();
-        if (driver['approval_status'] != 'approved') {
-          await _client.auth.signOut();
-          throw const AuthException(
-            'This driver account is still awaiting administrator approval.',
-          );
-        }
-        plateNumber = driver['plate_number'] as String?;
+            .maybeSingle();
+        driverApproval = driver?['approval_status'] as String?;
+        plateNumber = driver?['plate_number'] as String?;
+      }
+      final decision = evaluateAuthAccess(
+        role: roleName,
+        status: status,
+        expectedRole: expectedRole.name,
+        driverApproval: driverApproval,
+      );
+      if (!decision.allowed || role == null) {
+        await _client.auth.signOut();
+        throw AuthException(
+          decision.message ?? MessageCode.thisAccountCannotSignIn,
+        );
       }
       return SignedInProfile(
         id: user.id,
@@ -110,6 +141,7 @@ class AuthService {
         role: role,
         status: status,
         plateNumber: plateNumber,
+        applicationPending: decision.applicationPending,
       );
     } catch (_) {
       if (_client.auth.currentUser != null) await _client.auth.signOut();
@@ -118,23 +150,32 @@ class AuthService {
   }
 
   static Future<void> registerTourist({
+    required String privacyVersion,
+    required String privacyLanguage,
     required String name,
     required String email,
     required String phone,
     required String password,
   }) async {
+    if (privacyVersion.trim().isEmpty) {
+      throw const AuthException(MessageCode.privacyNoticeAcceptanceIsRequired);
+    }
     await _client.auth.signUp(
       email: email.trim(),
       password: password,
       data: {
         'full_name': name.trim(),
-        'phone': phone.trim(),
+        'phone': Validators.normalizePhone(phone),
+        'privacy_notice_version': privacyVersion,
+        'privacy_notice_language': privacyLanguage,
         'requested_role': AppRole.tourist.name,
       },
     );
   }
 
-  static Future<void> registerDriver({
+  static Future<DriverRegistrationOutcome> registerDriver({
+    required String privacyVersion,
+    required String privacyLanguage,
     required String name,
     required String email,
     required String phone,
@@ -148,14 +189,17 @@ class AuthService {
     required Uint8List licenseBytes,
     required Uint8List vehicleRegistrationBytes,
   }) async {
+    if (privacyVersion.trim().isEmpty) {
+      throw const AuthException(MessageCode.privacyNoticeAcceptanceIsRequired);
+    }
     const maxDocumentBytes = 5 * 1024 * 1024;
     if (licenseBytes.isEmpty || vehicleRegistrationBytes.isEmpty) {
-      throw const AuthException('Both driver documents are required.');
+      throw const AuthException(MessageCode.bothDriverDocumentsAreRequired);
     }
     if (licenseBytes.length > maxDocumentBytes ||
         vehicleRegistrationBytes.length > maxDocumentBytes) {
       throw const AuthException(
-        'Each driver document must be 5 MB or smaller.',
+        MessageCode.eachDriverDocumentMustBe5MbOrSmaller,
       );
     }
 
@@ -164,7 +208,8 @@ class AuthService {
     final existing = _client.auth.currentUser;
     if (existing != null && existing.email?.toLowerCase() != normalizedEmail) {
       throw const AuthException(
-        'Another account is already signed in. Sign out before registering a driver.',
+        MessageCode
+            .anotherAccountIsAlreadySignedInSignOutBeforeRegisteringADriver,
       );
     }
     if (existing == null) {
@@ -175,14 +220,19 @@ class AuthService {
           email: normalizedEmail,
           password: password,
         );
-      } on AuthException {
+      } on AuthException catch (error) {
+        if (error.code == 'email_not_confirmed') {
+          return DriverRegistrationOutcome.awaitingEmailConfirmation;
+        }
         response = await _client.auth.signUp(
           email: normalizedEmail,
           password: password,
           data: {
             'full_name': name.trim(),
-            'phone': phone.trim(),
+            'phone': Validators.normalizePhone(phone),
             'requested_role': AppRole.driver.name,
+            'privacy_notice_version': privacyVersion,
+            'privacy_notice_language': privacyLanguage,
           },
         );
       }
@@ -190,16 +240,52 @@ class AuthService {
     final user = response?.user;
     final authenticatedUser = user ?? existing;
     if (authenticatedUser == null) {
-      throw const AuthException('Registration did not complete.');
+      throw const AuthException(MessageCode.registrationDidNotComplete);
     }
     if (_client.auth.currentSession == null) {
+      return DriverRegistrationOutcome.awaitingEmailConfirmation;
+    }
+    final consent = await PrivacyService.status();
+    if (!consent.accepted) {
+      await PrivacyService.accept(privacyVersion, language: privacyLanguage);
+    }
+    await submitPendingApplication(
+      privacyVersion: privacyVersion,
+      plateNumber: plateNumber,
+      franchiseNumber: franchiseNumber,
+      licenseExpiresOn: licenseExpiresOn,
+      franchiseExpiresOn: franchiseExpiresOn,
+      passengerCapacity: passengerCapacity,
+      acceptsAccessibilityRequests: acceptsAccessibilityRequests,
+      licenseBytes: licenseBytes,
+      vehicleRegistrationBytes: vehicleRegistrationBytes,
+    );
+    return DriverRegistrationOutcome.submitted;
+  }
+
+  static Future<void> submitPendingApplication({
+    required String privacyVersion,
+    required String plateNumber,
+    required String franchiseNumber,
+    required DateTime licenseExpiresOn,
+    required DateTime franchiseExpiresOn,
+    required int passengerCapacity,
+    required bool acceptsAccessibilityRequests,
+    required Uint8List licenseBytes,
+    required Uint8List vehicleRegistrationBytes,
+  }) async {
+    final authenticatedUser = _client.auth.currentUser;
+    if (authenticatedUser == null) {
+      throw const AuthException(MessageCode.signInAfterConfirmingYourEmail);
+    }
+    if (licenseBytes.isEmpty ||
+        vehicleRegistrationBytes.isEmpty ||
+        licenseBytes.length > 5 * 1024 * 1024 ||
+        vehicleRegistrationBytes.length > 5 * 1024 * 1024) {
       throw const AuthException(
-        'Driver document upload needs an authenticated registration session. '
-        'For this closed test environment, disable mandatory email confirmation '
-        'in Supabase Auth, remove this incomplete test account, and register again.',
+        MessageCode.bothDriverDocumentsMustBeValidImagesUnder5Mb,
       );
     }
-
     final profile = await _client
         .from('profiles')
         .select('role,status')
@@ -209,10 +295,28 @@ class AuthService {
         profile['status'] != 'pending') {
       await _client.auth.signOut();
       throw const AuthException(
-        'Only a pending driver application can be resumed from this form.',
+        MessageCode.onlyAPendingDriverApplicationCanBeResumedFromThisForm,
       );
     }
 
+    final consent = await PrivacyService.status();
+    if (!consent.accepted || consent.notice.version != privacyVersion) {
+      throw const AuthException(
+        MessageCode.acceptTheCurrentPrivacyNoticeBeforeSubmitting,
+      );
+    }
+    ImageUploadValidator.validateForObject(
+      licenseBytes,
+      path: 'license.jpg',
+      contentType: 'image/jpeg',
+      jpegOnly: true,
+    );
+    ImageUploadValidator.validateForObject(
+      vehicleRegistrationBytes,
+      path: 'vehicle-registration.jpg',
+      contentType: 'image/jpeg',
+      jpegOnly: true,
+    );
     final prefix = authenticatedUser.id;
     final licensePath = '$prefix/license.jpg';
     final registrationPath = '$prefix/vehicle-registration.jpg';
@@ -223,6 +327,7 @@ class AuthService {
           licenseBytes,
           fileOptions: const FileOptions(
             upsert: true,
+            cacheControl: '0',
             contentType: 'image/jpeg',
           ),
         );
@@ -233,6 +338,7 @@ class AuthService {
           vehicleRegistrationBytes,
           fileOptions: const FileOptions(
             upsert: true,
+            cacheControl: '0',
             contentType: 'image/jpeg',
           ),
         );
@@ -249,7 +355,6 @@ class AuthService {
         'p_vehicle_document_path': registrationPath,
       },
     );
-    await _client.auth.signOut();
   }
 
   static String _dateOnly(DateTime value) =>
@@ -260,14 +365,15 @@ class AuthService {
   static Future<void> sendPasswordReset(String email) =>
       _client.auth.resetPasswordForEmail(
         email.trim(),
-        redirectTo: 'tricgabay://auth-callback',
+        redirectTo: AuthLinkConfig.resetUri().toString(),
       );
 
   static Future<void> updateRecoveredPassword(String password) async {
-    if (_client.auth.currentSession == null) {
-      throw const AuthException(
-        'This password-reset link is invalid or expired. Request a new one.',
-      );
+    final decision = evaluatePasswordRecoverySession(
+      _client.auth.currentSession != null,
+    );
+    if (!decision.allowed) {
+      throw AuthException(decision.message!);
     }
     await _client.auth.updateUser(UserAttributes(password: password));
     await _client.auth.signOut();

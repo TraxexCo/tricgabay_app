@@ -4,8 +4,9 @@ class MapboxConfig {
   MapboxConfig._();
 
   // ── Tokens ──────────────────────────────────────────────────────────────
-  static const String publicToken =
-      'REDACTED';
+  static const String publicToken = String.fromEnvironment(
+    'MAPBOX_PUBLIC_TOKEN',
+  );
 
   // ── Map Style ────────────────────────────────────────────────────────────
   /// Mapbox Streets v12 — clean, detailed, great for a tourist guide.

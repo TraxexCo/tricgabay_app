@@ -1,0 +1,2550 @@
+{
+  "gcashSendToDriver": "GCash (ipadala sa drayber)",
+  "gcashAfterTrip": "Ipapadala mo ang pamasahe sa GCash ng iyong drayber pagkatapos ng biyahe.",
+  "gcashCompleteTrip": "Tapusin ang biyahe",
+  "gcashDetails": "Mga detalye ng bayad sa GCash",
+  "gcashNumber": "Numero ng GCash",
+  "gcashConfirmNumber": "Ilagay muli ang numero ng GCash",
+  "gcashAccountName": "Nakarehistrong pangalan sa GCash",
+  "gcashActive": "Tumanggap ng bayad sa GCash",
+  "gcashInactive": "Naka-off ang pagbabayad sa GCash",
+  "gcashNotConfigured": "Wala pang idinagdag na detalye sa GCash ang drayber na ito.",
+  "gcashVisibility": "Makikita ng mga turista ang numero at pangalang ito kapag nagbabayad sa iyo sa GCash.",
+  "gcashInvalidNumber": "Gumamit ng numerong nasa format na 09XXXXXXXXX o +639XXXXXXXXX.",
+  "gcashNumberMismatch": "Dapat magkapareho ang mga numero ng GCash.",
+  "gcashInvalidName": "Ilagay ang pangalan ng account gamit ang 2 hanggang 120 character.",
+  "gcashCheckName": "Bago magpadala, tiyaking tugma ang pangalang ipinapakita sa GCash.",
+  "gcashOpen": "Buksan ang GCash",
+  "gcashLaunchFailed": "Walang GCash o hindi ito mabuksan. Maaari mo pa ring kopyahin ang numero at halaga.",
+  "gcashCopyNumber": "Kopyahin ang numero",
+  "gcashCopyAmount": "Kopyahin ang halaga",
+  "gcashNumberCopied": "Nakopya ang numero",
+  "gcashAmountCopied": "Nakopya ang halaga",
+  "gcashSent": "Naipadala ko na ang bayad",
+  "gcashReference": "Numero ng reference sa GCash (opsyonal)",
+  "gcashInvalidReference": "Gumamit ng 8 hanggang 20 titik o numero para sa reference number.",
+  "gcashPayCash": "Magbayad na lang ng cash",
+  "gcashNotSetUp": "Wala pang naka-set up na GCash ang iyong drayber. Magbayad na lang ng cash.",
+  "gcashAwaitingDriver": "Hinihintay ang kumpirmasyon ng drayber",
+  "gcashAwaitingYour": "Hinihintay ang iyong kumpirmasyon",
+  "gcashDisputed": "May pagtutol sa bayad sa GCash",
+  "gcashDisputeMessage": "Hindi pa natatanggap ng drayber ang bayad. Suriin ang resibo at reference number sa GCash, o magbayad ng cash.",
+  "gcashSlide": "I-slide upang kumpirmahing natanggap ang bayad",
+  "gcashDriverConfirm": "Kumpirmahing natanggap ang bayad",
+  "gcashNotReceived": "Hindi pa natatanggap",
+  "gcashDisputeNote": "Maikling tala (opsyonal)",
+  "gcashPaidByDriver": "Kinumpirma ng drayber ang bayad",
+  "gcashActionFailed": "Hindi natapos ang aksyon sa GCash. I-refresh ang reserbasyon at subukang muli.",
+  "gcashSettingsSaved": "Na-save ang mga detalye ng GCash",
+  "gcashCashWarning": "Kung nakapagpadala ka na, suriin muna ang resibo sa GCash kasama ang drayber bago magbayad ng cash.",
+  "gcashFareToPay": "Pamasaheng babayaran",
+  "gcashCheckWallet": "Tiyaking pumasok sa iyong GCash ang pamasahe bago kumpirmahin.",
+  "gcashAmountReceived": "Natanggap na pamasahe sa GCash",
+  "gcashConfirmedFares": "Mga kinumpirmang pamasahe",
+  "gcashConfirmedFaresOverTime": "Mga kinumpirmang pamasahe sa paglipas ng panahon",
+  "loadedBookingTotals": "Mga reserbasyong na-load sa app lamang ang kasama sa mga bilang at halaga.",
+  "gcashEarningsExplanation": "Kasama ang mga kinumpirmang direktang bayad sa GCash. Hindi kasama ang mga halagang sinusuri pa.",
+  "@@locale": "fil",
+  "abc1234": "ABC 1234",
+  "abc1234AccreditedDriver": "ABC 1234 • Akreditadong drayber",
+  "about": "Tungkol dito",
+  "accept": "TANGGAPIN",
+  "acceptAndContinue": "Tanggapin at magpatuloy",
+  "acceptAssistanceRequests": "Tumanggap ng mga kahilingan para sa tulong",
+  "accepted": "Tinanggap",
+  "acceptTheCurrentPrivacyNoticeBeforeSubmitting": "Tanggapin ang kasalukuyang abiso sa privacy bago magsumite.",
+  "accessibilityOrAssistanceNeeds": "Pangangailangan sa aksesibilidad o tulong",
+  "account": "Account",
+  "accountAccessCouldNotBeCompletedCheckYourDetailsAndTryAgain": "Hindi ma-access ang account. Suriin ang mga detalye at subukan muli.",
+  "accountCreatedConfirmYourEmailThenSignIn": "Nagawa na ang account. Kumpirmahin ang email mo bago mag-login.",
+  "accreditationVerified": "Beripikado ang akreditasyon",
+  "aConfiguredServerAndAdministratorAccountAreRequired": "Kailangan ang naka-configure na server at account ng administrador.",
+  "activate": "I-activate",
+  "activateTourist": "I-activate ang Turista",
+  "activateValue": "I-activate si {value}",
+  "@activateValue": {
+    "description": "Application message: activateValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "active": "Aktibo",
+  "activeTrip": "Kasalukuyang biyahe",
+  "activeTripRoute": "Ruta ng kasalukuyang biyahe",
+  "actNow": "Kumilos ngayon",
+  "addAStatementToThisCase": "Magdagdag ng salaysay sa kasong ito",
+  "addedToItinerary": "Naidagdag sa itineraryo!",
+  "addedToYourItinerary": "Naidagdag sa iyong itineraryo!",
+  "address": "Address",
+  "addressDetails": "Mga detalye ng address",
+  "addressMatchesPin": "Tugma ang address sa pin",
+  "addToTrip": "+ Idagdag sa biyahe",
+  "addToTripLabel": "Idagdag sa biyahe",
+  "addTouristSpot": "Magdagdag ng Pasyalan",
+  "addYourStatement": "Idagdag ang iyong salaysay",
+  "aDestinationIsNoLongerAvailableUpdateYourItinerary": "Hindi na available ang isang destinasyon. I-update ang iyong itineraryo.",
+  "adjustPin": "Ayusin ang pin",
+  "adminEmail": "Email ng Admin",
+  "administratorUpdatedFixedFares": "Na-update ng administrador ang mga takdang pamasahe.",
+  "adminPasswordIsRequired": "Kailangan ang password ng admin",
+  "adminPortal": "Portal ng Admin",
+  "adminReviewPaymentOnHold": "Sinusuri ng admin · nakahold ang bayad",
+  "affectedTouristsAndAssignedDriversWillBeNotifiedExistingBookingsKeepAnAudit": "Aabisuhan ang mga apektadong turista at drayber. Magkakaroon ng tala ng pagsusuri ang mga kasalukuyang reserbasyon.",
+  "agreeAndContinue": "Sumang-ayon at magpatuloy",
+  "agreedFare": "Napagkasunduang pamasahe",
+  "agreedFixedFare": "Napagkasunduang nakapirming pamasahe",
+  "agreedMaximumStopsConfirmedByTheTouristTheSuggestedProratedAmountIsAValue": "Napagkasunduang pinakamataas na singil: {value}. Kinumpirma ng turista ang {secondValue}/{thirdValue} hintuan. Panimulang mungkahi lamang ang proporsiyonal na halaga. Suriin ang mga salaysay, kaligtasan at serbisyong naibigay. Walang multa o dagdag-singil.",
+  "@agreedMaximumStopsConfirmedByTheTouristTheSuggestedProratedAmountIsAValue": {
+    "description": "Application message: agreedMaximumStopsConfirmedByTheTouristTheSuggestedProratedAmountIsAValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      },
+      "thirdValue": {
+        "type": "String"
+      }
+    }
+  },
+  "agreedPolicy": "Napagkasunduang patakaran",
+  "agreedValue": "Napagkasunduan\n₱{value}",
+  "@agreedValue": {
+    "description": "Application message: agreedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "all": "Lahat",
+  "allowLocationAccessInAndroidSettings": "Payagan ang access sa lokasyon sa mga setting ng Android.",
+  "allowMatchingForTouristsWithMobilityOrBoardingNeeds": "Payagang maitugma sa mga turistang nangangailangan ng tulong sa pagkilos o pagsakay.",
+  "allowOptionalCrashDiagnostics": "Payagan ang opsiyonal na pagsusuri ng pag-crash",
+  "allStopsAreConfirmedOpenTripControlsToFinish": "Nakumpirma na ang lahat ng hintuan. Buksan ang mga kontrol ng biyahe upang tapusin.",
+  "alreadyHaveAnAccount": "May account ka na ba?",
+  "aNearbyTouristIsLookingForADriver": "Naghahanap ng drayber ang isang kalapit na turista.",
+  "announcementSentSuccessfully": "Matagumpay na naipadala ang anunsiyo",
+  "anotherAccountIsAlreadySignedInSignOutBeforeRegisteringADriver": "May ibang account na naka-sign in. Mag-sign out muna bago magparehistro ng drayber.",
+  "aPackageStopIsUnavailablePleaseChooseAnotherRoute": "Hindi available ang isang hintuan sa package. Pumili ng ibang ruta.",
+  "appDriverIsOnline": "Naka-online ang drayber ng {brandName}",
+  "@appDriverIsOnline": {
+    "description": "Application message: appDriverIsOnline",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "applicationPending": "Naghihintay ang aplikasyon",
+  "applicationRejected": "Tinanggihan ang aplikasyon.",
+  "applicationSubmittedForAdministratorReview": "Naipasa na ang aplikasyon para sa pagsusuri ng administrador.",
+  "appManagementSystem": "Sistema ng Pamamahala ng {brandName}",
+  "@appManagementSystem": {
+    "description": "Application message: appManagementSystem",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "appName": "{brandName}",
+  "@appName": {
+    "description": "Application message: appName",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "appReportValue": "Ulat ng {brandName} para sa {value}",
+  "@appReportValue": {
+    "description": "Application message: appReportValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "approveAndEnableMatching": "Aprubahan at paganahin ang pagtutugma",
+  "approved": "Aprubado",
+  "approvedServiceArea": "Aprubadong lugar ng serbisyo",
+  "approveRouteChange": "Aprubahan ang pagbabago ng ruta",
+  "apr": "Abr",
+  "aPrePickupReviewCannotIncreaseTheSnapshottedCancellationCharge": "Hindi maaaring taasan ng pagsusuri bago ang pagsakay ang naitalang singil sa pagkansela.",
+  "aPreviousBookingRequestIsAwaitingConfirmationReconnectAndOpenTripsBeforeChanging": "Naghihintay ng kumpirmasyon ang naunang reserbasyon. Kumonekta muli at buksan ang Mga Biyahe bago baguhin ang kahilingan.",
+  "areaName": "Pangalan ng lugar",
+  "areaUnverified": "Hindi pa beripikado ang lugar",
+  "areCurrentlyOnATripValue": "{value} ang kasalukuyang bumibiyahe",
+  "@areCurrentlyOnATripValue": {
+    "description": "Application message: areCurrentlyOnATripValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "areYouInAnEmergency": "May emergency ka ba?",
+  "areYouSureYouWantToLogOut": "Sigurado ka bang gusto mong mag-log out?",
+  "areYouSureYouWantToLogOutOfApp": "Sigurado ka bang gusto mong mag-log out sa {brandName}?",
+  "@areYouSureYouWantToLogOutOfApp": {
+    "description": "Application message: areYouSureYouWantToLogOutOfApp",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "arrivalReportedValue": "Iniulat ang pagdating: {value}.",
+  "@arrivalReportedValue": {
+    "description": "Application message: arrivalReportedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "askTheTouristForTheCorrectPickupCodeOnceTheyAreOnBoard": "Hingin ang tamang code sa turista kapag nakasakay na siya.",
+  "askTheTouristForTheirCodeAfterTheyAreSafelyOnBoard": "Hingin ang code ng turista kapag ligtas na siyang nakasakay.",
+  "assignedDriver": "Nakatalagang drayber",
+  "attachBothRequiredDriverDocuments": "Ilakip ang dalawang kailangang dokumento ng drayber.",
+  "attachedValue": "Nakalakip ang {value}",
+  "@attachedValue": {
+    "description": "Application message: attachedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "attraction": "Pasyalan",
+  "attractionAndFareInformationIsSynchronizedWithApp": "Sinasabay sa {brandName} ang impormasyon sa mga pasyalan at pamasahe.",
+  "@attractionAndFareInformationIsSynchronizedWithApp": {
+    "description": "Application message: attractionAndFareInformationIsSynchronizedWithApp",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "audience": "Mga tatanggap",
+  "audienceValue": "Mga tatanggap: {value}",
+  "@audienceValue": {
+    "description": "Application message: audienceValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "auditedRouteChangesRequireTheConfiguredServer": "Kailangan ang naka-configure na server para sa naitalang pagbabago ng ruta.",
+  "aug": "Ago",
+  "availability": "Availability",
+  "avatarCleanupPendingForObjectValue": "Naghihintay ang paglilinis ng larawan ng profile para sa object na {value}",
+  "@avatarCleanupPendingForObjectValue": {
+    "description": "Application message: avatarCleanupPendingForObjectValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "avatarObjectVersionIsInvalid": "Hindi wasto ang bersiyon ng larawan ng profile.",
+  "avatarOwnerIsInvalid": "Hindi wasto ang may-ari ng larawan ng profile.",
+  "awaitingBothCashConfirmations": "Hinihintay ang kumpirmasyon ng parehong panig sa cash",
+  "awaitingPaymentValue": "Hinihintay na bayad: ₱{value}",
+  "@awaitingPaymentValue": {
+    "description": "Application message: awaitingPaymentValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "back": "Bumalik",
+  "backToExplore": "Bumalik sa pag-explore",
+  "backToLogin": "Bumalik sa Pag-login",
+  "backToUserLogin": "Bumalik sa Login ng Gumagamit",
+  "barangay": "Barangay",
+  "blocked": "Hinaharang",
+  "blockedCheckoutExpiry": "Nakaharang na pag-expire ng checkout",
+  "bongaMayor": "Bonga mayor",
+  "bongaMenor": "Bonga menor",
+  "bookATourToGetStarted": "Magpareserba ng paglilibot upang magsimula!",
+  "bookATricycle": "magpareserba ng traysikel",
+  "bookForValue": "Magpareserba sa halagang ₱{value}",
+  "@bookForValue": {
+    "description": "Application message: bookForValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "booking": "Reserbasyon",
+  "bookingAndSystemUpdates": "Mga update sa reserbasyon at sistema",
+  "bookingDetailsCancel": "Detalye ng reserbasyon / kanselahin",
+  "bookingDriverPaymentAndSafetyUpdates": "Mga update sa reserbasyon, drayber, pagbabayad at kaligtasan",
+  "bookingHistory": "Kasaysayan ng reserbasyon",
+  "bookingNotFoundForThisAccount": "Walang nakitang reserbasyon para sa account na ito.",
+  "bookings": "Mga reserbasyon",
+  "bookingSessionChanged": "Nagbago ang session ng reserbasyon.",
+  "bookingsPaymentReviews": "Mga reserbasyon at pagsusuri ng bayad",
+  "bookingsToday": "Mga reserbasyon ngayon",
+  "bookingValue": "reserbasyon {value}",
+  "@bookingValue": {
+    "description": "Application message: bookingValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "bookNow": "Magpareserba ngayon",
+  "bookThisTour": "Ipareserba ang paglilibot na ito",
+  "bothDriverDocumentsAreRequired": "Kailangan ang parehong dokumento ng drayber.",
+  "bothDriverDocumentsMustBeValidImagesUnder5Mb": "Dapat wastong larawan na wala pang 5 MB ang parehong dokumento ng drayber.",
+  "brandMark": "T",
+  "broadcastAMessage": "Mag-broadcast ng Mensahe",
+  "bugReport": "Ulat ng bug",
+  "buildADayYouLlRemember": "Bumuo ng itineraryo",
+  "buildYourDay": "Bumuo ng itineraryo",
+  "buildYourItineraryAndEnjoyAPersonalizedTourExperience": "Bumuo ng itineraryo at mag-enjoy sa paglilibot na ayon sa iyong gusto.",
+  "buildYourOwnDay": "Planuhin ang sarili mong araw",
+  "bulletItem": "• {value}",
+  "@bulletItem": {
+    "description": "Application message: bulletItem",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "bustosBulacan": "Bustos, Bulacan",
+  "bustosTourMap": "Mapa ng paglilibot sa Bustos",
+  "bustosTownCentre": "Sentro ng bayan ng Bustos",
+  "calculatingLocalRoadRoute": "Kinakalkula ang ruta sa mga lokal na daan...",
+  "callEmergencyServices": "Tumawag sa serbisyong pang-emerhensiya?",
+  "cancel": "Kanselahin",
+  "cancelBooking": "Kanselahin ang reserbasyon?",
+  "cancelBookingFeeValue": "Kanselahin ang reserbasyon | {value}% singil",
+  "@cancelBookingFeeValue": {
+    "description": "Application message: cancelBookingFeeValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelBookingNoCharge": "Kanselahin ang reserbasyon | walang singil",
+  "cancelFree": "Kanselahin nang walang singil",
+  "cancelFreeOfCharge": "Kanselahin nang walang bayad",
+  "cancellationAndPaymentPolicy": "Patakaran sa pagkansela at pagbabayad",
+  "cancelled": "Kinansela",
+  "cancelledAfterTheGracePeriodPublishedCancellationFeeApplied": "Kinansela matapos ang palugit; inilapat ang nailathalang singil sa pagkansela",
+  "cancelledWithoutCharge": "Kinansela nang walang singil",
+  "cancelThisBooking": "Kanselahin ang reserbasyong ito?",
+  "capacity": "Kapasidad",
+  "caseStatementValue": "Salaysay sa kaso: {value}",
+  "@caseStatementValue": {
+    "description": "Application message: caseStatementValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "cash": "Cash",
+  "cashConfirmedByBoth": "Kinumpirma ng parehong panig ang cash",
+  "cashConfirmedByBothParties": "Kinumpirma ng parehong panig ang cash",
+  "cashConfirmedByBothPartiesAfterReturnsFilteredByTripEndDateAmounts": "Cash na kinumpirma ng dalawang panig, matapos ang mga ibinalik. Nakaayos ayon sa petsa ng pagtatapos. Hindi kasama ang mga halagang sinusuri.",
+  "cashNotConfirmed": "Hindi pa nakumpirma ang cash",
+  "cashPayment": "Bayad na cash",
+  "cashReturn": "Pagsasauli ng cash",
+  "cashReturnConfirmed": "Nakumpirma ang pagsasauli ng cash",
+  "cashReturnOutstanding": "Hindi pa naibabalik ang cash",
+  "cashToReturn": "Cash na isasauli",
+  "category": "Kategorya",
+  "centerLatitude": "Latitude ng sentro",
+  "centerLongitude": "Longitude ng sentro",
+  "changingServiceCapacityRequiresAdministratorApprovalBeforeYouCanGoOnlineAgain": "Kailangan ng pag-apruba ng administrador ang pagbabago ng kapasidad bago muling mag-online.",
+  "checkApproval": "Tingnan ang pag-apruba",
+  "checkingGpsAndPermission": "Sinusuri ang GPS at pahintulot.",
+  "checkLocally": "Magtanong sa lugar",
+  "checkoutCouldNotBeCreated": "Hindi magawa ang checkout.",
+  "checkOutInBustosBulacanValue": "Tingnan ang {value} sa Bustos, Bulacan! 🏝️",
+  "@checkOutInBustosBulacanValue": {
+    "description": "Application message: checkOutInBustosBulacanValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "checkRoadRestrictions": "Suriin ang mga paghihigpit sa daan",
+  "checkYourEmail": "Tingnan ang email mo",
+  "chooseABarangayAndEnterTheExactAddressBelow": "Pumili ng barangay at ilagay sa ibaba ang eksaktong address",
+  "chooseAnExactPickupPointBeforeBooking": "Pumili ng eksaktong sunduan bago magpareserba",
+  "chooseAPickupPointOnTheMapOrEnableLocationFirst": "Pumili ng sunduan sa mapa o paganahin muna ang lokasyon.",
+  "chooseBothDocumentsAndExpiryDates": "Piliin ang dalawang dokumento at mga petsa ng pag-expire.",
+  "chooseFranchiseExpiry": "Piliin ang pag-expire ng prangkisa",
+  "chooseHowYouWantToUseApp": "Piliin kung paano mo gagamitin ang {brandName}",
+  "@chooseHowYouWantToUseApp": {
+    "description": "Application message: chooseHowYouWantToUseApp",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "chooseJpegDocumentImages": "Pumili ng mga larawan ng dokumento na JPEG.",
+  "chooseLicenseExpiry": "Piliin ang pag-expire ng lisensya",
+  "chooseLicenseImage": "Piliin ang larawan ng lisensya",
+  "choosePickupDate": "Piliin ang petsa ng sunduan",
+  "choosePickupTime": "Piliin ang oras ng sunduan",
+  "choosePlacesSeeYourFareBookARide": "Pumili ng mga lugar, tingnan ang pamasahe, magpareserba ng sakay.",
+  "chooseThePlacesYouWantToVisitInOneTrip": "Piliin ang mga lugar na gusto mong puntahan sa isang biyahe.",
+  "chooseVehicleRegistrationImage": "Piliin ang larawan ng rehistro ng sasakyan",
+  "chooseWhoShouldReceiveThisAnnouncementThenReviewBeforeSending": "Piliin ang mga tatanggap ng anunsiyo, saka suriin bago ipadala.",
+  "chooseYourWorkspaceThenSignInToContinue": "Piliin ang iyong workspace, pagkatapos ay mag-sign in upang magpatuloy.",
+  "church": "Simbahan",
+  "cleanVehicle": "Malinis na sasakyan",
+  "clearAll": "Alisin lahat",
+  "clearSearch": "Burahin ang paghahanap",
+  "closeAndNotify": "Isara at abisuhan",
+  "closeAttractionDetails": "Isara ang detalye ng pasyalan",
+  "closed": "Sarado",
+  "closeTemporarily": "Pansamantalang isara",
+  "closureReason": "Dahilan ng pagsasara",
+  "codeReissueCouldNotBeConfirmed": "Hindi makumpirma ang muling pag-isyu ng code.",
+  "compactCurrency": "₱{value}k",
+  "@compactCurrency": {
+    "description": "Application message: compactCurrency",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "completeAllDocumentAndServiceAreaFields": "Kumpletuhin ang lahat ng dokumento at detalye ng lugar ng serbisyo.",
+  "completed": "Natapos",
+  "completedAndActiveBookings": "Mga natapos at kasalukuyang reserbasyon",
+  "completedTrips": "Mga natapos na biyahe",
+  "completeRefund": "Tapusin ang refund",
+  "completeTestModeRefund": "Tapusin ang refund sa test mode?",
+  "completeTestModeRefundLabel": "Tapusin ang refund sa test mode",
+  "completeTripCashStillUnconfirmed": "Tapusin ang biyahe · hindi pa nakukumpirma ang cash",
+  "complianceApproved": "Aprubado ang pagsunod sa mga patakaran",
+  "complianceReviewRequired": "Kailangan ng pagsusuri ng pagsunod sa mga patakaran",
+  "complianceReviewSaved": "Na-save ang pagsusuri ng pagsunod sa mga patakaran.",
+  "confirm": "Kumpirmahin",
+  "confirmAmount": "Kumpirmahin ang halaga",
+  "confirmAndSend": "Kumpirmahin at ipadala",
+  "confirmCashExchanged": "Kumpirmahing naiabot ang cash?",
+  "confirmCashPaid": "Kumpirmahing naibayad ang cash",
+  "confirmCashReceived": "Kumpirmahing natanggap ang cash",
+  "confirmCashReturned": "Kumpirmahing naibalik ang cash?",
+  "confirmCashReturnedLabel": "Kumpirmahing naisauli ang cash",
+  "confirmCashReturnReceived": "Kumpirmahing natanggap ang isinauling cash",
+  "confirmChange": "Kumpirmahin ang pagbabago",
+  "confirmedCash": "Nakumpirmang cash",
+  "confirmedEntriesArePermanentAndCannotBeEditedOrDeleted": "Permanente ang mga nakumpirmang tala at hindi maaaring baguhin o burahin.",
+  "confirmedTransactionsOnlyOpenReviewsAndOutstandingRefundsAreExcluded": "Mga nakumpirmang transaksiyon lamang. Hindi kasama ang mga bukas na pagsusuri at hindi pa naibabalik na bayad.",
+  "confirmLocation": "Kumpirmahin ang lokasyon",
+  "confirmNewPassword": "Kumpirmahin ang bagong password",
+  "confirmNoShow": "Kumpirmahing hindi dumating",
+  "confirmOnlyAfterHasPhysicallyChangedHandsTheOtherPartyMustConfirmTooValue": "Kumpirmahin lamang kapag aktuwal nang naiabot ang {value}. Kailangan ding kumpirmahin ng kabilang panig. Huwag kumpirmahin ang ipinangako pa lamang o bahagyang bayad.",
+  "@confirmOnlyAfterHasPhysicallyChangedHandsTheOtherPartyMustConfirmTooValue": {
+    "description": "Application message: confirmOnlyAfterHasPhysicallyChangedHandsTheOtherPartyMustConfirmTooValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmPassword": "Kumpirmahin ang Password",
+  "confirmRefund": "Kumpirmahin ang refund",
+  "confirmThatYouStayedAtTheVerifiedPickupPointUntilTheWaitingPeriodValue": "Kumpirmahing nanatili ka sa beripikadong sunduan hanggang matapos ang oras ng paghihintay at sinubukan mong kontakin ang turista. Ang nailathalang singil na {value}% para sa hindi pagsipot ay {secondValue}. Itatala ang aksiyong ito at maaari itong kuwestiyunin.",
+  "@confirmThatYouStayedAtTheVerifiedPickupPointUntilTheWaitingPeriodValue": {
+    "description": "Application message: confirmThatYouStayedAtTheVerifiedPickupPointUntilTheWaitingPeriodValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmThePickupPin": "Kumpirmahin ang pin sa sunduan",
+  "confirmYourEmailThenSignInAsADriverToFinishUploadingYour": "Kumpirmahin ang iyong email, saka mag-sign in bilang drayber upang tapusin ang pag-upload ng iyong aplikasyon.",
+  "connectionUnavailableCheckYourInternetConnectionAndTryAgain": "Walang koneksiyon. Suriin ang internet at subukan muli.",
+  "connectToTheInternetAndRetry": "Kumonekta sa internet at subukang muli.",
+  "contactUpdatesAreUnavailableOnlyTheNationalFallbackIsShown": "Hindi makuha ang mga bagong kontak. Pambansang fallback lamang ang ipinapakita.",
+  "couldNotGetACurrentGpsPositionCheckYourSignalAndTryAgain": "Hindi makuha ang kasalukuyang GPS. Suriin ang signal at subukan muli.",
+  "couldNotGoOfflineLocationSharingRemainsActiveUntilTheServerConfirmsIt": "Hindi makapag-offline. Aktibo pa ang pagbabahagi ng lokasyon hanggang makumpirma ng server.",
+  "couldNotGoOnlineYourAvailabilityWasNotChanged": "Hindi makapag-online. Hindi nagbago ang iyong availability.",
+  "couldNotLaunchPhoneDialer": "Hindi mabuksan ang pantawag",
+  "couldNotLaunchValue": "Hindi mabuksan ang {value}",
+  "@couldNotLaunchValue": {
+    "description": "Application message: couldNotLaunchValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotOpenCheckoutResumePaymentFromThisBooking": "Hindi mabuksan ang pahina ng bayad. Ipagpatuloy ang pagbabayad mula sa reserbasyon na ito.",
+  "couldNotOpenMessages": "Hindi mabuksan ang mga mensahe.",
+  "couldNotOpenNavigation": "Hindi mabuksan ang nabigasyon.",
+  "couldNotOpenPhoneDialer": "Hindi mabuksan ang dialer.",
+  "couldNotOpenThePhoneDialerCall911Manually": "Hindi mabuksan ang dialer. Mano-manong tumawag sa 911.",
+  "couldNotOpenThePhoneDialerCallTheDisplayedNumberManually": "Hindi mabuksan ang dialer ng telepono. Manu-manong tawagan ang nakasaad na numero.",
+  "couldNotOpenThisDocument": "Hindi mabuksan ang dokumentong ito.",
+  "couldNotSaveNoBookingOrPaymentStateWasChanged": "Hindi ma-save. Walang nabago sa reserbasyon o bayad.",
+  "couldNotSaveThisChangePleaseRetryThePreviousTripStateHasBeen": "Hindi ma-save ang pagbabago. Subukan muli; nananatili ang dating katayuan ng biyahe.",
+  "couldNotSynchronizeWithTheServerCheckYourConnectionAndRetry": "Hindi makasabay sa server. Suriin ang koneksiyon at subukang muli.",
+  "createANewPassword": "Gumawa ng bagong password",
+  "createTouristAccount": "Gumawa ng Account ng Turista",
+  "criticalConditionsAlsoAppearInOperationalAlertsInvestigateBeforeClearingAnAlert": "Makikita rin ang mga kritikal na kondisyon sa mga alerto sa operasyon. Siyasatin muna bago alisin ang alerto.",
+  "curatedExperience": "PINILING KARANASAN",
+  "currentGpsLocation": "Kasalukuyang lokasyon sa GPS",
+  "currentGpsPickup": "Kasalukuyang sunduan mula sa GPS",
+  "currentLocation": "Kasalukuyang lokasyon",
+  "customTour": "Sariling paglilibot",
+  "customTour112SelectedStops": "Pasadyang tour (1–12 napiling hintuan)",
+  "customTourNewBookingsUseTheseRatesExistingBookingsKeepTheirAgreedFareValue": "Pasadyang tour: ₱{value}\n{secondValue}\n\nGagamitin ng mga bagong reserbasyon ang mga presyong ito. Mananatili ang napagkasunduang pamasahe ng mga kasalukuyang reserbasyon.",
+  "@customTourNewBookingsUseTheseRatesExistingBookingsKeepTheirAgreedFareValue": {
+    "description": "Application message: customTourNewBookingsUseTheseRatesExistingBookingsKeepTheirAgreedFareValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "dataExportRequests": "Mga kahilingan ng export ng data",
+  "daysAgoValue": "{value} araw ang nakalipas",
+  "@daysAgoValue": {
+    "description": "Application message: daysAgoValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "dec": "Dis",
+  "decisionAndReasoning": "Pasiya at paliwanag",
+  "decline": "TANGGIHAN",
+  "decliningMatchedOffersRequiresTheConfiguredServer": "Kailangan ang naka-configure na server upang tanggihan ang itinugmang alok.",
+  "delete": "Burahin",
+  "deleteAccount": "Burahin ang account?",
+  "deletedValue": "Nabura ang {value}",
+  "@deletedValue": {
+    "description": "Application message: deletedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteMyAccount": "Burahin ang aking account",
+  "deletingAccount": "Binubura ang account…",
+  "deletionPending": "Naghihintay ang pagbura",
+  "describeTheDisagreementCollectionAndRefundConfirmationsWillPauseUntilAnAdminReviews": "Ilarawan ang hindi pagkakasundo. Ihihinto muna ang mga kumpirmasyon sa paniningil at refund hanggang masuri ito ng admin.",
+  "description": "Paglalarawan",
+  "destination": "Patutunguhan",
+  "destinations": "mga destinasyon",
+  "destinationsYouLove": "Mga destinasyon na gusto mo",
+  "directions": "Mga direksiyon",
+  "directionsRequireBetween2And25Coordinates": "Kailangan ng 2 hanggang 25 coordinate para sa direksiyon.",
+  "discover": "Tuklasin",
+  "discoverBustos": "Tuklasin ang Bustos",
+  "disputePaymentReportAProblem": "Kuwestiyunin ang pagbabayad / mag-ulat ng problema",
+  "distanceKilometers": "{value} km",
+  "@distanceKilometers": {
+    "description": "Application message: distanceKilometers",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "distanceMeters": "{value} m",
+  "@distanceMeters": {
+    "description": "Application message: distanceMeters",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsAreWaitingForVerificationValue": "{value} dokumento ang naghihintay ng beripikasyon",
+  "@documentsAreWaitingForVerificationValue": {
+    "description": "Application message: documentsAreWaitingForVerificationValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsDatesServiceAreaAndReliabilityMeetTheMatchingRules": "Pasado sa mga tuntunin ang mga dokumento, petsa, lugar ng serbisyo at pagiging maaasahan.",
+  "documentsPassword": "Mga Dokumento at Password",
+  "done": "Tapos na",
+  "donTHaveAnAccount": "Wala pang account?",
+  "downloadExport": "I-download ang export",
+  "dragTheMapToPinYourExactLocation": "I-drag ang mapa upang i-pin ang eksaktong lokasyon",
+  "drive": "Magmaneho",
+  "driver": "Drayber",
+  "driverAcceptedTheFixedFareAndPickup": "Tinanggap ng drayber ang takdang pamasahe at sunduan.",
+  "driverAccount": "Account ng drayber",
+  "driverApplication": "Aplikasyon ng drayber",
+  "driverApprovedAndMatchingEnabled": "Aprubado na ang drayber at maaari nang itugma sa mga biyahe.",
+  "driverArrival": "Pagdating ng drayber",
+  "driverArrivedAtTheVerifiedPickupAreaTheWaitingPeriodStarted": "Dumating ang drayber sa beripikadong sunduan. Nagsimula ang oras ng paghihintay.",
+  "driverBookings": "Mga reserbasyon ng drayber",
+  "driverCancellationRateExceedsThe30MatchingLimit": "Lampas sa 30% na limitasyon ang pagkansela ng drayber.",
+  "driverCancellations": "Mga pagkansela ng drayber",
+  "driverCompliance": "Pagsunod ng drayber sa mga patakaran",
+  "driverComplianceRecordsWillAppearHere": "Dito makikita ang mga tala ng pagsunod ng drayber sa mga patakaran.",
+  "driverConcern": "Alalahanin tungkol sa drayber",
+  "driverDocumentsMustBeJpegImages5MbMaximumEach": "Dapat JPEG na larawan ang mga dokumento ng drayber, hanggang 5 MB bawat isa.",
+  "driverHasArrived": "Dumating na ang drayber",
+  "driverIsMoving": "Papalapit ang drayber",
+  "driverIsStopped": "Huminto ang drayber",
+  "driverLicense": "Lisensya ng drayber",
+  "driverLicenseDocumentIsMissing": "Walang dokumento ng lisensya ng drayber.",
+  "driverLicenseExpiry": "Pag-expire ng lisensiya",
+  "driverMatchingBegins30MinutesBeforePickup": "Magsisimula ang paghahanap ng drayber 30 minuto bago ang sunduan.",
+  "driverNotFound": "Hindi makita ang drayber",
+  "driverPerformance": "Pagganap ng drayber",
+  "driverRegistration": "Pagpaparehistro ng Drayber",
+  "driverReplacementRequested": "Humiling ng kapalit na drayber",
+  "driverReplacementRequiresTheConfiguredServer": "Kailangan ang naka-configure na server upang magpalit ng drayber.",
+  "driverReportedArrivalAwaitingTourist": "Dumating na ang drayber · hinihintay ang turista",
+  "driverReviewSubmitted": "Naisumite ang review ng drayber.",
+  "drivers": "Mga drayber",
+  "driversActiveValue": "{value} drayber ang aktibo",
+  "@driversActiveValue": {
+    "description": "Application message: driversActiveValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "driverSearchRetriedForAnother10Minutes": "Muling maghahanap ng drayber sa loob ng 10 minuto.",
+  "driversHaveToAcceptThisSearchRequestYouCanLeaveThisScreenAndValue": "May {value} ang mga drayber upang tanggapin ang kahilingang ito. Maaari kang umalis sa screen at bumalik sa Mga biyahe. Walang singil habang naghihintay.",
+  "@driversHaveToAcceptThisSearchRequestYouCanLeaveThisScreenAndValue": {
+    "description": "Application message: driversHaveToAcceptThisSearchRequestYouCanLeaveThisScreenAndValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "driverSuspendedFor30Days": "Sinuspinde ang drayber sa loob ng 30 araw.",
+  "driverTools": "Mga kasangkapan ng drayber",
+  "driverTrackingPreview": "Preview ng pagsubaybay sa drayber",
+  "driverValue": "Drayber: {value}",
+  "@driverValue": {
+    "description": "Application message: driverValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "driverVerifications": "Beripikasyon ng mga drayber",
+  "eachDriverDocumentMustBe5MbOrSmaller": "Dapat 5 MB o mas maliit ang bawat dokumento ng drayber.",
+  "earlier": "Mas maaga",
+  "earnings": "Kita",
+  "earningsInsights": "Buod ng kita",
+  "edit": "I-edit",
+  "editProfile": "I-edit ang Profile",
+  "editTouristSpot": "I-edit ang Pasyalan",
+  "eG123RizalStNearTheBakery": "Hal. 123 Rizal St., malapit sa panaderya",
+  "eGMinasaFestivalGrounds": "hal. Minasa Festival Grounds",
+  "eGSystemMaintenance": "hal. Pagpapanatili ng Sistema",
+  "email": "Email",
+  "emailAddress": "Email address",
+  "emailAddressIsRequired": "Kailangan ang email address",
+  "emailAddressMustNotExceedCharactersValue": "Hindi dapat lumampas sa {value} karakter ang email address",
+  "@emailAddressMustNotExceedCharactersValue": {
+    "description": "Application message: emailAddressMustNotExceedCharactersValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emailIsRequired": "Kailangan ang email",
+  "emailReadOnly": "Email (Hindi nae-edit)",
+  "emergency": "Emerhensiya",
+  "emergencyContact": "Kontak sa emergency",
+  "emergencyContacts": "Mga Kontak sa Emerhensiya",
+  "emergencyContactsSettings": "Mga setting ng kontak sa emergency",
+  "emergencyHelp": "Tulong sa emerhensiya",
+  "emergencySafety": "Emergency at Kaligtasan",
+  "endSafelyReviewPayment": "Tapusin nang ligtas · suriin ang bayad",
+  "endTheTourSafelyFirstToOpenASettlementReview": "Tapusin muna nang ligtas ang tour bago magbukas ng pagsusuri ng bayad.",
+  "endTourEarly": "Tapusin nang maaga ang paglilibot?",
+  "endTourEarlyReportAProblem": "Maagang tapusin ang paglilibot / mag-ulat ng problema",
+  "english": "English",
+  "englishName": "Pangalan sa Ingles",
+  "enterAClearClosureReason": "Maglagay ng malinaw na dahilan ng pagsasara.",
+  "enterAClearReasonForTheAuditHistory": "Maglagay ng malinaw na dahilan para sa tala ng pagsusuri",
+  "enterAClearReasonForThisChange": "Maglagay ng malinaw na dahilan ng pagbabagong ito.",
+  "enterAddress": "Ilagay ang address...",
+  "enterAnAdminEmail": "Maglagay ng email ng admin",
+  "enterAPhMobileNumberOrInternationalNumberWithCountryCode": "Maglagay ng PH mobile number o internasyonal na numero na may +country code",
+  "enterAPriceBetween001And100000": "Maglagay ng presyong mula ₱0.01 hanggang ₱100,000.",
+  "enterAReasonOfAtLeastFiveCharacters": "Maglagay ng dahilan na may hindi bababa sa limang karakter.",
+  "enterAValidAmountWithAtMostTwoDecimals": "Maglagay ng wastong halaga na hanggang dalawang decimal.",
+  "enterAValidEmail": "Maglagay ng wastong email",
+  "enterAValidPhoneNumber": "Maglagay ng wastong numero ng telepono",
+  "enterAValidPrice": "Maglagay ng wastong presyo",
+  "enterDescription": "Ilagay ang paglalarawan...",
+  "enterDriverApp": "Pumasok sa drayber app",
+  "enterHistory": "Ilagay ang kasaysayan...",
+  "enterPesosWithAtMostTwoDecimalPlaces": "Maglagay ng halaga sa piso na hanggang dalawang decimal.",
+  "enterThePickupAddressBelow": "Ilagay sa ibaba ang address ng sunduan.",
+  "enterTheReasonForApprovingOrRestoringServiceAtLeastFiveCharacters": "Ilagay ang dahilan ng pag-apruba o pagpapanumbalik ng serbisyo (hindi bababa sa limang karakter).",
+  "enterTouristApp": "Pumasok sa turista app",
+  "enterValidFixedFaresForEveryRoute": "Maglagay ng wastong takdang pamasahe para sa bawat ruta.",
+  "enterYourAnnouncementDetailsHere": "Ilagay ang mga detalye ng anunsiyo rito...",
+  "enterYourEmail": "Ilagay ang iyong email",
+  "enterYourEmailAndWeWillSendYouALinkToResetYour": "Ilagay ang email mo at magpapadala kami ng link para palitan ang password.",
+  "enterYourFullName": "Ilagay ang iyong buong pangalan",
+  "enterYourPassword": "Ilagay ang iyong password",
+  "entranceFee": "Bayad sa Pagpasok",
+  "entranceFeesMayApply": "+ maaaring may entrance fee",
+  "eta": "Tinatayang Oras ng Pagdating",
+  "exampleEmailCom": "example@email.com",
+  "exampleSeniorPassengerNeedsExtraBoardingTime": "Halimbawa: kailangan ng dagdag na oras sa pagsakay ng nakatatandang pasahero",
+  "exampleTwoBackpacksAndOneFoldingStroller": "Halimbawa: dalawang backpack at isang natitiklop na stroller",
+  "exampleUpdatedOperatingCostApprovedByAdmin": "Halimbawa: Bagong gastusin sa operasyon na aprubado ng admin",
+  "expectedReopening": "Inaasahang muling pagbubukas",
+  "expectedReopeningValue": "Inaasahang muling pagbubukas: {value}",
+  "@expectedReopeningValue": {
+    "description": "Application message: expectedReopeningValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "expiryIsNotVerifiedValue": "Hindi beripikado ang petsa ng pag-expire ng {value}.",
+  "@expiryIsNotVerifiedValue": {
+    "description": "Application message: expiryIsNotVerifiedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "expiryVerification": "Beripikasyon ng pag-expire",
+  "explainAnythingTheDriverMustCorrect": "Ipaliwanag ang kailangang itama ng drayber",
+  "explainTheDecisionAtLeast10Characters": "Ipaliwanag ang desisyon (hindi bababa sa 10 karakter).",
+  "explainTheDecisionClearly": "Ipaliwanag nang malinaw ang desisyon",
+  "explainThePolicyInAtLeast20Characters": "Ipaliwanag ang patakaran gamit ang hindi bababa sa 20 karakter.",
+  "explore": "Tuklasin",
+  "exploreBustos": "Mga Kalapit na Lugar",
+  "exploreSpotsBuildItinerariesAndBookTricyclesEasily": "Madaling tumuklas ng mga pasyalan, bumuo ng itineraryo at magpareserba ng traysikel.",
+  "exploreTheHeritageNatureAndBeautyOfBustosBulacanWithEase": "Madaling tuklasin ang pamana, kalikasan at ganda ng Bustos, Bulacan.",
+  "exportsAreDeliveredOnlyToTheRequestingAccountFulfilmentIsAudited": "Sa humiling na account lamang ibinibigay ang export. Itinatala ang pagtupad sa kahilingan.",
+  "f123456": "F-123456",
+  "failedPayments": "Mga nabigong pagbabayad",
+  "feb": "Peb",
+  "feedback": "Feedback",
+  "feedbackMarkedResolved": "Minarkahang nalutas ang feedback",
+  "feedbackSubmittedThankYou": "Naipadala ang feedback! Salamat 🙏",
+  "filipino": "Filipino",
+  "filipinoName": "Pangalan sa Filipino",
+  "finalCharge": "Huling singil (₱)",
+  "finalChargeLabel": "Huling singil",
+  "finalChargeValue": "Huling singil: ₱{value} · {secondValue}",
+  "@finalChargeValue": {
+    "description": "Application message: finalChargeValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "financeAdministratorAccessIsRequired": "Kailangan ang access ng administrador ng pananalapi.",
+  "financialRecord": "Tala ng transaksiyon",
+  "findADriver": "Maghanap ng drayber",
+  "findAnotherDriver": "Maghanap ng ibang drayber",
+  "findAnotherDriverLabel": "Maghanap ng ibang drayber?",
+  "findingYourLocation": "Hinahanap ang iyong lokasyon…",
+  "findMyDriver": "Hanapin ang aking drayber",
+  "finishOrCancelTheActiveTripBeforeGoingOffline": "Tapusin o kanselahin ang kasalukuyang biyahe bago mag-offline.",
+  "finishYourCurrentTripBeforeAcceptingAnother": "Tapusin muna ang kasalukuyang biyahe bago tumanggap ng iba.",
+  "fixedFare": "Nakapirming pamasahe",
+  "fixedFareAcceptedCancellationPaymentPolicyV1AcceptedValue": "Tinanggap ang nakapirming pamasahe na ₱{value} at patakaran sa pagkansela at pagbabayad na bersiyon 1.",
+  "@fixedFareAcceptedCancellationPaymentPolicyV1AcceptedValue": {
+    "description": "Application message: fixedFareAcceptedCancellationPaymentPolicyV1AcceptedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "fixedFareForThisRoute": "Nakapirming pamasahe para sa rutang ito",
+  "fixedFares": "Mga takdang pamasahe",
+  "fixedFaresSavedExistingBookingPricesAreUnchanged": "Na-save ang mga takdang pamasahe. Hindi nagbago ang presyo ng mga kasalukuyang reserbasyon.",
+  "fixedFareValue": "Nakapirming pamasahe: ₱{value}",
+  "@fixedFareValue": {
+    "description": "Application message: fixedFareValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "fixedItinerary": "Nakapirming itineraryo",
+  "flag": "Markahan",
+  "flutterFailureValue": "Pagpalya ng Flutter: {value}",
+  "@flutterFailureValue": {
+    "description": "Application message: flutterFailureValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "forgotPassword": "Nakalimutang password",
+  "forgotPasswordLabel": "Nakalimutan ang Password?",
+  "forImmediateDangerCall911AppDoesNotReplaceEmergencyServices": "Kung may agarang panganib, tumawag sa 911. Hindi kapalit ng serbisyong pang-emerhensiya ang {brandName}.",
+  "@forImmediateDangerCall911AppDoesNotReplaceEmergencyServices": {
+    "description": "Application message: forImmediateDangerCall911AppDoesNotReplaceEmergencyServices",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "formattedValue": " → ",
+  "fr12345": "FR-12345",
+  "franchise": "Prangkisa",
+  "franchiseExpiresOn": "franchise_expires_on",
+  "franchiseExpiryDate": "Petsa ng pag-expire ng prangkisa",
+  "franchiseNumber": "Numero ng Prangkisa",
+  "franchiseNumberIsRequired": "Kailangan ang numero ng prangkisa",
+  "franchiseOrCr": "Prangkisa / OR-CR",
+  "franchiseOrCrDocumentIsMissing": "Walang dokumento ng prangkisa / OR-CR.",
+  "franchiseOrCrExpiry": "Pag-expire ng prangkisa / OR-CR",
+  "franchiseOrCrLabel": "OR/CR ng prangkisa",
+  "franchiseOrCrNumberIsRequired": "Kailangan ang numero ng prangkisa/OR-CR",
+  "franchiseOrCrNumberMustNotExceedCharactersValue": "Hindi dapat lumampas sa {value} karakter ang numero ng prangkisa/OR-CR",
+  "@franchiseOrCrNumberMustNotExceedCharactersValue": {
+    "description": "Application message: franchiseOrCrNumberMustNotExceedCharactersValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "franchiseValue": "Prangkisa: {value}",
+  "@franchiseValue": {
+    "description": "Application message: franchiseValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "freeCancellation": "Libreng pagkansela",
+  "freeCancellationMinutesLateTouristCancellationVerifiedPickupWaitMinutesTouristNoShowValue": "Libreng pagkansela: {value} minuto\nHuling pagkansela ng turista: {secondValue}%\nBeripikadong paghihintay sa sunduan: {thirdValue} minuto\nBayad sa hindi pagsipot: {fourthValue}%\n\nPananatilihin ng mga kasalukuyang reserbasyon ang orihinal na patakaran.",
+  "@freeCancellationMinutesLateTouristCancellationVerifiedPickupWaitMinutesTouristNoShowValue": {
+    "description": "Application message: freeCancellationMinutesLateTouristCancellationVerifiedPickupWaitMinutesTouristNoShowValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      },
+      "thirdValue": {
+        "type": "String"
+      },
+      "fourthValue": {
+        "type": "String"
+      }
+    }
+  },
+  "fri": "Biy",
+  "fromPickup": "mula sa sunduan",
+  "fromValue": "{value} mula kay {secondValue}",
+  "@fromValue": {
+    "description": "Application message: fromValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "fromYou": "mula sa iyo",
+  "fulfilled": "natupad",
+  "fullName": "Buong pangalan",
+  "fullNameIsRequired": "Kailangan ang buong pangalan",
+  "getAroundQuicklyAndSafelyByBookingLocalTricycleDriversInSeconds": "Mabilis at ligtas na bumiyahe sa pamamagitan ng pagpapareserba sa mga lokal na drayber ng traysikel.",
+  "getStarted": "Magsimula",
+  "goBack": "Bumalik",
+  "goodAfternoon": "Magandang hapon",
+  "goodEvening": "Magandang gabi",
+  "goodMorning": "Magandang umaga",
+  "goodMorningValue": "Magandang umaga, {value}",
+  "@goodMorningValue": {
+    "description": "Application message: goodMorningValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "goOnlineToActivateTheDriverMap": "Mag-online upang i-activate ang mapa ng drayber.",
+  "goOnlineToStartReceivingBookingRequests": "Mag-online upang makatanggap ng mga kahilingan ng reserbasyon.",
+  "goOnlineWithAnApprovedAccountAndFinishYourCurrentTripToAccept": "Mag-online gamit ang aprubadong account at tapusin ang kasalukuyang biyahe bago tumanggap ng bagong kahilingan.",
+  "goOnlineWithAnApprovedDriverAccountFirst": "Mag-online muna gamit ang aprubadong account ng drayber.",
+  "greatRideVeryKnowledgeableAboutBustos": "Magandang biyahe, mahusay ang kaalaman tungkol sa Bustos!",
+  "headingTo": "Papunta sa",
+  "headingToPickup": "Papunta sa Sunduan",
+  "help": "Tulong",
+  "helpSupport": "Tulong at suporta",
+  "heritage": "Pamana",
+  "hidden": "NAKATAGO",
+  "hideValue": "Itago ang {value}",
+  "@hideValue": {
+    "description": "Application message: hideValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "history": "Kasaysayan",
+  "hoursAgoValue": "{value} oras ang nakalipas",
+  "@hoursAgoValue": {
+    "description": "Application message: hoursAgoValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "howWasYourRideWithValue": "Kumusta ang iyong biyahe kasama si {value}?",
+  "@howWasYourRideWithValue": {
+    "description": "Application message: howWasYourRideWithValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "iAgreeToTheFixedFareAndCancellationPaymentPolicy": "Sumasang-ayon ako sa nakapirming pamasahe at sa patakaran sa pagkansela at pagbabayad.",
+  "iAgreeToTheTermsAndConditions": "Sumasang-ayon ako sa mga Tuntunin at Kondisyon",
+  "iAmA": "Ako ay isang...",
+  "ifPlansChange": "Kung magbago ang plano",
+  "iHaveReadAndAcceptThisNotice": "Nabasa ko at tinatanggap ang abisong ito.",
+  "iHaveReadTheNoticeAndAgreeToTheDataUseNeededTo": "Nabasa ko ang abiso at pumapayag ako sa paggamit ng datos na kailangan para sa aking account at mga biyahe.",
+  "imageContentMimeTypeAndFileExtensionMustMatch": "Dapat magkatugma ang laman ng larawan, MIME type at extension ng file.",
+  "includedStops": "Mga kasamang hinto",
+  "includeWhatHappenedWhereTheTripStoppedAndAnyCashAlreadyExchangedStatements": "Isama ang nangyari, kung saan huminto ang biyahe at ang cash na naiabot na. Pananatilihin ang mga salaysay kasama ng reserbasyon.",
+  "incomingBooking": "Papasok na reserbasyon",
+  "incomingPickup": "Papasok na sunduan",
+  "informationProvidedByAppAdministrators": "Impormasyong ibinigay ng mga admin ng {brandName}",
+  "@informationProvidedByAppAdministrators": {
+    "description": "Application message: informationProvidedByAppAdministrators",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "interactiveMapsAreAvailableInTheMobileApp": "Sa mobile app magagamit ang interactive na mapa.",
+  "invalidAdminCredentials": "Hindi wastong mga kredensiyal ng admin",
+  "invalidAppBuild": "Hindi wastong build ng app",
+  "invalidAttractionImageOwner": "Hindi wasto ang may-ari ng larawan ng pasyalan.",
+  "invalidAttractionImageVersion": "Hindi wasto ang bersiyon ng larawan ng pasyalan.",
+  "invalidLatitude": "Hindi wastong latitude",
+  "invalidLongitude": "Hindi wastong longitude",
+  "isExpiredValue": "Expired na ang {value}.",
+  "@isExpiredValue": {
+    "description": "Application message: isExpiredValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "isNowHiddenValue": "Nakatago na ngayon ang {value}",
+  "@isNowHiddenValue": {
+    "description": "Application message: isNowHiddenValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "isNowVisibleValue": "Nakikita na ngayon ang {value}",
+  "@isNowVisibleValue": {
+    "description": "Application message: isNowVisibleValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "isRequiredValue": "Kailangan ang {value}",
+  "@isRequiredValue": {
+    "description": "Application message: isRequiredValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "isTemporarilyClosedAndCannotBeAddedRightNow": "Pansamantalang sarado ang {spot} at hindi maidagdag ngayon.",
+  "itinerary": "Itineraryo",
+  "iVerifiedThisNumberWithTheAgency": "Kinumpirma ko ang numerong ito sa ahensiya.",
+  "jan": "Ene",
+  "jobs": "Mga biyahe",
+  "johnDoe": "John doe",
+  "johnExampleCom": "john@example.com",
+  "juanDelaCruz": "Juan Dela Cruz",
+  "juanExampleCom": "juan@example.com",
+  "jul": "Hul",
+  "jun": "Hun",
+  "justNow": "Ngayon lang",
+  "keepAccount": "Panatilihin ang account",
+  "keepCurrentCode": "Panatilihin ang kasalukuyang code",
+  "keepEditing": "Ipagpatuloy ang pag-edit",
+  "keepOpen": "Panatilihing bukas",
+  "keepOriginalRoute": "Panatilihin ang orihinal na ruta",
+  "keepUnderReview": "Panatilihin sa pagsusuri",
+  "keepWaiting": "Maghintay pa",
+  "kmAwayValue": "{value} • {secondValue} km ang layo",
+  "@kmAwayValue": {
+    "description": "Application message: kmAwayValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "kmAwayValueLabel": "{value} km ang layo",
+  "@kmAwayValueLabel": {
+    "description": "Application message: kmAwayValueLabel",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "kmValue": " {value} km",
+  "@kmValue": {
+    "description": "Application message: kmValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "language": "Wika",
+  "lastLocationIsMoreThanAMinuteOld": "Huling lokasyon ay mahigit isang minuto na",
+  "lateCancellation": "Huling pagkansela",
+  "lateCancellationFee": "Bayad sa huling pagkansela",
+  "latitude": "Latitude",
+  "leaveACommentOptional": "Mag-iwan ng komento (opsiyonal)",
+  "leaveTheNumberEmptyToKeepAClearlyMarkedPlaceholder": "Iwanang walang laman ang numero upang manatiling malinaw na placeholder.",
+  "licenseExpiresOn": "license_expires_on",
+  "licenseExpiryDate": "Petsa ng pag-expire ng lisensiya",
+  "licenseImageSelected": "Napili na ang larawan ng lisensya",
+  "licenseValue": "Lisensya: {value}",
+  "@licenseValue": {
+    "description": "Application message: licenseValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "listView": "Listahan",
+  "liveDriverTracking": "Live na Pagsubaybay sa Drayber",
+  "liveLocationIsActiveForTripMatching": "Aktibo ang live na lokasyon para sa pagtutugma ng biyahe",
+  "liveLocationIsReconnectingKeepTheAppOpen": "Muling kumokonekta ang live na lokasyon. Panatilihing bukas ang app.",
+  "liveMapboxTrackingIsAvailableInTheMobileApp": "Sa mobile app magagamit ang live na pagsubaybay sa Mapbox.",
+  "liveOverview": "Live na pangkalahatang-ideya",
+  "loading": "Naglo-load",
+  "loadingMore": "Naglo-load pa…",
+  "loadMore": "Mag-load pa",
+  "loadMoreBookings": "Mag-load pa ng mga reserbasyon",
+  "loadMorePeople": "Mag-load pa ng mga tao",
+  "localContactsAndSos": "Mga lokal na kontak at SOS",
+  "localEmergencyNumbers": "Mga Lokal na Numero ng Emergency",
+  "localHistory": "Kasaysayan ng lugar",
+  "localRoadsArePreferredFollowRoadSignsAndYourApprovedTodaOrLgu": "Mas pinipili ang mga lokal na daan. Sundin ang mga karatula at rutang aprubado ng TODA o LGU.",
+  "locationIsUnavailableRightNowCheckYourSettingsAndTryAgain": "Hindi makuha ang lokasyon ngayon. Suriin ang mga setting at subukan muli.",
+  "locationPermissionDeniedEnableItInSettings": "Tinanggihan ang pahintulot sa lokasyon. Payagan ito sa Mga setting.",
+  "locationPermissionIsNeededToReceiveRides": "Kailangan ang pahintulot sa lokasyon upang makatanggap ng biyahe.",
+  "locationPermissionIsNeededToUseYourCurrentPosition": "Kailangan ang pahintulot sa lokasyon upang magamit ang kasalukuyang posisyon.",
+  "locationServicesAreDisabledPleaseEnableGps": "Naka-off ang serbisyo ng lokasyon. I-on ang GPS.",
+  "locationSharingIsAlreadyStopped": "Nakahinto na ang pagbabahagi ng lokasyon.",
+  "locationSharingIsNoLongerAvailableOnThisScreen": "Hindi na available ang pagbabahagi ng lokasyon sa pahinang ito.",
+  "locationSharingIsOff": "Naka-off ang pagbabahagi ng lokasyon",
+  "locationSharingWasCancelled": "Kinansela ang pagbabahagi ng lokasyon.",
+  "locationUnavailable": "Hindi makuha ang lokasyon",
+  "login": "Mag-login",
+  "loginAsAdmin": "Mag-login bilang Admin",
+  "logOut": "Mag-log out",
+  "logOutLabel": "Mag-log Out?",
+  "longitude": "Longitude",
+  "lookingForADriver": "Naghahanap ng drayber",
+  "lostPickupCodeReissue": "Nawala ang sunduan code? Palitan",
+  "luggageOrBulkyItems": "Bagahe o malalaking gamit",
+  "makeItYourOwn": "Iayon sa iyong gusto",
+  "manageAppOpenTheAdminPortal": "Pamahalaan ang {brandName}? Buksan ang admin portal",
+  "@manageAppOpenTheAdminPortal": {
+    "description": "Application message: manageAppOpenTheAdminPortal",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "manageTourists": "Pamahalaan ang mga turista",
+  "mapView": "Tingnan sa mapa",
+  "mar": "Mar",
+  "mariaExampleCom": "maria@example.com",
+  "markAllAsRead": "Markahang nabasa ang lahat",
+  "markAllRead": "Markahang nabasa lahat",
+  "market": "Pamilihan",
+  "matchingBlockers": "Mga hadlang sa pagtutugma",
+  "matchingIsTemporarilyBlocked": "Pansamantalang hinaharang ang pagtutugma.",
+  "matchWithTouristsWhoDescribeMobilityOrBoardingNeeds": "Tumanggap ng turistang nangangailangan ng tulong sa pagkilos o pagsakay.",
+  "maximumCapacityIsCheckedBeforeOfferingTheBooking": "Sinusuri ang kapasidad bago ialok ang reserbasyon.",
+  "may": "May",
+  "member": "Miyembro",
+  "message": "Mensahe",
+  "min8Characters": "Hindi bababa sa 8 karakter",
+  "min8Chars": "Hindi bababa sa 8 karakter",
+  "minsAgoValue": "{value} minuto ang nakalipas",
+  "@minsAgoValue": {
+    "description": "Application message: minsAgoValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "minutes": "minuto",
+  "minValue": "{value} | {secondValue} minuto",
+  "@minValue": {
+    "description": "Application message: minValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "minValueLabel": "{value} min | {secondValue}",
+  "@minValueLabel": {
+    "description": "Application message: minValueLabel",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "missingValue": "Wala ang {value}",
+  "@missingValue": {
+    "description": "Application message: missingValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "modeValue": "Mode: {value}",
+  "@modeValue": {
+    "description": "Application message: modeValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "modeValueLabel": "{value} · mode: {secondValue}\n{thirdValue}",
+  "@modeValueLabel": {
+    "description": "Application message: modeValueLabel",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      },
+      "thirdValue": {
+        "type": "String"
+      }
+    }
+  },
+  "mon": "Lun",
+  "moveTheMapPinOrUseYourCurrentLocationBeforeSaving": "Ilipat ang pin o gamitin ang kasalukuyang lokasyon bago i-save.",
+  "mustBeAtLeastCharactersValue": "Dapat may hindi bababa sa {secondValue} karakter ang {value}",
+  "@mustBeAtLeastCharactersValue": {
+    "description": "Application message: mustBeAtLeastCharactersValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "mustNotExceedCharactersValue": "Hindi dapat lumampas sa {secondValue} karakter ang {value}",
+  "@mustNotExceedCharactersValue": {
+    "description": "Application message: mustNotExceedCharactersValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "myBookings": "Aking mga reserbasyon",
+  "myData": "Aking data",
+  "myLocation": "Aking lokasyon",
+  "name": "Pangalan",
+  "nameMustBeAtLeast2Characters": "Dapat may hindi bababa sa 2 karakter ang pangalan",
+  "nameMustNotExceedCharactersValue": "Hindi dapat lumampas sa {value} karakter ang pangalan",
+  "@nameMustNotExceedCharactersValue": {
+    "description": "Application message: nameMustNotExceedCharactersValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "namePlateFranchiseOrServiceArea": "Pangalan, plaka, prangkisa o lugar ng serbisyo",
+  "nationalEmergencyHotline": "Pambansang Hotline ng Emergency",
+  "nature": "Kalikasan",
+  "navigate": "Mag-navigate",
+  "needsReview": "Kailangang suriin",
+  "newPassword": "Bagong password",
+  "newRideRequest": "Bagong kahilingan sa biyahe",
+  "next": "Susunod",
+  "noActiveBookingOpenTripsToViewYourHistory": "Walang aktibong reserbasyon. Buksan ang Mga Biyahe para makita ang kasaysayan.",
+  "noActiveTrip": "Walang kasalukuyang biyahe",
+  "noActiveTrips": "Walang aktibong biyahe",
+  "noArrivalIsAwaitingConfirmation": "Walang pagdating na naghihintay ng kumpirmasyon.",
+  "noBlockedDrivers": "Walang hinaharang na drayber",
+  "noBookingsHereYet": "Wala pang reserbasyon dito.",
+  "noBookingsInThisCategory": "Walang reserbasyon sa kategoryang ito.",
+  "noCharge": "Walang singil",
+  "noCompletedBookingsFoundForThisPeriod": "Walang natapos na reserbasyon sa panahong ito.",
+  "noCompletedDriverTripsYet": "Wala pang natapos na biyahe ng drayber.",
+  "noConfirmedMoneyMovementYet": "Wala pang nakumpirmang transaksiyon.",
+  "noDestinationsSelected": "Wala pang napiling destinasyon",
+  "noDistanceWaitingOrSurgeAdditionsEntranceFeesAndPurchasesAreSeparate": "Walang dagdag para sa layo, paghihintay o dami ng pasahero. Hiwalay ang entrance fee at mga binili.",
+  "noDriverAcceptedDuringThisSearchWindowRetryToOpenAFreshRequest": "Walang drayber na tumanggap sa oras ng paghahanap. Subukang muli upang magbukas ng bagong kahilingan o magkansela nang walang singil.",
+  "noDriversAwaitingReview": "Walang drayber na naghihintay ng pagsusuri",
+  "noDriverYet": "Wala pang drayber",
+  "noEligibleActiveDrivers": "Walang kwalipikadong aktibong drayber",
+  "noEndedTripsInThisPeriod": "Walang natapos na biyahe sa panahong ito.",
+  "noExportRequestsYet": "Wala pang kahilingan ng export.",
+  "noLocalRoadRouteWasReturned": "Walang nakuhang ruta sa mga lokal na kalsada.",
+  "noNotificationsYet": "Wala pang abiso",
+  "noPastTripsYet": "Wala pang nakaraang biyahe",
+  "noPendingRequest": "Walang Naghihintay na Kahilingan",
+  "noPhotosAvailable": "Walang available na larawan",
+  "noRecentBookings": "Walang kamakailang reserbasyon",
+  "noReviewsFound": "Walang nakitang review.",
+  "noShowFee": "Bayad sa hindi pagsipot",
+  "noSpotsFound": "Walang nakitang pasyalan",
+  "noSystemFeedbackFound": "Walang nakitang feedback sa sistema.",
+  "notificationDeliveryFailures": "Mga nabigong paghahatid ng abiso",
+  "notifications": "Mga abiso",
+  "noTouristsFound": "Walang nakitang turista",
+  "noTouristSpotsFound": "Walang nakitang pasyalan.",
+  "notRated": "Wala pang rating",
+  "notVerified": "Hindi beripikado",
+  "notYet": "Hindi pa",
+  "nov": "Nob",
+  "noVerifiedContactNumberIsAvailableForThisTourist": "Walang beripikadong numero ng telepono para sa turistang ito.",
+  "oct": "Okt",
+  "officialEmergencyNumbersFromMunicipalityPortal": "Mga numerong pang-emerhensiya mula sa portal ng munisipyo.",
+  "offline": "Naka-offline",
+  "offlineConnection": "Walang koneksiyon",
+  "offlineModeShowingSavedDataFromCriticalActionsRequireAConnection": "Offline · ipinapakita ang naka-save na datos mula {time}. Kailangan ng koneksiyon para sa mahahalagang aksiyon.",
+  "offlineModeShowingSavedDataFromCriticalActionsRequireAConnectionValue": "Offline · ipinapakita ang naka-save na data mula {value}. Kailangan ng koneksiyon para sa mahahalagang aksiyon.",
+  "@offlineModeShowingSavedDataFromCriticalActionsRequireAConnectionValue": {
+    "description": "Application message: offlineModeShowingSavedDataFromCriticalActionsRequireAConnectionValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "offlineSavedInformationMayBeShown": "Offline · maaaring ipakita ang naka-save na impormasyon.",
+  "offThePlannedRouteNavigationIsRecalculatingFollowLegalLocalRoadsAndStop": "Lumihis sa ruta · muling kinakalkula ang nabigasyon. Sundin ang mga legal na daan at huminto nang ligtas kung hindi sigurado.",
+  "onePriceForTheBookedRoute": "Isang presyo para sa naka-book na ruta",
+  "ongoing": "Kasalukuyan",
+  "online": "Naka-online",
+  "onlinePayment": "Online na pagbabayad",
+  "onlinePaymentFailedRetryAvailable": "Nabigo ang online na pagbabayad — maaaring subukang muli",
+  "onlinePaymentNotStarted": "Hindi pa nasisimulan ang online na pagbabayad",
+  "onlinePaymentReceived": "Natanggap ang online na bayad",
+  "onlinePaymentRequiresTheConfiguredServer": "Kailangan ang naka-configure na server para sa online na pagbabayad.",
+  "onlinePaymentsRequireAVerifiedPaymentProvider": "Kailangan ng beripikadong tagapagbigay ng bayad para sa online na pagbabayad.",
+  "onlineRefundAwaitingAdminAction": "Naghihintay ng aksiyon ng admin para sa online na refund",
+  "onlineRefundDue": "Nakatakdang online na refund",
+  "onlyACompletedUnratedTripCanBeReviewed": "Ang natapos na biyahe na wala pang rating lamang ang maaaring i-review.",
+  "onlyAnAcceptedBookingCanStart": "Ang tinanggap na reserbasyon lamang ang maaaring simulan.",
+  "onlyAnEndedTripWithAnOpenReviewCanBeResolved": "Ang natapos na biyahe na may bukas na pagsusuri lamang ang maaaring resolbahin.",
+  "onlyAnOngoingTripCanBeCompleted": "Ang kasalukuyang biyahe lamang ang maaaring tapusin.",
+  "onlyAParticipantCanReportAPaymentIssue": "Kalahok lamang ang maaaring mag-ulat ng problema sa bayad.",
+  "onlyAPendingDriverApplicationCanBeResumedFromThisForm": "Naghihintay na aplikasyon ng drayber lamang ang maaaring ipagpatuloy sa form na ito.",
+  "onlyATripParticipantCanEndThisTrip": "Kalahok lamang sa biyahe ang maaaring magtapos nito.",
+  "onlyThePayerAndReceiverCanConfirmCash": "Ang nagbayad at tumanggap lamang ang maaaring magkumpirma ng cash.",
+  "onlyUnvisitedStopsMoveTheOtherParticipantMustApproveBeforeNavigationChanges": "Mga hindi pa napupuntahang hinto lamang ang maaaring baguhin. Kailangang aprubahan ito ng kabilang panig bago baguhin ang ruta.",
+  "openAPaymentReview": "Magbukas ng pagsusuri sa bayad",
+  "openAppStore": "Buksan ang app store",
+  "openAppToViewThisUpdate": "Buksan ang {brandName} upang makita ang update na ito.",
+  "@openAppToViewThisUpdate": {
+    "description": "Application message: openAppToViewThisUpdate",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "openDialer": "BUKSAN ANG DIALER",
+  "openDriverSearch": "Buksan ang paghahanap ng drayber",
+  "openingHours": "Mga Oras ng Pagbubukas",
+  "openReviewsValue": "Mga bukas na pagsusuri: {value}",
+  "@openReviewsValue": {
+    "description": "Application message: openReviewsValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "openTheMobileAppForTheInteractiveRoute": "Buksan ang mobile app para sa interaktibong ruta.",
+  "openTripMap": "Buksan ang mapa ng biyahe",
+  "openTripsToSeeTheLatestBookingStatus": "Buksan ang Mga biyahe upang makita ang pinakabagong katayuan ng reserbasyon.",
+  "operationalAlertSNeedReviewValue": "{value} alerto sa operasyon ang kailangang suriin",
+  "@operationalAlertSNeedReviewValue": {
+    "description": "Application message: operationalAlertSNeedReviewValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "operationFailureValue": "Pagpalya ng operasyon: {value}",
+  "@operationFailureValue": {
+    "description": "Application message: operationFailureValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "operationsCentre": "Sentro ng operasyon",
+  "other": "Iba pa",
+  "overview": "Pangkalahatang-ideya",
+  "packageNotFound": "Hindi nakita ang pakete.",
+  "packageStopsChangedSelectThePackageAgain": "Nagbago ang mga hintuan ng package. Piliin muli ang package.",
+  "paid": "Bayad na",
+  "paidOnline": "Nabayaran online",
+  "park": "Liwasan",
+  "partiallypaid": "Bahagyang bayad",
+  "partiallyRefunded": "Bahagyang na-refund",
+  "passengerCapacity": "Kapasidad ng pasahero",
+  "passengerCount": "{count, plural, =1{1 pasahero} other{{count} pasahero}}",
+  "@passengerCount": {
+    "description": "Application message: passengerCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "passengerRequirements": "Mga pangangailangan ng pasahero",
+  "passengers": "Mga pasahero",
+  "passengersValue": "{value} pasahero",
+  "@passengersValue": {
+    "description": "Application message: passengersValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "password": "Password",
+  "passwordIsRequired": "Kailangan ang password",
+  "passwordMustBeAtLeast8Characters": "Dapat may hindi bababa sa 8 karakter ang password",
+  "passwordMustContainAtLeastOneNumber": "Dapat may kahit isang numero ang password",
+  "passwordMustContainAtLeastOneUppercaseLetter": "Dapat may kahit isang malaking titik ang password",
+  "passwordMustNotExceedCharactersValue": "Hindi dapat lumampas sa {value} karakter ang password",
+  "@passwordMustNotExceedCharactersValue": {
+    "description": "Application message: passwordMustNotExceedCharactersValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "passwordsDoNotMatch": "Hindi magkatugma ang mga password",
+  "passwordUpdatedSignInAgain": "Napalitan na ang password. Mag-login muli.",
+  "past": "Nakaraan",
+  "pauseForAVehicleProblem": "Huminto dahil sa problema sa sasakyan?",
+  "paymentAttention": "Kailangang asikasuhin ang bayad",
+  "paymentDisputedValue": "Kinuwestiyon ang pagbabayad: {value}",
+  "@paymentDisputedValue": {
+    "description": "Application message: paymentDisputedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentIsOnHoldAnAdminMustReviewTheCaseBeforeCollectionOr": "Nakahinto muna ang pagbabayad. Kailangang suriin ng administrador ang kaso bago maningil o magsauli ng pera.",
+  "paymentIsPendingADriverWillOnlyBeRequestedAfterPaymentIsConfirmed": "Naghihintay ng bayad. Hahanap lamang ng drayber kapag nakumpirma ang bayad. Mawawalan ng bisa ang hindi nabayarang kahilingan pagkalipas ng 30 minuto.",
+  "paymentOnHoldAdminReview": "Nakahold ang bayad · sinusuri ng admin",
+  "paymentpending": "Naghihintay ng bayad",
+  "paymentPending": "Naghihintay ng bayad",
+  "paymentPendingLabel": "Naghihintay ng bayad",
+  "paymentReview": "Pagsusuri ng bayad",
+  "paymentReviewPending": "Naghihintay ng pagsusuri ng bayad",
+  "paymentStatusCouldNotBeRefreshed": "Hindi ma-refresh ang katayuan ng pagbabayad.",
+  "paymentStatusRefreshed": "Na-refresh ang katayuan ng pagbabayad.",
+  "paymentStatusUnavailableRefreshOrUpdateTheApp": "Hindi makuha ang katayuan ng pagbabayad. I-refresh o i-update ang app.",
+  "paymentVerificationRequiresTheConfiguredServer": "Kailangan ang naka-configure na server upang beripikahin ang bayad.",
+  "paymongo": "PayMongo",
+  "paymongoCheckoutReady": "Handa na ang checkout ng PayMongo",
+  "paymongoIsProcessingPayment": "Pinoproseso ng PayMongo ang bayad",
+  "paymongoTestModeStatusIsConfirmedByWebhookOrADirectProviderCheck": "PayMongo test mode · kinukumpirma ang katayuan sa webhook o direktang pagsusuri sa provider.",
+  "paymongoUnavailable": "Hindi available ang PayMongo",
+  "payTheFinalAmountAfterTheTripTouristAndDriverMustBothConfirm": "Bayaran ang huling halaga pagkatapos ng biyahe. Dapat kumpirmahin ng turista at drayber ang pag-aabot ng cash.",
+  "pending": "Naghihintay",
+  "pendingRequestsAndDriverCancellationsAreFreeTouristCancellationAfterTheGracePeriod": "Walang bayad ang mga naghihintay na kahilingan at pagkansela ng drayber. Maaaring may nailathalang singil kapag turista ang nagkansela matapos ang palugit. Kailangan ng beripikadong pagdating ng drayber at kumpletong oras ng paghihintay bago ituring na hindi sumipot ang turista.",
+  "permanentlyDelete": "Permanenteng burahin",
+  "personalInfo": "Personal na Impormasyon",
+  "personalInformation": "Personal na impormasyon",
+  "phone": "Telepono",
+  "phoneNumber": "Numero ng Telepono",
+  "phoneNumberIsRequired": "Kailangan ang numero ng telepono",
+  "photoGallery": "Galeriya ng larawan",
+  "photos": "Mga larawan",
+  "pickupArrivalCanOnlyBeReportedForAnAcceptedBooking": "Maaari lamang iulat ang pagdating sa sunduan para sa tinanggap na reserbasyon.",
+  "pickupArrivalHasAlreadyBeenRecorded": "Naitala na ang pagdating sa sunduan.",
+  "pickupCode": "Code sa sunduan",
+  "pickupCodeVerifiedTripStarted": "Beripikado ang code sa pagsakay; nagsimula na ang biyahe.",
+  "pickupLocationPreview": "Preview ng lokasyon ng sunduan",
+  "pickupPoint": "Lugar ng sunduan",
+  "pickupValue": "Sunduan: {value}",
+  "@pickupValue": {
+    "description": "Application message: pickupValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "pickupVerificationIsTemporarilyLockedPleaseWaitAndTryAgain": "Pansamantalang naka-lock ang beripikasyon ng pagsakay. Maghintay at subukan muli.",
+  "pickupWait": "Paghihintay sa sunduan",
+  "placeholderTheOwnerMustVerifyAndEnterANumber": "Placeholder — dapat kumpirmahin at ilagay ng may-ari ang numero.",
+  "places": "Mga lugar",
+  "placesYouSaved": "Lugar na naka-save",
+  "planYourTrip": "Planuhin ang biyahe",
+  "plateNumber": "Numero ng Plaka",
+  "plateNumberIsRequired": "Kailangan ang numero ng plaka",
+  "plateNumberMustNotExceedCharactersValue": "Hindi dapat lumampas sa {value} karakter ang numero ng plaka",
+  "@plateNumberMustNotExceedCharactersValue": {
+    "description": "Application message: plateNumberMustNotExceedCharactersValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "platformFailureValue": "Pagpalya ng platform: {value}",
+  "@platformFailureValue": {
+    "description": "Application message: platformFailureValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseConfirmYourPassword": "Pakikumpirma ang iyong password",
+  "pleaseDescribeYourConcernOrSuggestionInDetail": "Ilarawan nang detalyado ang iyong alalahanin o mungkahi…",
+  "pleaseEnterAtLeast20Characters": "Maglagay ng hindi bababa sa 20 character.",
+  "pleaseEnterAValidEmailAddress": "Maglagay ng wastong email address",
+  "pleaseEnterAValidPlateNumber": "Maglagay ng wastong numero ng plaka",
+  "pleaseEnterYourStreetOrHouseNumber": "Ilagay ang kalye o numero ng bahay",
+  "pleaseExplainTheIssueAtLeast5Characters": "Ipaliwanag ang problema (hindi bababa sa 5 karakter).",
+  "pleaseGiveAReasonAtLeast5Characters": "Magbigay ng dahilan (hindi bababa sa 5 karakter).",
+  "pleaseProvideDetailsAtLeast5Characters": "Magbigay ng detalye (hindi bababa sa 5 karakter).",
+  "pleaseReviewTheCurrentPrivacyNotice": "Pakisuri ang kasalukuyang abiso sa privacy",
+  "pleaseWaitFiveMinutesBeforeRequestingAnotherPickupCode": "Maghintay ng limang minuto bago humiling ng panibagong code sa pagsakay.",
+  "policyPublishedExistingBookingsAreUnchanged": "Nailathala na ang patakaran. Hindi nagbago ang mga kasalukuyang reserbasyon.",
+  "policyVersionValue": "Bersiyon ng patakaran {value}",
+  "@policyVersionValue": {
+    "description": "Application message: policyVersionValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "prepareExport": "Ihanda ang export",
+  "preparePrivateAccountExports": "Ihanda ang pribadong export ng account",
+  "preparingDriverRoute": "Inihahanda ang ruta ng drayber",
+  "preparingRoute": "Inihahanda ang ruta...",
+  "pressSosToOpenYourPhoneDialerWithTheNationalEmergencyNumber": "Pindutin ang SOS upang buksan ang pantawag gamit ang pambansang numero ng emergency.",
+  "previewAnnouncement": "I-preview ang anunsiyo",
+  "priceHistoryCurrentVersionValue": "Kasaysayan ng presyo · kasalukuyang bersiyon {value}",
+  "@priceHistoryCurrentVersionValue": {
+    "description": "Application message: priceHistoryCurrentVersionValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "pricesChangedWhileYouWereEditingReopenThisPageAndReviewTheLatest": "Nagbago ang presyo habang nag-e-edit ka. Buksan muli ang pahina at suriin ang pinakabagong presyo.",
+  "priceVersion": "Bersiyon ng presyo",
+  "privacyAndDataUse": "Privacy at paggamit ng datos",
+  "privacyNoticeAcceptanceIsRequired": "Kailangang tanggapin ang abiso sa pagkapribado.",
+  "privacyUpdate": "Update sa Privacy",
+  "profileImagesMustBe5MbOrSmaller": "Dapat 5 MB o mas maliit ang larawan ng profile.",
+  "profileImagesMustBeJpegOrPngFiles": "Dapat JPEG o PNG ang larawan ng profile.",
+  "profileUpdatedSuccessfully": "Matagumpay na na-update ang profile",
+  "profileUpdatedSuccessfullyLabel": "Matagumpay na na-update ang profile!",
+  "proposeANewStopOrder": "Magmungkahi ng bagong pagkakasunod-sunod ng mga hinto",
+  "proposedValue": "Iminungkahi: {value}",
+  "@proposedValue": {
+    "description": "Application message: proposedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "publish": "Ilathala",
+  "publishCancellationPolicy": "Ilathala ang patakaran sa pagkansela?",
+  "publishedPolicy": "Nailathalang patakaran",
+  "publishing": "Inilalathala...",
+  "publishPolicy": "Ilathala ang patakaran",
+  "publishTheseFixedFares": "Ilathala ang mga takdang pamasahe?",
+  "radius130Km": "Saklaw (1–30 km)",
+  "rateDriver": "I-rate ang drayber",
+  "rating": "Rating",
+  "ratingsFeedback": "Mga Rating at Feedback",
+  "ratingsReviews": "Mga rating at pagsusuri",
+  "readyForApproval": "Handa nang aprubahan",
+  "readyMadeDaysOut": "Handang mga biyahe",
+  "readyMadeTrips": "Handang mga biyahe",
+  "reason": "Dahilan",
+  "reasonAtLeast5Characters": "Dahilan (hindi bababa sa 5 karakter)",
+  "reasonDetails": "Dahilan / mga detalye",
+  "reasonForChangingTheOrder": "Dahilan ng pagbabago ng pagkakasunod-sunod",
+  "reasonForPolicyChange": "Dahilan ng pagbabago ng patakaran",
+  "reasonForPriceChange": "Dahilan ng pagbabago ng presyo",
+  "receiveBookingsEarnMoneyAndShowcaseYourLocalKnowledge": "Tumanggap ng mga reserbasyon, kumita at ibahagi ang iyong kaalaman sa lugar.",
+  "recentBookings": "Mga kamakailang reserbasyon",
+  "refresh": "I-refresh",
+  "refreshPaymentStatus": "I-refresh ang katayuan ng bayad",
+  "refundCompleted": "Natapos ang refund",
+  "refundCompletedInPaymongoTestMode": "Natapos ang refund sa test mode ng PayMongo.",
+  "refundCompletedInTheTestPaymentEnvironment": "Natapos ang refund sa test na environment ng pagbabayad.",
+  "refundDecisionRecorded": "Naitala ang pasiya sa refund.",
+  "refunddue": "May ibabalik na bayad",
+  "refunded": "Naibalik na ang bayad",
+  "refundRequired": "Kailangang ibalik ang bayad",
+  "refundSentAwaitingPaymongoConfirmation": "Naipadala ang refund · naghihintay ng kumpirmasyon ng PayMongo",
+  "refundUpdateRecorded": "Naitala ang update sa refund.",
+  "register": "Magparehistro",
+  "registrationDidNotComplete": "Hindi natapos ang pagpaparehistro.",
+  "reissueCode": "Palitan ang code",
+  "reissuePickupCode": "Palitan ang sunduan code?",
+  "reject": "Tanggihan",
+  "rejectApplication": "Tanggihan ang aplikasyon",
+  "rejected": "Tinanggihan",
+  "releaseConfigurationIsIncompleteValue": "Hindi kumpleto ang configuration ng release: {value}",
+  "@releaseConfigurationIsIncompleteValue": {
+    "description": "Application message: releaseConfigurationIsIncompleteValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "reliability": "Pagiging maaasahan",
+  "reliabilitySeatsValue": "{value}% pagiging maaasahan • {secondValue} upuan",
+  "@reliabilitySeatsValue": {
+    "description": "Application message: reliabilitySeatsValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "reliableValue": "{value}% maaasahan",
+  "@reliableValue": {
+    "description": "Application message: reliableValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "removedFromYourItinerary": "Inalis sa iyong itineraryo",
+  "removeDuplicateDestinations": "Alisin ang mga naulit na destinasyon.",
+  "reopenAttraction": "Muling buksan ang pasyalan",
+  "reopenedValue": "Muling binuksan ang {value}",
+  "@reopenedValue": {
+    "description": "Application message: reopenedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "replacementNeeded": "KAILANGAN NG KAPALIT",
+  "replacementpending": "Naghihintay ng kapalit",
+  "replacementPending": "Naghihintay ng kapalit",
+  "reportArrivalAtNextStop": "Iulat ang pagdating sa susunod na hintuan",
+  "reports": "Mga ulat",
+  "reportsAnalytics": "Mga Ulat at Pagsusuri",
+  "reportTouristNoShow": "Iulat na hindi dumating ang turista?",
+  "reportTouristNoShowLabel": "Iulat na hindi sumipot ang turista",
+  "reportYourVerifiedArrivalAtThePickupPointBeforeStarting": "Iulat ang iyong beripikadong pagdating sa sunduan bago magsimula.",
+  "requestACopyOfYourAccountAndTripDataSupportPreparesTheExport": "Humiling ng kopya ng data ng iyong account at mga biyahe. Ihahanda ng support ang export para lamang sa iyong account.",
+  "requestADifferentStopOrder": "Humiling ng ibang pagkakasunod-sunod ng mga hintuan",
+  "requestADriverNow": "Humiling ng drayber ngayon",
+  "requestAnotherDriver": "Humiling ng ibang drayber?",
+  "requestDataExport": "Humiling ng export ng data",
+  "requestIsNoLongerPending": "Hindi na naghihintay ang kahilingan",
+  "requests": "Mga kahilingan",
+  "requestSaved": "Naka-save ang kahilingan",
+  "requestToSkipThisStop": "Humiling na laktawan ang hintuang ito",
+  "requestToSkipValue": "Humiling na laktawan ang {value}?",
+  "@requestToSkipValue": {
+    "description": "Application message: requestToSkipValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "resetMap": "I-reset ang mapa",
+  "resolve": "Lutasin",
+  "resolved": "Nalutas",
+  "resolvePaymentReview": "Tapusin ang pagsusuri ng bayad",
+  "resortCaf": "Resort at café",
+  "respondToCommunityConcerns": "Tumugon sa mga alalahanin ng komunidad",
+  "restore": "Ibalik",
+  "restoreTourist": "Ibalik ang turista?",
+  "resumePayment": "Ipagpatuloy ang pagbabayad",
+  "retry": "Subukan muli",
+  "retryConnection": "Subukang kumonekta muli",
+  "retrying": "Sinusubukang muli…",
+  "retryStorage": "Subukan muli ang storage",
+  "retypePassword": "I-type muli ang password",
+  "revenueOverTime": "Kita sa Paglipas ng Panahon",
+  "review": "Suriin",
+  "reviewActiveAndCompletedTrips": "Suriin ang mga kasalukuyan at natapos na biyahe",
+  "reviewAndPublishFares": "Suriin at ilathala ang mga pamasahe",
+  "reviewAndPublishPolicy": "Suriin at ilathala ang patakaran",
+  "reviewCountSummary": "(128 pagsusuri)",
+  "reviewFailuresAndStaleDrivers": "Suriin ang mga pagpalya at drayber na walang bagong heartbeat",
+  "reviewFare": "Suriin ang pamasahe",
+  "reviewFlaggedForFollowUp": "Minarkahan ang review para sa follow-up",
+  "reviewNote": "Tala ng pagsusuri",
+  "reviewPendingDrivers": "Suriin ang mga naghihintay na drayber",
+  "reviewResolvedFinalChargeValue": "Natapos ang pagsusuri: ₱{value} ang huling singil. {secondValue}",
+  "@reviewResolvedFinalChargeValue": {
+    "description": "Application message: reviewResolvedFinalChargeValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "reviews": "Mga review",
+  "reviewYourBooking": "Suriin ang reserbasyon mo",
+  "ride": "Sakay",
+  "rideAndBookingUpdates": "Mga update sa sakay at reserbasyon",
+  "rideUpdates": "Mga update sa sakay",
+  "roadRouteUnavailableCheckYourConnectionAndTryAgain": "Hindi makuha ang ruta. Suriin ang koneksiyon at subukan muli.",
+  "routeProgressConfirmedValue": "Pag-usad sa ruta · {value}/{secondValue} ang nakumpirma",
+  "@routeProgressConfirmedValue": {
+    "description": "Application message: routeProgressConfirmedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "routeReorderApprovalNeeded": "Kailangan ang pag-apruba sa pagbabago ng ruta",
+  "safeCapacity": "Ligtas na kapasidad",
+  "safeDriver": "Ligtas na drayber",
+  "safePassengerCapacity": "Ligtas na kapasidad ng pasahero",
+  "safetySupport": "Kaligtasan at suporta",
+  "sanPedro": "San pedro",
+  "sat": "Sab",
+  "saveChanges": "I-save ang mga Pagbabago",
+  "saved": "Naka-save",
+  "saveDecision": "I-save ang pasya",
+  "savedPlaces": "Mga paborito",
+  "savedTripDataCouldNotBeReadBookingChangesArePausedToProtect": "Hindi mabasa ang naka-save na biyahe. Pansamantalang inihinto ang pagbabago ng reserbasyon upang protektahan ang iyong mga tala. Subukan muli ang storage o i-restart ang app.",
+  "saveFailed": "Hindi na-save",
+  "savePlacesYouLove": "I-save ang mga lugar na gusto mo",
+  "saveReviewWithoutApproval": "I-save ang pagsusuri nang walang pag-apruba",
+  "saveSpot": "I-save ang Pasyalan",
+  "saving": "Sine-save…",
+  "savingBooking": "Sine-save ang reserbasyon…",
+  "scheduled": "Naka-iskedyul",
+  "scheduledFor": "Naiskedyul para sa",
+  "scheduledJobFailures": "Mga nabigong nakaiskedyul na gawain",
+  "scheduledPickup": "Naiskedyul na sunduan",
+  "schedulePickupAtLeast1HourFromNow": "Pumili ng sunduan na hindi bababa sa isang oras mula ngayon.",
+  "search": "Maghanap",
+  "searchAgain": "Maghanap muli",
+  "searchDrivers": "Maghanap ng drayber",
+  "searchSpots": "Maghanap ng mga pasyalan…",
+  "searchWindowEnded": "Natapos ang oras ng paghahanap",
+  "secureYourAccount": "Protektahan ang account mo",
+  "seeAll": "Tingnan lahat",
+  "seeYourDailyTripSummary": "Tingnan ang buod ng iyong araw-araw na biyahe",
+  "selectAddress": "Pumili ng address",
+  "selectARatingBetween1And5": "Pumili ng rating mula 1 hanggang 5.",
+  "selectAtLeastOneDestinationFirst": "Pumili muna ng kahit isang destinasyon.",
+  "selectBetween1And12Destinations": "Pumili ng 1 hanggang 12 destinasyon.",
+  "selectedStop": "Napiling hintuan",
+  "selectExpiryDate": "Piliin ang petsa ng pag-expire",
+  "sendAnAnnouncement": "Magpadala ng anunsiyo",
+  "sendAnnouncement": "Magpadala ng Anunsiyo",
+  "sendASupportMessage": "Magpadala ng mensahe para sa suporta",
+  "sendFeedback": "Magpadala ng feedback",
+  "sendProposal": "Ipadala ang mungkahi",
+  "sendRefundRequestToPaymongo": "Ipadala ang kahilingan sa refund sa PayMongo",
+  "sendRefundToPaymongo": "Ipadala ang refund sa PayMongo?",
+  "sendResetLink": "Ipadala ang Reset Link",
+  "sep": "Set",
+  "serverSetupIsIncomplete": "Hindi pa kumpleto ang pagkakakonekta sa server.",
+  "serverSetupIsIncompleteAddTheSupabaseBuildConfigurationBeforeSigningIn": "Hindi kumpleto ang pag-setup ng server. Idagdag ang configuration ng Supabase bago mag-sign in.",
+  "serverSetupIsIncompleteFeedbackWasNotSent": "Hindi kumpleto ang pag-setup ng server. Hindi naipadala ang feedback.",
+  "serverSetupIsIncompleteNothingWasSent": "Hindi kumpleto ang pag-setup ng server. Walang naipadala.",
+  "serverSetupIsIncompleteTheAttractionWasNotSaved": "Hindi kumpleto ang pag-setup ng server. Hindi na-save ang pasyalan.",
+  "serviceAreaValue": "Lugar ng serbisyo: {value} ",
+  "@serviceAreaValue": {
+    "description": "Application message: serviceAreaValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "serviceHealth": "Kalagayan ng serbisyo",
+  "sessionChanged": "Nagbago ang session.",
+  "setAFlatCustomTourFareAndAFixedFareForEachPackage": "Magtakda ng isang pamasahe para sa pasadyang tour at bawat package. Walang awtomatikong dagdag para sa hintuan, distansiya, paghihintay o dagsa ng pasahero. Hiwalay ang bayad sa pagpasok.",
+  "shareAnUpdateWithDriversOrTourists": "Magbahagi ng update sa mga drayber o turista",
+  "shareThisCodeOnlyWhenYouAreOnBoard": "Ibigay lamang ang code na ito kapag nakasakay ka na",
+  "sharingLocation": "IBINABAHAGI ANG LOKASYON",
+  "showValue": "Ipakita ang {value}",
+  "@showValue": {
+    "description": "Application message: showValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "signInAfterConfirmingYourEmail": "Mag-sign in pagkatapos kumpirmahin ang iyong email.",
+  "signInBeforeSendingFeedback": "Mag-sign in bago magpadala ng feedback.",
+  "signInFirst": "Mag-sign in muna.",
+  "signOut": "Mag-sign out",
+  "signUp": "Mag-sign Up",
+  "skip": "Laktawan",
+  "someInformationCouldNotRefreshPreviouslyLoadedDataIsShownReconnectAndRetry": "May impormasyong hindi ma-refresh. Ipinapakita ang dating na-load na datos; kumonekta at subukang muli.",
+  "sos": "SOS",
+  "spotName": "Pangalan ng Pasyalan",
+  "spots": "mga lugar",
+  "staleOnlineDrivers": "Mga online na drayber na walang bagong heartbeat",
+  "startNewSearch": "Magsimula ng bagong paghahanap",
+  "statusValue": "Katayuan: {value}",
+  "@statusValue": {
+    "description": "Application message: statusValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "stillToPay": "Dapat pang bayaran",
+  "stop": "Hintuan",
+  "stopAtASafePlaceFirstTheTripWillEndImmediatelyPaymentWill": "Huminto muna sa ligtas na lugar. Agad na matatapos ang biyahe. Ihahold ang bayad para sa pagsusuri ng admin; hindi maaaring awtomatikong singilin ng alinmang panig ang buong pamasahe. Ilarawan ang nangyari, tulad ng pagbabago ng plano, pagkasira ng sasakyan, panganib o pagsara ng pasyalan.",
+  "stopCustomTourValue": "Pasadyang tour na may {value} hintuan",
+  "@stopCustomTourValue": {
+    "description": "Application message: stopCustomTourValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "stops": "stops",
+  "stopsIncluded": "Mga kasamang hintuan",
+  "stopSkipApprovalNeeded": "Kailangan ang pag-apruba sa paglaktaw ng hintuan",
+  "stopSomewhereSafeFirstYourCurrentGpsLocationAndExplanationWillBeRecorded": "Huminto muna sa ligtas na lugar. Itatala ang kasalukuyang lokasyon sa GPS at iyong paliwanag. Maaaring maghintay ang turista o tapusin ang paglilibot para masuri ang bayad.",
+  "stopsValue": "{value} hintuan",
+  "@stopsValue": {
+    "description": "Application message: stopsValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "stopsValueLabel": "{value} hintuan • ₱{secondValue}",
+  "@stopsValueLabel": {
+    "description": "Application message: stopsValueLabel",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "stopTemporarilyUnavailable": "Pansamantalang hindi available ang hintuan",
+  "stopValue": "Hintuan: {value}",
+  "@stopValue": {
+    "description": "Application message: stopValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "storageIsUnavailableRetryStorageBeforeMakingChanges": "Hindi available ang storage. Subukan muli ito bago gumawa ng pagbabago.",
+  "storeUnavailable": "Hindi mabuksan ang app store",
+  "streetHouseNo": "Kalye / numero ng bahay",
+  "streetNameBuildingHouseNo": "Pangalan ng kalye, gusali, numero ng bahay",
+  "submit": "Ipadala",
+  "submitApplication": "Isumite ang aplikasyon",
+  "submitFeedback": "Ipadala ang feedback",
+  "submitReview": "Ipadala ang pagsusuri",
+  "submittedDocuments": "Mga naisumiteng dokumento",
+  "sun": "Lin",
+  "supportSettings": "Suporta at setting",
+  "suspend": "Suspindihin",
+  "suspendDriver": "Suspindihin ang drayber",
+  "suspended": "Sinuspinde",
+  "suspendTourist": "Suspindihin ang turista?",
+  "suspendTouristLabel": "Suspindihin ang Turista",
+  "suspendValue": "Suspindihin si {value}",
+  "@suspendValue": {
+    "description": "Application message: suspendValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "systemActionsAreUnavailableHere": "Hindi available dito ang mga aksiyon ng sistema.",
+  "systemFeedback": "Feedback sa Sistema",
+  "tapTheHeartOnAnyTouristSpotToKeepItHere": "I-tap ang puso sa pasyalan upang itabi ito rito.",
+  "tellUsWhatToImprove": "Sabihin kung ano ang dapat pagandahin",
+  "temporarilyCloseAttraction": "Pansamantalang isara ang pasyalan",
+  "temporarilyClosed": "PANSAMANTALANG SARADO",
+  "temporarilyClosedValue": "Pansamantalang isinara ang {value}",
+  "@temporarilyClosedValue": {
+    "description": "Application message: temporarilyClosedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "thankYouForYourFeedback": "Salamat sa iyong feedback!",
+  "thatPickupCodeIsIncorrectOrTemporarilyLockedAfterRepeatedAttempts": "Mali ang code sa pagsakay o pansamantalang naka-lock matapos ang paulit-ulit na pagsubok.",
+  "theAgreedTourFareIsFixedThereIsNoSurgePricingPendingRequests": "Nakapirmi ang napagkasunduang pamasahe; walang dagdag dahil sa dami ng pasahero. Walang bayad ang mga naghihintay na kahilingan at pagkansela ng drayber. Kapag tinanggap ng drayber, may maikling palugit ang turista bago maaaring singilin ng nailathalang bayad sa pagkansela. Pagkasundo, ligtas munang huminto at susuriin ng admin ang naibigay na serbisyo at ebidensiya. Hiwalay ang entrance fee at mga personal na bilihin.",
+  "theAssignedDriverIsUnavailable": "Hindi available ang nakatalagang drayber.",
+  "theBookingWillEndWithoutACancellationChargeIfAnOnlinePaymentWas": "Matatapos ang reserbasyon nang walang singil sa pagkansela. Kung natanggap na ang online na bayad, mamarkahan ito para sa refund.",
+  "theCheckoutAddressCouldNotBeVerifiedRefreshThisBookingBeforePaying": "Hindi maberipika ang address ng pahina ng bayad. I-refresh ang reserbasyon bago magbayad.",
+  "theDriverMovedAwayFromThePlannedRouteAndNavigationWasRecalculatedLive": "Lumayo ang drayber sa nakaplanong ruta kaya muling kinalkula ang nabigasyon. Aktibo pa rin ang live na pagsubaybay.",
+  "theDriverReportedAVehicleProblem": "Nag-ulat ang drayber ng problema sa sasakyan.",
+  "theDriverWillFollowTheSelectedPinConfirmThatItMatchesTheAddress": "Susundan ng drayber ang napiling pin. Kumpirmahing tumutugma ito sa inilagay mong address.",
+  "theFinalChargeMustBeBetweenZeroAndTheAgreedFare": "Dapat nasa pagitan ng sero at napagkasunduang pamasahe ang huling singil.",
+  "theFinalChargeMustBeSettledBeforeConfirmingCash": "Dapat matukoy ang huling singil bago kumpirmahin ang cash.",
+  "theFinancialRecordRequiresTheConfiguredServer": "Kailangan ang naka-configure na server para sa talang pinansiyal.",
+  "theGpsPositionIsStaleOrInvalidWaitForAFreshSignalAnd": "Luma o hindi wasto ang posisyon ng GPS. Maghintay ng bagong signal at subukan muli.",
+  "theInteractiveOperationsMapIsAvailableInTheMobileApp": "Available ang interaktibong mapa ng operasyon sa mobile app.",
+  "theOtherParticipantMustApproveIfApprovedFinalPaymentWillBeHeldFor": "Kailangan ang pag-apruba ng kabilang panig. Kapag naaprubahan, ihahold ang huling bayad para sa patas na pagsusuri ng admin dahil nagbago ang rutang naibigay.",
+  "theOwnerMustVerifyLocalAgencyNumbersBeforeEnablingCalls": "Dapat kumpirmahin ng may-ari ang mga numero ng lokal na ahensiya bago payagan ang pagtawag.",
+  "thePickupPinIsOutsideTheServiceAreaChooseANearbyPickupPoint": "Nasa labas ng lugar ng serbisyo ang pin ng sunduan. Pumili ng malapit na sunduan.",
+  "thePickupPinIsOutsideTheServiceAreaChooseAnotherPickupPoint": "Nasa labas ng lugar ng serbisyo ang pin ng sunduan. Pumili ng ibang sunduan.",
+  "thePickupWaitingPeriodHasNotFinished": "Hindi pa tapos ang oras ng paghihintay sa sunduan.",
+  "thePolicyChangedWhileYouWereEditingReopenThisPage": "Nagbago ang patakaran habang nag-e-edit ka. Buksan muli ang pahina.",
+  "thePriceChangedReviewTheUpdatedFareAndConfirmAgain": "Nagbago ang presyo. Suriin ang bagong pamasahe at kumpirmahin muli.",
+  "thereAreNoRegisteredTouristsYet": "Wala pang nakarehistrong turista.",
+  "thereIsNoOpenReviewOnThisBooking": "Walang bukas na pagsusuri para sa reserbasyon na ito.",
+  "thereIsNoOutstandingAmountToConfirm": "Walang natitirang halagang kailangang kumpirmahin.",
+  "theRideRequestIsNoLongerAvailable": "Hindi na available ang kahilingan sa biyahe.",
+  "theServerIsNotConfiguredOnThisBuildAddTheSupabaseUrlAnd": "Hindi pa na-configure ang server sa build na ito. Ilagay ang Supabase URL at publishable key, pagkatapos ay buuin muli ang app.",
+  "theTouristMustConfirmAllBookedStopsUseEndTourEarlyForAn": "Dapat kumpirmahin ng turista ang lahat ng naka-book na hintuan. Gamitin ang Maagang tapusin ang tour para sa hindi nakumpletong ruta.",
+  "thisAccountBelongsToThePortal": "Para sa portal ng {role} ang account na ito.",
+  "thisAccountBelongsToThePortalValue": "Para sa portal na {value} ang account na ito.",
+  "@thisAccountBelongsToThePortalValue": {
+    "description": "Application message: thisAccountBelongsToThePortalValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "thisAccountCannotSignIn": "Hindi makapag-sign in ang account na ito.",
+  "thisAccountHasAnInvalidRole": "Hindi wasto ang tungkulin ng account na ito.",
+  "thisAccountIsNotCurrentlyAllowedToSignIn": "Hindi kasalukuyang pinapayagang mag-sign in ang account na ito.",
+  "thisAccountIsStillAwaitingAdministratorApproval": "Naghihintay pa ng pag-apruba ng administrador ang account na ito.",
+  "thisActionCouldNotBeCompletedYourExistingRecordsArePreservedRefreshAnd": "Hindi makumpleto ang aksiyong ito. Nananatili ang iyong mga tala. I-refresh at subukan muli.",
+  "thisAttractionBelongsToATourPackageHideItInsteadOfDeletingIt": "Kasama ang pasyalang ito sa isang tour package. Itago ito sa halip na burahin.",
+  "thisAttractionIsInAnActiveBookingHideItForNewTripsInstead": "Kasama ang pasyalang ito sa aktibong reserbasyon. Itago ito para sa mga bagong biyahe.",
+  "thisAttractionIsNoLongerAvailable": "Hindi na available ang pasyalang ito.",
+  "thisBookingBelongsToAnotherTourist": "Pagmamay-ari ng ibang turista ang reserbasyon na ito.",
+  "thisBookingCouldNotBeFound": "Hindi makita ang reserbasyon na ito.",
+  "thisBookingIsAlreadyUnderReviewAddYourStatementToTheCase": "Sinusuri na ang reserbasyon na ito. Idagdag ang iyong pahayag sa kaso.",
+  "thisBookingIsAssignedToAnotherDriver": "Nakatakda sa ibang drayber ang reserbasyon na ito.",
+  "thisBookingRequestIsNotReadyToRetry": "Hindi pa maaaring subukang muli ang kahilingan ng reserbasyon na ito.",
+  "thisCancellationIsCurrentlyFreeGiveTheRealReasonSoTheEventCan": "Wala pang singil sa pagkanselang ito. Ibigay ang tunay na dahilan upang masuri ang tala.",
+  "thisCompletesTheRefundWorkflowForThePaymongoTestTransactionRecordsTheResult": "Tatapusin nito ang proseso ng refund para sa test na transaksiyon ng PayMongo, itatala ang resulta at aabisuhan ang turista. Ilagay ang dahilan ng refund.",
+  "thisDriverAccountIsStillAwaitingAdministratorApproval": "Naghihintay pa ng pag-apruba ng administrador ang account ng drayber na ito.",
+  "thisField": "Ang field na ito",
+  "thisMonth": "Ngayong buwan",
+  "thisOpensYourPhoneDialerConfirmTheNumberBeforeCalling": "Bubuksan nito ang dialer ng telepono. Kumpirmahin ang numero bago tumawag.",
+  "thisOpensYourPhoneDialerWith911YouMustPressCallToContact": "Bubuksan nito ang dialer na may numerong 911. Pindutin ang Tumawag para makontak ang serbisyong pang-emerhensiya.",
+  "thisPackageCannotBeBookedUntilAllStopsAreAvailable": "Hindi maaaring ipareserba ang paketeng ito hangga’t hindi available ang lahat ng hintuan.",
+  "thisPackageHasAFixedRouteTheStopsAreAlreadySelectedForYou": "May nakapirming ruta ang paketeng ito. Napili na ang mga hintuan para sa iyo.",
+  "thisPackageHasNoPublishedPrice": "Wala pang nailathalang presyo ang paketeng ito.",
+  "thisPasswordResetLinkIsInvalidOrExpiredRequestANewOne": "Hindi wasto o expired na ang link sa pagpapalit ng password. Humiling ng bago.",
+  "thisPickupPinIsOutsideTheServiceAreaMoveThePinCloserTo": "Nasa labas ng lugar ng serbisyo ang pin sa sunduan. Ilapit ito sa sentro ng serbisyo.",
+  "thisRemovesYourLoginProfileDetailsDocumentsAndAvatarsRetainedTripAndFinancial": "Aalisin nito ang iyong login, detalye ng profile, mga dokumento at larawan ng profile. Ihihiwalay sa iyong pagkakakilanlan ang mga pinanatiling tala ng biyahe at pananalapi. Tapusin o kanselahin muna ang aktibong reserbasyon. I-type ang DELETE upang kumpirmahin.",
+  "thisRequestAlreadyExistsRefreshYourTripsBeforeTryingAgain": "May ganitong kahilingan na. I-refresh ang mga biyahe bago subukang muli.",
+  "thisRequestIsNoLongerAvailable": "Hindi na available ang kahilingang ito.",
+  "thisSendsTheExactAmountToPaymongoAndRecordsOnlyTheProviderResult": "Ipapadala nito ang eksaktong halaga sa PayMongo at itatala lamang ang resulta ng provider. Kasalukuyang para lamang sa live na transaksiyon ang aktuwal na refund ng PayMongo, kaya mananatiling malinaw na hindi na-refund ang pagtanggi sa test mode. Ilagay ang dahilan ng pasiya.",
+  "thisTouristAccountCannotBookRightNowContactTheAdministrator": "Hindi makapag-book ang account ng turistang ito ngayon. Makipag-ugnayan sa administrador.",
+  "thisTouristAccountIsCurrentlyUnavailable": "Hindi kasalukuyang available ang account ng turistang ito.",
+  "thisTripCouldNotBeFoundOrHasBeenRemoved": "Hindi makita o naalis na ang biyaheng ito.",
+  "thisTripHasAlreadyEnded": "Natapos na ang biyaheng ito.",
+  "thisTripIsNotInProgress": "Hindi kasalukuyang tumatakbo ang biyaheng ito.",
+  "thisTripUsesANewerStatusUpdateTheAppOrContactSupportBefore": "Gumagamit ang biyaheng ito ng mas bagong katayuan. I-update ang app o kontakin ang support bago gumawa ng pagbabago.",
+  "thisWeek": "Ngayong linggo",
+  "thisYear": "Ngayong taon",
+  "threeLineSummary": "{value} · {secondValue}\n{thirdValue}",
+  "@threeLineSummary": {
+    "description": "Application message: threeLineSummary",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      },
+      "thirdValue": {
+        "type": "String"
+      }
+    }
+  },
+  "thu": "Huw",
+  "tipsReminders": "Mga tip at paalala",
+  "title": "Pamagat",
+  "today": "Ngayon",
+  "totalBookings": "Kabuuang reserbasyon",
+  "totalFare": "Kabuuang pamasahe",
+  "totalRevenue": "Kabuuang kita",
+  "tourEndedEarlyPaymentHeldForReview": "Maagang tinapos ang biyahe; nakahold ang bayad para sa pagsusuri",
+  "tourist": "Turista",
+  "touristAccountActivated": "Na-activate ang account ng turista",
+  "touristAccounts": "Mga account ng turista",
+  "touristAccountSuspended": "Nasuspinde ang account ng turista",
+  "touristAndDriverPolicyTerms": "Mga tuntunin para sa turista at drayber",
+  "touristConfirmedStopValue": "Kinumpirma ng turista ang hintuang {value}.",
+  "@touristConfirmedStopValue": {
+    "description": "Application message: touristConfirmedStopValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "touristNoShowAfterVerifiedPickupWait": "Hindi sumipot ang turista matapos ang beripikadong paghihintay.",
+  "touristReportedAsANoShowAfterTheVerifiedWaitingPeriodPublishedNo": "Iniulat na hindi sumipot ang turista matapos ang beripikadong paghihintay. Inilapat ang nakalathalang bayad.",
+  "tourists": "Mga turista",
+  "touristsAndDrivers": "Mga turista at drayber",
+  "touristSpot": "Lugar ng Turista",
+  "touristSpotCreated": "Nalikha ang pasyalan",
+  "touristSpotIssue": "Problema sa pasyalan",
+  "touristSpots": "Mga pasyalan",
+  "touristSpotUpdated": "Na-update ang pasyalan",
+  "touristVisibilityValue": "Pagpapakita ng {value} sa mga turista",
+  "@touristVisibilityValue": {
+    "description": "Application message: touristVisibilityValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "tourPackage": "Pakete ng paglilibot",
+  "tourPackages": "Mga tour package",
+  "tourScheduled": "Naiskedyul ang paglilibot",
+  "tricycleBooking": "reserbasyon ng Traysikel",
+  "trip": "Biyahe",
+  "tripCompletedFixedFareDueCashNotYetConfirmed": "Natapos ang biyahe. Dapat bayaran ang takdang pamasahe; hindi pa kumpirmado ang cash.",
+  "tripControls": "Mga kontrol ng biyahe",
+  "tripHistory": "Kasaysayan ng biyahe",
+  "tripOngoing": "Kasalukuyang bumiyahe",
+  "tripPausedOpenTripControlsToChooseWhetherToWaitOrEndSafelyValue": "Nakahinto ang biyahe: {value}. Buksan ang mga kontrol ng biyahe upang pumiling maghintay o ligtas na tapusin ito.",
+  "@tripPausedOpenTripControlsToChooseWhetherToWaitOrEndSafelyValue": {
+    "description": "Application message: tripPausedOpenTripControlsToChooseWhetherToWaitOrEndSafelyValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "tripPausedVehicleProblem": "Nakahinto ang biyahe · may problema sa sasakyan",
+  "tripPayment": "Biyahe at bayad",
+  "trips": "Mga biyahe",
+  "tripsValue": "Mga biyahe: {value}",
+  "@tripsValue": {
+    "description": "Application message: tripsValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "tripUpdates": "Mga update sa biyahe",
+  "tryAdjustingYourFiltersOrSearchTerm": "Subukang baguhin ang mga filter o salitang hinahanap.",
+  "tue": "Mar",
+  "turnByTurnMappingIsAvailableInTheMobileApp": "Available ang detalyadong direksiyon sa mobile app.",
+  "turnOnGpsToShareYourLocation": "I-on ang GPS upang ibahagi ang iyong lokasyon.",
+  "turnOnLocationServicesToUseYourCurrentPosition": "I-on ang serbisyo ng lokasyon upang magamit ang kasalukuyang posisyon.",
+  "twoPartDetails": "{value} • {secondValue}",
+  "@twoPartDetails": {
+    "description": "Application message: twoPartDetails",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "twoPartSummary": "{value} · {secondValue}",
+  "@twoPartSummary": {
+    "description": "Application message: twoPartSummary",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "unableToCheckAppRequirements": "Hindi masuri ang mga kinakailangan ng app",
+  "unableToLoadThePrivacyNotice": "Hindi ma-load ang abiso sa privacy",
+  "unavailable": "Hindi available",
+  "underreview": "Sinusuri",
+  "underReview": "Sinusuri",
+  "unknown": "Hindi alam",
+  "unknownApplicationEnvironment": "Hindi kilalang environment ng app.",
+  "unknownUntilManuallyReopened": "Hindi alam / hanggang manu-manong buksan",
+  "unpaid": "Hindi pa bayad",
+  "unsettledCash": "Hindi pa bayad na cash",
+  "unsupportedOfflineCommand": "Hindi suportado ang aksiyong ito habang offline.",
+  "updateAppBeforeContinuingToUseBookingAndPaymentServices": "I-update ang {brandName} bago patuloy na gumamit ng reserbasyon at pagbabayad.",
+  "@updateAppBeforeContinuingToUseBookingAndPaymentServices": {
+    "description": "Application message: updateAppBeforeContinuingToUseBookingAndPaymentServices",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "updateApplication": "I-update ang aplikasyon",
+  "updatedSAgoValue": "na-update {value}s ang nakalipas",
+  "@updatedSAgoValue": {
+    "description": "Application message: updatedSAgoValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "updatePassword": "Palitan ang password",
+  "updateRequired": "Kailangan ng update",
+  "updateYourDriverDetails": "I-update ang iyong detalye bilang drayber",
+  "updatingRoute": "Ina-update ang ruta…",
+  "uploadImage": "Mag-upload ng Larawan",
+  "uploading": "Ina-upload…",
+  "uploadValue": "I-upload ang {value}",
+  "@uploadValue": {
+    "description": "Application message: uploadValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "useAtLeast8Characters": "Gumamit ng hindi bababa sa 8 character",
+  "useAtLeastEightCharactersAvoidAPasswordYouUseOnAnotherService": "Gumamit ng hindi bababa sa walong karakter. Iwasang gamitin ang password mo sa ibang serbisyo.",
+  "useLettersSpacesHyphensApostrophesOrPeriodsInYourName": "Gumamit ng mga titik, puwang, gitling, kudlit o tuldok sa pangalan",
+  "useMyCurrentLocation": "Gamitin ang kasalukuyan kong lokasyon",
+  "useNow": "Gamitin ngayon",
+  "useThisOnlyIfYouCannotCompleteThePickupTheTouristWillDecide": "Gamitin lamang ito kung hindi mo maitutuloy ang pagsundo. Magpapasiya ang turista kung maghahanap ng ibang beripikadong drayber o magkakansela nang walang singil. Ipaliwanag ang nangyari.",
+  "vehicleAndReliability": "Sasakyan at pagiging maaasahan",
+  "vehicleImageSelected": "Napili na ang larawan ng sasakyan",
+  "vehicleInfo": "Impormasyon ng Sasakyan",
+  "vehicleInspection": "Inspeksiyon ng sasakyan",
+  "vehicleInspectionExpiresOn": "vehicle_inspection_expires_on",
+  "vehicleInspectionValue": "Inspeksiyon ng sasakyan: {value}",
+  "@vehicleInspectionValue": {
+    "description": "Application message: vehicleInspectionValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "vehicleIsSafeResumeTrip": "Ligtas na ang sasakyan · ipagpatuloy ang biyahe",
+  "vehicleProblem": "problema sa sasakyan",
+  "vehicleProblemPauseTripSafely": "Problema sa sasakyan · ligtas na huminto",
+  "verificationStatus": "Katayuan ng beripikasyon",
+  "verified": "BERIPIKADO",
+  "verifiedAppDriver": "Beripikadong drayber ng {brandName}",
+  "@verifiedAppDriver": {
+    "description": "Application message: verifiedAppDriver",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "verifiedNearThePickupPoint": "Beripikadong malapit sa sunduan",
+  "verifiedPickupArrivalIsRequiredBeforeReportingANoShow": "Kailangan ang beripikadong pagdating sa sunduan bago mag-ulat ng hindi pagsipot.",
+  "verifiedTourist": "Na-verify na turista",
+  "verifyLocalAgencyNumbers": "Beripikahin ang mga numero ng lokal na ahensiya",
+  "verifyPickup": "Beripikahin ang pagsakay",
+  "verifyPickupCodeStart": "Beripikahin ang code sa sunduan at magsimula",
+  "viewActiveDriversOnTheMap": "Tingnan ang mga aktibong drayber sa mapa",
+  "viewAll": "Tingnan lahat",
+  "viewAndManageTouristAccounts": "Tingnan at pamahalaan ang mga account ng turista",
+  "viewBookingRequests": "Tingnan ang mga kahilingan ng reserbasyon",
+  "viewDetails": "Tingnan ang mga detalye",
+  "viewMap": "Tingnan sa mapa",
+  "viewMyTrips": "Tingnan ang aking mga biyahe",
+  "viewScheduledBooking": "Tingnan ang nakaiskedyul na reserbasyon",
+  "viewValue": "Tingnan ang {value}",
+  "@viewValue": {
+    "description": "Application message: viewValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "visible": "Nakikita",
+  "visibleToTourists": "Nakikita ng mga Turista",
+  "waitForTheMobileMapToLoadBeforeConfirmingAnExactPickupPin": "Hintaying ma-load ang mobile na mapa bago kumpirmahin ang eksaktong pin sa sunduan.",
+  "waitForTheTouristToConfirmThisStop": "Hintaying kumpirmahin ng turista ang hintuang ito.",
+  "waitForThisDriver": "Hintayin ang drayber na ito",
+  "waitingForADriverToAcceptYouCanLeaveThisPageAndResume": "Naghihintay ng drayber na tatanggap. Maaari mong balikan ang reserbasyon sa Mga Biyahe.",
+  "waitingForAnApprovedDriverToAcceptYourRequest": "Naghihintay ng aprubadong drayber na tatanggap sa iyong kahilingan.",
+  "waitingForCashReturnConfirmation": "Naghihintay ng kumpirmasyon sa pagsasauli ng cash",
+  "waitingForLiveLocation": "Naghihintay ng live location",
+  "waitingForTheOtherCashConfirmation": "Naghihintay ng kumpirmasyon ng kabilang panig sa cash",
+  "waitingForTheOtherParticipantNavigationStaysOnTheCurrentRoute": "Hinihintay ang kabilang panig. Mananatili muna sa kasalukuyang ruta.",
+  "waitingForTheTouristSDecision": "Naghihintay ng pasiya ng turista.",
+  "waitingForTheTouristToChooseDoNotProceedToPickup": "Hinihintay ang pasya ng turista. Huwag munang pumunta sa sunduan.",
+  "waitingPeriodCompleted": "Natapos ang oras ng paghihintay",
+  "waived": "Walang singil",
+  "wed": "Miy",
+  "weHaveSentPasswordRecoveryInstructionsToYourEmail": "Ipinadala na namin sa email mo ang mga tagubilin sa pagpapalit ng password.",
+  "welcomeBack": "Maligayang pagbabalik",
+  "weLlSendNearbyBookingsYourWay": "Ipapadala namin sa iyo ang mga kalapit na reserbasyon.",
+  "weWillRemindYouAndStartMatching30MinutesBeforePickup": "Ipapaalala namin ang biyahe at magsisimulang maghanap ng drayber 30 minuto bago ang sunduan.",
+  "whatDidYouLikeOrDislike": "Ano ang nagustuhan o hindi mo nagustuhan?",
+  "whatSIncluded": "Ano ang kasama",
+  "whenYouGetNotificationsTheyWillAppearHere": "Dito makikita ang mga abisong matatanggap mo.",
+  "whereWouldYouLikeToGo": "Saan mo gusto pumunta?",
+  "willBeCompletedInThePaymongoTestEnvironmentValue": "Tatapusin ang {value} sa test environment ng PayMongo.",
+  "@willBeCompletedInThePaymongoTestEnvironmentValue": {
+    "description": "Application message: willBeCompletedInThePaymongoTestEnvironmentValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "youAlreadyHaveAnActiveBookingOpenTripsToContinueOrCancelIt": "May aktibong reserbasyon ka na. Buksan ang Mga Biyahe upang ipagpatuloy o kanselahin ito.",
+  "youAreTogether": "Magkasama na kayo",
+  "youChoseToWaitTheDriverMustConfirmTheVehicleIsSafeBefore": "Pinili mong maghintay. Dapat kumpirmahin muna ng drayber na ligtas ang sasakyan bago ituloy ang nabigasyon.",
+  "yourAccount": "Ang iyong account",
+  "yourAccountCannotPerformThisActionRefreshYourAccountOrContactSupport": "Hindi maaaring gawin ng iyong account ang aksiyong ito. I-refresh ang account o makipag-ugnayan sa suporta.",
+  "yourAccountCanUploadApplicationDocumentsAndCheckApprovalGoingOnlineAndAccepting": "Maaari kang mag-upload ng mga dokumento at tingnan ang pag-apruba. Kailangan ang pag-apruba ng administrador bago mag-online at tumanggap ng biyahe.",
+  "yourAccreditationIsVerified": "Beripikado ang iyong akreditasyon",
+  "yourActivity": "Iyong aktibidad",
+  "yourAdministratorRoleDoesNotIncludeThisArea": "Hindi kasama ang bahaging ito sa iyong tungkulin bilang administrador.",
+  "yourAssignedTouristCanSeeYourLiveLocation": "Nakikita ng nakatalagang turista ang iyong live na lokasyon",
+  "yourCompletedRidesWillAppearHere": "Dito makikita ang iyong mga natapos na biyahe.",
+  "yourDocumentsAreUnderReview": "Sinusuri ang iyong mga dokumento.",
+  "yourDriver": "Iyong drayber",
+  "youReOffline": "Naka-offline ka",
+  "youReReadyToRide": "Handa ka nang bumiyahe",
+  "yourFeedbackHelpsKeepAppTrusted": "Nakakatulong ang iyong feedback upang manatiling mapagkakatiwalaan ang {brandName}.",
+  "@yourFeedbackHelpsKeepAppTrusted": {
+    "description": "Application message: yourFeedbackHelpsKeepAppTrusted",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "yourFixedFareRouteAndPaymentRecordStayUnchangedThePreviousDriverIs": "Mananatili ang nakapirming pamasahe, ruta at tala ng pagbabayad. Aalisin ang dating drayber at magsisimula ang panibagong 10 minutong paghahanap.",
+  "yourGuideYourRideInBustos": "Gabay at Sakay Mo sa Bustos",
+  "yourJourneyYourWay": "Ang Biyahe Mo, sa Paraan Mo",
+  "yourLocalJourneyStartsHere": "Ang iyong lokal na paglalakbay ay nagsisimula dito",
+  "yourPreviousCodeWillStopWorkingShareTheNewCodeOnlyAfterBoarding": "Hindi na gagana ang dating code. Ibigay lamang ang bagong code kapag nakasakay ka na. Maaari kang humiling ng bagong code kada limang minuto.",
+  "yourRidesAndReceipts": "Iyong mga sakay at resibo",
+  "yourTourIsReservedDriverMatchingBegins30MinutesBeforePickupAndReminders": "Nakareserba na ang tour mo. Magsisimula ang paghahanap ng drayber 30 minuto bago ang sunduan. Makikita ang mga paalala sa Mga Abiso.",
+  "yourTravel": "Ang iyong paglalakbay",
+  "youWillBeSentToPaymongoTestCheckoutPaymentIsConfirmedOnlyAfter": "Dadalhin ka sa test checkout ng PayMongo. Makukumpirma lamang ang bayad kapag dumating sa {brandName} ang secure na webhook.",
+  "@youWillBeSentToPaymongoTestCheckoutPaymentIsConfirmedOnlyAfter": {
+    "description": "Application message: youWillBeSentToPaymongoTestCheckoutPaymentIsConfirmedOnlyAfter",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "useDeviceLanguage": "Gamitin ang wika ng device",
+  "philippineTime": "Oras sa Pilipinas",
+  "philippineDateTime": "{value} ({timeZone})",
+  "@philippineDateTime": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "timeZone": {
+        "type": "String"
+      }
+    }
+  },
+  "minutesDuration": "{count, plural, =1{1 min} other{{count} min}}",
+  "@minutesDuration": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursDuration": "{count, plural, =1{1 oras} other{{count} oras}}",
+  "@hoursDuration": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursMinutesDuration": "{hours} oras {minutes} min",
+  "@hoursMinutesDuration": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "numberOfTrips": "{count, plural, =1{1 biyahe} other{{count} biyahe}}",
+  "@numberOfTrips": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@isTemporarilyClosedAndCannotBeAddedRightNow": {
+    "placeholders": {
+      "spot": {
+        "type": "String"
+      }
+    }
+  },
+  "@offlineModeShowingSavedDataFromCriticalActionsRequireAConnection": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@thisAccountBelongsToThePortal": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "activeTripLocationTitle": "Aktibo ang lokasyon ng biyahe sa {brandName}",
+  "@activeTripLocationTitle": {
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationUpdateTitle": "Update mula sa {brandName}",
+  "@notificationUpdateTitle": {
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldMustBeBetween": "Dapat nasa pagitan ng {minimum} at {maximum} ang {field}.",
+  "@fieldMustBeBetween": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "minimum": {
+        "type": "int"
+      },
+      "maximum": {
+        "type": "int"
+      }
+    }
+  },
+  "selectedDestinationCount": "{count} destinasyon",
+  "@selectedDestinationCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "spotCount": "{count} lugar",
+  "@spotCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "buildYourDayWithStops": "Buuin ang iyong araw ({count} hintuan)",
+  "@buildYourDayWithStops": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cancellationWithReason": "{result}. Dahilan: {reason}",
+  "@cancellationWithReason": {
+    "placeholders": {
+      "result": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "cashConfirmation": "Kinumpirma ng {actor} ang {payment}; {confirmation}.",
+  "@cashConfirmation": {
+    "placeholders": {
+      "payment": {
+        "type": "String"
+      },
+      "actor": {
+        "type": "String"
+      },
+      "confirmation": {
+        "type": "String"
+      }
+    }
+  },
+  "bothPartiesConfirmed": "kinumpirma ng parehong panig",
+  "awaitingOtherParty": "hinihintay ang kabilang panig",
+  "exportPending": "Nakabinbin",
+  "exportFulfilled": "Handa na ang kopya",
+  "exportRejected": "Tinanggihan ang kahilingan",
+  "administrator": "Tagapangasiwa",
+  "payment": "Pagbabayad",
+  "signInDidNotComplete": "Hindi natapos ang pag-sign in.",
+  "authResetConfigurationRequired": "Hindi pa nakaayos ang pagbawi ng password para sa bersyong ito.",
+  "pickupRecoveryFailed": "Hindi nakumpirma ang pagbawi ng kodigo sa sunduan. Subukang muli mula sa reserbasyon.",
+  "offlineReplayUnsafe": "Hindi maaaring ulitin ang aksiyong ito nang offline.",
+  "selectedStopsCount": "{count} napiling hintuan",
+  "@selectedStopsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cancellationGraceExpired": "Natapos na ang palugit na {minutes} minuto. Ang nakasaad na bayad sa pagkansela na {percent}% ay {fee}. Ibigay ang dahilan bago kumpirmahin.",
+  "@cancellationGraceExpired": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      },
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "arrivedAtPickup": "Nakarating na ako sa sunduan",
+  "requestPickupReplacement": "Hindi ako makakarating sa sunduan · humiling ng kapalit",
+  "confirmReachedStop": "Oo, nakarating kami sa hintuang ito",
+  "reviewFinalCharge": "Suriin at itakda ang huling singil",
+  "trackingMovementSubtitle": "{distance} {target} · na-update {seconds}s ang nakalipas",
+  "@trackingMovementSubtitle": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "complianceServiceArea": "Sakop ng serbisyo: {name} ({radius} km)",
+  "@complianceServiceArea": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "radius": {
+        "type": "String"
+      }
+    }
+  },
+  "goOnline": "Mag-online",
+  "call": "Tumawag",
+  "sendMessage": "Magpadala ng mensahe",
+  "share": "Ibahagi",
+  "close": "Isara",
+  "downloadReport": "I-download ang ulat",
+  "markResolved": "Markahang nalutas",
+  "changePhoto": "Palitan ang larawan",
+  "savePlace": "I-save ang lugar",
+  "suggestion": "Mungkahi",
+  "luggage": "Bagahe",
+  "assistance": "Tulong",
+  "friendly": "Magiliw",
+  "punctual": "Nasa oras",
+  "terrible": "Napakasama",
+  "bad": "Hindi maganda",
+  "okay": "Katamtaman",
+  "good": "Maganda",
+  "excellent": "Napakahusay!",
+  "province": "Lalawigan",
+  "municipality": "Munisipyo",
+  "resorts": "Mga resort",
+  "events": "Mga kaganapan",
+  "farmsNature": "Mga bukid at kalikasan",
+  "foodCafes": "Pagkain at mga kapihan",
+  "pickup": "Sunduan",
+  "tricycle": "Traysikel",
+  "oneYearMembership": "1 taon",
+  "lastThirtyDays": "30 araw",
+  "lastSevenDays": "7 araw",
+  "newTouristRating": " 5.0 (Bago)",
+  "exampleOperatingHours": "8:00 AM – 5:00 PM",
+  "onePassenger": "1 pasahero",
+  "twoPassengers": "2 pasahero",
+  "threePassengers": "3 pasahero",
+  "removeSavedPlace": "Alisin ang na-save na lugar",
+  "togglePhotoControls": "Ipakita o itago ang mga kontrol ng larawan",
+  "paymentCheckoutCreated": "Nagawa ang checkout",
+  "paymentProcessing": "Pinoproseso ang bayad",
+  "paymentFailed": "Nabigo ang pagbabayad",
+  "paymentAwaitingConfirmation": "Naghihintay ng kumpirmasyon ng bayad",
+  "paymentRefundDue": "May ibabalik na bayad",
+  "paymentRefundProcessing": "Pinoproseso ang pagbabalik ng bayad",
+  "actorSystem": "Sistema",
+  "statusBusy": "Abala",
+  "privacyNoticeTitle": "Paunawa sa pagkapribado",
+  "privacyWelcomeTitle": "Mahalaga ang iyong pagkapribado",
+  "privacyWelcomeBody": "Bago magpatuloy, suriin kung paano ginagamit ng {brandName} ang iyong impormasyon at piliin ang iyong mga kagustuhan.",
+  "@privacyWelcomeBody": {"placeholders": {"brandName": {"type": "String"}}},
+  "privacyAccountTitle": "Detalye ng account at biyahe",
+  "privacyAccountBody": "Ginagamit ang iyong detalye para pamahalaan ang account, maghanap ng masasakyan at magtala ng biyahe.",
+  "privacyLocationTitle": "Lokasyon kapag kailangan",
+  "privacyLocationBody": "Ginagamit ang lokasyon para sa sunduan at nabigasyon. Hinihingi lang ang lokasyon sa background para sa serbisyo ng drayber.",
+  "privacyChoiceTitle": "Ikaw ang may kontrol",
+  "privacyChoiceBody": "Opsyonal ang mga ulat ng pag-crash. Maaari kang humiling ng iyong datos o mag-delete ng account sa iyong profile.",
+  "privacyFullNotice": "Basahin ang buong paunawa",
+  "privacyDiagnosticsHelp": "Opsyonal. Hindi maaapektuhan ang pag-sign in o mga reserbasyon kapag naka-off ito.",
+  "privacyRequiredHelp": "Tanggapin ang paunawa para magpatuloy. Ikaw ang pipili kung magpapadala ng mga ulat.",
+  "privacyLoadingLabel": "Sinusuri ang iyong mga kagustuhan sa pagkapribado",
+  "privacyVersionLabel": "Bersiyon ng paunawa: {version}",
+  "@privacyVersionLabel": {"placeholders": {"version": {"type": "String"}}}
+}

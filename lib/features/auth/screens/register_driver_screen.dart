@@ -1,3 +1,8 @@
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import '../../../core/prototype/prototype_session.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/widgets/registration_privacy.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -69,19 +74,23 @@ class _RegisterDriverScreenState extends ConsumerState<RegisterDriverScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (_documents.length != 2) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Attach both required driver documents.')),
+        SnackBar(content: Text(context.l10n.attachBothRequiredDriverDocuments)),
       );
       return;
     }
     if (!BackendConfig.isConfigured) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Server setup is incomplete.')),
+        SnackBar(content: Text(context.l10n.serverSetupIsIncomplete)),
       );
       return;
     }
+    final consent = await requestRegistrationConsent(context);
+    if (consent == null || !mounted) return;
     setState(() => _submitting = true);
     try {
-      await AuthService.registerDriver(
+      final outcome = await AuthService.registerDriver(
+        privacyVersion: consent.version,
+        privacyLanguage: consent.shownLanguage!,
         name: _name.text,
         email: _email.text,
         phone: _phone.text,
@@ -96,17 +105,46 @@ class _RegisterDriverScreenState extends ConsumerState<RegisterDriverScreen> {
         vehicleRegistrationBytes: await _documents['vehicle']!.readAsBytes(),
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Application submitted for administrator review.'),
-        ),
-      );
-      context.go('/login');
+      if (outcome == DriverRegistrationOutcome.awaitingEmailConfirmation) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context
+                  .l10n
+                  .confirmYourEmailThenSignInAsADriverToFinishUploadingYour,
+            ),
+          ),
+        );
+        context.go('/login');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.applicationSubmittedForAdministratorReview,
+            ),
+          ),
+        );
+        final profile = await AuthService.restoreSession();
+        if (profile != null) {
+          PrototypeSession.setAuthenticatedUser(
+            id: profile.id,
+            name: profile.name,
+            role: profile.applicationPending
+                ? 'driver_pending'
+                : profile.role.name,
+            email: profile.email,
+            plateNumber: profile.plateNumber,
+          );
+        }
+        if (mounted) context.go('/driver/application-pending');
+      }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.toString())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.message(ErrorMessages.forError(error))),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -132,7 +170,9 @@ class _RegisterDriverScreenState extends ConsumerState<RegisterDriverScreen> {
       initialDate: current ?? now.add(const Duration(days: 365)),
       firstDate: DateTime(now.year, now.month, now.day),
       lastDate: DateTime(now.year + 10, 12, 31),
-      helpText: license ? 'License expiry date' : 'Franchise expiry date',
+      helpText: license
+          ? MessageCode.licenseExpiryDate
+          : MessageCode.franchiseExpiryDate,
     );
     if (picked == null || !mounted) return;
     setState(() {
@@ -145,8 +185,8 @@ class _RegisterDriverScreenState extends ConsumerState<RegisterDriverScreen> {
   }
 
   String _dateLabel(DateTime? value) => value == null
-      ? 'Select expiry date'
-      : '${value.month}/${value.day}/${value.year}';
+      ? MessageCode.selectExpiryDate
+      : AppFormatters.dateShort(value);
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +194,7 @@ class _RegisterDriverScreenState extends ConsumerState<RegisterDriverScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          'Driver Registration',
+          context.l10n.driverRegistration,
           style: GoogleFonts.poppins(color: AppColors.textPrimary),
         ),
         backgroundColor: AppColors.surface,
@@ -176,7 +216,9 @@ class _RegisterDriverScreenState extends ConsumerState<RegisterDriverScreen> {
                 children: [
                   Expanded(
                     child: AppButton(
-                      label: _currentStep == 2 ? 'Submit application' : 'Next',
+                      label: _currentStep == 2
+                          ? MessageCode.submitApplication
+                          : MessageCode.next,
                       isLoading: _submitting,
                       onPressed: details.onStepContinue,
                     ),
@@ -185,7 +227,7 @@ class _RegisterDriverScreenState extends ConsumerState<RegisterDriverScreen> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: AppButton(
-                        label: 'Back',
+                        label: context.l10n.back,
                         type: AppButtonType.outline,
                         onPressed: details.onStepCancel,
                       ),
@@ -197,39 +239,39 @@ class _RegisterDriverScreenState extends ConsumerState<RegisterDriverScreen> {
           },
           steps: [
             Step(
-              title: const Text('Personal Info'),
+              title: Text(context.l10n.personalInfo),
               content: Column(
                 children: [
                   AppTextField(
                     controller: _name,
-                    label: 'Full Name',
-                    hint: 'Juan Dela Cruz',
+                    label: context.l10n.fullName,
+                    hint: context.l10n.juanDelaCruz,
                     textInputAction: TextInputAction.next,
                     validator: (v) => v == null || v.trim().length < 2
-                        ? 'Full Name is required'
+                        ? MessageCode.fullNameIsRequired
                         : null,
                   ),
                   const SizedBox(height: 16),
                   AppTextField(
                     controller: _email,
-                    label: 'Email',
-                    hint: 'juan@example.com',
+                    label: context.l10n.email,
+                    hint: context.l10n.juanExampleCom,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     validator: (v) => v == null || !v.contains('@')
-                        ? 'Enter a valid email'
+                        ? MessageCode.enterAValidEmail
                         : null,
                   ),
                   const SizedBox(height: 16),
                   AppTextField(
                     controller: _phone,
-                    label: 'Phone Number',
+                    label: context.l10n.phoneNumber,
                     hint: '+63 912 345 6789',
                     keyboardType: TextInputType.phone,
                     textInputAction: TextInputAction.done,
                     validator: (v) =>
                         v == null || v.replaceAll(RegExp(r'\D'), '').length < 10
-                        ? 'Enter a valid phone number'
+                        ? MessageCode.enterAValidPhoneNumber
                         : null,
                   ),
                 ],
@@ -237,51 +279,60 @@ class _RegisterDriverScreenState extends ConsumerState<RegisterDriverScreen> {
               isActive: _currentStep >= 0,
             ),
             Step(
-              title: const Text('Vehicle Info'),
+              title: Text(context.l10n.vehicleInfo),
               content: Column(
                 children: [
                   AppTextField(
                     controller: _plate,
-                    label: 'Plate Number',
-                    hint: 'ABC 1234',
+                    label: context.l10n.plateNumber,
+                    hint: context.l10n.abc1234,
                     textInputAction: TextInputAction.next,
                     validator: (v) => v == null || v.trim().isEmpty
-                        ? 'Plate Number is required'
+                        ? MessageCode.plateNumberIsRequired
                         : null,
                   ),
                   const SizedBox(height: 16),
                   AppTextField(
                     controller: _franchise,
-                    label: 'Franchise Number',
-                    hint: 'F-123456',
+                    label: context.l10n.franchiseNumber,
+                    hint: context.l10n.f123456,
                     textInputAction: TextInputAction.done,
                     validator: (v) => v == null || v.trim().isEmpty
-                        ? 'Franchise Number is required'
+                        ? MessageCode.franchiseNumberIsRequired
                         : null,
                   ),
                   const SizedBox(height: 16),
                   _expiryTile(
-                    title: 'Driver license expiry',
+                    title: MessageCode.driverLicenseExpiry,
                     value: _licenseExpiresOn,
                     onTap: () => _pickExpiry(true),
                   ),
                   const SizedBox(height: 12),
                   _expiryTile(
-                    title: 'Franchise / OR-CR expiry',
+                    title: MessageCode.franchiseOrCrExpiry,
                     value: _franchiseExpiresOn,
                     onTap: () => _pickExpiry(false),
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<int>(
                     initialValue: _passengerCapacity,
-                    decoration: const InputDecoration(
-                      labelText: 'Safe passenger capacity',
+                    decoration: InputDecoration(
+                      labelText: context.l10n.safePassengerCapacity,
                       border: OutlineInputBorder(),
                     ),
-                    items: const [
-                      DropdownMenuItem(value: 1, child: Text('1 passenger')),
-                      DropdownMenuItem(value: 2, child: Text('2 passengers')),
-                      DropdownMenuItem(value: 3, child: Text('3 passengers')),
+                    items: [
+                      DropdownMenuItem(
+                        value: 1,
+                        child: Text(context.l10n.onePassenger),
+                      ),
+                      DropdownMenuItem(
+                        value: 2,
+                        child: Text(context.l10n.twoPassengers),
+                      ),
+                      DropdownMenuItem(
+                        value: 3,
+                        child: Text(context.l10n.threePassengers),
+                      ),
                     ],
                     onChanged: (value) =>
                         setState(() => _passengerCapacity = value ?? 3),
@@ -291,9 +342,11 @@ class _RegisterDriverScreenState extends ConsumerState<RegisterDriverScreen> {
                     value: _acceptsAccessibilityRequests,
                     onChanged: (value) =>
                         setState(() => _acceptsAccessibilityRequests = value),
-                    title: const Text('Accept assistance requests'),
-                    subtitle: const Text(
-                      'Match with tourists who describe mobility or boarding needs.',
+                    title: Text(context.l10n.acceptAssistanceRequests),
+                    subtitle: Text(
+                      context
+                          .l10n
+                          .matchWithTouristsWhoDescribeMobilityOrBoardingNeeds,
                     ),
                   ),
                 ],
@@ -301,21 +354,24 @@ class _RegisterDriverScreenState extends ConsumerState<RegisterDriverScreen> {
               isActive: _currentStep >= 1,
             ),
             Step(
-              title: const Text('Documents & Password'),
+              title: Text(context.l10n.documentsPassword),
               content: Column(
                 children: [
                   _buildUploadBtn('license', 'Driver\'s license'),
+                  Text(
+                    context.l10n.driverDocumentsMustBeJpegImages5MbMaximumEach,
+                  ),
                   const SizedBox(height: 16),
-                  _buildUploadBtn('vehicle', 'Franchise OR/CR'),
+                  _buildUploadBtn('vehicle', MessageCode.franchiseOrCrLabel),
                   const SizedBox(height: 24),
                   AppTextField(
                     controller: _password,
-                    label: 'Password',
-                    hint: 'Min. 8 chars',
+                    label: context.l10n.password,
+                    hint: context.l10n.min8Chars,
                     obscureText: true,
                     textInputAction: TextInputAction.done,
                     validator: (v) => v == null || v.length < 8
-                        ? 'Password must be at least 8 characters'
+                        ? MessageCode.passwordMustBeAtLeast8Characters
                         : null,
                   ),
                 ],
@@ -353,7 +409,11 @@ class _RegisterDriverScreenState extends ConsumerState<RegisterDriverScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              uploaded ? '$title attached' : 'Upload $title',
+              context.message(
+                uploaded
+                    ? MessageCode.attachedValue((title).toString())
+                    : MessageCode.uploadValue((title).toString()),
+              ),
               style: GoogleFonts.poppins(
                 color: uploaded ? AppColors.success : AppColors.primary,
                 fontWeight: FontWeight.w600,
@@ -379,8 +439,8 @@ class _RegisterDriverScreenState extends ConsumerState<RegisterDriverScreen> {
         ),
       ),
       leading: const Icon(Icons.event_available_outlined),
-      title: Text(title),
-      subtitle: Text(_dateLabel(value)),
+      title: Text(context.message(title)),
+      subtitle: Text(context.message(_dateLabel(value))),
       trailing: const Icon(Icons.chevron_right),
     );
   }

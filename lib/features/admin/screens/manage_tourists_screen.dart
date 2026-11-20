@@ -1,19 +1,103 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/widgets/remote_page_controls.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/shared_widgets.dart';
 import '../../../core/prototype/prototype_session.dart';
 
-class ManageTouristsScreen extends StatelessWidget {
+class ManageTouristsScreen extends StatefulWidget {
   const ManageTouristsScreen({super.key});
+
+  @override
+  State<ManageTouristsScreen> createState() => _ManageTouristsScreenState();
+}
+
+class _ManageTouristsScreenState extends State<ManageTouristsScreen> {
+  final Set<String> _pending = {};
+
+  Future<void> _toggle(Map<String, dynamic> tourist) async {
+    final id = tourist['id'] as String;
+    if (_pending.contains(id)) return;
+    final controller = TextEditingController();
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          context.message(
+            tourist['status'] == 'active'
+                ? MessageCode.suspendTourist
+                : MessageCode.restoreTourist,
+          ),
+        ),
+        content: TextField(
+          controller: controller,
+          maxLength: 500,
+          decoration: InputDecoration(
+            labelText: context.l10n.reasonAtLeast5Characters,
+          ),
+          onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+          scrollPadding: const EdgeInsets.all(96),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(context.l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (controller.text.trim().length >= 5) {
+                Navigator.pop(ctx, controller.text.trim());
+              }
+            },
+            child: Text(context.l10n.confirmChange),
+          ),
+        ],
+      ),
+    );
+    // The dialog's route disposes after its closing animation.
+    if (reason == null || !mounted) return;
+    setState(() => _pending.add(id));
+    try {
+      await PrototypeSession.toggleTouristStatus(id, reason: reason);
+      if (!mounted) return;
+      final activated = tourist['status'] != 'active';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.message(
+              activated
+                  ? MessageCode.touristAccountActivated
+                  : MessageCode.touristAccountSuspended,
+            ),
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.message(ErrorMessages.forError(error))),
+          action: SnackBarAction(
+            label: context.l10n.refresh,
+            onPressed: () => PrototypeSession.syncRemoteState(),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _pending.remove(id));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: const RemotePageControls(directory: true),
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          'Manage Tourists',
+          context.l10n.manageTourists,
           style: GoogleFonts.poppins(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
@@ -27,9 +111,9 @@ class ManageTouristsScreen extends StatelessWidget {
         valueListenable: PrototypeSession.adminTourists,
         builder: (context, tourists, _) {
           if (tourists.isEmpty) {
-            return const EmptyStateWidget(
-              title: 'No Tourists Found',
-              subtitle: 'There are no registered tourists yet.',
+            return EmptyStateWidget(
+              title: context.l10n.noTouristsFound,
+              subtitle: context.l10n.thereAreNoRegisteredTouristsYet,
               icon: Icons.people_outline,
             );
           }
@@ -40,6 +124,7 @@ class ManageTouristsScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final tourist = tourists[index];
               final isActive = tourist['status'] == 'active';
+              final pending = _pending.contains(tourist['id']);
 
               return AppCard(
                 margin: const EdgeInsets.only(bottom: 12),
@@ -49,7 +134,7 @@ class ManageTouristsScreen extends StatelessWidget {
                     CircleAvatar(
                       backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                       child: Text(
-                        tourist['name'][0].toUpperCase(),
+                        context.message(tourist['name'][0]).toUpperCase(),
                         style: GoogleFonts.poppins(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w600,
@@ -62,7 +147,7 @@ class ManageTouristsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            tourist['name'],
+                            context.message(tourist['name']),
                             style: GoogleFonts.poppins(
                               fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
@@ -71,7 +156,7 @@ class ManageTouristsScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            tourist['email'],
+                            context.message(tourist['email']),
                             style: GoogleFonts.poppins(
                               color: AppColors.textSecondary,
                               fontSize: 14,
@@ -79,7 +164,9 @@ class ManageTouristsScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Trips: ${tourist['trips']}',
+                            context.l10n.tripsValue(
+                              context.message((tourist['trips']).toString()),
+                            ),
                             style: GoogleFonts.poppins(
                               color: AppColors.textSecondary,
                               fontSize: 12,
@@ -87,7 +174,9 @@ class ManageTouristsScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           StatusBadge(
-                            label: isActive ? 'Active' : 'Suspended',
+                            label: isActive
+                                ? MessageCode.active
+                                : MessageCode.suspended,
                             color: isActive
                                 ? AppColors.success
                                 : AppColors.danger,
@@ -96,17 +185,41 @@ class ManageTouristsScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    IconButton(
-                      icon: Icon(
-                        isActive ? Icons.block : Icons.check_circle_outline,
-                        color: isActive ? AppColors.danger : AppColors.success,
+                    Semantics(
+                      label: context.message(
+                        isActive
+                            ? MessageCode.suspendValue(
+                                (tourist['name']).toString(),
+                              )
+                            : MessageCode.activateValue(
+                                (tourist['name']).toString(),
+                              ),
                       ),
-                      onPressed: () {
-                        PrototypeSession.toggleTouristStatus(tourist['id']);
-                      },
-                      tooltip: isActive
-                          ? 'Suspend Tourist'
-                          : 'Activate Tourist',
+                      button: true,
+                      enabled: !pending,
+                      child: IconButton(
+                        icon: pending
+                            ? const SizedBox.square(
+                                dimension: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Icon(
+                                isActive
+                                    ? Icons.block
+                                    : Icons.check_circle_outline,
+                                color: isActive
+                                    ? AppColors.danger
+                                    : AppColors.success,
+                              ),
+                        onPressed: pending ? null : () => _toggle(tourist),
+                        tooltip: context.message(
+                          isActive
+                              ? MessageCode.suspendTouristLabel
+                              : MessageCode.activateTourist,
+                        ),
+                      ),
                     ),
                   ],
                 ),

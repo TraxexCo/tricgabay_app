@@ -1,10 +1,12 @@
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/shared_widgets.dart';
-import '../../../models/tourist_spot_model.dart';
 import '../../../core/prototype/prototype_session.dart';
 
 class TourPackageDetailScreen extends StatelessWidget {
@@ -13,15 +15,20 @@ class TourPackageDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-    listenable: PrototypeSession.farePolicy,
+    listenable: Listenable.merge([
+      PrototypeSession.farePolicy,
+      PrototypeSession.tourPackages,
+      PrototypeSession.allSpots,
+    ]),
     builder: (context, _) {
-      final pkg = TourPackageModel.catalog
+      final pkg = PrototypeSession.tourPackages.value
           .where((p) => p.id == packageId)
           .firstOrNull;
-      if (pkg == null) {
+      if (pkg == null ||
+          !PrototypeSession.farePolicy.value.packageFares.containsKey(pkg.id)) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Tour package')),
-          body: const Center(child: Text('Package not found.')),
+          appBar: AppBar(title: Text(context.l10n.tourPackage)),
+          body: Center(child: Text(context.l10n.packageNotFound)),
         );
       }
 
@@ -61,7 +68,7 @@ class TourPackageDetailScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      pkg.name,
+                      context.message(pkg.name),
                       style: GoogleFonts.poppins(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -71,25 +78,33 @@ class TourPackageDetailScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(
-                          Icons.timer,
-                          color: AppColors.textSecondary,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          pkg.duration,
-                          style: GoogleFonts.poppins(
+                        if (pkg.duration.isNotEmpty)
+                          const Icon(
+                            Icons.timer,
                             color: AppColors.textSecondary,
+                            size: 16,
                           ),
-                        ),
+                        if (pkg.duration.isNotEmpty) const SizedBox(width: 4),
+                        if (pkg.duration.isNotEmpty)
+                          Flexible(
+                            child: Text(
+                              context.message(pkg.duration),
+                              style: GoogleFonts.poppins(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
                         const Spacer(),
-                        Text(
-                          '₱${PrototypeSession.packageFare(pkg).toStringAsFixed(0)}',
-                          style: GoogleFonts.poppins(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
+                        Flexible(
+                          child: Text(
+                            context.message(
+                              '₱${AppFormatters.integer(PrototypeSession.packageFare(pkg))}',
+                            ),
+                            style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
                           ),
                         ),
                       ],
@@ -111,7 +126,9 @@ class TourPackageDetailScreen extends StatelessWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'This package has a fixed route. The stops are already selected for you.',
+                              context
+                                  .l10n
+                                  .thisPackageHasAFixedRouteTheStopsAreAlreadySelectedForYou,
                               style: GoogleFonts.poppins(
                                 fontSize: 11,
                                 color: AppColors.textSecondary,
@@ -130,7 +147,7 @@ class TourPackageDetailScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'What\'s Included',
+                              context.l10n.whatSIncluded,
                               style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 16,
@@ -148,7 +165,7 @@ class TourPackageDetailScreen extends StatelessWidget {
                                       size: 18,
                                     ),
                                     const SizedBox(width: 10),
-                                    Expanded(child: Text(h)),
+                                    Expanded(child: Text(context.message(h))),
                                   ],
                                 ),
                               ),
@@ -160,20 +177,26 @@ class TourPackageDetailScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Stops included',
-                          style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                        Flexible(
+                          child: Text(
+                            context.l10n.stopsIncluded,
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
                         ),
-                        Text(
-                          '${pkg.spotIds.length} stops',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
+                        Flexible(
+                          child: Text(
+                            context.l10n.stopsValue(
+                              context.message((pkg.spotIds.length).toString()),
+                            ),
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ),
                       ],
@@ -184,10 +207,12 @@ class TourPackageDetailScreen extends StatelessWidget {
                           .where((s) => s.id == entry.value && s.isActive)
                           .firstOrNull;
                       if (spot == null) {
-                        return const ListTile(
-                          title: Text('Stop temporarily unavailable'),
+                        return ListTile(
+                          title: Text(context.l10n.stopTemporarilyUnavailable),
                           subtitle: Text(
-                            'This package cannot be booked until all stops are available.',
+                            context
+                                .l10n
+                                .thisPackageCannotBeBookedUntilAllStopsAreAvailable,
                           ),
                         );
                       }
@@ -196,18 +221,18 @@ class TourPackageDetailScreen extends StatelessWidget {
                         leading: CircleAvatar(
                           backgroundColor: AppColors.primary,
                           child: Text(
-                            '${entry.key + 1}',
+                            context.message('${entry.key + 1}'),
                             style: const TextStyle(color: Colors.white),
                           ),
                         ),
                         title: Text(
-                          spot.name,
+                          context.message(spot.name),
                           style: GoogleFonts.poppins(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         subtitle: Text(
-                          spot.categoryLabel,
+                          context.message(spot.categoryLabel),
                           style: GoogleFonts.poppins(
                             color: AppColors.textSecondary,
                           ),
@@ -244,14 +269,21 @@ class TourPackageDetailScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Fixed itinerary',
+                            context.l10n.fixedItinerary,
                             style: GoogleFonts.poppins(
                               fontSize: 11,
                               color: AppColors.textSecondary,
                             ),
                           ),
                           Text(
-                            '${pkg.spotIds.length} stops • ₱${PrototypeSession.packageFare(pkg).toStringAsFixed(0)}',
+                            context.l10n.stopsValueLabel(
+                              context.message((pkg.spotIds.length).toString()),
+                              context.message(
+                                (AppFormatters.integer(
+                                  PrototypeSession.packageFare(pkg),
+                                )).toString(),
+                              ),
+                            ),
                             style: GoogleFonts.poppins(
                               fontWeight: FontWeight.w700,
                             ),
@@ -268,14 +300,18 @@ class TourPackageDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 AppButton(
-                  label: 'Book This Tour',
+                  label: context.l10n.bookThisTour,
                   onPressed: () {
                     try {
                       PrototypeSession.selectPackage(pkg);
                     } catch (e) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text('$e')));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            context.message(ErrorMessages.forError(e)),
+                          ),
+                        ),
+                      );
                       return;
                     }
                     context.push('/tourist/fare-summary');

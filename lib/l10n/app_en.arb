@@ -1,0 +1,2550 @@
+{
+  "gcashSendToDriver": "GCash (send to driver)",
+  "gcashAfterTrip": "You'll send the fare to your driver's GCash after the trip.",
+  "gcashCompleteTrip": "Complete trip",
+  "gcashDetails": "GCash payment details",
+  "gcashNumber": "GCash number",
+  "gcashConfirmNumber": "Re-enter GCash number",
+  "gcashAccountName": "Registered GCash account name",
+  "gcashActive": "Accept GCash payments",
+  "gcashInactive": "GCash payments disabled",
+  "gcashNotConfigured": "This driver has not added GCash details.",
+  "gcashVisibility": "Tourists will see this number and name when paying you by GCash.",
+  "gcashInvalidNumber": "Enter a mobile number in 09XXXXXXXXX or +639XXXXXXXXX format.",
+  "gcashNumberMismatch": "The GCash numbers must match.",
+  "gcashInvalidName": "Enter the account name using 2 to 120 characters.",
+  "gcashCheckName": "Before sending, check that the name shown in GCash matches this account name.",
+  "gcashOpen": "Open GCash",
+  "gcashLaunchFailed": "GCash isn't installed or couldn't be opened. You can still copy the number and amount.",
+  "gcashCopyNumber": "Copy number",
+  "gcashCopyAmount": "Copy amount",
+  "gcashNumberCopied": "Number copied",
+  "gcashAmountCopied": "Amount copied",
+  "gcashSent": "I've sent the payment",
+  "gcashReference": "GCash reference number (optional)",
+  "gcashInvalidReference": "Use 8 to 20 letters or digits for the reference number.",
+  "gcashPayCash": "Pay with cash instead",
+  "gcashNotSetUp": "Your driver hasn't set up GCash. Please pay with cash.",
+  "gcashAwaitingDriver": "Awaiting driver confirmation",
+  "gcashAwaitingYour": "Awaiting your confirmation",
+  "gcashDisputed": "GCash payment disputed",
+  "gcashDisputeMessage": "Your driver hasn't received the payment yet. Check your GCash receipt and reference number, or pay in cash.",
+  "gcashSlide": "Slide to confirm payment received",
+  "gcashDriverConfirm": "Confirm payment received",
+  "gcashNotReceived": "Not received yet",
+  "gcashDisputeNote": "Short note (optional)",
+  "gcashPaidByDriver": "Payment confirmed by driver",
+  "gcashActionFailed": "Could not complete this GCash action. Refresh the booking and try again.",
+  "gcashSettingsSaved": "GCash details saved",
+  "gcashCashWarning": "If you already sent money, check your GCash receipt with the driver before paying in cash.",
+  "gcashFareToPay": "Fare to pay",
+  "gcashCheckWallet": "Check that the fare arrived in your GCash before confirming.",
+  "gcashAmountReceived": "GCash fare received",
+  "gcashConfirmedFares": "Confirmed fares",
+  "gcashConfirmedFaresOverTime": "Confirmed fares over time",
+  "loadedBookingTotals": "These figures cover only bookings loaded in the app.",
+  "gcashEarningsExplanation": "Includes confirmed direct GCash fares. Amounts under review are excluded.",
+  "@@locale": "en",
+  "abc1234": "ABC 1234",
+  "abc1234AccreditedDriver": "ABC 1234 • Accredited driver",
+  "about": "About",
+  "accept": "ACCEPT",
+  "acceptAndContinue": "Accept and continue",
+  "acceptAssistanceRequests": "Accept assistance requests",
+  "accepted": "accepted",
+  "acceptTheCurrentPrivacyNoticeBeforeSubmitting": "Accept the current privacy notice before submitting.",
+  "accessibilityOrAssistanceNeeds": "Accessibility or assistance needs",
+  "account": "Account",
+  "accountAccessCouldNotBeCompletedCheckYourDetailsAndTryAgain": "Account access could not be completed. Check your details and try again.",
+  "accountCreatedConfirmYourEmailThenSignIn": "Account created. Confirm your email, then sign in.",
+  "accreditationVerified": "Accreditation verified",
+  "aConfiguredServerAndAdministratorAccountAreRequired": "A configured server and administrator account are required.",
+  "activate": "Activate",
+  "activateTourist": "Activate tourist",
+  "activateValue": "Activate {value}",
+  "@activateValue": {
+    "description": "Application message: activateValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "active": "Active",
+  "activeTrip": "Active trip",
+  "activeTripRoute": "Active trip route",
+  "actNow": "Act now",
+  "addAStatementToThisCase": "Add a statement to this case",
+  "addedToItinerary": "Added to itinerary!",
+  "addedToYourItinerary": "Added to your itinerary!",
+  "address": "Address",
+  "addressDetails": "Address details",
+  "addressMatchesPin": "Address matches pin",
+  "addToTrip": "+ Add to Trip",
+  "addToTripLabel": "Add to Trip",
+  "addTouristSpot": "Add tourist spot",
+  "addYourStatement": "Add your statement",
+  "aDestinationIsNoLongerAvailableUpdateYourItinerary": "A destination is no longer available. Update your itinerary.",
+  "adjustPin": "Adjust pin",
+  "adminEmail": "Admin email",
+  "administratorUpdatedFixedFares": "Administrator updated fixed fares.",
+  "adminPasswordIsRequired": "Admin password is required",
+  "adminPortal": "Admin portal",
+  "adminReviewPaymentOnHold": "Admin review · payment on hold",
+  "affectedTouristsAndAssignedDriversWillBeNotifiedExistingBookingsKeepAnAudit": "Affected tourists and assigned drivers will be notified. Existing bookings keep an audit record.",
+  "agreeAndContinue": "Agree and continue",
+  "agreedFare": "Agreed fare",
+  "agreedFixedFare": "Agreed fixed fare",
+  "agreedMaximumStopsConfirmedByTheTouristTheSuggestedProratedAmountIsAValue": "Agreed maximum: {value}. {secondValue}/{thirdValue} stops confirmed by the tourist. The suggested prorated amount is a starting point only. Review both statements, safety concerns and service delivered. No penalties or extras.",
+  "@agreedMaximumStopsConfirmedByTheTouristTheSuggestedProratedAmountIsAValue": {
+    "description": "Application message: agreedMaximumStopsConfirmedByTheTouristTheSuggestedProratedAmountIsAValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      },
+      "thirdValue": {
+        "type": "String"
+      }
+    }
+  },
+  "agreedPolicy": "Agreed policy",
+  "agreedValue": "Agreed\n₱{value}",
+  "@agreedValue": {
+    "description": "Application message: agreedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "all": "All",
+  "allowLocationAccessInAndroidSettings": "Allow location access in Android settings.",
+  "allowMatchingForTouristsWithMobilityOrBoardingNeeds": "Allow matching for tourists with mobility or boarding needs.",
+  "allowOptionalCrashDiagnostics": "Allow optional crash diagnostics",
+  "allStopsAreConfirmedOpenTripControlsToFinish": "All stops are confirmed. Open Trip controls to finish.",
+  "alreadyHaveAnAccount": "Already have an account?",
+  "aNearbyTouristIsLookingForADriver": "A nearby tourist is looking for a driver.",
+  "announcementSentSuccessfully": "Announcement sent successfully",
+  "anotherAccountIsAlreadySignedInSignOutBeforeRegisteringADriver": "Another account is already signed in. Sign out before registering a driver.",
+  "aPackageStopIsUnavailablePleaseChooseAnotherRoute": "A package stop is unavailable. Please choose another route.",
+  "appDriverIsOnline": "{brandName} driver is online",
+  "@appDriverIsOnline": {
+    "description": "Application message: appDriverIsOnline",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "applicationPending": "Application pending",
+  "applicationRejected": "Application rejected.",
+  "applicationSubmittedForAdministratorReview": "Application submitted for administrator review.",
+  "appManagementSystem": "{brandName} Management System",
+  "@appManagementSystem": {
+    "description": "Application message: appManagementSystem",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "appName": "{brandName}",
+  "@appName": {
+    "description": "Application message: appName",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "appReportValue": "{brandName} {value} report",
+  "@appReportValue": {
+    "description": "Application message: appReportValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "approveAndEnableMatching": "Approve and enable matching",
+  "approved": "Approved",
+  "approvedServiceArea": "Approved service area",
+  "approveRouteChange": "Approve route change",
+  "apr": "Apr",
+  "aPrePickupReviewCannotIncreaseTheSnapshottedCancellationCharge": "A pre-pickup review cannot increase the snapshotted cancellation charge.",
+  "aPreviousBookingRequestIsAwaitingConfirmationReconnectAndOpenTripsBeforeChanging": "A previous booking request is awaiting confirmation. Reconnect and open Trips before changing the request.",
+  "areaName": "Area name",
+  "areaUnverified": "Area unverified",
+  "areCurrentlyOnATripValue": "{value} are currently on a trip",
+  "@areCurrentlyOnATripValue": {
+    "description": "Application message: areCurrentlyOnATripValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "areYouInAnEmergency": "Are you in an emergency?",
+  "areYouSureYouWantToLogOut": "Are you sure you want to log out?",
+  "areYouSureYouWantToLogOutOfApp": "Are you sure you want to log out of {brandName}?",
+  "@areYouSureYouWantToLogOutOfApp": {
+    "description": "Application message: areYouSureYouWantToLogOutOfApp",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "arrivalReportedValue": "Arrival reported: {value}.",
+  "@arrivalReportedValue": {
+    "description": "Application message: arrivalReportedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "askTheTouristForTheCorrectPickupCodeOnceTheyAreOnBoard": "Ask the tourist for the correct pickup code once they are on board.",
+  "askTheTouristForTheirCodeAfterTheyAreSafelyOnBoard": "Ask the tourist for their code after they are safely on board.",
+  "assignedDriver": "Assigned driver",
+  "attachBothRequiredDriverDocuments": "Attach both required driver documents.",
+  "attachedValue": "{value} attached",
+  "@attachedValue": {
+    "description": "Application message: attachedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "attraction": "Attraction",
+  "attractionAndFareInformationIsSynchronizedWithApp": "Attraction and fare information is synchronized with {brandName}.",
+  "@attractionAndFareInformationIsSynchronizedWithApp": {
+    "description": "Application message: attractionAndFareInformationIsSynchronizedWithApp",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "audience": "Audience",
+  "audienceValue": "Audience: {value}",
+  "@audienceValue": {
+    "description": "Application message: audienceValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "auditedRouteChangesRequireTheConfiguredServer": "Audited route changes require the configured server.",
+  "aug": "Aug",
+  "availability": "Availability",
+  "avatarCleanupPendingForObjectValue": "Avatar cleanup pending for object {value}",
+  "@avatarCleanupPendingForObjectValue": {
+    "description": "Application message: avatarCleanupPendingForObjectValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "avatarObjectVersionIsInvalid": "Avatar object version is invalid.",
+  "avatarOwnerIsInvalid": "Avatar owner is invalid.",
+  "awaitingBothCashConfirmations": "Awaiting both cash confirmations",
+  "awaitingPaymentValue": "Awaiting payment: ₱{value}",
+  "@awaitingPaymentValue": {
+    "description": "Application message: awaitingPaymentValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "back": "Back",
+  "backToExplore": "Back to explore",
+  "backToLogin": "Back to Login",
+  "backToUserLogin": "Back to User Login",
+  "barangay": "Barangay",
+  "blocked": "Blocked",
+  "blockedCheckoutExpiry": "Blocked checkout expiry",
+  "bongaMayor": "Bonga mayor",
+  "bongaMenor": "Bonga menor",
+  "bookATourToGetStarted": "Book a tour to get started!",
+  "bookATricycle": "Book a Tricycle",
+  "bookForValue": "Book for ₱{value}",
+  "@bookForValue": {
+    "description": "Application message: bookForValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "booking": "Booking",
+  "bookingAndSystemUpdates": "Booking and system updates",
+  "bookingDetailsCancel": "Booking details / cancel",
+  "bookingDriverPaymentAndSafetyUpdates": "Booking, driver, payment, and safety updates",
+  "bookingHistory": "Booking history",
+  "bookingNotFoundForThisAccount": "Booking not found for this account.",
+  "bookings": "Bookings",
+  "bookingSessionChanged": "Booking session changed.",
+  "bookingsPaymentReviews": "Bookings & payment reviews",
+  "bookingsToday": "Bookings today",
+  "bookingValue": "Booking {value}",
+  "@bookingValue": {
+    "description": "Application message: bookingValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "bookNow": "Book now",
+  "bookThisTour": "Book this tour",
+  "bothDriverDocumentsAreRequired": "Both driver documents are required.",
+  "bothDriverDocumentsMustBeValidImagesUnder5Mb": "Both driver documents must be valid images under 5 MB.",
+  "brandMark": "T",
+  "broadcastAMessage": "Broadcast a Message",
+  "bugReport": "Bug report",
+  "buildADayYouLlRemember": "Build a day you'll remember",
+  "buildYourDay": "Build your day",
+  "buildYourItineraryAndEnjoyAPersonalizedTourExperience": "Build your itinerary and enjoy a personalized tour experience.",
+  "buildYourOwnDay": "Build your own day",
+  "bulletItem": "• {value}",
+  "@bulletItem": {
+    "description": "Application message: bulletItem",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "bustosBulacan": "Bustos, Bulacan",
+  "bustosTourMap": "Bustos tour map",
+  "bustosTownCentre": "Bustos town centre",
+  "calculatingLocalRoadRoute": "Calculating local-road route...",
+  "callEmergencyServices": "Call emergency services?",
+  "cancel": "Cancel",
+  "cancelBooking": "Cancel booking?",
+  "cancelBookingFeeValue": "Cancel booking | {value}% fee",
+  "@cancelBookingFeeValue": {
+    "description": "Application message: cancelBookingFeeValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelBookingNoCharge": "Cancel booking | no charge",
+  "cancelFree": "Cancel free",
+  "cancelFreeOfCharge": "Cancel free of charge",
+  "cancellationAndPaymentPolicy": "Cancellation and payment policy",
+  "cancelled": "cancelled",
+  "cancelledAfterTheGracePeriodPublishedCancellationFeeApplied": "Cancelled after the grace period; published cancellation fee applied",
+  "cancelledWithoutCharge": "Cancelled without charge",
+  "cancelThisBooking": "Cancel this booking?",
+  "capacity": "Capacity",
+  "caseStatementValue": "Case statement: {value}",
+  "@caseStatementValue": {
+    "description": "Application message: caseStatementValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "cash": "Cash",
+  "cashConfirmedByBoth": "Cash confirmed by both",
+  "cashConfirmedByBothParties": "Cash confirmed by both parties",
+  "cashConfirmedByBothPartiesAfterReturnsFilteredByTripEndDateAmounts": "Cash confirmed by both parties, after returns. Filtered by trip end date. Amounts under review are excluded.",
+  "cashNotConfirmed": "Cash not confirmed",
+  "cashPayment": "Cash payment",
+  "cashReturn": "Cash return",
+  "cashReturnConfirmed": "Cash return confirmed",
+  "cashReturnOutstanding": "Cash return outstanding",
+  "cashToReturn": "Cash to return",
+  "category": "Category",
+  "centerLatitude": "Center latitude",
+  "centerLongitude": "Center longitude",
+  "changingServiceCapacityRequiresAdministratorApprovalBeforeYouCanGoOnlineAgain": "Changing service capacity requires administrator approval before you can go online again.",
+  "checkApproval": "Check approval",
+  "checkingGpsAndPermission": "Checking GPS and permission.",
+  "checkLocally": "Check locally",
+  "checkoutCouldNotBeCreated": "Checkout could not be created.",
+  "checkOutInBustosBulacanValue": "Check out {value} in Bustos, Bulacan! 🏝️",
+  "@checkOutInBustosBulacanValue": {
+    "description": "Application message: checkOutInBustosBulacanValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "checkRoadRestrictions": "Check road restrictions",
+  "checkYourEmail": "Check your email",
+  "chooseABarangayAndEnterTheExactAddressBelow": "Choose a barangay and enter the exact address below",
+  "chooseAnExactPickupPointBeforeBooking": "Choose an exact pickup point before booking",
+  "chooseAPickupPointOnTheMapOrEnableLocationFirst": "Choose a pickup point on the map or enable location first.",
+  "chooseBothDocumentsAndExpiryDates": "Choose both documents and expiry dates.",
+  "chooseFranchiseExpiry": "Choose franchise expiry",
+  "chooseHowYouWantToUseApp": "Choose how you want to use {brandName}",
+  "@chooseHowYouWantToUseApp": {
+    "description": "Application message: chooseHowYouWantToUseApp",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "chooseJpegDocumentImages": "Choose JPEG document images.",
+  "chooseLicenseExpiry": "Choose license expiry",
+  "chooseLicenseImage": "Choose license image",
+  "choosePickupDate": "Choose pickup date",
+  "choosePickupTime": "Choose pickup time",
+  "choosePlacesSeeYourFareBookARide": "Choose places, see your fare, book a ride.",
+  "chooseThePlacesYouWantToVisitInOneTrip": "Choose the places you want to visit in one trip.",
+  "chooseVehicleRegistrationImage": "Choose vehicle registration image",
+  "chooseWhoShouldReceiveThisAnnouncementThenReviewBeforeSending": "Choose who should receive this announcement, then review before sending.",
+  "chooseYourWorkspaceThenSignInToContinue": "Choose your workspace, then sign in to continue.",
+  "church": "Church",
+  "cleanVehicle": "Clean vehicle",
+  "clearAll": "Clear all",
+  "clearSearch": "Clear search",
+  "closeAndNotify": "Close and notify",
+  "closeAttractionDetails": "Close attraction details",
+  "closed": "Closed",
+  "closeTemporarily": "Close temporarily",
+  "closureReason": "Closure reason",
+  "codeReissueCouldNotBeConfirmed": "Code reissue could not be confirmed.",
+  "compactCurrency": "₱{value}k",
+  "@compactCurrency": {
+    "description": "Application message: compactCurrency",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "completeAllDocumentAndServiceAreaFields": "Complete all document and service-area fields.",
+  "completed": "completed",
+  "completedAndActiveBookings": "Completed and active bookings",
+  "completedTrips": "Completed trips",
+  "completeRefund": "Complete refund",
+  "completeTestModeRefund": "Complete test-mode refund?",
+  "completeTestModeRefundLabel": "Complete test-mode refund",
+  "completeTripCashStillUnconfirmed": "Complete trip · cash still unconfirmed",
+  "complianceApproved": "Compliance approved",
+  "complianceReviewRequired": "Compliance review required",
+  "complianceReviewSaved": "Compliance review saved.",
+  "confirm": "Confirm",
+  "confirmAmount": "Confirm amount",
+  "confirmAndSend": "Confirm and send",
+  "confirmCashExchanged": "Confirm cash exchanged?",
+  "confirmCashPaid": "Confirm cash paid",
+  "confirmCashReceived": "Confirm cash received",
+  "confirmCashReturned": "Confirm cash returned?",
+  "confirmCashReturnedLabel": "Confirm cash returned",
+  "confirmCashReturnReceived": "Confirm cash return received",
+  "confirmChange": "Confirm change",
+  "confirmedCash": "Confirmed cash",
+  "confirmedEntriesArePermanentAndCannotBeEditedOrDeleted": "Confirmed entries are permanent and cannot be edited or deleted.",
+  "confirmedTransactionsOnlyOpenReviewsAndOutstandingRefundsAreExcluded": "Confirmed transactions only. Open reviews and outstanding refunds are excluded.",
+  "confirmLocation": "Confirm location",
+  "confirmNewPassword": "Confirm new password",
+  "confirmNoShow": "Confirm no-show",
+  "confirmOnlyAfterHasPhysicallyChangedHandsTheOtherPartyMustConfirmTooValue": "Confirm only after {value} has physically changed hands. The other party must confirm too. Do not confirm a promised or partial payment.",
+  "@confirmOnlyAfterHasPhysicallyChangedHandsTheOtherPartyMustConfirmTooValue": {
+    "description": "Application message: confirmOnlyAfterHasPhysicallyChangedHandsTheOtherPartyMustConfirmTooValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmPassword": "Confirm password",
+  "confirmRefund": "Confirm refund",
+  "confirmThatYouStayedAtTheVerifiedPickupPointUntilTheWaitingPeriodValue": "Confirm that you stayed at the verified pickup point until the waiting period ended and tried to contact the tourist. The published {value}% no-show fee is {secondValue}. This action is recorded and can be disputed.",
+  "@confirmThatYouStayedAtTheVerifiedPickupPointUntilTheWaitingPeriodValue": {
+    "description": "Application message: confirmThatYouStayedAtTheVerifiedPickupPointUntilTheWaitingPeriodValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmThePickupPin": "Confirm the pickup pin",
+  "confirmYourEmailThenSignInAsADriverToFinishUploadingYour": "Confirm your email, then sign in as a driver to finish uploading your application.",
+  "connectionUnavailableCheckYourInternetConnectionAndTryAgain": "Connection unavailable. Check your internet connection and try again.",
+  "connectToTheInternetAndRetry": "Connect to the internet and retry.",
+  "contactUpdatesAreUnavailableOnlyTheNationalFallbackIsShown": "Contact updates are unavailable. Only the national fallback is shown.",
+  "couldNotGetACurrentGpsPositionCheckYourSignalAndTryAgain": "Could not get a current GPS position. Check your signal and try again.",
+  "couldNotGoOfflineLocationSharingRemainsActiveUntilTheServerConfirmsIt": "Could not go offline. Location sharing remains active until the server confirms it.",
+  "couldNotGoOnlineYourAvailabilityWasNotChanged": "Could not go online. Your availability was not changed.",
+  "couldNotLaunchPhoneDialer": "Could not launch phone dialer",
+  "couldNotLaunchValue": "Could not launch {value}",
+  "@couldNotLaunchValue": {
+    "description": "Application message: couldNotLaunchValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotOpenCheckoutResumePaymentFromThisBooking": "Could not open checkout. Resume payment from this booking.",
+  "couldNotOpenMessages": "Could not open messages.",
+  "couldNotOpenNavigation": "Could not open navigation.",
+  "couldNotOpenPhoneDialer": "Could not open phone dialer.",
+  "couldNotOpenThePhoneDialerCall911Manually": "Could not open the phone dialer. Call 911 manually.",
+  "couldNotOpenThePhoneDialerCallTheDisplayedNumberManually": "Could not open the phone dialer. Call the displayed number manually.",
+  "couldNotOpenThisDocument": "Could not open this document.",
+  "couldNotSaveNoBookingOrPaymentStateWasChanged": "Could not save. No booking or payment state was changed.",
+  "couldNotSaveThisChangePleaseRetryThePreviousTripStateHasBeen": "Could not save this change. Please retry; the previous trip state has been kept.",
+  "couldNotSynchronizeWithTheServerCheckYourConnectionAndRetry": "Could not synchronize with the server. Check your connection and retry.",
+  "createANewPassword": "Create a new password",
+  "createTouristAccount": "Create tourist account",
+  "criticalConditionsAlsoAppearInOperationalAlertsInvestigateBeforeClearingAnAlert": "Critical conditions also appear in operational alerts. Investigate before clearing an alert.",
+  "curatedExperience": "CURATED EXPERIENCE",
+  "currentGpsLocation": "Current GPS location",
+  "currentGpsPickup": "Current GPS pickup",
+  "currentLocation": "Current location",
+  "customTour": "Custom tour",
+  "customTour112SelectedStops": "Custom tour (1–12 selected stops)",
+  "customTourNewBookingsUseTheseRatesExistingBookingsKeepTheirAgreedFareValue": "Custom tour: ₱{value}\n{secondValue}\n\nNew bookings use these rates. Existing bookings keep their agreed fare.",
+  "@customTourNewBookingsUseTheseRatesExistingBookingsKeepTheirAgreedFareValue": {
+    "description": "Application message: customTourNewBookingsUseTheseRatesExistingBookingsKeepTheirAgreedFareValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "dataExportRequests": "Data export requests",
+  "daysAgoValue": "{value} days ago",
+  "@daysAgoValue": {
+    "description": "Application message: daysAgoValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "dec": "Dec",
+  "decisionAndReasoning": "Decision and reasoning",
+  "decline": "DECLINE",
+  "decliningMatchedOffersRequiresTheConfiguredServer": "Declining matched offers requires the configured server.",
+  "delete": "Delete",
+  "deleteAccount": "Delete account?",
+  "deletedValue": "{value} deleted",
+  "@deletedValue": {
+    "description": "Application message: deletedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteMyAccount": "Delete my account",
+  "deletingAccount": "Deleting account…",
+  "deletionPending": "Deletion pending",
+  "describeTheDisagreementCollectionAndRefundConfirmationsWillPauseUntilAnAdminReviews": "Describe the disagreement. Collection and refund confirmations will pause until an admin reviews it.",
+  "description": "Description",
+  "destination": "Destination",
+  "destinations": "destinations",
+  "destinationsYouLove": "Destinations you love",
+  "directions": "Directions",
+  "directionsRequireBetween2And25Coordinates": "Directions require between 2 and 25 coordinates.",
+  "discover": "Discover",
+  "discoverBustos": "Discover Bustos",
+  "disputePaymentReportAProblem": "Dispute payment / report a problem",
+  "distanceKilometers": "{value} km",
+  "@distanceKilometers": {
+    "description": "Application message: distanceKilometers",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "distanceMeters": "{value} m",
+  "@distanceMeters": {
+    "description": "Application message: distanceMeters",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsAreWaitingForVerificationValue": "{value} documents are waiting for verification",
+  "@documentsAreWaitingForVerificationValue": {
+    "description": "Application message: documentsAreWaitingForVerificationValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "documentsDatesServiceAreaAndReliabilityMeetTheMatchingRules": "Documents, dates, service area, and reliability meet the matching rules.",
+  "documentsPassword": "Documents & Password",
+  "done": "Done",
+  "donTHaveAnAccount": "Don't have an account?",
+  "downloadExport": "Download export",
+  "dragTheMapToPinYourExactLocation": "Drag the map to pin your exact location",
+  "drive": "Drive",
+  "driver": "Driver",
+  "driverAcceptedTheFixedFareAndPickup": "Driver accepted the fixed fare and pickup.",
+  "driverAccount": "Driver account",
+  "driverApplication": "Driver application",
+  "driverApprovedAndMatchingEnabled": "Driver approved and matching enabled.",
+  "driverArrival": "Driver arrival",
+  "driverArrivedAtTheVerifiedPickupAreaTheWaitingPeriodStarted": "Driver arrived at the verified pickup area. The waiting period started.",
+  "driverBookings": "Driver bookings",
+  "driverCancellationRateExceedsThe30MatchingLimit": "Driver cancellation rate exceeds the 30% matching limit.",
+  "driverCancellations": "Driver cancellations",
+  "driverCompliance": "Driver compliance",
+  "driverComplianceRecordsWillAppearHere": "Driver compliance records will appear here.",
+  "driverConcern": "Driver concern",
+  "driverDocumentsMustBeJpegImages5MbMaximumEach": "Driver documents must be JPEG images, 5 MB maximum each.",
+  "driverHasArrived": "Driver has arrived",
+  "driverIsMoving": "Driver is moving",
+  "driverIsStopped": "Driver is stopped",
+  "driverLicense": "Driver license",
+  "driverLicenseDocumentIsMissing": "Driver license document is missing.",
+  "driverLicenseExpiry": "Driver license expiry",
+  "driverMatchingBegins30MinutesBeforePickup": "Driver matching begins 30 minutes before pickup.",
+  "driverNotFound": "Driver not found",
+  "driverPerformance": "Driver performance",
+  "driverRegistration": "Driver registration",
+  "driverReplacementRequested": "Driver replacement requested",
+  "driverReplacementRequiresTheConfiguredServer": "Driver replacement requires the configured server.",
+  "driverReportedArrivalAwaitingTourist": "Driver reported arrival · awaiting tourist",
+  "driverReviewSubmitted": "Driver review submitted.",
+  "drivers": "Drivers",
+  "driversActiveValue": "{value} drivers active",
+  "@driversActiveValue": {
+    "description": "Application message: driversActiveValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "driverSearchRetriedForAnother10Minutes": "Driver search retried for another 10 minutes.",
+  "driversHaveToAcceptThisSearchRequestYouCanLeaveThisScreenAndValue": "Drivers have {value} to accept this search request. You can leave this screen and return through Trips. No fare is charged while waiting.",
+  "@driversHaveToAcceptThisSearchRequestYouCanLeaveThisScreenAndValue": {
+    "description": "Application message: driversHaveToAcceptThisSearchRequestYouCanLeaveThisScreenAndValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "driverSuspendedFor30Days": "Driver suspended for 30 days.",
+  "driverTools": "Driver tools",
+  "driverTrackingPreview": "Driver tracking preview",
+  "driverValue": "Driver: {value}",
+  "@driverValue": {
+    "description": "Application message: driverValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "driverVerifications": "Driver verifications",
+  "eachDriverDocumentMustBe5MbOrSmaller": "Each driver document must be 5 MB or smaller.",
+  "earlier": "Earlier",
+  "earnings": "Earnings",
+  "earningsInsights": "Earnings insights",
+  "edit": "Edit",
+  "editProfile": "Edit profile",
+  "editTouristSpot": "Edit tourist spot",
+  "eG123RizalStNearTheBakery": "e.g. 123 Rizal St. near the bakery",
+  "eGMinasaFestivalGrounds": "e.g. Minasa Festival Grounds",
+  "eGSystemMaintenance": "e.g. System Maintenance",
+  "email": "Email",
+  "emailAddress": "Email address",
+  "emailAddressIsRequired": "Email address is required",
+  "emailAddressMustNotExceedCharactersValue": "Email address must not exceed {value} characters",
+  "@emailAddressMustNotExceedCharactersValue": {
+    "description": "Application message: emailAddressMustNotExceedCharactersValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "emailIsRequired": "Email is required",
+  "emailReadOnly": "Email (Read-only)",
+  "emergency": "Emergency",
+  "emergencyContact": "Emergency contact",
+  "emergencyContacts": "Emergency contacts",
+  "emergencyContactsSettings": "Emergency contacts settings",
+  "emergencyHelp": "Emergency help",
+  "emergencySafety": "Emergency & Safety",
+  "endSafelyReviewPayment": "End safely · review payment",
+  "endTheTourSafelyFirstToOpenASettlementReview": "End the tour safely first to open a settlement review.",
+  "endTourEarly": "End tour early?",
+  "endTourEarlyReportAProblem": "End tour early / report a problem",
+  "english": "English",
+  "englishName": "English name",
+  "enterAClearClosureReason": "Enter a clear closure reason.",
+  "enterAClearReasonForTheAuditHistory": "Enter a clear reason for the audit history",
+  "enterAClearReasonForThisChange": "Enter a clear reason for this change.",
+  "enterAddress": "Enter address...",
+  "enterAnAdminEmail": "Enter an admin email",
+  "enterAPhMobileNumberOrInternationalNumberWithCountryCode": "Enter a PH mobile number or international number with +country code",
+  "enterAPriceBetween001And100000": "Enter a price between ₱0.01 and ₱100,000.",
+  "enterAReasonOfAtLeastFiveCharacters": "Enter a reason of at least five characters.",
+  "enterAValidAmountWithAtMostTwoDecimals": "Enter a valid amount with at most two decimals.",
+  "enterAValidEmail": "Enter a valid email",
+  "enterAValidPhoneNumber": "Enter a valid phone number",
+  "enterAValidPrice": "Enter a valid price",
+  "enterDescription": "Enter description...",
+  "enterDriverApp": "Enter driver app",
+  "enterHistory": "Enter history...",
+  "enterPesosWithAtMostTwoDecimalPlaces": "Enter pesos with at most two decimal places.",
+  "enterThePickupAddressBelow": "Enter the pickup address below.",
+  "enterTheReasonForApprovingOrRestoringServiceAtLeastFiveCharacters": "Enter the reason for approving or restoring service (at least five characters).",
+  "enterTouristApp": "Enter tourist app",
+  "enterValidFixedFaresForEveryRoute": "Enter valid fixed fares for every route.",
+  "enterYourAnnouncementDetailsHere": "Enter your announcement details here...",
+  "enterYourEmail": "Enter your email",
+  "enterYourEmailAndWeWillSendYouALinkToResetYour": "Enter your email and we will send you a link to reset your password.",
+  "enterYourFullName": "Enter your full name",
+  "enterYourPassword": "Enter your password",
+  "entranceFee": "Entrance fee",
+  "entranceFeesMayApply": "+ entrance fees may apply",
+  "eta": "ETA",
+  "exampleEmailCom": "example@email.com",
+  "exampleSeniorPassengerNeedsExtraBoardingTime": "Example: senior passenger needs extra boarding time",
+  "exampleTwoBackpacksAndOneFoldingStroller": "Example: two backpacks and one folding stroller",
+  "exampleUpdatedOperatingCostApprovedByAdmin": "Example: Updated operating cost approved by admin",
+  "expectedReopening": "Expected reopening",
+  "expectedReopeningValue": "Expected reopening: {value}",
+  "@expectedReopeningValue": {
+    "description": "Application message: expectedReopeningValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "expiryIsNotVerifiedValue": "{value} expiry is not verified.",
+  "@expiryIsNotVerifiedValue": {
+    "description": "Application message: expiryIsNotVerifiedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "expiryVerification": "Expiry verification",
+  "explainAnythingTheDriverMustCorrect": "Explain anything the driver must correct",
+  "explainTheDecisionAtLeast10Characters": "Explain the decision (at least 10 characters).",
+  "explainTheDecisionClearly": "Explain the decision clearly",
+  "explainThePolicyInAtLeast20Characters": "Explain the policy in at least 20 characters.",
+  "explore": "Explore",
+  "exploreBustos": "Explore Bustos",
+  "exploreSpotsBuildItinerariesAndBookTricyclesEasily": "Explore spots, build itineraries, and book tricycles easily.",
+  "exploreTheHeritageNatureAndBeautyOfBustosBulacanWithEase": "Explore the heritage, nature, and beauty of Bustos, Bulacan with ease.",
+  "exportsAreDeliveredOnlyToTheRequestingAccountFulfilmentIsAudited": "Exports are delivered only to the requesting account. Fulfilment is audited.",
+  "f123456": "F-123456",
+  "failedPayments": "Failed payments",
+  "feb": "Feb",
+  "feedback": "Feedback",
+  "feedbackMarkedResolved": "Feedback marked resolved",
+  "feedbackSubmittedThankYou": "Feedback submitted! Thank you 🙏",
+  "filipino": "Filipino",
+  "filipinoName": "Filipino name",
+  "finalCharge": "Final charge (₱)",
+  "finalChargeLabel": "Final charge",
+  "finalChargeValue": "Final charge: ₱{value} · {secondValue}",
+  "@finalChargeValue": {
+    "description": "Application message: finalChargeValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "financeAdministratorAccessIsRequired": "Finance administrator access is required.",
+  "financialRecord": "Financial record",
+  "findADriver": "Find a driver",
+  "findAnotherDriver": "Find another driver",
+  "findAnotherDriverLabel": "Find another driver?",
+  "findingYourLocation": "Finding your location…",
+  "findMyDriver": "Find my driver",
+  "finishOrCancelTheActiveTripBeforeGoingOffline": "Finish or cancel the active trip before going offline.",
+  "finishYourCurrentTripBeforeAcceptingAnother": "Finish your current trip before accepting another.",
+  "fixedFare": "Fixed fare",
+  "fixedFareAcceptedCancellationPaymentPolicyV1AcceptedValue": "Fixed fare ₱{value} accepted; cancellation/payment policy v1 accepted.",
+  "@fixedFareAcceptedCancellationPaymentPolicyV1AcceptedValue": {
+    "description": "Application message: fixedFareAcceptedCancellationPaymentPolicyV1AcceptedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "fixedFareForThisRoute": "Fixed fare for this route",
+  "fixedFares": "Fixed fares",
+  "fixedFaresSavedExistingBookingPricesAreUnchanged": "Fixed fares saved. Existing booking prices are unchanged.",
+  "fixedFareValue": "Fixed fare: ₱{value}",
+  "@fixedFareValue": {
+    "description": "Application message: fixedFareValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "fixedItinerary": "Fixed itinerary",
+  "flag": "Flag",
+  "flutterFailureValue": "Flutter failure: {value}",
+  "@flutterFailureValue": {
+    "description": "Application message: flutterFailureValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "forgotPassword": "Forgot password",
+  "forgotPasswordLabel": "Forgot password?",
+  "forImmediateDangerCall911AppDoesNotReplaceEmergencyServices": "For immediate danger, call 911. {brandName} does not replace emergency services.",
+  "@forImmediateDangerCall911AppDoesNotReplaceEmergencyServices": {
+    "description": "Application message: forImmediateDangerCall911AppDoesNotReplaceEmergencyServices",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "formattedValue": " → ",
+  "fr12345": "FR-12345",
+  "franchise": "Franchise",
+  "franchiseExpiresOn": "franchise_expires_on",
+  "franchiseExpiryDate": "Franchise expiry date",
+  "franchiseNumber": "Franchise number",
+  "franchiseNumberIsRequired": "Franchise Number is required",
+  "franchiseOrCr": "Franchise / OR-CR",
+  "franchiseOrCrDocumentIsMissing": "Franchise / OR-CR document is missing.",
+  "franchiseOrCrExpiry": "Franchise / OR-CR expiry",
+  "franchiseOrCrLabel": "Franchise OR/CR",
+  "franchiseOrCrNumberIsRequired": "Franchise/OR-CR number is required",
+  "franchiseOrCrNumberMustNotExceedCharactersValue": "Franchise/OR-CR number must not exceed {value} characters",
+  "@franchiseOrCrNumberMustNotExceedCharactersValue": {
+    "description": "Application message: franchiseOrCrNumberMustNotExceedCharactersValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "franchiseValue": "Franchise: {value}",
+  "@franchiseValue": {
+    "description": "Application message: franchiseValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "freeCancellation": "Free cancellation",
+  "freeCancellationMinutesLateTouristCancellationVerifiedPickupWaitMinutesTouristNoShowValue": "Free cancellation: {value} minutes\nLate tourist cancellation: {secondValue}%\nVerified pickup wait: {thirdValue} minutes\nTourist no-show fee: {fourthValue}%\n\nExisting bookings keep their original policy.",
+  "@freeCancellationMinutesLateTouristCancellationVerifiedPickupWaitMinutesTouristNoShowValue": {
+    "description": "Application message: freeCancellationMinutesLateTouristCancellationVerifiedPickupWaitMinutesTouristNoShowValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      },
+      "thirdValue": {
+        "type": "String"
+      },
+      "fourthValue": {
+        "type": "String"
+      }
+    }
+  },
+  "fri": "Fri",
+  "fromPickup": "from pickup",
+  "fromValue": "{value} from {secondValue}",
+  "@fromValue": {
+    "description": "Application message: fromValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "fromYou": "from you",
+  "fulfilled": "fulfilled",
+  "fullName": "Full name",
+  "fullNameIsRequired": "Full name is required",
+  "getAroundQuicklyAndSafelyByBookingLocalTricycleDriversInSeconds": "Get around quickly and safely by booking local tricycle drivers in seconds.",
+  "getStarted": "Get started",
+  "goBack": "Go back",
+  "goodAfternoon": "Good afternoon",
+  "goodEvening": "Good evening",
+  "goodMorning": "Good morning",
+  "goodMorningValue": "Good morning, {value}",
+  "@goodMorningValue": {
+    "description": "Application message: goodMorningValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "goOnlineToActivateTheDriverMap": "Go online to activate the driver map.",
+  "goOnlineToStartReceivingBookingRequests": "Go online to start receiving booking requests.",
+  "goOnlineWithAnApprovedAccountAndFinishYourCurrentTripToAccept": "Go online with an approved account and finish your current trip to accept a new request.",
+  "goOnlineWithAnApprovedDriverAccountFirst": "Go online with an approved driver account first.",
+  "greatRideVeryKnowledgeableAboutBustos": "Great ride, very knowledgeable about Bustos!",
+  "headingTo": "Heading to",
+  "headingToPickup": "Heading to Pickup",
+  "help": "Help",
+  "helpSupport": "Help & support",
+  "heritage": "Heritage",
+  "hidden": "HIDDEN",
+  "hideValue": "Hide {value}",
+  "@hideValue": {
+    "description": "Application message: hideValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "history": "History",
+  "hoursAgoValue": "{value} hours ago",
+  "@hoursAgoValue": {
+    "description": "Application message: hoursAgoValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "howWasYourRideWithValue": "How was your ride with {value}?",
+  "@howWasYourRideWithValue": {
+    "description": "Application message: howWasYourRideWithValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "iAgreeToTheFixedFareAndCancellationPaymentPolicy": "I agree to the fixed fare and cancellation/payment policy.",
+  "iAgreeToTheTermsAndConditions": "I agree to the Terms and Conditions",
+  "iAmA": "I am a...",
+  "ifPlansChange": "If plans change",
+  "iHaveReadAndAcceptThisNotice": "I have read and accept this notice.",
+  "iHaveReadTheNoticeAndAgreeToTheDataUseNeededTo": "I have read the notice and agree to the data use needed to provide my account and trips.",
+  "imageContentMimeTypeAndFileExtensionMustMatch": "Image content, MIME type and file extension must match.",
+  "includedStops": "Included stops",
+  "includeWhatHappenedWhereTheTripStoppedAndAnyCashAlreadyExchangedStatements": "Include what happened, where the trip stopped, and any cash already exchanged. Statements are retained with the booking.",
+  "incomingBooking": "Incoming booking",
+  "incomingPickup": "Incoming pickup",
+  "informationProvidedByAppAdministrators": "Information provided by {brandName} administrators",
+  "@informationProvidedByAppAdministrators": {
+    "description": "Application message: informationProvidedByAppAdministrators",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "interactiveMapsAreAvailableInTheMobileApp": "Interactive maps are available in the mobile app.",
+  "invalidAdminCredentials": "Invalid admin credentials",
+  "invalidAppBuild": "Invalid app build",
+  "invalidAttractionImageOwner": "Invalid attraction image owner.",
+  "invalidAttractionImageVersion": "Invalid attraction image version.",
+  "invalidLatitude": "Invalid latitude",
+  "invalidLongitude": "Invalid longitude",
+  "isExpiredValue": "{value} is expired.",
+  "@isExpiredValue": {
+    "description": "Application message: isExpiredValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "isNowHiddenValue": "{value} is now hidden",
+  "@isNowHiddenValue": {
+    "description": "Application message: isNowHiddenValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "isNowVisibleValue": "{value} is now visible",
+  "@isNowVisibleValue": {
+    "description": "Application message: isNowVisibleValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "isRequiredValue": "{value} is required",
+  "@isRequiredValue": {
+    "description": "Application message: isRequiredValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "isTemporarilyClosedAndCannotBeAddedRightNow": "{spot} is temporarily closed and cannot be added right now.",
+  "itinerary": "Itinerary",
+  "iVerifiedThisNumberWithTheAgency": "I verified this number with the agency.",
+  "jan": "Jan",
+  "jobs": "Jobs",
+  "johnDoe": "John doe",
+  "johnExampleCom": "john@example.com",
+  "juanDelaCruz": "Juan Dela Cruz",
+  "juanExampleCom": "juan@example.com",
+  "jul": "Jul",
+  "jun": "Jun",
+  "justNow": "Just now",
+  "keepAccount": "Keep account",
+  "keepCurrentCode": "Keep current code",
+  "keepEditing": "Keep editing",
+  "keepOpen": "Keep open",
+  "keepOriginalRoute": "Keep original route",
+  "keepUnderReview": "Keep under review",
+  "keepWaiting": "Keep waiting",
+  "kmAwayValue": "{value} • {secondValue} km away",
+  "@kmAwayValue": {
+    "description": "Application message: kmAwayValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "kmAwayValueLabel": "{value} km away",
+  "@kmAwayValueLabel": {
+    "description": "Application message: kmAwayValueLabel",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "kmValue": " {value}km",
+  "@kmValue": {
+    "description": "Application message: kmValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "language": "Language",
+  "lastLocationIsMoreThanAMinuteOld": "Last location is more than a minute old",
+  "lateCancellation": "Late cancellation",
+  "lateCancellationFee": "Late cancellation fee",
+  "latitude": "Latitude",
+  "leaveACommentOptional": "Leave a comment (Optional)",
+  "leaveTheNumberEmptyToKeepAClearlyMarkedPlaceholder": "Leave the number empty to keep a clearly marked placeholder.",
+  "licenseExpiresOn": "license_expires_on",
+  "licenseExpiryDate": "License expiry date",
+  "licenseImageSelected": "License image selected",
+  "licenseValue": "License: {value}",
+  "@licenseValue": {
+    "description": "Application message: licenseValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "listView": "List view",
+  "liveDriverTracking": "Live driver tracking",
+  "liveLocationIsActiveForTripMatching": "Live location is active for trip matching",
+  "liveLocationIsReconnectingKeepTheAppOpen": "Live location is reconnecting. Keep the app open.",
+  "liveMapboxTrackingIsAvailableInTheMobileApp": "Live Mapbox tracking is available in the mobile app.",
+  "liveOverview": "Live overview",
+  "loading": "Loading",
+  "loadingMore": "Loading more…",
+  "loadMore": "Load more",
+  "loadMoreBookings": "Load more bookings",
+  "loadMorePeople": "Load more people",
+  "localContactsAndSos": "Local contacts and SOS",
+  "localEmergencyNumbers": "Local emergency numbers",
+  "localHistory": "Local history",
+  "localRoadsArePreferredFollowRoadSignsAndYourApprovedTodaOrLgu": "Local roads are preferred. Follow road signs and your approved TODA or LGU route.",
+  "locationIsUnavailableRightNowCheckYourSettingsAndTryAgain": "Location is unavailable right now. Check your settings and try again.",
+  "locationPermissionDeniedEnableItInSettings": "Location permission denied. Enable it in Settings.",
+  "locationPermissionIsNeededToReceiveRides": "Location permission is needed to receive rides.",
+  "locationPermissionIsNeededToUseYourCurrentPosition": "Location permission is needed to use your current position.",
+  "locationServicesAreDisabledPleaseEnableGps": "Location services are disabled. Please enable GPS.",
+  "locationSharingIsAlreadyStopped": "Location sharing is already stopped.",
+  "locationSharingIsNoLongerAvailableOnThisScreen": "Location sharing is no longer available on this screen.",
+  "locationSharingIsOff": "Location sharing is off",
+  "locationSharingWasCancelled": "Location sharing was cancelled.",
+  "locationUnavailable": "Location unavailable",
+  "login": "Login",
+  "loginAsAdmin": "Login as Admin",
+  "logOut": "Log out",
+  "logOutLabel": "Log out?",
+  "longitude": "Longitude",
+  "lookingForADriver": "Looking for a driver",
+  "lostPickupCodeReissue": "Lost pickup code? Reissue",
+  "luggageOrBulkyItems": "Luggage or bulky items",
+  "makeItYourOwn": "Make it your own",
+  "manageAppOpenTheAdminPortal": "Manage {brandName}? Open the admin portal",
+  "@manageAppOpenTheAdminPortal": {
+    "description": "Application message: manageAppOpenTheAdminPortal",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "manageTourists": "Manage tourists",
+  "mapView": "Map view",
+  "mar": "Mar",
+  "mariaExampleCom": "maria@example.com",
+  "markAllAsRead": "Mark all as read",
+  "markAllRead": "Mark all read",
+  "market": "Market",
+  "matchingBlockers": "Matching blockers",
+  "matchingIsTemporarilyBlocked": "Matching is temporarily blocked.",
+  "matchWithTouristsWhoDescribeMobilityOrBoardingNeeds": "Match with tourists who describe mobility or boarding needs.",
+  "maximumCapacityIsCheckedBeforeOfferingTheBooking": "Maximum capacity is checked before offering the booking.",
+  "may": "May",
+  "member": "Member",
+  "message": "Message",
+  "min8Characters": "Min. 8 characters",
+  "min8Chars": "Min. 8 chars",
+  "minsAgoValue": "{value} mins ago",
+  "@minsAgoValue": {
+    "description": "Application message: minsAgoValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "minutes": "minutes",
+  "minValue": "{value} | {secondValue} min",
+  "@minValue": {
+    "description": "Application message: minValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "minValueLabel": "{value} min | {secondValue}",
+  "@minValueLabel": {
+    "description": "Application message: minValueLabel",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "missingValue": "{value} missing",
+  "@missingValue": {
+    "description": "Application message: missingValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "modeValue": "{value} mode",
+  "@modeValue": {
+    "description": "Application message: modeValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "modeValueLabel": "{value} · {secondValue} mode\n{thirdValue}",
+  "@modeValueLabel": {
+    "description": "Application message: modeValueLabel",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      },
+      "thirdValue": {
+        "type": "String"
+      }
+    }
+  },
+  "mon": "Mon",
+  "moveTheMapPinOrUseYourCurrentLocationBeforeSaving": "Move the map pin or use your current location before saving.",
+  "mustBeAtLeastCharactersValue": "{value} must be at least {secondValue} characters",
+  "@mustBeAtLeastCharactersValue": {
+    "description": "Application message: mustBeAtLeastCharactersValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "mustNotExceedCharactersValue": "{value} must not exceed {secondValue} characters",
+  "@mustNotExceedCharactersValue": {
+    "description": "Application message: mustNotExceedCharactersValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "myBookings": "My bookings",
+  "myData": "My data",
+  "myLocation": "My location",
+  "name": "Name",
+  "nameMustBeAtLeast2Characters": "Name must be at least 2 characters",
+  "nameMustNotExceedCharactersValue": "Name must not exceed {value} characters",
+  "@nameMustNotExceedCharactersValue": {
+    "description": "Application message: nameMustNotExceedCharactersValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "namePlateFranchiseOrServiceArea": "Name, plate, franchise, or service area",
+  "nationalEmergencyHotline": "National emergency hotline",
+  "nature": "Nature",
+  "navigate": "Navigate",
+  "needsReview": "Needs review",
+  "newPassword": "New password",
+  "newRideRequest": "New ride request",
+  "next": "Next",
+  "noActiveBookingOpenTripsToViewYourHistory": "No active booking. Open Trips to view your history.",
+  "noActiveTrip": "No active trip",
+  "noActiveTrips": "No active trips",
+  "noArrivalIsAwaitingConfirmation": "No arrival is awaiting confirmation.",
+  "noBlockedDrivers": "No blocked drivers",
+  "noBookingsHereYet": "No bookings here yet.",
+  "noBookingsInThisCategory": "No bookings in this category.",
+  "noCharge": "No charge",
+  "noCompletedBookingsFoundForThisPeriod": "No completed bookings found for this period.",
+  "noCompletedDriverTripsYet": "No completed driver trips yet.",
+  "noConfirmedMoneyMovementYet": "No confirmed money movement yet.",
+  "noDestinationsSelected": "No destinations selected",
+  "noDistanceWaitingOrSurgeAdditionsEntranceFeesAndPurchasesAreSeparate": "No distance, waiting or surge additions. Entrance fees and purchases are separate.",
+  "noDriverAcceptedDuringThisSearchWindowRetryToOpenAFreshRequest": "No driver accepted during this search window. Retry to open a fresh request or cancel without charge.",
+  "noDriversAwaitingReview": "No drivers awaiting review",
+  "noDriverYet": "No driver yet",
+  "noEligibleActiveDrivers": "No eligible active drivers",
+  "noEndedTripsInThisPeriod": "No ended trips in this period.",
+  "noExportRequestsYet": "No export requests yet.",
+  "noLocalRoadRouteWasReturned": "No local-road route was returned.",
+  "noNotificationsYet": "No notifications yet",
+  "noPastTripsYet": "No past trips yet",
+  "noPendingRequest": "No pending request",
+  "noPhotosAvailable": "No photos available",
+  "noRecentBookings": "No recent bookings",
+  "noReviewsFound": "No reviews found.",
+  "noShowFee": "No-show fee",
+  "noSpotsFound": "No spots found",
+  "noSystemFeedbackFound": "No system feedback found.",
+  "notificationDeliveryFailures": "Notification delivery failures",
+  "notifications": "Notifications",
+  "noTouristsFound": "No tourists found",
+  "noTouristSpotsFound": "No tourist spots found.",
+  "notRated": "Not rated",
+  "notVerified": "Not verified",
+  "notYet": "Not yet",
+  "nov": "Nov",
+  "noVerifiedContactNumberIsAvailableForThisTourist": "No verified contact number is available for this tourist.",
+  "oct": "Oct",
+  "officialEmergencyNumbersFromMunicipalityPortal": "Official emergency numbers from municipality portal.",
+  "offline": "Offline",
+  "offlineConnection": "Offline connection",
+  "offlineModeShowingSavedDataFromCriticalActionsRequireAConnection": "Offline mode · showing saved data from {time}. Critical actions require a connection.",
+  "offlineModeShowingSavedDataFromCriticalActionsRequireAConnectionValue": "Offline mode · showing saved data from {value}. Critical actions require a connection.",
+  "@offlineModeShowingSavedDataFromCriticalActionsRequireAConnectionValue": {
+    "description": "Application message: offlineModeShowingSavedDataFromCriticalActionsRequireAConnectionValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "offlineSavedInformationMayBeShown": "Offline · saved information may be shown.",
+  "offThePlannedRouteNavigationIsRecalculatingFollowLegalLocalRoadsAndStop": "Off the planned route · navigation is recalculating. Follow legal local roads and stop safely if unsure.",
+  "onePriceForTheBookedRoute": "One price for the booked route",
+  "ongoing": "ongoing",
+  "online": "Online",
+  "onlinePayment": "Online payment",
+  "onlinePaymentFailedRetryAvailable": "Online payment failed — retry available",
+  "onlinePaymentNotStarted": "Online payment not started",
+  "onlinePaymentReceived": "Online payment received",
+  "onlinePaymentRequiresTheConfiguredServer": "Online payment requires the configured server.",
+  "onlinePaymentsRequireAVerifiedPaymentProvider": "Online payments require a verified payment provider.",
+  "onlineRefundAwaitingAdminAction": "Online refund awaiting admin action",
+  "onlineRefundDue": "Online refund due",
+  "onlyACompletedUnratedTripCanBeReviewed": "Only a completed, unrated trip can be reviewed.",
+  "onlyAnAcceptedBookingCanStart": "Only an accepted booking can start.",
+  "onlyAnEndedTripWithAnOpenReviewCanBeResolved": "Only an ended trip with an open review can be resolved.",
+  "onlyAnOngoingTripCanBeCompleted": "Only an ongoing trip can be completed.",
+  "onlyAParticipantCanReportAPaymentIssue": "Only a participant can report a payment issue.",
+  "onlyAPendingDriverApplicationCanBeResumedFromThisForm": "Only a pending driver application can be resumed from this form.",
+  "onlyATripParticipantCanEndThisTrip": "Only a trip participant can end this trip.",
+  "onlyThePayerAndReceiverCanConfirmCash": "Only the payer and receiver can confirm cash.",
+  "onlyUnvisitedStopsMoveTheOtherParticipantMustApproveBeforeNavigationChanges": "Only unvisited stops move. The other participant must approve before navigation changes.",
+  "openAPaymentReview": "Open a payment review",
+  "openAppStore": "Open app store",
+  "openAppToViewThisUpdate": "Open {brandName} to view this update.",
+  "@openAppToViewThisUpdate": {
+    "description": "Application message: openAppToViewThisUpdate",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "openDialer": "OPEN DIALER",
+  "openDriverSearch": "Open driver search",
+  "openingHours": "Opening hours",
+  "openReviewsValue": "Open reviews: {value}",
+  "@openReviewsValue": {
+    "description": "Application message: openReviewsValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "openTheMobileAppForTheInteractiveRoute": "Open the mobile app for the interactive route.",
+  "openTripMap": "Open trip map",
+  "openTripsToSeeTheLatestBookingStatus": "Open Trips to see the latest booking status.",
+  "operationalAlertSNeedReviewValue": "{value} operational alert(s) need review",
+  "@operationalAlertSNeedReviewValue": {
+    "description": "Application message: operationalAlertSNeedReviewValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "operationFailureValue": "Operation failure: {value}",
+  "@operationFailureValue": {
+    "description": "Application message: operationFailureValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "operationsCentre": "Operations centre",
+  "other": "Other",
+  "overview": "Overview",
+  "packageNotFound": "Package not found.",
+  "packageStopsChangedSelectThePackageAgain": "Package stops changed. Select the package again.",
+  "paid": "paid",
+  "paidOnline": "Paid online",
+  "park": "Park",
+  "partiallypaid": "partiallyPaid",
+  "partiallyRefunded": "Partially refunded",
+  "passengerCapacity": "Passenger capacity",
+  "passengerCount": "{count, plural, =1{1 passenger} other{{count} passengers}}",
+  "@passengerCount": {
+    "description": "Application message: passengerCount",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "passengerRequirements": "Passenger requirements",
+  "passengers": "Passengers",
+  "passengersValue": "{value} passengers",
+  "@passengersValue": {
+    "description": "Application message: passengersValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "password": "Password",
+  "passwordIsRequired": "Password is required",
+  "passwordMustBeAtLeast8Characters": "Password must be at least 8 characters",
+  "passwordMustContainAtLeastOneNumber": "Password must contain at least one number",
+  "passwordMustContainAtLeastOneUppercaseLetter": "Password must contain at least one uppercase letter",
+  "passwordMustNotExceedCharactersValue": "Password must not exceed {value} characters",
+  "@passwordMustNotExceedCharactersValue": {
+    "description": "Application message: passwordMustNotExceedCharactersValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "passwordsDoNotMatch": "Passwords do not match",
+  "passwordUpdatedSignInAgain": "Password updated. Sign in again.",
+  "past": "Past",
+  "pauseForAVehicleProblem": "Pause for a vehicle problem?",
+  "paymentAttention": "Payment attention",
+  "paymentDisputedValue": "Payment disputed: {value}",
+  "@paymentDisputedValue": {
+    "description": "Application message: paymentDisputedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentIsOnHoldAnAdminMustReviewTheCaseBeforeCollectionOr": "Payment is on hold. An admin must review the case before collection or a cash return.",
+  "paymentIsPendingADriverWillOnlyBeRequestedAfterPaymentIsConfirmed": "Payment is pending. A driver will only be requested after payment is confirmed. Unpaid requests expire after 30 minutes.",
+  "paymentOnHoldAdminReview": "Payment on hold · admin review",
+  "paymentpending": "paymentPending",
+  "paymentPending": "Payment pending",
+  "paymentPendingLabel": "payment_pending",
+  "paymentReview": "payment review",
+  "paymentReviewPending": "Payment review pending",
+  "paymentStatusCouldNotBeRefreshed": "Payment status could not be refreshed.",
+  "paymentStatusRefreshed": "Payment status refreshed.",
+  "paymentStatusUnavailableRefreshOrUpdateTheApp": "Payment status unavailable. Refresh or update the app.",
+  "paymentVerificationRequiresTheConfiguredServer": "Payment verification requires the configured server.",
+  "paymongo": "PayMongo",
+  "paymongoCheckoutReady": "PayMongo checkout ready",
+  "paymongoIsProcessingPayment": "PayMongo is processing payment",
+  "paymongoTestModeStatusIsConfirmedByWebhookOrADirectProviderCheck": "PayMongo test mode · status is confirmed by webhook or a direct provider check.",
+  "paymongoUnavailable": "PayMongo unavailable",
+  "payTheFinalAmountAfterTheTripTouristAndDriverMustBothConfirm": "Pay the final amount after the trip. Tourist and driver must both confirm the cash handover.",
+  "pending": "Pending",
+  "pendingRequestsAndDriverCancellationsAreFreeTouristCancellationAfterTheGracePeriod": "Pending requests and driver cancellations are free. Tourist cancellation after the grace period may incur the published fee. A no-show requires verified driver arrival and the full waiting period.",
+  "permanentlyDelete": "Permanently delete",
+  "personalInfo": "Personal info",
+  "personalInformation": "Personal information",
+  "phone": "Phone",
+  "phoneNumber": "Phone number",
+  "phoneNumberIsRequired": "Phone number is required",
+  "photoGallery": "Photo gallery",
+  "photos": "Photos",
+  "pickupArrivalCanOnlyBeReportedForAnAcceptedBooking": "Pickup arrival can only be reported for an accepted booking.",
+  "pickupArrivalHasAlreadyBeenRecorded": "Pickup arrival has already been recorded.",
+  "pickupCode": "Pickup code",
+  "pickupCodeVerifiedTripStarted": "Pickup code verified; trip started.",
+  "pickupLocationPreview": "Pickup location preview",
+  "pickupPoint": "Pickup point",
+  "pickupValue": "Pickup: {value}",
+  "@pickupValue": {
+    "description": "Application message: pickupValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "pickupVerificationIsTemporarilyLockedPleaseWaitAndTryAgain": "Pickup verification is temporarily locked. Please wait and try again.",
+  "pickupWait": "Pickup wait",
+  "placeholderTheOwnerMustVerifyAndEnterANumber": "Placeholder — the owner must verify and enter a number.",
+  "places": "Places",
+  "placesYouSaved": "Places you saved",
+  "planYourTrip": "Plan your trip",
+  "plateNumber": "Plate number",
+  "plateNumberIsRequired": "Plate number is required",
+  "plateNumberMustNotExceedCharactersValue": "Plate number must not exceed {value} characters",
+  "@plateNumberMustNotExceedCharactersValue": {
+    "description": "Application message: plateNumberMustNotExceedCharactersValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "platformFailureValue": "Platform failure: {value}",
+  "@platformFailureValue": {
+    "description": "Application message: platformFailureValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseConfirmYourPassword": "Please confirm your password",
+  "pleaseDescribeYourConcernOrSuggestionInDetail": "Please describe your concern or suggestion in detail...",
+  "pleaseEnterAtLeast20Characters": "Please enter at least 20 characters.",
+  "pleaseEnterAValidEmailAddress": "Please enter a valid email address",
+  "pleaseEnterAValidPlateNumber": "Please enter a valid plate number",
+  "pleaseEnterYourStreetOrHouseNumber": "Please enter your street or house number",
+  "pleaseExplainTheIssueAtLeast5Characters": "Please explain the issue (at least 5 characters).",
+  "pleaseGiveAReasonAtLeast5Characters": "Please give a reason (at least 5 characters).",
+  "pleaseProvideDetailsAtLeast5Characters": "Please provide details (at least 5 characters).",
+  "pleaseReviewTheCurrentPrivacyNotice": "Please review the current privacy notice",
+  "pleaseWaitFiveMinutesBeforeRequestingAnotherPickupCode": "Please wait five minutes before requesting another pickup code.",
+  "policyPublishedExistingBookingsAreUnchanged": "Policy published. Existing bookings are unchanged.",
+  "policyVersionValue": "Policy version {value}",
+  "@policyVersionValue": {
+    "description": "Application message: policyVersionValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "prepareExport": "Prepare export",
+  "preparePrivateAccountExports": "Prepare private account exports",
+  "preparingDriverRoute": "Preparing driver route",
+  "preparingRoute": "Preparing route...",
+  "pressSosToOpenYourPhoneDialerWithTheNationalEmergencyNumber": "Press SOS to open your phone dialer with the national emergency number.",
+  "previewAnnouncement": "Preview announcement",
+  "priceHistoryCurrentVersionValue": "Price history · current version {value}",
+  "@priceHistoryCurrentVersionValue": {
+    "description": "Application message: priceHistoryCurrentVersionValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "pricesChangedWhileYouWereEditingReopenThisPageAndReviewTheLatest": "Prices changed while you were editing. Reopen this page and review the latest rates.",
+  "priceVersion": "Price version",
+  "privacyAndDataUse": "Privacy and data use",
+  "privacyNoticeAcceptanceIsRequired": "Privacy notice acceptance is required.",
+  "privacyUpdate": "Privacy update",
+  "profileImagesMustBe5MbOrSmaller": "Profile images must be 5 MB or smaller.",
+  "profileImagesMustBeJpegOrPngFiles": "Profile images must be JPEG or PNG files.",
+  "profileUpdatedSuccessfully": "Profile updated successfully",
+  "profileUpdatedSuccessfullyLabel": "Profile updated successfully!",
+  "proposeANewStopOrder": "Propose a new stop order",
+  "proposedValue": "Proposed: {value}",
+  "@proposedValue": {
+    "description": "Application message: proposedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "publish": "Publish",
+  "publishCancellationPolicy": "Publish cancellation policy?",
+  "publishedPolicy": "Published policy",
+  "publishing": "Publishing...",
+  "publishPolicy": "Publish policy",
+  "publishTheseFixedFares": "Publish these fixed fares?",
+  "radius130Km": "Radius (1–30 km)",
+  "rateDriver": "Rate driver",
+  "rating": "Rating",
+  "ratingsFeedback": "Ratings & Feedback",
+  "ratingsReviews": "Ratings & Reviews",
+  "readyForApproval": "Ready for approval",
+  "readyMadeDaysOut": "Ready-made days out",
+  "readyMadeTrips": "Ready-made trips",
+  "reason": "Reason",
+  "reasonAtLeast5Characters": "Reason (at least 5 characters)",
+  "reasonDetails": "Reason / details",
+  "reasonForChangingTheOrder": "Reason for changing the order",
+  "reasonForPolicyChange": "Reason for policy change",
+  "reasonForPriceChange": "Reason for price change",
+  "receiveBookingsEarnMoneyAndShowcaseYourLocalKnowledge": "Receive bookings, earn money, and showcase your local knowledge.",
+  "recentBookings": "Recent bookings",
+  "refresh": "Refresh",
+  "refreshPaymentStatus": "Refresh payment status",
+  "refundCompleted": "Refund completed",
+  "refundCompletedInPaymongoTestMode": "Refund completed in PayMongo test mode.",
+  "refundCompletedInTheTestPaymentEnvironment": "Refund completed in the test payment environment.",
+  "refundDecisionRecorded": "Refund decision recorded.",
+  "refunddue": "refundDue",
+  "refunded": "refunded",
+  "refundRequired": "refund_required",
+  "refundSentAwaitingPaymongoConfirmation": "Refund sent · awaiting PayMongo confirmation",
+  "refundUpdateRecorded": "Refund update recorded.",
+  "register": "Register",
+  "registrationDidNotComplete": "Registration did not complete.",
+  "reissueCode": "Reissue code",
+  "reissuePickupCode": "Reissue pickup code?",
+  "reject": "Reject",
+  "rejectApplication": "Reject application",
+  "rejected": "Rejected",
+  "releaseConfigurationIsIncompleteValue": "Release configuration is incomplete: {value}",
+  "@releaseConfigurationIsIncompleteValue": {
+    "description": "Application message: releaseConfigurationIsIncompleteValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "reliability": "Reliability",
+  "reliabilitySeatsValue": "{value}% reliability • {secondValue} seats",
+  "@reliabilitySeatsValue": {
+    "description": "Application message: reliabilitySeatsValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "reliableValue": "{value}% reliable",
+  "@reliableValue": {
+    "description": "Application message: reliableValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "removedFromYourItinerary": "Removed from your itinerary",
+  "removeDuplicateDestinations": "Remove duplicate destinations.",
+  "reopenAttraction": "Reopen attraction",
+  "reopenedValue": "{value} reopened",
+  "@reopenedValue": {
+    "description": "Application message: reopenedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "replacementNeeded": "REPLACEMENT NEEDED",
+  "replacementpending": "replacementPending",
+  "replacementPending": "replacement_pending",
+  "reportArrivalAtNextStop": "Report arrival at next stop",
+  "reports": "Reports",
+  "reportsAnalytics": "Reports & Analytics",
+  "reportTouristNoShow": "Report tourist no-show?",
+  "reportTouristNoShowLabel": "Report tourist no-show",
+  "reportYourVerifiedArrivalAtThePickupPointBeforeStarting": "Report your verified arrival at the pickup point before starting.",
+  "requestACopyOfYourAccountAndTripDataSupportPreparesTheExport": "Request a copy of your account and trip data. Support prepares the export for your account only.",
+  "requestADifferentStopOrder": "Request a different stop order",
+  "requestADriverNow": "Request a driver now",
+  "requestAnotherDriver": "Request another driver?",
+  "requestDataExport": "Request data export",
+  "requestIsNoLongerPending": "Request is no longer pending",
+  "requests": "Requests",
+  "requestSaved": "Request saved",
+  "requestToSkipThisStop": "Request to skip this stop",
+  "requestToSkipValue": "Request to skip {value}?",
+  "@requestToSkipValue": {
+    "description": "Application message: requestToSkipValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "resetMap": "Reset map",
+  "resolve": "Resolve",
+  "resolved": "Resolved",
+  "resolvePaymentReview": "Resolve payment review",
+  "resortCaf": "Resort & Café",
+  "respondToCommunityConcerns": "Respond to community concerns",
+  "restore": "Restore",
+  "restoreTourist": "Restore tourist?",
+  "resumePayment": "Resume payment",
+  "retry": "Retry",
+  "retryConnection": "Retry connection",
+  "retrying": "Retrying…",
+  "retryStorage": "Retry storage",
+  "retypePassword": "Retype password",
+  "revenueOverTime": "Revenue over time",
+  "review": "Review",
+  "reviewActiveAndCompletedTrips": "Review active and completed trips",
+  "reviewAndPublishFares": "Review and publish fares",
+  "reviewAndPublishPolicy": "Review and publish policy",
+  "reviewCountSummary": "(128 reviews)",
+  "reviewFailuresAndStaleDrivers": "Review failures and stale drivers",
+  "reviewFare": "Review fare",
+  "reviewFlaggedForFollowUp": "Review flagged for follow-up",
+  "reviewNote": "Review note",
+  "reviewPendingDrivers": "Review pending drivers",
+  "reviewResolvedFinalChargeValue": "Review resolved: ₱{value} final charge. {secondValue}",
+  "@reviewResolvedFinalChargeValue": {
+    "description": "Application message: reviewResolvedFinalChargeValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "reviews": "Reviews",
+  "reviewYourBooking": "Review your booking",
+  "ride": "Ride",
+  "rideAndBookingUpdates": "Ride and booking updates",
+  "rideUpdates": "Ride updates",
+  "roadRouteUnavailableCheckYourConnectionAndTryAgain": "Road route unavailable. Check your connection and try again.",
+  "routeProgressConfirmedValue": "Route progress · {value}/{secondValue} confirmed",
+  "@routeProgressConfirmedValue": {
+    "description": "Application message: routeProgressConfirmedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "routeReorderApprovalNeeded": "Route reorder approval needed",
+  "safeCapacity": "Safe capacity",
+  "safeDriver": "Safe driver",
+  "safePassengerCapacity": "Safe passenger capacity",
+  "safetySupport": "Safety & support",
+  "sanPedro": "San pedro",
+  "sat": "Sat",
+  "saveChanges": "Save changes",
+  "saved": "Saved",
+  "saveDecision": "Save decision",
+  "savedPlaces": "Saved places",
+  "savedTripDataCouldNotBeReadBookingChangesArePausedToProtect": "Saved trip data could not be read. Booking changes are paused to protect your records. Retry storage or restart the app.",
+  "saveFailed": "Save failed",
+  "savePlacesYouLove": "Save places you love",
+  "saveReviewWithoutApproval": "Save review without approval",
+  "saveSpot": "Save spot",
+  "saving": "Saving…",
+  "savingBooking": "Saving booking…",
+  "scheduled": "scheduled",
+  "scheduledFor": "Scheduled for",
+  "scheduledJobFailures": "Scheduled job failures",
+  "scheduledPickup": "Scheduled pickup",
+  "schedulePickupAtLeast1HourFromNow": "Schedule pickup at least 1 hour from now.",
+  "search": "Search",
+  "searchAgain": "Search again",
+  "searchDrivers": "Search drivers",
+  "searchSpots": "Search spots...",
+  "searchWindowEnded": "Search window ended",
+  "secureYourAccount": "Secure your account",
+  "seeAll": "See all",
+  "seeYourDailyTripSummary": "See your daily trip summary",
+  "selectAddress": "Select address",
+  "selectARatingBetween1And5": "Select a rating between 1 and 5.",
+  "selectAtLeastOneDestinationFirst": "Select at least one destination first.",
+  "selectBetween1And12Destinations": "Select between 1 and 12 destinations.",
+  "selectedStop": "Selected stop",
+  "selectExpiryDate": "Select expiry date",
+  "sendAnAnnouncement": "Send an announcement",
+  "sendAnnouncement": "Send announcement",
+  "sendASupportMessage": "Send a support message",
+  "sendFeedback": "Send feedback",
+  "sendProposal": "Send proposal",
+  "sendRefundRequestToPaymongo": "Send refund request to PayMongo",
+  "sendRefundToPaymongo": "Send refund to PayMongo?",
+  "sendResetLink": "Send reset link",
+  "sep": "Sep",
+  "serverSetupIsIncomplete": "Server setup is incomplete.",
+  "serverSetupIsIncompleteAddTheSupabaseBuildConfigurationBeforeSigningIn": "Server setup is incomplete. Add the Supabase build configuration before signing in.",
+  "serverSetupIsIncompleteFeedbackWasNotSent": "Server setup is incomplete. Feedback was not sent.",
+  "serverSetupIsIncompleteNothingWasSent": "Server setup is incomplete. Nothing was sent.",
+  "serverSetupIsIncompleteTheAttractionWasNotSaved": "Server setup is incomplete. The attraction was not saved.",
+  "serviceAreaValue": "Service area: {value} ",
+  "@serviceAreaValue": {
+    "description": "Application message: serviceAreaValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "serviceHealth": "Service health",
+  "sessionChanged": "Session changed.",
+  "setAFlatCustomTourFareAndAFixedFareForEachPackage": "Set a flat custom-tour fare and a fixed fare for each package. No automatic per-stop, distance, waiting-time or surge additions. Entrance fees are paid separately.",
+  "shareAnUpdateWithDriversOrTourists": "Share an update with drivers or tourists",
+  "shareThisCodeOnlyWhenYouAreOnBoard": "Share this code only when you are on board",
+  "sharingLocation": "SHARING LOCATION",
+  "showValue": "Show {value}",
+  "@showValue": {
+    "description": "Application message: showValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "signInAfterConfirmingYourEmail": "Sign in after confirming your email.",
+  "signInBeforeSendingFeedback": "Sign in before sending feedback.",
+  "signInFirst": "Sign in first.",
+  "signOut": "Sign out",
+  "signUp": "Sign up",
+  "skip": "Skip",
+  "someInformationCouldNotRefreshPreviouslyLoadedDataIsShownReconnectAndRetry": "Some information could not refresh. Previously loaded data is shown; reconnect and retry.",
+  "sos": "SOS",
+  "spotName": "Spot name",
+  "spots": "spots",
+  "staleOnlineDrivers": "Stale online drivers",
+  "startNewSearch": "Start new search",
+  "statusValue": "{value} status",
+  "@statusValue": {
+    "description": "Application message: statusValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "stillToPay": "Still to pay",
+  "stop": "Stop",
+  "stopAtASafePlaceFirstTheTripWillEndImmediatelyPaymentWill": "Stop at a safe place first. The trip will end immediately. Payment will be held for admin review; neither party can demand the full fare automatically. Describe what happened (changed plans, breakdown, safety concern, closed venue, etc.).",
+  "stopCustomTourValue": "{value} stop custom tour",
+  "@stopCustomTourValue": {
+    "description": "Application message: stopCustomTourValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "stops": "stops",
+  "stopsIncluded": "Stops included",
+  "stopSkipApprovalNeeded": "Stop-skip approval needed",
+  "stopSomewhereSafeFirstYourCurrentGpsLocationAndExplanationWillBeRecorded": "Stop somewhere safe first. Your current GPS location and explanation will be recorded. The tourist can wait or end the tour for payment review.",
+  "stopsValue": "{value} stops",
+  "@stopsValue": {
+    "description": "Application message: stopsValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "stopsValueLabel": "{value} stops • ₱{secondValue}",
+  "@stopsValueLabel": {
+    "description": "Application message: stopsValueLabel",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "stopTemporarilyUnavailable": "Stop temporarily unavailable",
+  "stopValue": "Stop: {value}",
+  "@stopValue": {
+    "description": "Application message: stopValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "storageIsUnavailableRetryStorageBeforeMakingChanges": "Storage is unavailable. Retry storage before making changes.",
+  "storeUnavailable": "Store unavailable",
+  "streetHouseNo": "Street/House No.",
+  "streetNameBuildingHouseNo": "Street Name, Building, House No.",
+  "submit": "Submit",
+  "submitApplication": "Submit application",
+  "submitFeedback": "Submit feedback",
+  "submitReview": "Submit review",
+  "submittedDocuments": "Submitted documents",
+  "sun": "Sun",
+  "supportSettings": "Support & settings",
+  "suspend": "Suspend",
+  "suspendDriver": "Suspend driver",
+  "suspended": "Suspended",
+  "suspendTourist": "Suspend tourist?",
+  "suspendTouristLabel": "Suspend tourist",
+  "suspendValue": "Suspend {value}",
+  "@suspendValue": {
+    "description": "Application message: suspendValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "systemActionsAreUnavailableHere": "System actions are unavailable here.",
+  "systemFeedback": "System feedback",
+  "tapTheHeartOnAnyTouristSpotToKeepItHere": "Tap the heart on any tourist spot to keep it here.",
+  "tellUsWhatToImprove": "Tell us what to improve",
+  "temporarilyCloseAttraction": "Temporarily close attraction",
+  "temporarilyClosed": "TEMPORARILY CLOSED",
+  "temporarilyClosedValue": "{value} temporarily closed",
+  "@temporarilyClosedValue": {
+    "description": "Application message: temporarilyClosedValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "thankYouForYourFeedback": "Thank you for your feedback!",
+  "thatPickupCodeIsIncorrectOrTemporarilyLockedAfterRepeatedAttempts": "That pickup code is incorrect or temporarily locked after repeated attempts.",
+  "theAgreedTourFareIsFixedThereIsNoSurgePricingPendingRequests": "The agreed tour fare is fixed; there is no surge pricing. Pending requests and driver cancellations are free. After a driver accepts, the tourist has a short grace period, then the published cancellation fee may apply. After pickup, end safely and an admin reviews the completed service and evidence. Entrance fees and personal purchases remain separate.",
+  "theAssignedDriverIsUnavailable": "The assigned driver is unavailable.",
+  "theBookingWillEndWithoutACancellationChargeIfAnOnlinePaymentWas": "The booking will end without a cancellation charge. If an online payment was already received, it will be marked for refund.",
+  "theCheckoutAddressCouldNotBeVerifiedRefreshThisBookingBeforePaying": "The checkout address could not be verified. Refresh this booking before paying.",
+  "theDriverMovedAwayFromThePlannedRouteAndNavigationWasRecalculatedLive": "The driver moved away from the planned route and navigation was recalculated. Live tracking remains active.",
+  "theDriverReportedAVehicleProblem": "The driver reported a vehicle problem.",
+  "theDriverWillFollowTheSelectedPinConfirmThatItMatchesTheAddress": "The driver will follow the selected pin. Confirm that it matches the address you entered.",
+  "theFinalChargeMustBeBetweenZeroAndTheAgreedFare": "The final charge must be between zero and the agreed fare.",
+  "theFinalChargeMustBeSettledBeforeConfirmingCash": "The final charge must be settled before confirming cash.",
+  "theFinancialRecordRequiresTheConfiguredServer": "The financial record requires the configured server.",
+  "theGpsPositionIsStaleOrInvalidWaitForAFreshSignalAnd": "The GPS position is stale or invalid. Wait for a fresh signal and retry.",
+  "theInteractiveOperationsMapIsAvailableInTheMobileApp": "The interactive operations map is available in the mobile app.",
+  "theOtherParticipantMustApproveIfApprovedFinalPaymentWillBeHeldFor": "The other participant must approve. If approved, final payment will be held for a fair admin review because the delivered route changed.",
+  "theOwnerMustVerifyLocalAgencyNumbersBeforeEnablingCalls": "The owner must verify local agency numbers before enabling calls.",
+  "thePickupPinIsOutsideTheServiceAreaChooseANearbyPickupPoint": "The pickup pin is outside the service area. Choose a nearby pickup point.",
+  "thePickupPinIsOutsideTheServiceAreaChooseAnotherPickupPoint": "The pickup pin is outside the service area. Choose another pickup point.",
+  "thePickupWaitingPeriodHasNotFinished": "The pickup waiting period has not finished.",
+  "thePolicyChangedWhileYouWereEditingReopenThisPage": "The policy changed while you were editing. Reopen this page.",
+  "thePriceChangedReviewTheUpdatedFareAndConfirmAgain": "The price changed. Review the updated fare and confirm again.",
+  "thereAreNoRegisteredTouristsYet": "There are no registered tourists yet.",
+  "thereIsNoOpenReviewOnThisBooking": "There is no open review on this booking.",
+  "thereIsNoOutstandingAmountToConfirm": "There is no outstanding amount to confirm.",
+  "theRideRequestIsNoLongerAvailable": "The ride request is no longer available.",
+  "theServerIsNotConfiguredOnThisBuildAddTheSupabaseUrlAnd": "The server is not configured on this build. Add the Supabase URL and publishable key, then rebuild the app.",
+  "theTouristMustConfirmAllBookedStopsUseEndTourEarlyForAn": "The tourist must confirm all booked stops. Use End tour early for an incomplete route.",
+  "thisAccountBelongsToThePortal": "This account belongs to the {role} portal.",
+  "thisAccountBelongsToThePortalValue": "This account belongs to the {value} portal.",
+  "@thisAccountBelongsToThePortalValue": {
+    "description": "Application message: thisAccountBelongsToThePortalValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "thisAccountCannotSignIn": "This account cannot sign in.",
+  "thisAccountHasAnInvalidRole": "This account has an invalid role.",
+  "thisAccountIsNotCurrentlyAllowedToSignIn": "This account is not currently allowed to sign in.",
+  "thisAccountIsStillAwaitingAdministratorApproval": "This account is still awaiting administrator approval.",
+  "thisActionCouldNotBeCompletedYourExistingRecordsArePreservedRefreshAnd": "This action could not be completed. Your existing records are preserved. Refresh and try again.",
+  "thisAttractionBelongsToATourPackageHideItInsteadOfDeletingIt": "This attraction belongs to a tour package. Hide it instead of deleting it.",
+  "thisAttractionIsInAnActiveBookingHideItForNewTripsInstead": "This attraction is in an active booking. Hide it for new trips instead.",
+  "thisAttractionIsNoLongerAvailable": "This attraction is no longer available.",
+  "thisBookingBelongsToAnotherTourist": "This booking belongs to another tourist.",
+  "thisBookingCouldNotBeFound": "This booking could not be found.",
+  "thisBookingIsAlreadyUnderReviewAddYourStatementToTheCase": "This booking is already under review. Add your statement to the case.",
+  "thisBookingIsAssignedToAnotherDriver": "This booking is assigned to another driver.",
+  "thisBookingRequestIsNotReadyToRetry": "This booking request is not ready to retry.",
+  "thisCancellationIsCurrentlyFreeGiveTheRealReasonSoTheEventCan": "This cancellation is currently free. Give the real reason so the event can be audited.",
+  "thisCompletesTheRefundWorkflowForThePaymongoTestTransactionRecordsTheResult": "This completes the refund workflow for the PayMongo test transaction, records the result, and notifies the tourist. Enter the reason for the refund.",
+  "thisDriverAccountIsStillAwaitingAdministratorApproval": "This driver account is still awaiting administrator approval.",
+  "thisField": "This field",
+  "thisMonth": "This month",
+  "thisOpensYourPhoneDialerConfirmTheNumberBeforeCalling": "This opens your phone dialer. Confirm the number before calling.",
+  "thisOpensYourPhoneDialerWith911YouMustPressCallToContact": "This opens your phone dialer with 911. You must press Call to contact emergency services.",
+  "thisPackageCannotBeBookedUntilAllStopsAreAvailable": "This package cannot be booked until all stops are available.",
+  "thisPackageHasAFixedRouteTheStopsAreAlreadySelectedForYou": "This package has a fixed route. The stops are already selected for you.",
+  "thisPackageHasNoPublishedPrice": "This package has no published price.",
+  "thisPasswordResetLinkIsInvalidOrExpiredRequestANewOne": "This password-reset link is invalid or expired. Request a new one.",
+  "thisPickupPinIsOutsideTheServiceAreaMoveThePinCloserTo": "This pickup pin is outside the service area. Move the pin closer to the service centre.",
+  "thisRemovesYourLoginProfileDetailsDocumentsAndAvatarsRetainedTripAndFinancial": "This removes your login, profile details, documents and avatars. Retained trip and financial records are disconnected from your identity. Finish or cancel active bookings first. Type DELETE to confirm.",
+  "thisRequestAlreadyExistsRefreshYourTripsBeforeTryingAgain": "This request already exists. Refresh your trips before trying again.",
+  "thisRequestIsNoLongerAvailable": "This request is no longer available.",
+  "thisSendsTheExactAmountToPaymongoAndRecordsOnlyTheProviderResult": "This sends the exact amount to PayMongo and records only the provider result. PayMongo currently limits actual refunds to live transactions, so a test-mode rejection will remain clearly marked as not refunded. Enter the decision reason.",
+  "thisTouristAccountCannotBookRightNowContactTheAdministrator": "This tourist account cannot book right now. Contact the administrator.",
+  "thisTouristAccountIsCurrentlyUnavailable": "This tourist account is currently unavailable.",
+  "thisTripCouldNotBeFoundOrHasBeenRemoved": "This trip could not be found or has been removed.",
+  "thisTripHasAlreadyEnded": "This trip has already ended.",
+  "thisTripIsNotInProgress": "This trip is not in progress.",
+  "thisTripUsesANewerStatusUpdateTheAppOrContactSupportBefore": "This trip uses a newer status. Update the app or contact support before making changes.",
+  "thisWeek": "This week",
+  "thisYear": "This year",
+  "threeLineSummary": "{value} · {secondValue}\n{thirdValue}",
+  "@threeLineSummary": {
+    "description": "Application message: threeLineSummary",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      },
+      "thirdValue": {
+        "type": "String"
+      }
+    }
+  },
+  "thu": "Thu",
+  "tipsReminders": "Tips & Reminders",
+  "title": "Title",
+  "today": "Today",
+  "totalBookings": "Total bookings",
+  "totalFare": "Total fare",
+  "totalRevenue": "Total revenue",
+  "tourEndedEarlyPaymentHeldForReview": "Tour ended early; payment held for review",
+  "tourist": "Tourist",
+  "touristAccountActivated": "Tourist account activated",
+  "touristAccounts": "Tourist accounts",
+  "touristAccountSuspended": "Tourist account suspended",
+  "touristAndDriverPolicyTerms": "Tourist and driver policy terms",
+  "touristConfirmedStopValue": "Tourist confirmed stop {value}.",
+  "@touristConfirmedStopValue": {
+    "description": "Application message: touristConfirmedStopValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "touristNoShowAfterVerifiedPickupWait": "Tourist no-show after verified pickup wait.",
+  "touristReportedAsANoShowAfterTheVerifiedWaitingPeriodPublishedNo": "Tourist reported as a no-show after the verified waiting period. Published no-show fee applied.",
+  "tourists": "Tourists",
+  "touristsAndDrivers": "Tourists and drivers",
+  "touristSpot": "Tourist spot",
+  "touristSpotCreated": "Tourist spot created",
+  "touristSpotIssue": "Tourist spot issue",
+  "touristSpots": "Tourist spots",
+  "touristSpotUpdated": "Tourist spot updated",
+  "touristVisibilityValue": "{value} tourist visibility",
+  "@touristVisibilityValue": {
+    "description": "Application message: touristVisibilityValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "tourPackage": "Tour package",
+  "tourPackages": "Tour packages",
+  "tourScheduled": "Tour scheduled",
+  "tricycleBooking": "Tricycle booking",
+  "trip": "Trip",
+  "tripCompletedFixedFareDueCashNotYetConfirmed": "Trip completed. Fixed fare due; cash not yet confirmed.",
+  "tripControls": "Trip controls",
+  "tripHistory": "Trip history",
+  "tripOngoing": "Trip ongoing",
+  "tripPausedOpenTripControlsToChooseWhetherToWaitOrEndSafelyValue": "Trip paused: {value}. Open Trip controls to choose whether to wait or end safely.",
+  "@tripPausedOpenTripControlsToChooseWhetherToWaitOrEndSafelyValue": {
+    "description": "Application message: tripPausedOpenTripControlsToChooseWhetherToWaitOrEndSafelyValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "tripPausedVehicleProblem": "Trip paused · vehicle problem",
+  "tripPayment": "Trip & payment",
+  "trips": "Trips",
+  "tripsValue": "Trips: {value}",
+  "@tripsValue": {
+    "description": "Application message: tripsValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "tripUpdates": "Trip updates",
+  "tryAdjustingYourFiltersOrSearchTerm": "Try adjusting your filters or search term.",
+  "tue": "Tue",
+  "turnByTurnMappingIsAvailableInTheMobileApp": "Turn-by-turn mapping is available in the mobile app.",
+  "turnOnGpsToShareYourLocation": "Turn on GPS to share your location.",
+  "turnOnLocationServicesToUseYourCurrentPosition": "Turn on Location Services to use your current position.",
+  "twoPartDetails": "{value} • {secondValue}",
+  "@twoPartDetails": {
+    "description": "Application message: twoPartDetails",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "twoPartSummary": "{value} · {secondValue}",
+  "@twoPartSummary": {
+    "description": "Application message: twoPartSummary",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "secondValue": {
+        "type": "String"
+      }
+    }
+  },
+  "unableToCheckAppRequirements": "Unable to check app requirements",
+  "unableToLoadThePrivacyNotice": "Unable to load the privacy notice",
+  "unavailable": "Unavailable",
+  "underreview": "underReview",
+  "underReview": "Under review",
+  "unknown": "Unknown",
+  "unknownApplicationEnvironment": "Unknown application environment.",
+  "unknownUntilManuallyReopened": "Unknown / until manually reopened",
+  "unpaid": "unpaid",
+  "unsettledCash": "Unsettled cash",
+  "unsupportedOfflineCommand": "Unsupported offline command.",
+  "updateAppBeforeContinuingToUseBookingAndPaymentServices": "Update {brandName} before continuing to use booking and payment services.",
+  "@updateAppBeforeContinuingToUseBookingAndPaymentServices": {
+    "description": "Application message: updateAppBeforeContinuingToUseBookingAndPaymentServices",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "updateApplication": "Update application",
+  "updatedSAgoValue": "updated {value}s ago",
+  "@updatedSAgoValue": {
+    "description": "Application message: updatedSAgoValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "updatePassword": "Update password",
+  "updateRequired": "Update required",
+  "updateYourDriverDetails": "Update your driver details",
+  "updatingRoute": "Updating route...",
+  "uploadImage": "Upload image",
+  "uploading": "Uploading…",
+  "uploadValue": "Upload {value}",
+  "@uploadValue": {
+    "description": "Application message: uploadValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "useAtLeast8Characters": "Use at least 8 characters",
+  "useAtLeastEightCharactersAvoidAPasswordYouUseOnAnotherService": "Use at least eight characters. Avoid a password you use on another service.",
+  "useLettersSpacesHyphensApostrophesOrPeriodsInYourName": "Use letters, spaces, hyphens, apostrophes or periods in your name",
+  "useMyCurrentLocation": "Use my current location",
+  "useNow": "Use now",
+  "useThisOnlyIfYouCannotCompleteThePickupTheTouristWillDecide": "Use this only if you cannot complete the pickup. The tourist will decide whether to search for another verified driver or cancel free of charge. Explain what happened.",
+  "vehicleAndReliability": "Vehicle and reliability",
+  "vehicleImageSelected": "Vehicle image selected",
+  "vehicleInfo": "Vehicle info",
+  "vehicleInspection": "Vehicle inspection",
+  "vehicleInspectionExpiresOn": "vehicle_inspection_expires_on",
+  "vehicleInspectionValue": "Vehicle inspection: {value}",
+  "@vehicleInspectionValue": {
+    "description": "Application message: vehicleInspectionValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "vehicleIsSafeResumeTrip": "Vehicle is safe · resume trip",
+  "vehicleProblem": "vehicle problem",
+  "vehicleProblemPauseTripSafely": "Vehicle problem · pause trip safely",
+  "verificationStatus": "Verification status",
+  "verified": "VERIFIED",
+  "verifiedAppDriver": "Verified {brandName} driver",
+  "@verifiedAppDriver": {
+    "description": "Application message: verifiedAppDriver",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "verifiedNearThePickupPoint": "Verified near the pickup point",
+  "verifiedPickupArrivalIsRequiredBeforeReportingANoShow": "Verified pickup arrival is required before reporting a no-show.",
+  "verifiedTourist": "Verified tourist",
+  "verifyLocalAgencyNumbers": "Verify local agency numbers",
+  "verifyPickup": "Verify pickup",
+  "verifyPickupCodeStart": "Verify pickup code & start",
+  "viewActiveDriversOnTheMap": "View active drivers on the map",
+  "viewAll": "View all",
+  "viewAndManageTouristAccounts": "View and manage tourist accounts",
+  "viewBookingRequests": "View booking requests",
+  "viewDetails": "View details",
+  "viewMap": "View map",
+  "viewMyTrips": "View my trips",
+  "viewScheduledBooking": "View scheduled booking",
+  "viewValue": "View {value}",
+  "@viewValue": {
+    "description": "Application message: viewValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "visible": "Visible",
+  "visibleToTourists": "Visible to Tourists",
+  "waitForTheMobileMapToLoadBeforeConfirmingAnExactPickupPin": "Wait for the mobile map to load before confirming an exact pickup pin.",
+  "waitForTheTouristToConfirmThisStop": "Wait for the tourist to confirm this stop.",
+  "waitForThisDriver": "Wait for this driver",
+  "waitingForADriverToAcceptYouCanLeaveThisPageAndResume": "Waiting for a driver to accept. You can leave this page and resume from Trips.",
+  "waitingForAnApprovedDriverToAcceptYourRequest": "Waiting for an approved driver to accept your request.",
+  "waitingForCashReturnConfirmation": "Waiting for cash return confirmation",
+  "waitingForLiveLocation": "Waiting for live location",
+  "waitingForTheOtherCashConfirmation": "Waiting for the other cash confirmation",
+  "waitingForTheOtherParticipantNavigationStaysOnTheCurrentRoute": "Waiting for the other participant. Navigation stays on the current route.",
+  "waitingForTheTouristSDecision": "Waiting for the tourist’s decision.",
+  "waitingForTheTouristToChooseDoNotProceedToPickup": "Waiting for the tourist to choose. Do not proceed to pickup.",
+  "waitingPeriodCompleted": "Waiting period completed",
+  "waived": "waived",
+  "wed": "Wed",
+  "weHaveSentPasswordRecoveryInstructionsToYourEmail": "We have sent password recovery instructions to your email.",
+  "welcomeBack": "Welcome back",
+  "weLlSendNearbyBookingsYourWay": "We’ll send nearby bookings your way.",
+  "weWillRemindYouAndStartMatching30MinutesBeforePickup": "We will remind you and start matching 30 minutes before pickup.",
+  "whatDidYouLikeOrDislike": "What did you like or dislike?",
+  "whatSIncluded": "What's Included",
+  "whenYouGetNotificationsTheyWillAppearHere": "When you get notifications, they will appear here.",
+  "whereWouldYouLikeToGo": "Where would you like to go?",
+  "willBeCompletedInThePaymongoTestEnvironmentValue": "{value} will be completed in the PayMongo test environment.",
+  "@willBeCompletedInThePaymongoTestEnvironmentValue": {
+    "description": "Application message: willBeCompletedInThePaymongoTestEnvironmentValue",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "youAlreadyHaveAnActiveBookingOpenTripsToContinueOrCancelIt": "You already have an active booking. Open Trips to continue or cancel it.",
+  "youAreTogether": "You are together",
+  "youChoseToWaitTheDriverMustConfirmTheVehicleIsSafeBefore": "You chose to wait. The driver must confirm the vehicle is safe before navigation resumes.",
+  "yourAccount": "Your account",
+  "yourAccountCannotPerformThisActionRefreshYourAccountOrContactSupport": "Your account cannot perform this action. Refresh your account or contact support.",
+  "yourAccountCanUploadApplicationDocumentsAndCheckApprovalGoingOnlineAndAccepting": "Your account can upload application documents and check approval. Going online and accepting trips require administrator approval.",
+  "yourAccreditationIsVerified": "Your accreditation is verified",
+  "yourActivity": "Your activity",
+  "yourAdministratorRoleDoesNotIncludeThisArea": "Your administrator role does not include this area.",
+  "yourAssignedTouristCanSeeYourLiveLocation": "Your assigned tourist can see your live location",
+  "yourCompletedRidesWillAppearHere": "Your completed rides will appear here.",
+  "yourDocumentsAreUnderReview": "Your documents are under review.",
+  "yourDriver": "Your driver",
+  "youReOffline": "You’re offline",
+  "youReReadyToRide": "You’re ready to ride",
+  "yourFeedbackHelpsKeepAppTrusted": "Your feedback helps keep {brandName} trusted.",
+  "@yourFeedbackHelpsKeepAppTrusted": {
+    "description": "Application message: yourFeedbackHelpsKeepAppTrusted",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "yourFixedFareRouteAndPaymentRecordStayUnchangedThePreviousDriverIs": "Your fixed fare, route, and payment record stay unchanged. The previous driver is released and a new 10-minute search begins.",
+  "yourGuideYourRideInBustos": "Your Guide, Your Ride in Bustos",
+  "yourJourneyYourWay": "Your Journey, Your Way",
+  "yourLocalJourneyStartsHere": "Your local journey starts here",
+  "yourPreviousCodeWillStopWorkingShareTheNewCodeOnlyAfterBoarding": "Your previous code will stop working. Share the new code only after boarding. You can request a new code once every five minutes.",
+  "yourRidesAndReceipts": "Your rides and receipts",
+  "yourTourIsReservedDriverMatchingBegins30MinutesBeforePickupAndReminders": "Your tour is reserved. Driver matching begins 30 minutes before pickup, and reminders will appear in Notifications.",
+  "yourTravel": "Your travel",
+  "youWillBeSentToPaymongoTestCheckoutPaymentIsConfirmedOnlyAfter": "You will be sent to PayMongo test checkout. Payment is confirmed only after the secure webhook reaches {brandName}.",
+  "@youWillBeSentToPaymongoTestCheckoutPaymentIsConfirmedOnlyAfter": {
+    "description": "Application message: youWillBeSentToPaymongoTestCheckoutPaymentIsConfirmedOnlyAfter",
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "useDeviceLanguage": "Use device language",
+  "philippineTime": "Philippine time",
+  "philippineDateTime": "{value} ({timeZone})",
+  "@philippineDateTime": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "timeZone": {
+        "type": "String"
+      }
+    }
+  },
+  "minutesDuration": "{count, plural, =1{1 min} other{{count} min}}",
+  "@minutesDuration": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursDuration": "{count, plural, =1{1 hour} other{{count} hours}}",
+  "@hoursDuration": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursMinutesDuration": "{hours} h {minutes} min",
+  "@hoursMinutesDuration": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "numberOfTrips": "{count, plural, =1{1 trip} other{{count} trips}}",
+  "@numberOfTrips": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@isTemporarilyClosedAndCannotBeAddedRightNow": {
+    "placeholders": {
+      "spot": {
+        "type": "String"
+      }
+    }
+  },
+  "@offlineModeShowingSavedDataFromCriticalActionsRequireAConnection": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@thisAccountBelongsToThePortal": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "activeTripLocationTitle": "{brandName} trip location active",
+  "@activeTripLocationTitle": {
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationUpdateTitle": "{brandName} update",
+  "@notificationUpdateTitle": {
+    "placeholders": {
+      "brandName": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldMustBeBetween": "{field} must be between {minimum} and {maximum}.",
+  "@fieldMustBeBetween": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "minimum": {
+        "type": "int"
+      },
+      "maximum": {
+        "type": "int"
+      }
+    }
+  },
+  "selectedDestinationCount": "{count, plural, =1{{count} destination} other{{count} destinations}}",
+  "@selectedDestinationCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "spotCount": "{count} spots",
+  "@spotCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "buildYourDayWithStops": "Build your day ({count} stops)",
+  "@buildYourDayWithStops": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cancellationWithReason": "{result}. Reason: {reason}",
+  "@cancellationWithReason": {
+    "placeholders": {
+      "result": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "cashConfirmation": "{payment} confirmed by {actor}; {confirmation}.",
+  "@cashConfirmation": {
+    "placeholders": {
+      "payment": {
+        "type": "String"
+      },
+      "actor": {
+        "type": "String"
+      },
+      "confirmation": {
+        "type": "String"
+      }
+    }
+  },
+  "bothPartiesConfirmed": "both parties confirmed",
+  "awaitingOtherParty": "awaiting the other party",
+  "exportPending": "Pending",
+  "exportFulfilled": "Export ready",
+  "exportRejected": "Request declined",
+  "administrator": "Administrator",
+  "payment": "Payment",
+  "signInDidNotComplete": "Sign-in did not complete.",
+  "authResetConfigurationRequired": "Password recovery is not configured for this build.",
+  "pickupRecoveryFailed": "Pickup-code recovery could not be confirmed. Retry from your booking.",
+  "offlineReplayUnsafe": "This action cannot be retried offline.",
+  "selectedStopsCount": "{count} selected stops",
+  "@selectedStopsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cancellationGraceExpired": "The {minutes}-minute grace period has ended. The published {percent}% cancellation fee is {fee}. Give the reason before confirming.",
+  "@cancellationGraceExpired": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      },
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "arrivedAtPickup": "I have arrived at pickup",
+  "requestPickupReplacement": "I cannot make this pickup · request replacement",
+  "confirmReachedStop": "Yes, we reached this stop",
+  "reviewFinalCharge": "Review and decide final charge",
+  "trackingMovementSubtitle": "{distance} {target} · updated {seconds}s ago",
+  "@trackingMovementSubtitle": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "complianceServiceArea": "Service area: {name} ({radius} km)",
+  "@complianceServiceArea": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "radius": {
+        "type": "String"
+      }
+    }
+  },
+  "goOnline": "Go online",
+  "call": "Call",
+  "sendMessage": "Send a message",
+  "share": "Share",
+  "close": "Close",
+  "downloadReport": "Download report",
+  "markResolved": "Mark resolved",
+  "changePhoto": "Change photo",
+  "savePlace": "Save place",
+  "suggestion": "Suggestion",
+  "luggage": "Luggage",
+  "assistance": "Assistance",
+  "friendly": "Friendly",
+  "punctual": "Punctual",
+  "terrible": "Terrible",
+  "bad": "Bad",
+  "okay": "Okay",
+  "good": "Good",
+  "excellent": "Excellent!",
+  "province": "Province",
+  "municipality": "Municipality",
+  "resorts": "Resorts",
+  "events": "Events",
+  "farmsNature": "Farms and nature",
+  "foodCafes": "Food and cafés",
+  "pickup": "Pickup",
+  "tricycle": "Tricycle",
+  "oneYearMembership": "1 yr",
+  "lastThirtyDays": "30 days",
+  "lastSevenDays": "7 days",
+  "newTouristRating": " 5.0 (New)",
+  "exampleOperatingHours": "8:00 AM - 5:00 PM",
+  "onePassenger": "1 passenger",
+  "twoPassengers": "2 passengers",
+  "threePassengers": "3 passengers",
+  "removeSavedPlace": "Remove saved place",
+  "togglePhotoControls": "Show or hide photo controls",
+  "paymentCheckoutCreated": "Checkout created",
+  "paymentProcessing": "Payment processing",
+  "paymentFailed": "Payment failed",
+  "paymentAwaitingConfirmation": "Awaiting payment confirmation",
+  "paymentRefundDue": "Refund due",
+  "paymentRefundProcessing": "Refund processing",
+  "actorSystem": "System",
+  "statusBusy": "Busy",
+  "privacyNoticeTitle": "Privacy notice",
+  "privacyWelcomeTitle": "Your privacy comes first",
+  "privacyWelcomeBody": "Before you continue, review how {brandName} uses your information and choose your preferences.",
+  "@privacyWelcomeBody": {"placeholders": {"brandName": {"type": "String"}}},
+  "privacyAccountTitle": "Account and trip details",
+  "privacyAccountBody": "Your details help manage your account, match your ride and keep trip records.",
+  "privacyLocationTitle": "Location when needed",
+  "privacyLocationBody": "Location supports pickup and navigation. Background location is requested only for driver service.",
+  "privacyChoiceTitle": "You stay in control",
+  "privacyChoiceBody": "Crash diagnostics are optional. You can request your data or delete your account in your profile.",
+  "privacyFullNotice": "Read the full notice",
+  "privacyDiagnosticsHelp": "Optional. Turning this off does not affect sign-in or bookings.",
+  "privacyRequiredHelp": "Accept the notice to continue. Diagnostics are your choice.",
+  "privacyLoadingLabel": "Checking your privacy preferences",
+  "privacyVersionLabel": "Notice version {version}",
+  "@privacyVersionLabel": {"placeholders": {"version": {"type": "String"}}}
+}

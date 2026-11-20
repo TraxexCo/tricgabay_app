@@ -1,3 +1,7 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import 'package:tricgabay_app/core/widgets/map_surface.dart';
+import '../../../core/services/error_messages.dart';
+import '../../../core/services/route_geometry.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -13,7 +17,7 @@ import '../../../core/config/mapbox_config.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/map_route_service.dart';
 import '../../../core/widgets/app_button.dart';
-import '../../../core/utils/app_translations.dart';
+
 import '../../../core/prototype/prototype_session.dart';
 import '../../../core/widgets/web_map_fallback.dart';
 import '../../../models/booking_model.dart';
@@ -37,11 +41,9 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
   Timer? _routeRefreshDebounce;
   Timer? _freshnessTimer;
   bool get _locationFresh {
-    final driver = PrototypeSession.adminDrivers.value
-        .where((d) => d['id'] == _booking?.driverId)
-        .firstOrNull;
+    if (_driverLocation == null) return false;
     final updated = DateTime.tryParse(
-      driver?['locationUpdatedAt'] as String? ?? '',
+      _assignedDriver?['locationUpdatedAt'] as String? ?? '',
     );
     return updated != null &&
         DateTime.now().difference(updated).inSeconds >= 0 &&
@@ -53,26 +55,31 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
   bool _usingRouteFallback = false;
   bool _completionHandled = false;
   MapRoutePlan? _routePlan;
+  final _routeRefreshPolicy = RouteRefreshPolicy();
 
-  double _currentDriverLat = 14.9520;
-  double _currentDriverLng = 120.9250;
-  double _driverSpeedMetersPerSecond = 0;
   double _pickupLat = MapboxConfig.bustosLat;
   double _pickupLng = MapboxConfig.bustosLng;
-  int _etaMinutes = 3;
 
   Map<String, dynamic>? get _assignedDriver {
-    final driverName = _booking?.driverName ?? 'Assigned driver';
+    final driverId = _booking?.driverId;
+    if (driverId == null) return null;
     return PrototypeSession.adminDrivers.value
-        .where(
-          (driver) =>
-              driver['id'] == _booking?.driverId ||
-              driver['name'] == driverName,
-        )
+        .where((driver) => driver['id'] == driverId)
         .firstOrNull;
   }
 
-  double get _distanceToRelevantPoint {
+  ({double lat, double lng})? get _driverLocation {
+    final driver = _assignedDriver;
+    final lat = (driver?['lat'] as num?)?.toDouble();
+    final lng = (driver?['lng'] as num?)?.toDouble();
+    return lat == null || lng == null ? null : (lat: lat, lng: lng);
+  }
+
+  num get _driverSpeedMetersPerSecond => _assignedDriver?['speed'] as num? ?? 0;
+
+  double? get _distanceToRelevantPoint {
+    final driverLocation = _driverLocation;
+    if (driverLocation == null) return null;
     final touristLat = PrototypeSession.userLatitude.value;
     final touristLng = PrototypeSession.userLongitude.value;
     final trackTourist =
@@ -80,8 +87,8 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
         touristLat != null &&
         touristLng != null;
     return geo.Geolocator.distanceBetween(
-      _currentDriverLat,
-      _currentDriverLng,
+      driverLocation.lat,
+      driverLocation.lng,
       trackTourist ? touristLat : _pickupLat,
       trackTourist ? touristLng : _pickupLng,
     );
@@ -89,9 +96,12 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
 
   String get _distanceLabel {
     final distance = _distanceToRelevantPoint;
+    if (distance == null) return MessageCode.unavailable;
     return distance < 1000
-        ? '${distance.round()} m'
-        : '${(distance / 1000).toStringAsFixed(1)} km';
+        ? MessageCode.distanceMeters((distance.round()).toString())
+        : MessageCode.distanceKilometers(
+            ((distance / 1000).toStringAsFixed(1)).toString(),
+          );
   }
 
   int? get _locationAgeSeconds {
@@ -104,36 +114,32 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
 
   String _movementTitle(bool isFilipino) {
     if (!_locationFresh) {
-      return isFilipino
-          ? 'Naghihintay ng live location'
-          : 'Waiting for live location';
+      return MessageCode.waitingForLiveLocation;
     }
-    if (_distanceToRelevantPoint <= 50) {
+    final distance = _distanceToRelevantPoint;
+    if (distance != null && distance <= 50) {
       if (_booking?.status == BookingStatus.ongoing) {
-        return isFilipino ? 'Magkasama na kayo' : 'You are together';
+        return MessageCode.youAreTogether;
       }
-      return isFilipino ? 'Dumating na ang driver' : 'Driver has arrived';
+      return MessageCode.driverHasArrived;
     }
     if (_driverSpeedMetersPerSecond >= 0.8) {
-      return isFilipino ? 'Papalapit ang driver' : 'Driver is moving';
+      return MessageCode.driverIsMoving;
     }
-    return isFilipino ? 'Huminto ang driver' : 'Driver is stopped';
+    return MessageCode.driverIsStopped;
   }
 
   String _movementSubtitle(bool isFilipino) {
     if (!_locationFresh) {
-      return isFilipino
-          ? 'Huling lokasyon ay mahigit isang minuto na'
-          : 'Last location is more than a minute old';
+      return _locationAgeSeconds == null
+          ? MessageCode.unavailable
+          : MessageCode.lastLocationIsMoreThanAMinuteOld;
     }
     final age = _locationAgeSeconds ?? 0;
     final target = _booking?.status == BookingStatus.ongoing
-        ? (isFilipino ? 'mula sa iyo' : 'from you')
-        : (isFilipino ? 'mula sa pickup' : 'from pickup');
-    final updated = isFilipino
-        ? 'na-update ${age}s ang nakalipas'
-        : 'updated ${age}s ago';
-    return '$_distanceLabel $target | $updated';
+        ? MessageCode.fromYou
+        : MessageCode.fromPickup;
+    return MessageCode.trackingMovementSubtitle(_distanceLabel, target, age);
   }
 
   @override
@@ -149,24 +155,6 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
 
     _pickupLat = _booking?.pickupLat ?? MapboxConfig.bustosLat;
     _pickupLng = _booking?.pickupLng ?? MapboxConfig.bustosLng;
-
-    final driverName = _booking?.driverName ?? 'Assigned driver';
-    Map<String, dynamic>? assignedDriver;
-    try {
-      assignedDriver = PrototypeSession.adminDrivers.value.firstWhere(
-        (d) => d['id'] == _booking?.driverId || d['name'] == driverName,
-      );
-    } catch (_) {}
-
-    _currentDriverLat = (assignedDriver?['lat'] as num?)?.toDouble() ?? 14.9520;
-    _currentDriverLng =
-        (assignedDriver?['lng'] as num?)?.toDouble() ?? 120.9250;
-    _driverSpeedMetersPerSecond =
-        (assignedDriver?['speed'] as num?)
-            ?.toDouble()
-            .clamp(0, 80)
-            .toDouble() ??
-        0;
 
     PrototypeSession.adminDrivers.addListener(_syncDriverLocation);
     PrototypeSession.bookings.addListener(_onBookingUpdated);
@@ -231,26 +219,8 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
   }
 
   void _syncDriverLocation() {
-    final driverName = _booking?.driverName ?? 'Assigned driver';
-    Map<String, dynamic>? driver;
-    for (final candidate in PrototypeSession.adminDrivers.value) {
-      if (candidate['id'] == _booking?.driverId ||
-          candidate['name'] == driverName) {
-        driver = candidate;
-        break;
-      }
-    }
-    final lat = (driver?['lat'] as num?)?.toDouble();
-    final lng = (driver?['lng'] as num?)?.toDouble();
-    if (lat == null || lng == null) return;
-    if (mounted) {
-      setState(() {
-        _currentDriverLat = lat;
-        _currentDriverLng = lng;
-        _driverSpeedMetersPerSecond =
-            (driver?['speed'] as num?)?.toDouble().clamp(0, 80).toDouble() ?? 0;
-      });
-    }
+    if (!mounted) return;
+    setState(() {});
     _updateDriverPin();
     _scheduleRouteRefresh();
   }
@@ -262,7 +232,12 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
 
   Future<void> _updateDriverPin() async {
     final manager = _annotationManager;
-    if (manager == null || !_locationFresh || !mounted || _creatingDriverPin) {
+    final location = _driverLocation;
+    if (manager == null ||
+        location == null ||
+        !_locationFresh ||
+        !mounted ||
+        _creatingDriverPin) {
       return;
     }
     if (_driverPin == null) {
@@ -275,9 +250,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
         if (!mounted) return;
         _driverPin = await manager.create(
           PointAnnotationOptions(
-            geometry: Point(
-              coordinates: Position(_currentDriverLng, _currentDriverLat),
-            ),
+            geometry: Point(coordinates: Position(location.lng, location.lat)),
             image: bitmap,
             iconSize: 1,
             iconAnchor: IconAnchor.BOTTOM,
@@ -288,7 +261,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
       }
     } else {
       _driverPin!.geometry = Point(
-        coordinates: Position(_currentDriverLng, _currentDriverLat),
+        coordinates: Position(location.lng, location.lat),
       );
       await manager.update(_driverPin!);
     }
@@ -339,7 +312,12 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
   Future<void> _drawDriverRoute({bool fitCamera = false}) async {
     final map = _mapboxMap;
     final manager = _routeManager;
-    if (map == null || manager == null || !_locationFresh || _routeLoading) {
+    final location = _driverLocation;
+    if (map == null ||
+        manager == null ||
+        location == null ||
+        !_locationFresh ||
+        _routeLoading) {
       return;
     }
     if (_booking?.interruptedAt != null) {
@@ -350,7 +328,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
     if (mounted) setState(() => _routeLoading = true);
 
     final waypoints = [
-      Position(_currentDriverLng, _currentDriverLat),
+      Position(location.lng, location.lat),
       if (_booking?.status == BookingStatus.ongoing)
         ..._booking!.stops
             .skip(_booking!.trip.confirmedStops)
@@ -362,22 +340,26 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
       if (mounted) setState(() => _routeLoading = false);
       return;
     }
+    if (!fitCamera && _routeRefreshPolicy.canReuse(waypoints)) {
+      if (mounted) setState(() => _routeLoading = false);
+      return;
+    }
     late final MapRoutePlan plan;
     try {
       plan = await MapRouteService.tricyclePreferred(waypoints);
-    } catch (_) {
-      await manager.deleteAll();
+    } catch (error) {
+      ErrorMessages.forError(error);
       if (mounted) {
         setState(() {
           _routeLoading = false;
-          _usingRouteFallback = true;
-          _routePlan = null;
+          _usingRouteFallback = _routePlan == null;
         });
       }
       return;
     }
 
     if (!mounted) return;
+    _routeRefreshPolicy.remember(waypoints, plan.geometry);
     await manager.deleteAll();
     await manager.create(
       PolylineAnnotationOptions(
@@ -404,7 +386,6 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
         _routeLoading = false;
         _usingRouteFallback = plan.restrictionViolation;
         _routePlan = plan;
-        _etaMinutes = plan.etaMinutes;
       });
     }
   }
@@ -445,7 +426,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
 
     final iconPainter = TextPainter(textDirection: TextDirection.ltr);
     iconPainter.text = TextSpan(
-      text: String.fromCharCode(iconData.codePoint),
+      text: context.message(String.fromCharCode(iconData.codePoint)),
       style: TextStyle(
         fontSize: 28,
         fontFamily: iconData.fontFamily,
@@ -470,19 +451,11 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
     if (_booking == null || !_booking!.isActive || _booking!.driverId == null) {
       return BookingDetailScreen(bookingId: widget.bookingId);
     }
-    final driverName = _booking?.driverName ?? 'Assigned driver';
-    final driverPlate = _booking?.driverPlate ?? 'ABC 1234';
-
-    Map<String, dynamic>? assignedDriver;
-    try {
-      assignedDriver = PrototypeSession.adminDrivers.value.firstWhere(
-        (d) => d['id'] == _booking?.driverId || d['name'] == driverName,
-      );
-    } catch (_) {}
-    final phoneNumber =
-        assignedDriver?['phoneNumber'] ??
-        assignedDriver?['contactNumber'] ??
-        '';
+    final driverName = _booking?.driverName ?? MessageCode.assignedDriver;
+    final driverPlate =
+        _booking?.driverPlate ?? _assignedDriver?['plate'] as String?;
+    final phoneNumber = _assignedDriver?['phone'] as String? ?? '';
+    final routePlan = _routePlan;
 
     final centerLat = _booking?.pickupLat ?? MapboxConfig.bustosLat;
     final centerLng = _booking?.pickupLng ?? MapboxConfig.bustosLng;
@@ -493,19 +466,22 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
         body: Stack(
           children: [
             kIsWeb
-                ? const WebMapFallback(
-                    title: 'Driver tracking preview',
-                    subtitle:
-                        'Live Mapbox tracking is available in the mobile app.',
+                ? WebMapFallback(
+                    title: context.l10n.driverTrackingPreview,
+                    subtitle: context
+                        .l10n
+                        .liveMapboxTrackingIsAvailableInTheMobileApp,
                   )
-                : MapWidget(
-                    styleUri: MapboxConfig.mapStyle,
-                    onMapCreated: _onMapCreated,
-                    viewport: CameraViewportState(
-                      center: Point(
-                        coordinates: Position(centerLng, centerLat),
+                : MapSurface(
+                    builder: (context) => MapWidget(
+                      styleUri: MapboxConfig.mapStyle,
+                      onMapCreated: _onMapCreated,
+                      viewport: CameraViewportState(
+                        center: Point(
+                          coordinates: Position(centerLng, centerLat),
+                        ),
+                        zoom: 14.0,
                       ),
-                      zoom: 14.0,
                     ),
                   ),
 
@@ -541,15 +517,20 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
                       ),
                     const SizedBox(width: 4),
                     Text(
-                      _routeLoading
-                          ? 'Updating route...'
-                          : _usingRouteFallback
-                          ? 'Check road restrictions'
-                          : _routePlan != null
-                          ? '${_routePlan!.distanceLabel} | ${_routePlan!.etaMinutes} min'
-                          : _locationFresh
-                          ? 'Preparing driver route'
-                          : 'Location unavailable',
+                      context.message(
+                        _routeLoading
+                            ? MessageCode.updatingRoute
+                            : _usingRouteFallback
+                            ? MessageCode.checkRoadRestrictions
+                            : _routePlan != null
+                            ? MessageCode.minValue(
+                                (_routePlan!.distanceLabel).toString(),
+                                (_routePlan!.etaMinutes).toString(),
+                              )
+                            : _locationFresh
+                            ? MessageCode.preparingDriverRoute
+                            : MessageCode.locationUnavailable,
+                      ),
                       style: GoogleFonts.poppins(
                         color: Colors.white,
                         fontSize: 10,
@@ -571,7 +552,14 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Text(
-                      'Trip paused: ${_booking?.interruptionReason ?? 'vehicle problem'}. Open Trip controls to choose whether to wait or end safely.',
+                      context.l10n
+                          .tripPausedOpenTripControlsToChooseWhetherToWaitOrEndSafelyValue(
+                            context.message(
+                              (_booking?.interruptionReason ??
+                                      MessageCode.vehicleProblem)
+                                  .toString(),
+                            ),
+                          ),
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
@@ -590,10 +578,12 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
                 child: Material(
                   color: AppColors.warningLight,
                   borderRadius: BorderRadius.circular(14),
-                  child: const Padding(
+                  child: Padding(
                     padding: EdgeInsets.all(12),
                     child: Text(
-                      'The driver moved away from the planned route and navigation was recalculated. Live tracking remains active.',
+                      context
+                          .l10n
+                          .theDriverMovedAwayFromThePlannedRouteAndNavigationWasRecalculatedLive,
                       textAlign: TextAlign.center,
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
@@ -646,7 +636,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _movementTitle(isFilipino),
+                                context.message(_movementTitle(isFilipino)),
                                 style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.textPrimary,
@@ -654,7 +644,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                _movementSubtitle(isFilipino),
+                                context.message(_movementSubtitle(isFilipino)),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.poppins(
@@ -701,152 +691,167 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
                 ),
                 child: SafeArea(
                   top: false,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.sizeOf(context).height * 0.62,
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          const CircleAvatar(
-                            radius: 24,
-                            backgroundColor: AppColors.primary,
-                            child: Icon(Icons.person, color: Colors.white),
+                          Row(
+                            children: [
+                              const CircleAvatar(
+                                radius: 24,
+                                backgroundColor: AppColors.primary,
+                                child: Icon(Icons.person, color: Colors.white),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      context.message(driverName),
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    if (driverPlate != null &&
+                                        driverPlate.isNotEmpty)
+                                      Text(
+                                        driverPlate,
+                                        style: GoogleFonts.poppins(
+                                          color: AppColors.textSecondary,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                tooltip: context.l10n.call,
+                                icon: const Icon(
+                                  Icons.phone,
+                                  color: AppColors.primary,
+                                ),
+                                onPressed: phoneNumber.toString().isEmpty
+                                    ? null
+                                    : () async {
+                                        final uri = Uri(
+                                          scheme: 'tel',
+                                          path: phoneNumber,
+                                        );
+                                        if (await canLaunchUrl(uri)) {
+                                          await launchUrl(uri);
+                                        } else {
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  context
+                                                      .l10n
+                                                      .couldNotOpenPhoneDialer,
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        }
+                                      },
+                              ),
+                              IconButton(
+                                tooltip: context.l10n.sendMessage,
+                                icon: const Icon(
+                                  Icons.message,
+                                  color: AppColors.primary,
+                                ),
+                                onPressed: phoneNumber.toString().isEmpty
+                                    ? null
+                                    : () async {
+                                        final uri = Uri(
+                                          scheme: 'sms',
+                                          path: phoneNumber,
+                                        );
+                                        if (!await launchUrl(uri) &&
+                                            context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                context
+                                                    .l10n
+                                                    .couldNotOpenMessages,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  driverName,
+                          const Divider(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  context.l10n.eta,
+                                  style: GoogleFonts.poppins(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                              Flexible(
+                                child: Text(
+                                  context.message(
+                                    !_locationFresh
+                                        ? MessageCode.unavailable
+                                        : routePlan == null
+                                        ? _distanceLabel
+                                        : MessageCode.minValueLabel(
+                                            routePlan.etaMinutes.toString(),
+                                            routePlan.distanceLabel,
+                                          ),
+                                  ),
                                   style: GoogleFonts.poppins(
                                     fontWeight: FontWeight.bold,
+                                    color: AppColors.textPrimary,
                                     fontSize: 16,
                                   ),
                                 ),
-                                Text(
-                                  driverPlate,
-                                  style: GoogleFonts.poppins(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 12,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: AppButton(
+                                  label: context.l10n.emergency,
+                                  type: AppButtonType.outline,
+                                  onPressed: () =>
+                                      context.push('/tourist/emergency'),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: AppButton(
+                                  label: context.l10n.tripPayment,
+                                  type: AppButtonType.primary,
+                                  onPressed: () => context.push(
+                                    '/tourist/bookings/${widget.bookingId}',
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.phone,
-                              color: AppColors.primary,
-                            ),
-                            onPressed: phoneNumber.toString().isEmpty
-                                ? null
-                                : () async {
-                                    final uri = Uri(
-                                      scheme: 'tel',
-                                      path: phoneNumber,
-                                    );
-                                    if (await canLaunchUrl(uri)) {
-                                      await launchUrl(uri);
-                                    } else {
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              context.tr(
-                                                'Could not open phone dialer.',
-                                                'Hindi mabuksan ang phone dialer.',
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    }
-                                  },
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.message,
-                              color: AppColors.primary,
-                            ),
-                            onPressed: phoneNumber.toString().isEmpty
-                                ? null
-                                : () async {
-                                    final uri = Uri(
-                                      scheme: 'sms',
-                                      path: phoneNumber,
-                                    );
-                                    if (!await launchUrl(uri) &&
-                                        context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            context.tr(
-                                              'Could not open messages.',
-                                              'Hindi mabuksan ang mga mensahe.',
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  },
-                          ),
-                        ],
-                      ),
-                      const Divider(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            context.tr('ETA', 'Tinatayang Oras ng Pagdating'),
-                            style: GoogleFonts.poppins(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          Text(
-                            context.tr(
-                              _locationFresh
-                                  ? '$_etaMinutes min | ${_routePlan?.distanceLabel ?? _distanceLabel}'
-                                  : 'Unavailable',
-                              _locationFresh
-                                  ? '$_etaMinutes min | ${_routePlan?.distanceLabel ?? _distanceLabel}'
-                                  : 'Hindi available',
-                            ),
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: AppButton(
-                              label: context.tr('Emergency', 'Emerhensiya'),
-                              type: AppButtonType.outline,
-                              onPressed: () =>
-                                  context.push('/tourist/emergency'),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: AppButton(
-                              label: 'Trip & payment',
-                              type: AppButtonType.primary,
-                              onPressed: () => context.push(
-                                '/tourist/bookings/${widget.bookingId}',
                               ),
-                            ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),

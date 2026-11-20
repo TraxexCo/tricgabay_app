@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tricgabay_app/core/services/cancellation_policy.dart';
+import 'package:tricgabay_app/core/services/fare_policy.dart';
 import 'package:tricgabay_app/core/state/offline_state_store.dart';
 
 void main() {
@@ -55,5 +57,30 @@ void main() {
       retry.add(command.id);
     });
     expect(retry, ['second', 'third']);
+  });
+
+  test('clearUser removes both cached snapshot and pending commands', () async {
+    await OfflineStateStore.saveSnapshot(
+      userId: userId,
+      bookings: const [],
+      spots: const [],
+      farePolicy: const FarePolicy(),
+      cancellationPolicy: const CancellationPolicy(),
+    );
+    await OfflineStateStore.enqueue(
+      userId: userId,
+      id: 'read-before-logout',
+      type: 'notification_read',
+      payload: {'notification_id': 'notice-1'},
+    );
+
+    await OfflineStateStore.clearUser(userId);
+
+    final replayed = <String>[];
+    await OfflineStateStore.replay(userId, (command) async {
+      replayed.add(command.id);
+    });
+    expect(replayed, isEmpty);
+    expect(await OfflineStateStore.restoreSnapshot(userId), isNull);
   });
 }

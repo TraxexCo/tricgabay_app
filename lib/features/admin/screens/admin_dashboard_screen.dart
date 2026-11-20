@@ -1,3 +1,6 @@
+import '../../../core/widgets/language_selection.dart';
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,6 +8,8 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/prototype/prototype_session.dart';
 import '../../../models/booking_model.dart';
+import '../../../core/l10n/record_labels.dart';
+import '../../../core/widgets/account_widgets.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -12,7 +17,6 @@ class AdminDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F8FB),
       body: SafeArea(
         child: ValueListenableBuilder<List<BookingModel>>(
           valueListenable: PrototypeSession.bookings,
@@ -20,14 +24,21 @@ class AdminDashboardScreen extends StatelessWidget {
             return ValueListenableBuilder<List<Map<String, dynamic>>>(
               valueListenable: PrototypeSession.adminDrivers,
               builder: (context, drivers, _) {
-                final double totalRevenue = bookings
-                    .where(
-                      (b) =>
-                          !b.isActive &&
-                          !b.trip.reviewRequired &&
-                          b.refundDueCents == 0,
-                    )
-                    .fold(0.0, (sum, b) => sum + b.trip.receivedCents / 100);
+                final settled = bookings.where(
+                  (b) =>
+                      !b.isActive &&
+                      !b.trip.reviewRequired &&
+                      b.refundDueCents == 0,
+                );
+                final totalRevenue = settled.fold<double>(
+                  0,
+                  (sum, b) => sum + b.trip.receivedCents / 100,
+                );
+                final includesDirectGcash = settled.any(
+                  (b) =>
+                      b.paymentMethod == PaymentMethod.gcashDirect &&
+                      b.trip.receivedCents > 0,
+                );
                 final int activeRides = bookings
                     .where((b) => b.status == BookingStatus.ongoing)
                     .length;
@@ -47,10 +58,6 @@ class AdminDashboardScreen extends StatelessWidget {
                 final int totalAccounts =
                     drivers.length +
                     PrototypeSession.adminTourists.value.length;
-                final formatCurrency = NumberFormat.currency(
-                  locale: 'en_PH',
-                  symbol: '₱',
-                );
 
                 final recentBookings = bookings.toList()
                   ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -67,31 +74,42 @@ class AdminDashboardScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Operations centre',
+                                  context.l10n.operationsCentre,
                                   style: GoogleFonts.poppins(
                                     fontSize: 23,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
                                 Text(
-                                  DateFormat(
-                                    'EEEE, d MMMM',
-                                  ).format(DateTime.now()),
+                                  context.message(
+                                    AppFormatters.weekdayDate(DateTime.now()),
+                                  ),
                                   style: GoogleFonts.poppins(
-                                    fontSize: 12,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
                                     color: AppColors.textSecondary,
                                   ),
                                 ),
                               ],
                             ),
                           ),
+                          IconButton(
+                            tooltip: context.l10n.language,
+                            icon: const Icon(Icons.language),
+                            onPressed: () => showModalBottomSheet(
+                              context: context,
+                              builder: (_) => const LanguageSelection(),
+                            ),
+                          ),
                           if (PrototypeSession.hasAdminCapability('support'))
                             IconButton(
+                              tooltip: context.l10n.sendAnAnnouncement,
                               onPressed: () =>
                                   context.push('/admin/announcements'),
                               icon: const Icon(Icons.campaign_outlined),
                             ),
                           IconButton(
+                            tooltip: context.l10n.logOut,
                             onPressed: () async {
                               await PrototypeSession.signOut();
                               if (context.mounted) context.go('/login');
@@ -99,6 +117,10 @@ class AdminDashboardScreen extends StatelessWidget {
                             icon: const Icon(Icons.logout_rounded),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 16),
+                      AccountIdentityCard(
+                        roleLabel: context.l10n.administrator,
                       ),
                       if (PrototypeSession.hasAdminCapability('operations') &&
                           PrototypeSession.operationalAlerts.value.isNotEmpty)
@@ -119,7 +141,15 @@ class AdminDashboardScreen extends StatelessWidget {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  '${PrototypeSession.operationalAlerts.value.length} operational alert(s) need review',
+                                  context.l10n.operationalAlertSNeedReviewValue(
+                                    context.message(
+                                      (PrototypeSession
+                                              .operationalAlerts
+                                              .value
+                                              .length)
+                                          .toString(),
+                                    ),
+                                  ),
                                   style: GoogleFonts.poppins(
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -160,7 +190,11 @@ class AdminDashboardScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      '$activeDrivers drivers active',
+                                      context.l10n.driversActiveValue(
+                                        context.message(
+                                          (activeDrivers).toString(),
+                                        ),
+                                      ),
                                       style: GoogleFonts.poppins(
                                         fontSize: 18,
                                         color: Colors.white,
@@ -168,10 +202,14 @@ class AdminDashboardScreen extends StatelessWidget {
                                       ),
                                     ),
                                     Text(
-                                      '$activeRides are currently on a trip',
+                                      context.l10n.areCurrentlyOnATripValue(
+                                        context.message(
+                                          (activeRides).toString(),
+                                        ),
+                                      ),
                                       style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        color: Colors.white70,
+                                        fontSize: 14,
+                                        color: Colors.white,
                                       ),
                                     ),
                                   ],
@@ -187,7 +225,7 @@ class AdminDashboardScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Live overview',
+                        context.l10n.liveOverview,
                         style: GoogleFonts.poppins(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
@@ -201,7 +239,11 @@ class AdminDashboardScreen extends StatelessWidget {
                           final itemWidth =
                               (width - (12 * (crossAxisCount - 1))) /
                               crossAxisCount;
-                          final aspectRatio = itemWidth / 80;
+                          final aspectRatio =
+                              itemWidth /
+                              (110 +
+                                  MediaQuery.textScalerOf(context).scale(12) *
+                                      5);
 
                           return GridView.count(
                             crossAxisCount: crossAxisCount,
@@ -213,27 +255,29 @@ class AdminDashboardScreen extends StatelessWidget {
                             children: [
                               _Metric(
                                 value: todayBookings.toString(),
-                                label: 'Bookings today',
+                                label: MessageCode.bookingsToday,
                                 icon: Icons.receipt_long_outlined,
                                 color: AppColors.primary,
                               ),
                               _Metric(
                                 value: verifications.toString(),
-                                label: 'Driver verifications',
+                                label: MessageCode.driverVerifications,
                                 icon: Icons.verified_user_outlined,
                                 color: AppColors.warning,
                               ),
                               _Metric(
-                                value: NumberFormat.compact().format(
-                                  totalAccounts,
-                                ),
-                                label: 'Tourist accounts',
+                                value: NumberFormat.compact(
+                                  locale: AppFormatters.resolvedLocale(null),
+                                ).format(totalAccounts),
+                                label: MessageCode.touristAccounts,
                                 icon: Icons.people_outline_rounded,
                                 color: AppColors.success,
                               ),
                               _Metric(
-                                value: formatCurrency.format(totalRevenue),
-                                label: 'Confirmed cash',
+                                value: AppFormatters.currency(totalRevenue),
+                                label: includesDirectGcash
+                                    ? context.l10n.gcashConfirmedFares
+                                    : MessageCode.confirmedCash,
                                 icon: Icons.payments_outlined,
                                 color: const Color(0xFF8E44AD),
                               ),
@@ -241,9 +285,11 @@ class AdminDashboardScreen extends StatelessWidget {
                           );
                         },
                       ),
+                      const SizedBox(height: 8),
+                      Text(context.l10n.loadedBookingTotals),
                       const SizedBox(height: 25),
                       Text(
-                        'Act now',
+                        context.l10n.actNow,
                         style: GoogleFonts.poppins(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
@@ -256,8 +302,10 @@ class AdminDashboardScreen extends StatelessWidget {
                         _action(
                           context,
                           Icons.verified_user_outlined,
-                          'Review pending drivers',
-                          '$verifications documents are waiting for verification',
+                          MessageCode.reviewPendingDrivers,
+                          MessageCode.documentsAreWaitingForVerificationValue(
+                            (verifications).toString(),
+                          ),
                           '/admin/drivers',
                           AppColors.warning,
                         ),
@@ -265,24 +313,24 @@ class AdminDashboardScreen extends StatelessWidget {
                         _action(
                           context,
                           Icons.campaign_outlined,
-                          'Send an announcement',
-                          'Share an update with drivers or tourists',
+                          MessageCode.sendAnAnnouncement,
+                          MessageCode.shareAnUpdateWithDriversOrTourists,
                           '/admin/announcements',
                           AppColors.primary,
                         ),
                         _action(
                           context,
                           Icons.people_outline,
-                          'Manage tourists',
-                          'View and manage tourist accounts',
+                          MessageCode.manageTourists,
+                          MessageCode.viewAndManageTouristAccounts,
                           '/admin/tourists',
                           AppColors.success,
                         ),
                         _action(
                           context,
                           Icons.forum_outlined,
-                          'Ratings & feedback',
-                          'Respond to community concerns',
+                          MessageCode.ratingsFeedback,
+                          MessageCode.respondToCommunityConcerns,
                           '/admin/ratings',
                           AppColors.secondary,
                         ),
@@ -291,25 +339,58 @@ class AdminDashboardScreen extends StatelessWidget {
                         _action(
                           context,
                           Icons.map_outlined,
-                          'Live Driver Tracking',
-                          'View active drivers on the map',
+                          MessageCode.liveDriverTracking,
+                          MessageCode.viewActiveDriversOnTheMap,
                           '/admin/live-map',
                           const Color(0xFF8E44AD),
                         ),
+                      if (PrototypeSession.hasAdminCapability('support'))
+                        _action(
+                          context,
+                          Icons.download_outlined,
+                          MessageCode.dataExportRequests,
+                          MessageCode.preparePrivateAccountExports,
+                          '/admin/data-requests',
+                          AppColors.primary,
+                        ),
+                      if (PrototypeSession.hasAdminCapability(
+                        'operations',
+                      )) ...[
+                        _action(
+                          context,
+                          Icons.local_hospital_outlined,
+                          MessageCode.emergencyContactsSettings,
+                          MessageCode.verifyLocalAgencyNumbers,
+                          '/admin/emergency-contacts',
+                          AppColors.danger,
+                        ),
+                        _action(
+                          context,
+                          Icons.monitor_heart_outlined,
+                          MessageCode.serviceHealth,
+                          MessageCode.reviewFailuresAndStaleDrivers,
+                          '/admin/health',
+                          AppColors.warning,
+                        ),
+                      ],
                       const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Recent bookings',
-                            style: GoogleFonts.poppins(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
+                          Flexible(
+                            child: Text(
+                              context.l10n.recentBookings,
+                              style: GoogleFonts.poppins(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
-                          TextButton(
-                            onPressed: () => context.push('/admin/bookings'),
-                            child: const Text('View all'),
+                          Flexible(
+                            child: TextButton(
+                              onPressed: () => context.push('/admin/bookings'),
+                              child: Text(context.l10n.viewAll),
+                            ),
                           ),
                         ],
                       ),
@@ -318,7 +399,7 @@ class AdminDashboardScreen extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(vertical: 20),
                           child: Center(
                             child: Text(
-                              'No recent bookings',
+                              context.l10n.noRecentBookings,
                               style: GoogleFonts.poppins(
                                 color: AppColors.textSecondary,
                               ),
@@ -330,8 +411,9 @@ class AdminDashboardScreen extends StatelessWidget {
                             .take(3)
                             .map(
                               (b) => _booking(
+                                context,
                                 b.id.toUpperCase(),
-                                b.status.name.toUpperCase(),
+                                bookingStatusLabel(context, b.status),
                                 _getStatusColor(b.status),
                               ),
                             ),
@@ -395,16 +477,17 @@ class AdminDashboardScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title,
+                        context.message(title),
                         style: GoogleFonts.poppins(
-                          fontSize: 13,
+                          fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       Text(
-                        description,
+                        context.message(description),
                         style: GoogleFonts.poppins(
-                          fontSize: 10,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -424,7 +507,7 @@ class AdminDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _booking(String id, String state, Color color) {
+  Widget _booking(BuildContext context, String id, String state, Color color) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
@@ -453,16 +536,17 @@ class AdminDashboardScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  id,
+                  context.message(id),
                   style: GoogleFonts.poppins(
-                    fontSize: 12,
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 Text(
-                  'Tricycle Booking',
+                  context.l10n.tricycleBooking,
                   style: GoogleFonts.poppins(
-                    fontSize: 10,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.textSecondary,
                   ),
                 ),
@@ -476,9 +560,9 @@ class AdminDashboardScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              state,
+              context.message(state),
               style: GoogleFonts.poppins(
-                fontSize: 9,
+                fontSize: 14,
                 color: color,
                 fontWeight: FontWeight.w700,
               ),
@@ -530,7 +614,7 @@ class _Metric extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    value,
+                    context.message(value),
                     style: GoogleFonts.poppins(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -541,9 +625,10 @@ class _Metric extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    label,
+                    context.message(label),
                     style: GoogleFonts.poppins(
-                      fontSize: 9,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                       color: AppColors.textSecondary,
                     ),
                     maxLines: 1,

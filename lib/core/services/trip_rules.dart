@@ -1,3 +1,6 @@
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/l10n/message_codes.g.dart';
+import 'server_clock.dart';
 import '../../models/booking_model.dart';
 import '../../models/trip_record.dart';
 
@@ -12,7 +15,7 @@ class TripRuleException implements Exception {
 /// these same rules with authenticated actors and atomic database transactions.
 class TripRules {
   static const policyText =
-      'The agreed tour fare is fixed; there is no surge pricing. Pending requests and driver cancellations are free. After a driver accepts, the tourist has a short grace period, then the published cancellation fee may apply. After pickup, end safely and an admin reviews the completed service and evidence. Entrance fees and personal purchases remain separate.';
+      MessageCode.theAgreedTourFareIsFixedThereIsNoSurgePricingPendingRequests;
 
   static void require(bool condition, String message) {
     if (!condition) throw TripRuleException(message);
@@ -27,7 +30,7 @@ class TripRules {
     trip: b.trip.copyWith(
       events: List.unmodifiable([
         ...b.trip.events,
-        TripEvent(at ?? DateTime.now(), actor, description),
+        TripEvent(at ?? ServerClock.now(), actor, description),
       ]),
     ),
   );
@@ -35,20 +38,20 @@ class TripRules {
   static BookingModel start(BookingModel b, String code) {
     require(
       b.status == BookingStatus.accepted,
-      'Only an accepted booking can start.',
+      MessageCode.onlyAnAcceptedBookingCanStart,
     );
     require(
       b.trip.pickupArrivedAt != null,
-      'Report your verified arrival at the pickup point before starting.',
+      MessageCode.reportYourVerifiedArrivalAtThePickupPointBeforeStarting,
     );
     require(
       b.trip.pickupCode.isNotEmpty && code.trim() == b.trip.pickupCode,
-      'Ask the tourist for the correct pickup code once they are on board.',
+      MessageCode.askTheTouristForTheCorrectPickupCodeOnceTheyAreOnBoard,
     );
     return record(
-      b.copyWith(status: BookingStatus.ongoing, startedAt: DateTime.now()),
+      b.copyWith(status: BookingStatus.ongoing, startedAt: ServerClock.now()),
       TripActor.driver,
-      'Pickup code verified; trip started.',
+      MessageCode.pickupCodeVerifiedTripStarted,
     );
   }
 
@@ -59,13 +62,13 @@ class TripRules {
   }) {
     require(
       b.status == BookingStatus.accepted,
-      'Pickup arrival can only be reported for an accepted booking.',
+      MessageCode.pickupArrivalCanOnlyBeReportedForAnAcceptedBooking,
     );
     require(
       b.trip.pickupArrivedAt == null,
-      'Pickup arrival has already been recorded.',
+      MessageCode.pickupArrivalHasAlreadyBeenRecorded,
     );
-    final arrival = at ?? DateTime.now();
+    final arrival = at ?? ServerClock.now();
     return record(
       b.copyWith(
         trip: b.trip.copyWith(
@@ -74,22 +77,22 @@ class TripRules {
         ),
       ),
       TripActor.driver,
-      'Driver arrived at the verified pickup area. The waiting period started.',
+      MessageCode.driverArrivedAtTheVerifiedPickupAreaTheWaitingPeriodStarted,
       at: arrival,
     );
   }
 
   static BookingModel declareTouristNoShow(BookingModel b, {DateTime? at}) {
-    final now = at ?? DateTime.now();
+    final now = at ?? ServerClock.now();
     require(
       b.status == BookingStatus.accepted &&
           b.trip.pickupArrivedAt != null &&
           b.trip.pickupWaitExpiresAt != null,
-      'Verified pickup arrival is required before reporting a no-show.',
+      MessageCode.verifiedPickupArrivalIsRequiredBeforeReportingANoShow,
     );
     require(
       !now.isBefore(b.trip.pickupWaitExpiresAt!),
-      'The pickup waiting period has not finished.',
+      MessageCode.thePickupWaitingPeriodHasNotFinished,
     );
     final charge = b.noShowFeeCents;
     final status = b.trip.receivedCents > charge
@@ -101,33 +104,39 @@ class TripRules {
       b.copyWith(
         status: BookingStatus.cancelled,
         completedAt: now,
-        cancellationReason: 'Tourist no-show after verified pickup wait.',
+        cancellationReason: MessageCode.touristNoShowAfterVerifiedPickupWait,
         paymentStatus: status,
         trip: b.trip.copyWith(finalChargeCents: charge),
       ),
       TripActor.driver,
-      'Tourist reported as a no-show after the verified waiting period. Published no-show fee applied.',
+      MessageCode
+          .touristReportedAsANoShowAfterTheVerifiedWaitingPeriodPublishedNo,
       at: now,
     );
   }
 
   static BookingModel proposeArrival(BookingModel b) {
-    require(b.status == BookingStatus.ongoing, 'This trip is not in progress.');
+    require(
+      b.status == BookingStatus.ongoing,
+      MessageCode.thisTripIsNotInProgress,
+    );
     require(
       b.trip.confirmedStops < b.stops.length && !b.trip.arrivalPending,
-      'Wait for the tourist to confirm this stop.',
+      MessageCode.waitForTheTouristToConfirmThisStop,
     );
     return record(
       b.copyWith(trip: b.trip.copyWith(arrivalPending: true)),
       TripActor.driver,
-      'Arrival reported: ${b.stops[b.trip.confirmedStops].spotName}.',
+      MessageCode.arrivalReportedValue(
+        (b.stops[b.trip.confirmedStops].spotName).toString(),
+      ),
     );
   }
 
   static BookingModel confirmArrival(BookingModel b) {
     require(
       b.status == BookingStatus.ongoing && b.trip.arrivalPending,
-      'No arrival is awaiting confirmation.',
+      MessageCode.noArrivalIsAwaitingConfirmation,
     );
     return record(
       b.copyWith(
@@ -137,40 +146,42 @@ class TripRules {
         ),
       ),
       TripActor.tourist,
-      'Tourist confirmed stop ${b.trip.confirmedStops + 1}.',
+      MessageCode.touristConfirmedStopValue(
+        (b.trip.confirmedStops + 1).toString(),
+      ),
     );
   }
 
   static BookingModel complete(BookingModel b) {
     require(
       b.status == BookingStatus.ongoing,
-      'Only an ongoing trip can be completed.',
+      MessageCode.onlyAnOngoingTripCanBeCompleted,
     );
     require(
       b.stops.isNotEmpty && b.trip.confirmedStops == b.stops.length,
-      'The tourist must confirm all booked stops. Use End tour early for an incomplete route.',
+      MessageCode.theTouristMustConfirmAllBookedStopsUseEndTourEarlyForAn,
     );
     return record(
       b.copyWith(
         status: BookingStatus.completed,
-        completedAt: DateTime.now(),
+        completedAt: ServerClock.now(),
         trip: b.trip.copyWith(finalChargeCents: b.quotedCents),
         paymentStatus: PaymentStatus.unpaid,
       ),
       TripActor.driver,
-      'Trip completed. Fixed fare due; cash not yet confirmed.',
+      MessageCode.tripCompletedFixedFareDueCashNotYetConfirmed,
     );
   }
 
   static BookingModel cancel(BookingModel b, TripActor actor, String reason) {
     require(
       actor == TripActor.driver || actor == TripActor.tourist,
-      'Only a trip participant can end this trip.',
+      MessageCode.onlyATripParticipantCanEndThisTrip,
     );
-    require(b.isActive, 'This trip has already ended.');
+    require(b.isActive, MessageCode.thisTripHasAlreadyEnded);
     require(
       reason.trim().length >= 5,
-      'Please give a reason (at least 5 characters).',
+      MessageCode.pleaseGiveAReasonAtLeast5Characters,
     );
     final started = b.status == BookingStatus.ongoing;
     final touristLateCancellation =
@@ -178,7 +189,7 @@ class TripRules {
         actor == TripActor.tourist &&
         b.status == BookingStatus.accepted &&
         b.acceptedAt != null &&
-        DateTime.now().isAfter(
+        ServerClock.now().isAfter(
           b.acceptedAt!.add(Duration(minutes: b.freeCancellationMinutes)),
         );
     final charge = started
@@ -196,7 +207,7 @@ class TripRules {
     return record(
       b.copyWith(
         status: BookingStatus.cancelled,
-        completedAt: DateTime.now(),
+        completedAt: ServerClock.now(),
         cancellationReason: reason.trim(),
         trip: b.trip.copyWith(
           reviewRequired: started,
@@ -206,30 +217,34 @@ class TripRules {
         paymentStatus: paymentStatus,
       ),
       actor,
-      '${started
-          ? 'Tour ended early; payment held for review'
-          : charge == 0
-          ? 'Cancelled without charge'
-          : 'Cancelled after the grace period; published cancellation fee applied'}. Reason: ${reason.trim()}',
+      MessageCode.cancellationWithReason(
+        started
+            ? MessageCode.tourEndedEarlyPaymentHeldForReview
+            : charge == 0
+            ? MessageCode.cancelledWithoutCharge
+            : MessageCode
+                  .cancelledAfterTheGracePeriodPublishedCancellationFeeApplied,
+        reason.trim(),
+      ),
     );
   }
 
   static BookingModel dispute(BookingModel b, TripActor actor, String reason) {
     require(
       !b.isActive,
-      'End the tour safely first to open a settlement review.',
+      MessageCode.endTheTourSafelyFirstToOpenASettlementReview,
     );
     require(
       actor == TripActor.tourist || actor == TripActor.driver,
-      'Only a participant can report a payment issue.',
+      MessageCode.onlyAParticipantCanReportAPaymentIssue,
     );
     require(
       !b.trip.reviewRequired,
-      'This booking is already under review. Add your statement to the case.',
+      MessageCode.thisBookingIsAlreadyUnderReviewAddYourStatementToTheCase,
     );
     require(
       reason.trim().length >= 5,
-      'Please explain the issue (at least 5 characters).',
+      MessageCode.pleaseExplainTheIssueAtLeast5Characters,
     );
     return record(
       b.copyWith(
@@ -237,17 +252,24 @@ class TripRules {
         paymentStatus: PaymentStatus.underReview,
       ),
       actor,
-      'Payment disputed: ${reason.trim()}',
+      MessageCode.paymentDisputedValue((reason.trim()).toString()),
     );
   }
 
   static BookingModel statement(BookingModel b, TripActor actor, String text) {
-    require(b.trip.reviewRequired, 'There is no open review on this booking.');
+    require(
+      b.trip.reviewRequired,
+      MessageCode.thereIsNoOpenReviewOnThisBooking,
+    );
     require(
       text.trim().length >= 5,
-      'Please provide details (at least 5 characters).',
+      MessageCode.pleaseProvideDetailsAtLeast5Characters,
     );
-    return record(b, actor, 'Case statement: ${text.trim()}');
+    return record(
+      b,
+      actor,
+      MessageCode.caseStatementValue((text.trim()).toString()),
+    );
   }
 
   static int suggestedCharge(BookingModel b) => b.stops.isEmpty
@@ -257,19 +279,20 @@ class TripRules {
   static BookingModel resolve(BookingModel b, int cents, String reason) {
     require(
       b.trip.reviewRequired && !b.isActive,
-      'Only an ended trip with an open review can be resolved.',
+      MessageCode.onlyAnEndedTripWithAnOpenReviewCanBeResolved,
     );
     require(
       cents >= 0 && cents <= b.quotedCents,
-      'The final charge must be between zero and the agreed fare.',
+      MessageCode.theFinalChargeMustBeBetweenZeroAndTheAgreedFare,
     );
     require(
       b.startedAt != null || cents <= (b.trip.finalChargeCents ?? 0),
-      'A pre-pickup review cannot increase the snapshotted cancellation charge.',
+      MessageCode
+          .aPrePickupReviewCannotIncreaseTheSnapshottedCancellationCharge,
     );
     require(
       reason.trim().length >= 10,
-      'Explain the decision (at least 10 characters).',
+      MessageCode.explainTheDecisionAtLeast10Characters,
     );
     final paid = b.trip.receivedCents;
     final status = paid > cents
@@ -292,7 +315,10 @@ class TripRules {
         paymentStatus: status,
       ),
       TripActor.admin,
-      'Review resolved: ₱${(cents / 100).toStringAsFixed(2)} final charge. ${reason.trim()}',
+      MessageCode.reviewResolvedFinalChargeValue(
+        (AppFormatters.amount((cents / 100))).toString(),
+        (reason.trim()).toString(),
+      ),
     );
   }
 
@@ -303,19 +329,19 @@ class TripRules {
   }) {
     require(
       actor == TripActor.tourist || actor == TripActor.driver,
-      'Only the payer and receiver can confirm cash.',
+      MessageCode.onlyThePayerAndReceiverCanConfirmCash,
     );
     require(
       !b.isActive && !b.trip.reviewRequired && b.trip.finalChargeCents != null,
-      'The final charge must be settled before confirming cash.',
+      MessageCode.theFinalChargeMustBeSettledBeforeConfirmingCash,
     );
     require(
       b.paymentMethod == PaymentMethod.cash,
-      'Online payments require a verified payment provider.',
+      MessageCode.onlinePaymentsRequireAVerifiedPaymentProvider,
     );
     require(
       refund ? b.refundDueCents > 0 : b.amountDueCents > 0,
-      'There is no outstanding amount to confirm.',
+      MessageCode.thereIsNoOutstandingAmountToConfirm,
     );
     final tourist = actor == TripActor.tourist;
     final already = refund
@@ -344,7 +370,17 @@ class TripRules {
                   : PaymentStatus.awaitingConfirmation),
       ),
       actor,
-      '${refund ? 'Cash return' : 'Cash payment'} confirmed by ${actor.name}${both ? '; both parties confirmed' : '; awaiting the other party'}.',
+      MessageCode.cashConfirmation(
+        refund ? MessageCode.cashReturn : MessageCode.cashPayment,
+        actor == TripActor.tourist
+            ? MessageCode.tourist
+            : actor == TripActor.driver
+            ? MessageCode.driver
+            : MessageCode.administrator,
+        both
+            ? MessageCode.bothPartiesConfirmed
+            : MessageCode.awaitingOtherParty,
+      ),
     );
   }
 }

@@ -1,3 +1,6 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import 'package:tricgabay_app/core/widgets/map_surface.dart';
+import '../../../core/services/error_messages.dart';
 import 'dart:ui' as ui;
 import 'dart:async';
 
@@ -12,16 +15,21 @@ import '../../../core/config/mapbox_config.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/prototype/prototype_session.dart';
 import '../../../models/tourist_spot_model.dart';
-import '../../../core/utils/app_translations.dart';
+
 import '../../../core/widgets/shared_widgets.dart';
 import '../../../core/widgets/web_map_fallback.dart';
+import '../spot_filters.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Screen
 // ─────────────────────────────────────────────────────────────────────────────
 
 class TouristHomeScreen extends StatefulWidget {
-  const TouristHomeScreen({super.key});
+  final Widget? mapPlaceholder;
+  const TouristHomeScreen({super.key}) : mapPlaceholder = null;
+  @visibleForTesting
+  const TouristHomeScreen.withMapPlaceholder({super.key, required Widget map})
+    : mapPlaceholder = map;
 
   @override
   State<TouristHomeScreen> createState() => _TouristHomeScreenState();
@@ -30,15 +38,17 @@ class TouristHomeScreen extends StatefulWidget {
 class _TouristHomeScreenState extends State<TouristHomeScreen> {
   MapboxMap? _mapboxMap;
   PointAnnotationManager? _annotationManager;
-  PointAnnotationManager? _driverAnnotationManager;
   StreamSubscription<geo.Position>? _positionSubscription;
 
   /// Maps annotation.id → TouristSpotModel so we can look up which spot was tapped.
   final Map<String, TouristSpotModel> _annotationSpotMap = {};
 
-  final List<TouristSpotModel> _spots = PrototypeSession.allSpots.value;
-  String _selectedCategory = 'All';
+  List<TouristSpotModel> get _spots => PrototypeSession.allSpots.value;
+  String _selectedCategory = MessageCode.all;
   late List<TouristSpotModel> _filteredSpots;
+  final _pinBitmaps = <Color, Future<Uint8List>>{};
+  List<TouristSpotModel>? _pendingPins;
+  bool _updatingPins = false;
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
@@ -46,24 +56,25 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
   void initState() {
     super.initState();
     _filteredSpots = _spots;
+    PrototypeSession.allSpots.addListener(_catalogChanged);
     PrototypeSession.focusedSpotId.addListener(_onFocusedSpotChanged);
-    _startLocationTracking();
+    if (widget.mapPlaceholder == null) _startLocationTracking();
   }
 
   @override
   void dispose() {
+    PrototypeSession.allSpots.removeListener(_catalogChanged);
     PrototypeSession.focusedSpotId.removeListener(_onFocusedSpotChanged);
     _annotationManager?.deleteAll();
-    _driverAnnotationManager?.deleteAll();
     _positionSubscription?.cancel();
-    PrototypeSession.adminDrivers.removeListener(_updateDriverPins);
     super.dispose();
   }
 
   void _onFocusedSpotChanged() async {
     final spotId = PrototypeSession.focusedSpotId.value;
     if (spotId != null) {
-      final spot = _spots.firstWhere((s) => s.id == spotId);
+      final spot = _spots.where((s) => s.id == spotId).firstOrNull;
+      if (spot == null) return;
       // Wait for navigation stack to settle
       await Future.delayed(const Duration(milliseconds: 300));
       if (!mounted) return;
@@ -111,12 +122,6 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
     );
 
     await _addSpotAnnotations(mapboxMap);
-
-    // Driver annotations
-    _driverAnnotationManager = await mapboxMap.annotations
-        .createPointAnnotationManager();
-    PrototypeSession.adminDrivers.addListener(_updateDriverPins);
-    _updateDriverPins();
   }
 
   Future<void> _addSpotAnnotations(MapboxMap mapboxMap) async {
@@ -128,24 +133,7 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
     // Register tap listener using tapEvents method API (v2.30)
     manager.tapEvents(onTap: _onAnnotationTapped);
 
-    // Create one pin per tourist spot
-    for (final spot in _spots) {
-      final bitmap = await _buildPinBitmap(_categoryColor(spot.category));
-      final annotation = await manager.create(
-        PointAnnotationOptions(
-          geometry: Point(coordinates: Position(spot.longitude, spot.latitude)),
-          image: bitmap,
-          iconSize: 1.0,
-          iconAnchor: IconAnchor.BOTTOM,
-        ),
-      );
-      _annotationSpotMap[annotation.id] = spot;
-    }
-  }
-
-  Future<void> _updateDriverPins() async {
-    // Deliberately disabled for Midterms:
-    // We remove them to avoid cluttering the tourism map.
+    await _recreatePins(_filteredSpots);
   }
 
   void _onAnnotationTapped(PointAnnotation annotation) {
@@ -158,7 +146,9 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
         center: Point(coordinates: Position(spot.longitude, spot.latitude)),
         zoom: MapboxConfig.spotZoom,
       ),
-      MapAnimationOptions(duration: 900),
+      MapAnimationOptions(
+        duration: MediaQuery.disableAnimationsOf(context) ? 0 : 900,
+      ),
     );
 
     _showSpotBottomSheet(spot);
@@ -171,568 +161,615 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: PrototypeSession.isFilipino,
       builder: (context, isFilipino, _) => Scaffold(
-        body: Stack(
-          children: [
-            // ── Full-screen Mapbox map ───────────────────────────────────────
-            kIsWeb
-                ? const WebMapFallback()
-                : MapWidget(
-                    styleUri: MapboxConfig.mapStyle,
-                    onMapCreated: _onMapCreated,
-                    viewport: CameraViewportState(
-                      center: Point(
-                        coordinates: Position(
-                          MapboxConfig.bustosLng,
-                          MapboxConfig.bustosLat,
-                        ),
-                      ),
-                      zoom: MapboxConfig.defaultZoom,
-                    ),
-                  ),
-
-            // ── Top bar ───────────────────────────────────────────────────
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final scale = MediaQuery.textScalerOf(context);
+            final needsScrolling =
+                constraints.maxHeight < 500 || scale.scale(14) > 18;
+            final canvasHeight = needsScrolling
+                ? constraints.maxHeight.clamp(
+                    480 + scale.scale(300),
+                    double.infinity,
+                  )
+                : constraints.maxHeight;
+            return SingleChildScrollView(
+              child: SizedBox(
+                height: canvasHeight,
+                child: Stack(
                   children: [
-                    // Greeting row
-                    Row(
-                      children: [
-                        const AppLogo(size: 46, showShadow: true),
-                        const SizedBox(width: 11),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ValueListenableBuilder<String>(
-                                valueListenable:
-                                    PrototypeSession.currentUserName,
-                                builder: (ctx, name, _) {
-                                  final hour = DateTime.now().hour;
-                                  String greeting = context.tr(
-                                    'Good morning',
-                                    'Magandang umaga',
-                                  );
-                                  if (hour >= 12 && hour < 17) {
-                                    greeting = context.tr(
-                                      'Good afternoon',
-                                      'Magandang hapon',
-                                    );
-                                  }
-                                  if (hour >= 17) {
-                                    greeting = context.tr(
-                                      'Good evening',
-                                      'Magandang gabi',
-                                    );
-                                  }
-                                  return Text(
-                                    '$greeting, $name',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
+                    // ── Full-screen Mapbox map ───────────────────────────────────────
+                    widget.mapPlaceholder ??
+                        (kIsWeb
+                            ? const WebMapFallback()
+                            : MapSurface(
+                                builder: (context) => MapWidget(
+                                  styleUri: MapboxConfig.mapStyle,
+                                  onMapCreated: _onMapCreated,
+                                  viewport: CameraViewportState(
+                                    center: Point(
+                                      coordinates: Position(
+                                        MapboxConfig.bustosLng,
+                                        MapboxConfig.bustosLat,
+                                      ),
                                     ),
-                                  );
-                                },
+                                    zoom: MapboxConfig.defaultZoom,
+                                  ),
+                                ),
+                              )),
+
+                    // ── Top bar ───────────────────────────────────────────────────
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Greeting row
+                              Row(
+                                children: [
+                                  const AppLogo(size: 46, showShadow: true),
+                                  const SizedBox(width: 11),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        ValueListenableBuilder<String>(
+                                          valueListenable:
+                                              PrototypeSession.currentUserName,
+                                          builder: (ctx, name, _) {
+                                            final hour = DateTime.now().hour;
+                                            String greeting =
+                                                context.l10n.goodMorning;
+                                            if (hour >= 12 && hour < 17) {
+                                              greeting =
+                                                  context.l10n.goodAfternoon;
+                                            }
+                                            if (hour >= 17) {
+                                              greeting =
+                                                  context.l10n.goodEvening;
+                                            }
+                                            return Text(
+                                              context.message(
+                                                '$greeting, $name',
+                                              ),
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                        Text(
+                                          context.l10n.bustosBulacan,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  _mapButton(
+                                    Icons.notifications_none_rounded,
+                                    () =>
+                                        context.push('/tourist/notifications'),
+                                    tooltip: context.l10n.notifications,
+                                  ),
+                                ],
                               ),
-                              Text(
-                                'Bustos, Bulacan',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
+                              const SizedBox(height: 14),
+                              // Search bar
+                              GestureDetector(
+                                onTap: () => context.go('/tourist/search'),
+                                child: Container(
+                                  height: 54,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(18),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Color(0x220D1B2A),
+                                        blurRadius: 18,
+                                        offset: Offset(0, 6),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.search_rounded,
+                                        color: AppColors.primary,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          context.l10n.whereWouldYouLikeToGo,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: GoogleFonts.poppins(
+                                            color: AppColors.textSecondary,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.tune_rounded,
+                                        color: AppColors.textSecondary,
+                                        size: 20,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: Material(
+                                  color: Colors.white,
+                                  elevation: 2,
+                                  shadowColor: const Color(0x220D1B2A),
+                                  borderRadius: BorderRadius.circular(18),
+                                  child: InkWell(
+                                    onTap: () => context.go('/tourist/search'),
+                                    borderRadius: BorderRadius.circular(18),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 16,
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(
+                                            Icons.format_list_bulleted_rounded,
+                                            color: AppColors.primary,
+                                            size: 18,
+                                          ),
+                                          const SizedBox(width: 7),
+                                          Text(
+                                            context.l10n.listView,
+                                            style: GoogleFonts.poppins(
+                                              color: AppColors.textPrimary,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        _mapButton(
-                          Icons.notifications_none_rounded,
-                          () => context.push('/tourist/notifications'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    // Search bar
-                    GestureDetector(
-                      onTap: () => context.go('/tourist/search'),
-                      child: Container(
-                        height: 54,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x220D1B2A),
-                              blurRadius: 18,
-                              offset: Offset(0, 6),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.search_rounded,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                context.tr(
-                                  'Where would you like to go?',
-                                  'Saan mo gusto pumunta?',
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.poppins(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                            const Icon(
-                              Icons.tune_rounded,
-                              color: AppColors.textSecondary,
-                              size: 20,
-                            ),
-                          ],
-                        ),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Material(
-                        color: Colors.white,
-                        elevation: 2,
-                        shadowColor: const Color(0x220D1B2A),
-                        borderRadius: BorderRadius.circular(18),
-                        child: InkWell(
-                          onTap: () => context.go('/tourist/search'),
-                          borderRadius: BorderRadius.circular(18),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 9,
+
+                    // ── Left-side Map Legend ──────────────────────────────────────
+                    Positioned(
+                      left: 16,
+                      bottom: 300,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.95),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x180D1B2A),
+                              blurRadius: 10,
+                              offset: Offset(0, 4),
                             ),
-                            child: Row(
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Icon(
-                                  Icons.format_list_bulleted_rounded,
+                                  Icons.location_on_rounded,
                                   color: AppColors.primary,
                                   size: 18,
                                 ),
-                                const SizedBox(width: 7),
+                                const SizedBox(width: 8),
                                 Text(
-                                  context.tr('List view', 'Listahan'),
+                                  context.l10n.touristSpot,
                                   style: GoogleFonts.poppins(
                                     color: AppColors.textPrimary,
-                                    fontSize: 12,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // ── Left-side Map Legend ──────────────────────────────────────
-            Positioned(
-              left: 16,
-              bottom: 300,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.95),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x180D1B2A),
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.location_on_rounded,
-                          color: AppColors.primary,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          context.tr('Tourist Spot', 'Lugar ng Turista'),
-                          style: GoogleFonts.poppins(
-                            color: AppColors.textPrimary,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // ── Right-side map controls ───────────────────────────────────
-            Positioned(
-              right: 16,
-              bottom: 300,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _mapButton(
-                    Icons.my_location_rounded,
-                    _flyToMyLocation,
-                    tooltip: context.tr('My location', 'Aking lokasyon'),
-                  ),
-                  const SizedBox(height: 10),
-                  _mapButton(
-                    Icons.center_focus_strong_rounded,
-                    () {
-                      _mapboxMap?.setCamera(
-                        CameraOptions(
-                          center: Point(
-                            coordinates: Position(
-                              MapboxConfig.bustosLng,
-                              MapboxConfig.bustosLat,
-                            ),
-                          ),
-                          zoom: MapboxConfig.defaultZoom,
-                        ),
-                      );
-                    },
-                    tooltip: context.tr('Reset map', 'I-reset ang mapa'),
-                  ),
-                  const SizedBox(height: 10),
-                  _mapButton(
-                    Icons.sos_rounded,
-                    () => context.push('/tourist/emergency'),
-                    foreground: AppColors.danger,
-                    tooltip: context.tr('Emergency', 'Emergency'),
-                  ),
-                ],
-              ),
-            ),
-
-            // ── Bottom draggable sheet ────────────────────────────────────
-            DraggableScrollableSheet(
-              initialChildSize: 0.36,
-              minChildSize: 0.22,
-              maxChildSize: 0.86,
-              builder: (ctx, ctrl) => Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF5F7FC),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0x280D1B2A),
-                      blurRadius: 24,
-                      offset: Offset(0, -4),
-                    ),
-                  ],
-                ),
-                child: ListView(
-                  controller: ctrl,
-                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 120),
-                  children: [
-                    // Drag handle
-                    Center(
-                      child: Container(
-                        width: 36,
-                        height: 4,
-                        margin: const EdgeInsets.only(bottom: 14),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFCED6E0),
-                          borderRadius: BorderRadius.circular(8),
+                          ],
                         ),
                       ),
                     ),
 
-                    // Section header — Explore Bustos
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // ── Right-side map controls ───────────────────────────────────
+                    Positioned(
+                      right: 16,
+                      bottom: 300,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            context.tr(
-                              'Explore Bustos',
-                              'Mga Kalapit na Lugar',
-                            ),
-                            style: GoogleFonts.poppins(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                            ),
+                          _mapButton(
+                            Icons.my_location_rounded,
+                            _flyToMyLocation,
+                            tooltip: context.l10n.myLocation,
                           ),
-                          Text(
-                            '${_filteredSpots.length} ${context.tr('spots', 'mga lugar')}',
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              color: AppColors.success,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          const SizedBox(height: 10),
+                          _mapButton(
+                            Icons.center_focus_strong_rounded,
+                            () {
+                              _mapboxMap?.setCamera(
+                                CameraOptions(
+                                  center: Point(
+                                    coordinates: Position(
+                                      MapboxConfig.bustosLng,
+                                      MapboxConfig.bustosLat,
+                                    ),
+                                  ),
+                                  zoom: MapboxConfig.defaultZoom,
+                                ),
+                              );
+                            },
+                            tooltip: context.l10n.resetMap,
+                          ),
+                          const SizedBox(height: 10),
+                          _mapButton(
+                            Icons.sos_rounded,
+                            () => context.push('/tourist/emergency'),
+                            foreground: AppColors.danger,
+                            tooltip: context.l10n.emergency,
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 12),
 
-                    // Category filter chips
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        children:
-                            [
-                                  'All',
-                                  'Church',
-                                  'Heritage',
-                                  'Farms/Nature',
-                                  'Market',
-                                  'Resorts',
-                                  'Food & Cafes',
-                                  'Events',
-                                ]
-                                .map(
-                                  (cat) => Padding(
-                                    padding: const EdgeInsets.only(right: 8),
-                                    child: ChoiceChip(
-                                      label: Text(cat),
-                                      selected: _selectedCategory == cat,
-                                      showCheckmark: false,
-                                      onSelected: (selected) {
-                                        setState(() => _selectedCategory = cat);
-                                        _filterPins(cat);
-                                      },
-                                      selectedColor: AppColors.primary,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 8,
-                                      ),
-                                      labelStyle: TextStyle(
-                                        color: _selectedCategory == cat
-                                            ? Colors.white
-                                            : AppColors.textSecondary,
-                                        fontSize: 13,
-                                        fontWeight: _selectedCategory == cat
-                                            ? FontWeight.w700
-                                            : FontWeight.w500,
-                                      ),
-                                      backgroundColor: AppColors.surface,
-                                      shape: const StadiumBorder(),
-                                      side: BorderSide(
-                                        color: _selectedCategory == cat
-                                            ? AppColors.primary
-                                            : Colors.grey.shade300,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Horizontal spot cards
-                    SizedBox(
-                      height: 168,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.only(left: 20, right: 8),
-                        itemCount: _filteredSpots.length,
-                        itemBuilder: (_, i) => _SpotCard(
-                          spot: _filteredSpots[i],
-                          onTap: () {
-                            // Fly map to spot then open sheet
-                            _mapboxMap?.flyTo(
-                              CameraOptions(
-                                center: Point(
-                                  coordinates: Position(
-                                    _filteredSpots[i].longitude,
-                                    _filteredSpots[i].latitude,
-                                  ),
-                                ),
-                                zoom: MapboxConfig.spotZoom,
-                              ),
-                              MapAnimationOptions(duration: 900),
-                            );
-                            _showSpotBottomSheet(_filteredSpots[i]);
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Build itinerary CTA
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: GestureDetector(
-                        onTap: () {
-                          PrototypeSession.startCustomItinerary();
-                          context.push('/tourist/itinerary');
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            gradient: AppColors.primaryGradient,
-                            borderRadius: BorderRadius.circular(22),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x440038A8),
-                                blurRadius: 18,
-                                offset: Offset(0, 6),
-                              ),
-                            ],
+                    // ── Bottom draggable sheet ────────────────────────────────────
+                    DraggableScrollableSheet(
+                      initialChildSize: 0.36,
+                      minChildSize: 0.22,
+                      maxChildSize: 0.86,
+                      builder: (ctx, ctrl) => Container(
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF5F7FC),
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(28),
                           ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(11),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0x280D1B2A),
+                              blurRadius: 24,
+                              offset: Offset(0, -4),
+                            ),
+                          ],
+                        ),
+                        child: ListView(
+                          controller: ctrl,
+                          padding: const EdgeInsets.fromLTRB(0, 10, 0, 120),
+                          children: [
+                            // Drag handle
+                            Center(
+                              child: Container(
+                                width: 36,
+                                height: 4,
+                                margin: const EdgeInsets.only(bottom: 14),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: .18),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: const Icon(
-                                  Icons.route_rounded,
-                                  color: Colors.white,
+                                  color: const Color(0xFFCED6E0),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              const SizedBox(width: 13),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    ValueListenableBuilder<
-                                      List<TouristSpotModel>
-                                    >(
-                                      valueListenable:
-                                          PrototypeSession.itinerary,
-                                      builder: (context, itinerary, child) {
-                                        return Text(
-                                          itinerary.isEmpty
-                                              ? context.tr(
-                                                  "Build a day you'll remember",
-                                                  "Bumuo ng Itinerary",
-                                                )
-                                              : '${context.tr("Build Your Day", "Bumuo ng Itinerary")} (${itinerary.length} ${context.tr("stops", "stops")})',
-                                          style: GoogleFonts.poppins(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 15,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                    Text(
-                                      context.tr(
-                                        'Choose places, see your fare, book a ride.',
-                                        'Pumili ng mga lugar, tingnan ang pamasahe, mag-book ng sakay.',
-                                      ),
-                                      style: GoogleFonts.poppins(
-                                        color: Colors.white.withValues(
-                                          alpha: .85,
-                                        ),
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const Icon(
-                                Icons.arrow_forward_rounded,
-                                color: Colors.white,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 22),
+                            ),
 
-                    // Plan your trip section
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            context.tr('Plan your trip', 'Planuhin ang biyahe'),
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
+                            // Section header — Explore Bustos
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: Wrap(
+                                alignment: WrapAlignment.spaceBetween,
+                                spacing: 12,
+                                children: [
+                                  Text(
+                                    context.l10n.exploreBustos,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  Text(
+                                    context.l10n.spotCount(
+                                      _filteredSpots.length,
+                                    ),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      color: AppColors.success,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          TextButton(
-                            onPressed: () => context.go('/tourist/search'),
-                            child: Text(context.tr('Explore', 'Tuklasin')),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    SizedBox(
-                      height: 120,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.only(left: 20, right: 8),
-                        children: [
-                          _actionCard(
-                            context,
-                            Icons.auto_awesome_outlined,
-                            context.tr('Tour packages', 'Mga Tour Package'),
-                            context.tr(
-                              'Ready-made trips',
-                              'Handang mga biyahe',
+                            const SizedBox(height: 12),
+
+                            // Category filter chips
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: Row(
+                                children: spotFilters
+                                    .map(
+                                      (cat) => Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 8,
+                                        ),
+                                        child: ChoiceChip(
+                                          label: Text(context.message(cat)),
+                                          selected: _selectedCategory == cat,
+                                          showCheckmark: false,
+                                          onSelected: (selected) {
+                                            if (selected) _filterPins(cat);
+                                          },
+                                          selectedColor: AppColors.primary,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 8,
+                                          ),
+                                          labelStyle: TextStyle(
+                                            color: _selectedCategory == cat
+                                                ? Colors.white
+                                                : AppColors.textSecondary,
+                                            fontSize: 14,
+                                            fontWeight: _selectedCategory == cat
+                                                ? FontWeight.w700
+                                                : FontWeight.w500,
+                                          ),
+                                          backgroundColor: AppColors.surface,
+                                          shape: const StadiumBorder(),
+                                          side: BorderSide(
+                                            color: _selectedCategory == cat
+                                                ? AppColors.primary
+                                                : Colors.grey.shade300,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
                             ),
-                            '/tourist/tour-packages',
-                            AppColors.secondary,
-                          ),
-                          _actionCard(
-                            context,
-                            Icons.favorite_outline_rounded,
-                            context.tr('Saved places', 'Mga Paborito'),
-                            context.tr(
-                              'Places you saved',
-                              'Lugar na naka-save',
+                            const SizedBox(height: 12),
+
+                            // Horizontal spot cards
+                            SizedBox(
+                              height:
+                                  96 +
+                                  120 *
+                                      MediaQuery.textScalerOf(context).scale(1),
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.only(
+                                  left: 20,
+                                  right: 8,
+                                ),
+                                itemCount: _filteredSpots.length,
+                                itemBuilder: (_, i) => _SpotCard(
+                                  spot: _filteredSpots[i],
+                                  onTap: () {
+                                    // Fly map to spot then open sheet
+                                    _mapboxMap?.flyTo(
+                                      CameraOptions(
+                                        center: Point(
+                                          coordinates: Position(
+                                            _filteredSpots[i].longitude,
+                                            _filteredSpots[i].latitude,
+                                          ),
+                                        ),
+                                        zoom: MapboxConfig.spotZoom,
+                                      ),
+                                      MapAnimationOptions(
+                                        duration:
+                                            MediaQuery.disableAnimationsOf(
+                                              context,
+                                            )
+                                            ? 0
+                                            : 900,
+                                      ),
+                                    );
+                                    _showSpotBottomSheet(_filteredSpots[i]);
+                                  },
+                                ),
+                              ),
                             ),
-                            '/tourist/favorites',
-                            const Color(0xFFE8675D),
-                          ),
-                          _actionCard(
-                            context,
-                            Icons.receipt_long_outlined,
-                            context.tr('My bookings', 'Aking bookings'),
-                            context.tr('Ride updates', 'Mga update sa sakay'),
-                            '/tourist/bookings',
-                            AppColors.primary,
-                          ),
-                        ],
+                            const SizedBox(height: 16),
+
+                            // Build itinerary CTA
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: GestureDetector(
+                                onTap: () {
+                                  PrototypeSession.startCustomItinerary();
+                                  context.push('/tourist/itinerary');
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(18),
+                                  decoration: BoxDecoration(
+                                    gradient: AppColors.primaryGradient,
+                                    borderRadius: BorderRadius.circular(22),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Color(0x440038A8),
+                                        blurRadius: 18,
+                                        offset: Offset(0, 6),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(11),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withValues(
+                                            alpha: .18,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            14,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.route_rounded,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 13),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            ValueListenableBuilder<
+                                              List<TouristSpotModel>
+                                            >(
+                                              valueListenable:
+                                                  PrototypeSession.itinerary,
+                                              builder: (context, itinerary, child) {
+                                                return Text(
+                                                  context.message(
+                                                    itinerary.isEmpty
+                                                        ? context
+                                                              .l10n
+                                                              .buildADayYouLlRemember
+                                                        : context.l10n
+                                                              .buildYourDayWithStops(
+                                                                itinerary
+                                                                    .length,
+                                                              ),
+                                                  ),
+                                                  style: GoogleFonts.poppins(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.w700,
+                                                    fontSize: 15,
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                            Text(
+                                              context
+                                                  .l10n
+                                                  .choosePlacesSeeYourFareBookARide,
+                                              style: GoogleFonts.poppins(
+                                                color: Colors.white.withValues(
+                                                  alpha: .85,
+                                                ),
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const Icon(
+                                        Icons.arrow_forward_rounded,
+                                        color: Colors.white,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 22),
+
+                            // Plan your trip section
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              child: Wrap(
+                                alignment: WrapAlignment.spaceBetween,
+                                spacing: 12,
+                                children: [
+                                  Text(
+                                    context.l10n.planYourTrip,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        context.go('/tourist/search'),
+                                    child: Text(context.l10n.explore),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            SizedBox(
+                              height:
+                                  96 +
+                                  120 *
+                                      MediaQuery.textScalerOf(context).scale(1),
+                              child: ListView(
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.only(
+                                  left: 20,
+                                  right: 8,
+                                ),
+                                children: [
+                                  _actionCard(
+                                    context,
+                                    Icons.auto_awesome_outlined,
+                                    context.l10n.tourPackages,
+                                    context.l10n.readyMadeTrips,
+                                    '/tourist/tour-packages',
+                                    AppColors.secondary,
+                                  ),
+                                  _actionCard(
+                                    context,
+                                    Icons.favorite_outline_rounded,
+                                    context.l10n.savedPlaces,
+                                    context.l10n.placesYouSaved,
+                                    '/tourist/favorites',
+                                    const Color(0xFFE8675D),
+                                  ),
+                                  _actionCard(
+                                    context,
+                                    Icons.receipt_long_outlined,
+                                    context.l10n.myBookings,
+                                    context.l10n.rideUpdates,
+                                    '/tourist/bookings',
+                                    AppColors.primary,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
@@ -751,18 +788,21 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
   }
 
   Future<void> _startLocationTracking() async {
-    if (!await _ensureLocationPermission()) return;
-    await _positionSubscription?.cancel();
-    _positionSubscription =
-        geo.Geolocator.getPositionStream(
-          locationSettings: const geo.LocationSettings(
-            accuracy: geo.LocationAccuracy.high,
-            distanceFilter: 8,
-          ),
-        ).listen((position) {
-          PrototypeSession.userLatitude.value = position.latitude;
-          PrototypeSession.userLongitude.value = position.longitude;
-        });
+    try {
+      if (!await _ensureLocationPermission() || !mounted) return;
+      _positionSubscription =
+          geo.Geolocator.getPositionStream(
+            locationSettings: const geo.LocationSettings(
+              accuracy: geo.LocationAccuracy.high,
+              distanceFilter: 8,
+            ),
+          ).listen((position) {
+            PrototypeSession.userLatitude.value = position.latitude;
+            PrototypeSession.userLongitude.value = position.longitude;
+          }, onError: (Object error) => ErrorMessages.forError(error));
+    } catch (error) {
+      ErrorMessages.forError(error);
+    }
   }
 
   Widget _mapButton(
@@ -770,15 +810,21 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
     VoidCallback onTap, {
     Color foreground = AppColors.textPrimary,
     String? tooltip,
-  }) => Material(
-    color: Colors.white,
-    shape: const CircleBorder(),
-    elevation: 3,
-    child: IconButton(
-      onPressed: onTap,
-      tooltip: tooltip,
-      icon: Icon(icon, color: foreground),
-      splashRadius: 24,
+  }) => Semantics(
+    label: tooltip,
+    button: true,
+    onTap: onTap,
+    excludeSemantics: true,
+    child: Material(
+      color: Colors.white,
+      shape: const CircleBorder(),
+      elevation: 3,
+      child: IconButton(
+        onPressed: onTap,
+        tooltip: context.optionalMessage(tooltip),
+        icon: Icon(icon, color: foreground),
+        splashRadius: 24,
+      ),
     ),
   );
 
@@ -790,7 +836,7 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
     String route,
     Color color,
   ) => SizedBox(
-    width: 152,
+    width: 152 * MediaQuery.textScalerOf(context).scale(1),
     child: Padding(
       padding: const EdgeInsets.only(right: 12),
       child: GestureDetector(
@@ -822,17 +868,18 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
               ),
               const Spacer(),
               Text(
-                title,
+                context.message(title),
                 style: GoogleFonts.poppins(
-                  fontSize: 12,
+                  fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
               ),
               Text(
-                subtitle,
+                context.message(subtitle),
                 style: GoogleFonts.poppins(
-                  fontSize: 10,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                   color: AppColors.textSecondary,
                 ),
               ),
@@ -848,9 +895,9 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
       if (!await geo.Geolocator.isLocationServiceEnabled()) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
-                'Location services are disabled. Please enable GPS.',
+                context.l10n.locationServicesAreDisabledPleaseEnableGps,
               ),
             ),
           );
@@ -860,9 +907,9 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
       if (!await _ensureLocationPermission()) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
-                'Location permission denied. Enable it in Settings.',
+                context.l10n.locationPermissionDeniedEnableItInSettings,
               ),
             ),
           );
@@ -884,70 +931,73 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Could not get location: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.message(ErrorMessages.forError(e)))),
+        );
       }
     }
   }
 
+  void _catalogChanged() => _filterPins(_selectedCategory);
+
   void _filterPins(String category) {
-    final filtered = category == 'All'
-        ? _spots
-        : _spots.where((s) {
-            if (category == 'Church') {
-              return s.category == SpotCategory.church;
-            }
-            if (category == 'Heritage') {
-              return s.category == SpotCategory.heritage;
-            }
-            if (category == 'Farms/Nature') {
-              return s.category == SpotCategory.nature ||
-                  s.name.toLowerCase().contains('farm') ||
-                  s.name.toLowerCase().contains('park');
-            }
-            if (category == 'Market') {
-              return s.category == SpotCategory.market;
-            }
-            if (category == 'Resorts') {
-              return s.name.toLowerCase().contains('resort');
-            }
-            if (category == 'Food & Cafes') {
-              return s.name.toLowerCase().contains('cafe');
-            }
-            if (category == 'Events') {
-              return s.name.toLowerCase().contains('festival') ||
-                  s.name.toLowerCase().contains('event');
-            }
-            return true;
-          }).toList();
-    setState(() => _filteredSpots = filtered);
+    final filtered = filterSpots(_spots, category);
+    setState(() {
+      _selectedCategory = category;
+      _filteredSpots = filtered;
+    });
     _recreatePins(filtered);
   }
 
   Future<void> _recreatePins(List<TouristSpotModel> spots) async {
-    if (_mapboxMap == null) return;
-    _annotationSpotMap.clear();
-    await _annotationManager?.deleteAll();
-    for (final spot in spots) {
-      final bitmap = await _buildPinBitmap(_categoryColor(spot.category));
-      final annotation = await _annotationManager?.create(
-        PointAnnotationOptions(
-          geometry: Point(coordinates: Position(spot.longitude, spot.latitude)),
-          image: bitmap,
-          iconSize: 1.0,
-          iconAnchor: IconAnchor.BOTTOM,
-          textField: spot.name,
-          textOffset: [0.0, 0.5],
-          textColor: AppColors.textPrimary.toARGB32(),
-          textHaloColor: Colors.white.toARGB32(),
-          textHaloWidth: 1.5,
-          textSize: 12.0,
-        ),
-      );
-      if (annotation != null) {
-        _annotationSpotMap[annotation.id] = spot;
+    _pendingPins = spots;
+    if (_annotationManager == null || _updatingPins) return;
+    _updatingPins = true;
+    try {
+      while (mounted && _pendingPins != null) {
+        final batch = _pendingPins!;
+        _pendingPins = null;
+        final manager = _annotationManager!;
+        final options = await Future.wait(
+          batch.map((spot) async {
+            final color = _categoryColor(spot.category);
+            return PointAnnotationOptions(
+              geometry: Point(
+                coordinates: Position(spot.longitude, spot.latitude),
+              ),
+              image: await _pinBitmaps.putIfAbsent(
+                color,
+                () => _buildPinBitmap(color),
+              ),
+              iconSize: 1.0,
+              iconAnchor: IconAnchor.BOTTOM,
+              textField: spot.name,
+              textOffset: [0.0, 0.5],
+              textColor: AppColors.textPrimary.toARGB32(),
+              textHaloColor: Colors.white.toARGB32(),
+              textHaloWidth: 1.5,
+              textSize: 12.0,
+            );
+          }),
+        );
+        if (!mounted) return;
+        if (_pendingPins != null) continue;
+        _annotationSpotMap.clear();
+        await manager.deleteAll();
+        if (!mounted || options.isEmpty) continue;
+        final created = await manager.createMulti(options);
+        for (var index = 0; index < created.length; index++) {
+          final annotation = created[index];
+          if (annotation != null) {
+            _annotationSpotMap[annotation.id] = batch[index];
+          }
+        }
       }
+    } catch (error) {
+      _pinBitmaps.clear();
+      ErrorMessages.forError(error);
+    } finally {
+      _updatingPins = false;
     }
   }
 }
@@ -967,7 +1017,7 @@ class _SpotCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 148,
+        width: 148 * MediaQuery.textScalerOf(context).scale(1),
         margin: const EdgeInsets.only(right: 12),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -1002,9 +1052,9 @@ class _SpotCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    spot.name,
+                    context.message(spot.name),
                     style: GoogleFonts.poppins(
-                      fontSize: 11,
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
                     ),
@@ -1012,7 +1062,10 @@ class _SpotCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  Row(
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -1026,24 +1079,26 @@ class _SpotCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          spot.categoryLabel,
+                          context.message(spot.categoryLabel),
                           style: GoogleFonts.poppins(
-                            fontSize: 9,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: _categoryColor(spot.category),
                           ),
                         ),
                       ),
-                      const Spacer(),
                       Icon(
                         Icons.near_me_rounded,
                         size: 11,
                         color: AppColors.textSecondary,
                       ),
                       Text(
-                        ' ${spot.distanceFromTown}km',
+                        context.l10n.kmValue(
+                          context.message((spot.distanceFromTown).toString()),
+                        ),
                         style: GoogleFonts.poppins(
-                          fontSize: 9,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -1134,10 +1189,10 @@ class _SpotInfoSheet extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
-                              spot.categoryLabel,
+                              context.message(spot.categoryLabel),
                               style: GoogleFonts.poppins(
                                 color: Colors.white,
-                                fontSize: 10,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -1147,9 +1202,10 @@ class _SpotInfoSheet extends StatelessWidget {
                         Positioned(
                           top: 12,
                           right: 12,
-                          child: GestureDetector(
-                            onTap: () => Navigator.pop(context),
-                            child: Container(
+                          child: IconButton(
+                            tooltip: context.l10n.closeAttractionDetails,
+                            onPressed: () => Navigator.pop(context),
+                            icon: Container(
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
@@ -1176,7 +1232,7 @@ class _SpotInfoSheet extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        spot.name,
+                        context.message(spot.name),
                         style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
@@ -1195,9 +1251,10 @@ class _SpotInfoSheet extends StatelessWidget {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              spot.openingHours,
+                              context.message(spot.openingHours),
                               style: GoogleFonts.poppins(
-                                fontSize: 11,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
                                 color: AppColors.textSecondary,
                               ),
                               maxLines: 1,
@@ -1212,9 +1269,10 @@ class _SpotInfoSheet extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            spot.entranceFee,
+                            context.message(spot.entranceFee),
                             style: GoogleFonts.poppins(
-                              fontSize: 11,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
                               color: AppColors.textSecondary,
                             ),
                           ),
@@ -1222,9 +1280,10 @@ class _SpotInfoSheet extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        spot.description,
+                        context.message(spot.description),
                         style: GoogleFonts.poppins(
-                          fontSize: 12,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                           color: AppColors.textSecondary,
                           height: 1.5,
                         ),
@@ -1246,9 +1305,9 @@ class _SpotInfoSheet extends StatelessWidget {
                                 size: 16,
                               ),
                               label: Text(
-                                'View Details',
+                                context.l10n.viewDetails,
                                 style: GoogleFonts.poppins(
-                                  fontSize: 12,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -1281,11 +1340,13 @@ class _SpotInfoSheet extends StatelessWidget {
                                     },
                               icon: const Icon(Icons.add_rounded, size: 16),
                               label: Text(
-                                spot.isTemporarilyClosed
-                                    ? 'Closed'
-                                    : 'Add to Trip',
+                                context.message(
+                                  spot.isTemporarilyClosed
+                                      ? MessageCode.closed
+                                      : MessageCode.addToTripLabel,
+                                ),
                                 style: GoogleFonts.poppins(
-                                  fontSize: 12,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),

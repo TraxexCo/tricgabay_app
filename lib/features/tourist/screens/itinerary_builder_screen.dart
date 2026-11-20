@@ -1,3 +1,5 @@
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -46,7 +48,7 @@ class _ItineraryBuilderScreenState extends State<ItineraryBuilderScreen> {
       backgroundColor: const Color(0xFFF5F8FB),
       appBar: AppBar(
         title: Text(
-          'Build Your Day',
+          context.l10n.buildYourDay,
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
@@ -59,7 +61,7 @@ class _ItineraryBuilderScreenState extends State<ItineraryBuilderScreen> {
           if (PrototypeSession.itinerary.value.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.clear_all_rounded),
-              tooltip: 'Clear All',
+              tooltip: context.l10n.clearAll,
               onPressed: () {
                 PrototypeSession.clearTripPlan();
                 setState(() {});
@@ -67,56 +69,61 @@ class _ItineraryBuilderScreenState extends State<ItineraryBuilderScreen> {
             ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
-            child: Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
-                borderRadius: BorderRadius.circular(22),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(11),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: .16),
-                      borderRadius: BorderRadius.circular(13),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+              child: Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(11),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: .16),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: const Icon(
+                        Icons.route_rounded,
+                        color: Colors.white,
+                      ),
                     ),
-                    child: const Icon(Icons.route_rounded, color: Colors.white),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Make it your own',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.l10n.makeItYourOwn,
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Choose the places you want to visit in one trip.',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white.withValues(alpha: .82),
-                            fontSize: 11,
+                          const SizedBox(height: 2),
+                          Text(
+                            context.l10n.chooseThePlacesYouWantToVisitInOneTrip,
+                            style: GoogleFonts.poppins(
+                              color: Colors.white.withValues(alpha: .82),
+                              fontSize: 11,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: ListView.builder(
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
               itemCount: PrototypeSession.allSpots.value.length,
               itemBuilder: (context, index) {
@@ -137,7 +144,9 @@ class _ItineraryBuilderScreenState extends State<ItineraryBuilderScreen> {
                               () => PrototypeSession.toggleItinerary(spot),
                             ),
                       child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
+                        duration: MediaQuery.disableAnimationsOf(context)
+                            ? Duration.zero
+                            : const Duration(milliseconds: 180),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: selected
@@ -191,7 +200,7 @@ class _ItineraryBuilderScreenState extends State<ItineraryBuilderScreen> {
                                       const SizedBox(width: 6),
                                       Expanded(
                                         child: Text(
-                                          spot.name,
+                                          context.message(spot.name),
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.poppins(
@@ -204,7 +213,16 @@ class _ItineraryBuilderScreenState extends State<ItineraryBuilderScreen> {
                                   ),
                                   const SizedBox(height: 3),
                                   Text(
-                                    '${spot.categoryLabel} • ${spot.distanceFromTown.toStringAsFixed(1)} km away',
+                                    context.l10n.kmAwayValue(
+                                      context.message(
+                                        (spot.categoryLabel).toString(),
+                                      ),
+                                      context.message(
+                                        (spot.distanceFromTown.toStringAsFixed(
+                                          1,
+                                        )).toString(),
+                                      ),
+                                    ),
                                     style: GoogleFonts.poppins(
                                       fontSize: 10,
                                       color: AppColors.textSecondary,
@@ -212,9 +230,11 @@ class _ItineraryBuilderScreenState extends State<ItineraryBuilderScreen> {
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    spot.isTemporarilyClosed
-                                        ? 'Temporarily closed'
-                                        : spot.entranceFee,
+                                    context.message(
+                                      spot.isTemporarilyClosed
+                                          ? MessageCode.temporarilyClosed
+                                          : spot.entranceFee,
+                                    ),
                                     style: GoogleFonts.poppins(
                                       fontSize: 10,
                                       color: spot.isTemporarilyClosed
@@ -227,7 +247,9 @@ class _ItineraryBuilderScreenState extends State<ItineraryBuilderScreen> {
                             ),
                             const SizedBox(width: 10),
                             AnimatedContainer(
-                              duration: const Duration(milliseconds: 180),
+                              duration: MediaQuery.disableAnimationsOf(context)
+                                  ? Duration.zero
+                                  : const Duration(milliseconds: 180),
                               width: 28,
                               height: 28,
                               decoration: BoxDecoration(
@@ -258,86 +280,93 @@ class _ItineraryBuilderScreenState extends State<ItineraryBuilderScreen> {
                 );
               },
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0x150D1B2A),
-                  blurRadius: 16,
-                  offset: Offset(0, -4),
-                ),
-              ],
-            ),
-            child: SafeArea(
-              top: false,
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              selectedCount == 0
-                                  ? 'No destinations selected'
-                                  : '$selectedCount ${selectedCount == 1 ? 'destination' : 'destinations'}',
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
-                                fontSize: 13,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Fixed fare',
-                              style: GoogleFonts.poppins(
-                                color: AppColors.textSecondary,
-                                fontSize: 10,
-                              ),
-                            ),
-                            if (hasEntranceFees) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                '+ entrance fees may apply',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.orange.shade700,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      Text(
-                        selectedCount == 0
-                            ? '—'
-                            : '₱${estimatedFare.toStringAsFixed(0)}',
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  AppButton(
-                    label: 'Review Fare',
-                    prefixIcon: Icons.arrow_forward_rounded,
-                    onPressed: selectedCount == 0
-                        ? null
-                        : () => context.push('/tourist/fare-summary'),
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x150D1B2A),
+                    blurRadius: 16,
+                    offset: Offset(0, -4),
                   ),
                 ],
               ),
+              child: SafeArea(
+                top: false,
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                context.message(
+                                  selectedCount == 0
+                                      ? MessageCode.noDestinationsSelected
+                                      : MessageCode.selectedDestinationCount(
+                                          selectedCount,
+                                        ),
+                                ),
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                context.l10n.fixedFare,
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textSecondary,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              if (hasEntranceFees) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  context.l10n.entranceFeesMayApply,
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.orange.shade700,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        Text(
+                          context.message(
+                            selectedCount == 0
+                                ? '—'
+                                : '₱${AppFormatters.integer(estimatedFare)}',
+                          ),
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    AppButton(
+                      label: context.l10n.reviewFare,
+                      prefixIcon: Icons.arrow_forward_rounded,
+                      onPressed: selectedCount == 0
+                          ? null
+                          : () => context.push('/tourist/fare-summary'),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,9 +22,9 @@ class TouristSpotInfoScreen extends StatelessWidget {
         .firstOrNull;
     if (spot == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Attraction')),
-        body: const Center(
-          child: Text('This attraction is no longer available.'),
+        appBar: AppBar(title: Text(context.l10n.attraction)),
+        body: Center(
+          child: Text(context.l10n.thisAttractionIsNoLongerAvailable),
         ),
       );
     }
@@ -42,11 +44,14 @@ class TouristSpotInfoScreen extends StatelessWidget {
             ),
             actions: [
               IconButton(
+                tooltip: context.l10n.share,
                 icon: const Icon(Icons.share, color: AppColors.primary),
                 onPressed: () {
                   SharePlus.instance.share(
                     ShareParams(
-                      text: 'Check out ${spot.name} in Bustos, Bulacan! 🏝️',
+                      text: context.l10n.checkOutInBustosBulacanValue(
+                        context.message((spot.name).toString()),
+                      ),
                       subject: spot.name,
                     ),
                   );
@@ -55,6 +60,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
               ValueListenableBuilder<Set<String>>(
                 valueListenable: PrototypeSession.favorites,
                 builder: (context, favorites, _) => IconButton(
+                  tooltip: context.l10n.savePlace,
                   icon: Icon(
                     favorites.contains(spotId)
                         ? Icons.favorite
@@ -77,7 +83,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          spot.name,
+                          context.message(spot.name),
                           style: GoogleFonts.poppins(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -95,7 +101,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Text(
-                          spot.categoryLabel,
+                          context.message(spot.categoryLabel),
                           style: GoogleFonts.poppins(
                             color: AppColors.primary,
                             fontWeight: FontWeight.bold,
@@ -118,15 +124,21 @@ class TouristSpotInfoScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Temporarily closed',
+                          Text(
+                            context.l10n.temporarilyClosed,
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           if (spot.closureReason != null)
-                            Text(spot.closureReason!),
+                            Text(context.message(spot.closureReason!)),
                           if (spot.closedUntil != null)
                             Text(
-                              'Expected reopening: ${spot.closedUntil!.toLocal().toString().split('.').first}',
+                              context.l10n.expectedReopeningValue(
+                                context.message(
+                                  (AppFormatters.dateTime(
+                                    spot.closedUntil!.toLocal(),
+                                  )).toString(),
+                                ),
+                              ),
                             ),
                         ],
                       ),
@@ -147,14 +159,14 @@ class TouristSpotInfoScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              spot.openingHours,
+                              context.message(spot.openingHours),
                               style: GoogleFonts.poppins(
                                 color: AppColors.textSecondary,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 4),
-                            _buildOpenStatusBadge(spot.openingHours),
+                            _buildOpenStatusBadge(context, spot.openingHours),
                           ],
                         ),
                       ),
@@ -189,7 +201,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          spot.entranceFee,
+                          context.message(spot.entranceFee),
                           style: TextStyle(
                             color:
                                 spot.entranceFee.toLowerCase() == 'free' ||
@@ -207,7 +219,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'About',
+                    context.l10n.about,
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -216,7 +228,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    spot.description,
+                    context.message(spot.description),
                     style: GoogleFonts.poppins(
                       color: AppColors.textSecondary,
                       height: 1.5,
@@ -224,7 +236,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Local history',
+                    context.l10n.localHistory,
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -233,7 +245,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    spot.history,
+                    context.message(spot.history),
                     style: GoogleFonts.poppins(
                       color: AppColors.textSecondary,
                       height: 1.5,
@@ -241,7 +253,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Tips & Reminders',
+                    context.l10n.tipsReminders,
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -249,34 +261,40 @@ class TouristSpotInfoScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ...spot.tips.map(_buildTip),
+                  ...spot.tips.map((tip) => _buildTip(context, tip)),
                   const SizedBox(height: 24),
                   Row(
                     children: [
-                      Text(
-                        'Ratings & Reviews',
-                        style: GoogleFonts.poppins(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                      Flexible(
+                        child: Text(
+                          context.l10n.ratingsReviews,
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.danger,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'Information provided by Tric-Gabay administrators',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.danger,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            context.l10n.informationProvidedByAppAdministrators(
+                              AppBrand.name,
+                            ),
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -287,19 +305,23 @@ class TouristSpotInfoScreen extends StatelessWidget {
                     children: [
                       const Icon(Icons.star, color: Colors.amber, size: 24),
                       const SizedBox(width: 4),
-                      Text(
-                        '4.8',
-                        style: GoogleFonts.poppins(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                      Flexible(
+                        child: Text(
+                          context.message('4.8'),
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        '(128 reviews)',
-                        style: GoogleFonts.poppins(
-                          color: AppColors.textSecondary,
+                      Flexible(
+                        child: Text(
+                          context.l10n.reviewCountSummary,
+                          style: GoogleFonts.poppins(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ),
                     ],
@@ -308,20 +330,26 @@ class TouristSpotInfoScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Photo Gallery',
-                        style: GoogleFonts.poppins(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                      Flexible(
+                        child: Text(
+                          context.l10n.photoGallery,
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ),
-                      TextButton(
-                        onPressed: () =>
-                            context.push('/tourist/spot/$spotId/gallery'),
-                        child: Text(
-                          'See All',
-                          style: GoogleFonts.poppins(color: AppColors.primary),
+                      Flexible(
+                        child: TextButton(
+                          onPressed: () =>
+                              context.push('/tourist/spot/$spotId/gallery'),
+                          child: Text(
+                            context.l10n.seeAll,
+                            style: GoogleFonts.poppins(
+                              color: AppColors.primary,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -375,7 +403,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: AppButton(
-                  label: 'View Map',
+                  label: context.l10n.viewMap,
                   type: AppButtonType.outline,
                   onPressed: () {
                     PrototypeSession.focusedSpotId.value = spot.id;
@@ -387,7 +415,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.directions_rounded),
-                  label: const Text('Directions'),
+                  label: Text(context.l10n.directions),
                   onPressed: () async {
                     final uri = Uri.parse(
                       'geo:${spot.latitude},${spot.longitude}?q=${spot.latitude},${spot.longitude}(${Uri.encodeComponent(spot.name)})',
@@ -410,7 +438,9 @@ class TouristSpotInfoScreen extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: AppButton(
-                  label: spot.isTemporarilyClosed ? 'Closed' : 'Itinerary',
+                  label: spot.isTemporarilyClosed
+                      ? MessageCode.closed
+                      : MessageCode.itinerary,
                   onPressed: spot.isTemporarilyClosed
                       ? null
                       : () {
@@ -420,9 +450,11 @@ class TouristSpotInfoScreen extends StatelessWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                alreadyAdded
-                                    ? 'Removed from your itinerary'
-                                    : 'Added to your itinerary!',
+                                context.message(
+                                  alreadyAdded
+                                      ? MessageCode.removedFromYourItinerary
+                                      : MessageCode.addedToYourItinerary,
+                                ),
                               ),
                             ),
                           );
@@ -436,7 +468,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTip(String text) {
+  Widget _buildTip(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -450,7 +482,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              text,
+              context.message(text),
               style: GoogleFonts.poppins(color: AppColors.textSecondary),
             ),
           ),
@@ -459,7 +491,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOpenStatusBadge(String openingHours) {
+  Widget _buildOpenStatusBadge(BuildContext context, String openingHours) {
     final isClosed =
         openingHours.toLowerCase().contains('temporarily closed') ||
         openingHours.toLowerCase().contains('closed');
@@ -481,12 +513,14 @@ class TouristSpotInfoScreen extends StatelessWidget {
             color: color,
           ),
           const SizedBox(width: 6),
-          Text(
-            openingHours,
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Text(
+              context.message(openingHours),
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

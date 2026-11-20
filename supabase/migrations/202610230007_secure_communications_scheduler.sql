@@ -10,14 +10,19 @@ as $$
 declare
   scheduler_token text;
   request_id bigint;
-  gateway_anon_key constant text := 'REDACTED';
+  gateway_anon_key text;
+  worker_url text;
 begin
+  select decrypted_secret into gateway_anon_key from vault.decrypted_secrets where name='tric_gabay_anon_key' order by created_at desc limit 1;
+  select decrypted_secret into worker_url from vault.decrypted_secrets where name='tric_gabay_dispatcher_url' order by created_at desc limit 1;
+  if gateway_anon_key is null or worker_url is null then return null; end if;
+  if worker_url !~ '^https://[a-z0-9-]+[.]supabase[.]co/functions/v1/dispatch-communications$' then raise exception 'Invalid communications worker URL'; end if;
   select token into scheduler_token
   from public.internal_scheduler_tokens
   where name='communications';
 
   select net.http_post(
-    url:='https://xcsrjuqzwequmeqzedzd.supabase.co/functions/v1/dispatch-communications',
+    url:=worker_url,
     headers:=jsonb_build_object(
       'Content-Type','application/json',
       'apikey',gateway_anon_key,

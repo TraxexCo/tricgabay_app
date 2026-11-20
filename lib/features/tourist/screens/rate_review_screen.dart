@@ -1,3 +1,5 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -42,13 +44,12 @@ class _RateReviewScreenState extends State<RateReviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final driverName = _booking?.driverName ?? 'Your Driver';
+    final driverName = _booking?.driverName ?? MessageCode.yourDriver;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F8FB),
       appBar: AppBar(
         title: Text(
-          'Rate Driver',
+          context.l10n.rateDriver,
           style: GoogleFonts.poppins(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.bold,
@@ -84,7 +85,9 @@ class _RateReviewScreenState extends State<RateReviewScreen> {
             ),
             const SizedBox(height: 18),
             Text(
-              'How was your ride with $driverName?',
+              context.l10n.howWasYourRideWithValue(
+                context.message((driverName).toString()),
+              ),
               style: GoogleFonts.poppins(
                 fontSize: 21,
                 fontWeight: FontWeight.bold,
@@ -93,7 +96,7 @@ class _RateReviewScreenState extends State<RateReviewScreen> {
               textAlign: TextAlign.center,
             ),
             Text(
-              'Your feedback helps keep Tric-Gabay trusted.',
+              context.l10n.yourFeedbackHelpsKeepAppTrusted(AppBrand.name),
               style: GoogleFonts.poppins(
                 color: AppColors.textSecondary,
                 fontSize: 13,
@@ -128,7 +131,7 @@ class _RateReviewScreenState extends State<RateReviewScreen> {
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Text(
-                _getRatingLabel(),
+                context.message(_getRatingLabel()),
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -139,28 +142,36 @@ class _RateReviewScreenState extends State<RateReviewScreen> {
             const SizedBox(height: 24),
             Wrap(
               spacing: 8,
-              children: ['Friendly', 'Punctual', 'Clean Vehicle', 'Safe Driver']
-                  .map(
-                    (tag) => FilterChip(
-                      label: Text(tag),
-                      selected: _selectedTags.contains(tag),
-                      onSelected: (v) => setState(() {
-                        v ? _selectedTags.add(tag) : _selectedTags.remove(tag);
-                      }),
-                    ),
-                  )
-                  .toList(),
+              children:
+                  [
+                        MessageCode.friendly,
+                        MessageCode.punctual,
+                        MessageCode.cleanVehicle,
+                        MessageCode.safeDriver,
+                      ]
+                      .map(
+                        (tag) => FilterChip(
+                          label: Text(context.message(tag)),
+                          selected: _selectedTags.contains(tag),
+                          onSelected: (v) => setState(() {
+                            v
+                                ? _selectedTags.add(tag)
+                                : _selectedTags.remove(tag);
+                          }),
+                        ),
+                      )
+                      .toList(),
             ),
             const SizedBox(height: 24),
             AppTextField(
               controller: _reviewCtrl,
-              label: 'Leave a comment (Optional)',
-              hint: 'What did you like or dislike?',
+              label: context.l10n.leaveACommentOptional,
+              hint: context.l10n.whatDidYouLikeOrDislike,
               maxLines: 4,
             ),
             const SizedBox(height: 40),
             AppButton(
-              label: 'Submit Review',
+              label: context.l10n.submitReview,
               isLoading: _isSubmitting,
               onPressed: () async {
                 setState(() => _isSubmitting = true);
@@ -174,9 +185,13 @@ class _RateReviewScreenState extends State<RateReviewScreen> {
                 } catch (e) {
                   if (context.mounted) {
                     setState(() => _isSubmitting = false);
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('$e')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          context.message(ErrorMessages.forError(e)),
+                        ),
+                      ),
+                    );
                   }
                   return;
                 }
@@ -185,16 +200,16 @@ class _RateReviewScreenState extends State<RateReviewScreen> {
                 if (!context.mounted) return;
                 AppSnackbar.showSuccess(
                   context,
-                  'Thank you for your feedback!',
+                  MessageCode.thankYouForYourFeedback,
                 );
-                context.go('/tourist/bookings');
+                _returnToBooking(context);
               },
             ),
             const SizedBox(height: 16),
             TextButton(
-              onPressed: () => context.go('/tourist/bookings'),
+              onPressed: () => _returnToBooking(context),
               child: Text(
-                'Skip',
+                context.l10n.skip,
                 style: GoogleFonts.poppins(color: AppColors.textSecondary),
               ),
             ),
@@ -204,18 +219,26 @@ class _RateReviewScreenState extends State<RateReviewScreen> {
     );
   }
 
+  void _returnToBooking(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/tourist/bookings');
+    }
+  }
+
   String _getRatingLabel() {
     switch (_rating) {
       case 1:
-        return 'Terrible';
+        return MessageCode.terrible;
       case 2:
-        return 'Bad';
+        return MessageCode.bad;
       case 3:
-        return 'Okay';
+        return MessageCode.okay;
       case 4:
-        return 'Good';
+        return MessageCode.good;
       case 5:
-        return 'Excellent!';
+        return MessageCode.excellent;
       default:
         return '';
     }

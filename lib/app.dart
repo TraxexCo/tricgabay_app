@@ -1,3 +1,8 @@
+import 'core/widgets/data_rights_screen.dart';
+import 'features/admin/screens/data_requests_admin_screen.dart';
+import 'features/admin/screens/emergency_contacts_admin_screen.dart';
+import 'features/admin/screens/operations_health_screen.dart';
+import 'features/driver/screens/driver_application_pending_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
@@ -80,6 +85,36 @@ final appRouter = GoRouter(
   redirect: (context, state) {
     final path = state.uri.path;
     final role = PrototypeSession.authenticatedRole;
+    // Authentication may finish while a root consent/version overlay is shown.
+    // Route from session state rather than relying on a login widget's lifetime.
+    if (role != null &&
+        (path == AppRoutes.login || path == AppRoutes.adminLogin)) {
+      return switch (role) {
+        'tourist' => '/tourist/home',
+        'driver' => '/driver/home',
+        'driver_pending' => '/driver/application-pending',
+        'admin' => AppRoutes.adminDashboard,
+        _ => null,
+      };
+    }
+    if (role == 'driver_pending' &&
+        !const {
+          '/driver/application-pending',
+          '/driver/data-rights',
+        }.contains(path) &&
+        path != AppRoutes.resetPassword) {
+      return '/driver/application-pending';
+    }
+    if (role == 'driver_pending' &&
+        const {
+          '/driver/application-pending',
+          '/driver/data-rights',
+        }.contains(path)) {
+      return null;
+    }
+    if (role == 'driver' && path == '/driver/application-pending') {
+      return '/driver/home';
+    }
     final protectedRole = path.startsWith('/tourist/')
         ? 'tourist'
         : path.startsWith('/driver/')
@@ -89,26 +124,34 @@ final appRouter = GoRouter(
         : null;
     if (protectedRole == null || role == protectedRole) {
       if (role == 'admin') {
-        final requiredCapability = switch (path) {
-          final value when value.startsWith('/admin/drivers') =>
+        final requiredCapabilities = switch (path) {
+          final value when value.startsWith('/admin/drivers') => [
             'driver_compliance',
-          final value when value.startsWith('/admin/spots') => 'content',
-          final value when value.startsWith('/admin/fare-settings') =>
+          ],
+          final value when value.startsWith('/admin/spots') => ['content'],
+          final value when value.startsWith('/admin/fare-settings') => [
             'finance',
+          ],
           final value
               when value.startsWith('/admin/tourists') ||
                   value.startsWith('/admin/announcements') ||
-                  value.startsWith('/admin/ratings') =>
-            'support',
+                  value.startsWith('/admin/ratings') ||
+                  value.startsWith('/admin/data-requests') =>
+            ['support'],
+          final value when value.startsWith('/admin/booking') => [
+            'operations',
+            'finance',
+          ],
           final value
-              when value.startsWith('/admin/booking') ||
+              when value.startsWith('/admin/emergency-contacts') ||
+                  value.startsWith('/admin/health') ||
                   value.startsWith('/admin/live-map') ||
                   value.startsWith('/admin/reports') =>
-            'operations',
+            ['operations'],
           _ => null,
         };
-        if (requiredCapability != null &&
-            !PrototypeSession.hasAdminCapability(requiredCapability)) {
+        if (requiredCapabilities != null &&
+            !requiredCapabilities.any(PrototypeSession.hasAdminCapability)) {
           return AppRoutes.adminDashboard;
         }
       }
@@ -117,6 +160,10 @@ final appRouter = GoRouter(
     return protectedRole == 'admin' ? AppRoutes.adminLogin : AppRoutes.login;
   },
   routes: [
+    GoRoute(
+      path: '/driver/application-pending',
+      builder: (context, state) => const DriverApplicationPendingScreen(),
+    ),
     // ─── Auth ───────────────────────────────────────────────
     GoRoute(
       path: AppRoutes.splash,
@@ -347,6 +394,10 @@ final appRouter = GoRouter(
       path: AppRoutes.driverEmergency,
       builder: (context, state) => const DriverEmergencyScreen(),
     ),
+    GoRoute(
+      path: AppRoutes.driverFeedback,
+      builder: (context, state) => const FeedbackScreen(),
+    ),
 
     // ─── Admin ────────────────────────────────────────────────
     GoRoute(
@@ -420,6 +471,26 @@ final appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.sendAnnouncements,
       builder: (context, state) => const SendAnnouncementScreen(),
+    ),
+    GoRoute(
+      path: '/tourist/data-rights',
+      builder: (context, state) => const DataRightsScreen(),
+    ),
+    GoRoute(
+      path: '/driver/data-rights',
+      builder: (context, state) => const DataRightsScreen(),
+    ),
+    GoRoute(
+      path: '/admin/data-requests',
+      builder: (context, state) => const DataRequestsAdminScreen(),
+    ),
+    GoRoute(
+      path: '/admin/emergency-contacts',
+      builder: (context, state) => const EmergencyContactsAdminScreen(),
+    ),
+    GoRoute(
+      path: '/admin/health',
+      builder: (context, state) => const OperationsHealthScreen(),
     ),
     GoRoute(
       path: '/admin/live-map',

@@ -1,15 +1,29 @@
+import 'package:tricgabay_app/core/l10n/message_codes.g.dart';
+import 'spot_image_material.dart';
+import 'remote_pagination.dart';
+import 'section_refresh.dart';
 import 'dart:async';
+import 'booking_request_material.dart';
+import 'pickup_service_area.dart';
+import '../utils/validators.dart';
 import 'dart:typed_data';
+import 'realtime_refresh_policy.dart';
+import 'location_upload_gate.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'pickup_recovery_material.dart';
 
 import '../../models/booking_model.dart';
 import '../../models/tourist_spot_model.dart';
 import '../../models/trip_record.dart';
 import '../config/backend_config.dart';
+import '../utils/map_coordinate_validator.dart';
 import 'fare_policy.dart';
 import 'cancellation_policy.dart';
+import 'avatar_replacement_service.dart';
+import 'telemetry_service.dart';
 
 class BookingCreationResult {
   final BookingModel booking;
@@ -35,16 +49,28 @@ class BackendRepository {
   BackendRepository._();
 
   static const _secureStorage = FlutterSecureStorage();
+  static const _readDeadline = Duration(seconds: 12);
   static SupabaseClient get _client => BackendConfig.client;
   static RealtimeChannel? _channel;
   static Timer? _refreshDebounce;
+  static final _driverRecords = <String, Map<String, dynamic>>{};
+
+  static const _activeBookingStatuses = [
+    'payment_pending',
+    'scheduled',
+    'pending',
+    'accepted',
+    'replacement_pending',
+    'ongoing',
+  ];
 
   static Future<FarePolicy> loadFarePolicy() async {
     final row = await _client
         .from('fare_revisions')
         .select('revision,custom_fare_centavos,package_fares,reason,created_at')
         .eq('is_current', true)
-        .single();
+        .single()
+        .timeout(_readDeadline);
     return FarePolicy(
       revision: row['revision'] as int,
       customFareCents: row['custom_fare_centavos'] as int,
@@ -56,9 +82,12 @@ class BackendRepository {
   static Future<CancellationPolicy> loadCancellationPolicy() async {
     final row = await _client
         .from('cancellation_policies')
-        .select()
+        .select(
+          'version,free_cancellation_minutes,accepted_trip_fee_percent,driver_wait_minutes,no_show_fee_percent,terms,created_at,change_reason',
+        )
         .eq('is_current', true)
-        .single();
+        .single()
+        .timeout(_readDeadline);
     return CancellationPolicy(
       version: row['version'] as int,
       freeCancellationMinutes: row['free_cancellation_minutes'] as int,
@@ -67,47 +96,70 @@ class BackendRepository {
       noShowFeePercent: row['no_show_fee_percent'] as int,
       terms: row['terms'] as String,
       history: [
-        '${row['created_at']} • ${row['change_reason'] ?? 'Published policy'}',
+        '${row['created_at']} • ${row['change_reason'] ?? MessageCode.publishedPolicy}',
       ],
     );
+  }
+
+  static Future<List<TourPackageModel>> loadTourPackages() async {
+    final rows = await _client
+        .from('tour_packages')
+        .select('id,name,description,tour_package_stops(spot_id,stop_order)')
+        .eq('is_active', true)
+        .order('id')
+        .timeout(_readDeadline);
+    return rows.map(TourPackageModel.fromPublishedRow).toList();
   }
 
   static Future<List<TouristSpotModel>> loadSpots({
     int page = 0,
     int pageSize = 200,
+    bool includeInactive = false,
   }) async {
     final safePage = page < 0 ? 0 : page;
     final safeSize = pageSize.clamp(1, 200).toInt();
     final start = safePage * safeSize;
-    final rows = await _client
+    var query = _client
         .from('tourist_spots')
-        .select()
-        .eq('is_active', true)
+        .select(
+          'id,name,description,history,category,latitude,longitude,image_url,opening_hours,entrance_fee_note,tips,distance_from_town,is_active,availability_status,closed_until,closure_reason',
+        );
+    if (!includeInactive) query = query.eq('is_active', true);
+    final rows = await query
         .order('name')
-        .range(start, start + safeSize - 1);
-    return rows.map<TouristSpotModel>((row) {
-      final map = Map<String, dynamic>.from(row);
-      return TouristSpotModel(
-        id: map['id'],
-        name: map['name'],
-        description: map['description'] ?? '',
-        history: map['history'] ?? '',
-        category: _category(map['category']),
-        latitude: (map['latitude'] as num).toDouble(),
-        longitude: (map['longitude'] as num).toDouble(),
-        imageUrls: map['image_url'] == null || map['image_url'] == ''
-            ? const []
-            : [map['image_url'] as String],
-        openingHours: map['opening_hours'] ?? '',
-        entranceFee: map['entrance_fee_note'] ?? '',
-        tips: List<String>.from(map['tips'] ?? const []),
-        distanceFromTown: (map['distance_from_town'] as num?)?.toDouble() ?? 0,
-        isActive: map['is_active'] ?? true,
-        availabilityStatus: map['availability_status'] ?? 'open',
-        closedUntil: _date(map['closed_until']),
-        closureReason: map['closure_reason'] as String?,
-      );
-    }).toList();
+        .range(start, start + safeSize - 1)
+        .timeout(_readDeadline);
+    return rows
+        .where((row) {
+          return MapCoordinateValidator.isValid(
+            latitude: row['latitude'],
+            longitude: row['longitude'],
+          );
+        })
+        .map<TouristSpotModel>((map) {
+          return TouristSpotModel(
+            id: map['id'],
+            name: map['name'],
+            description: map['description'] ?? '',
+            history: map['history'] ?? '',
+            category: _category(map['category']),
+            latitude: MapCoordinateValidator.finiteNumber(map['latitude'])!,
+            longitude: MapCoordinateValidator.finiteNumber(map['longitude'])!,
+            imageUrls: map['image_url'] == null || map['image_url'] == ''
+                ? const []
+                : [map['image_url'] as String],
+            openingHours: map['opening_hours'] ?? '',
+            entranceFee: map['entrance_fee_note'] ?? '',
+            tips: List<String>.from(map['tips'] ?? const []),
+            distanceFromTown:
+                (map['distance_from_town'] as num?)?.toDouble() ?? 0,
+            isActive: map['is_active'] ?? true,
+            availabilityStatus: map['availability_status'] ?? 'open',
+            closedUntil: _date(map['closed_until']),
+            closureReason: map['closure_reason'] as String?,
+          );
+        })
+        .toList();
   }
 
   static SpotCategory _category(String? value) =>
@@ -119,251 +171,421 @@ class BackendRepository {
   static Future<List<BookingModel>> loadBookings({
     int page = 0,
     int pageSize = 200,
+    String? bookingId,
+    bool activeOnly = false,
+  }) async => (await _loadBookingPage(
+    page: page,
+    pageSize: pageSize,
+    bookingId: bookingId,
+    activeOnly: activeOnly,
+  )).items;
+
+  static Future<({List<BookingModel> items, bool hasMore})> loadBookingWindow({
+    int throughPage = 0,
+    String? viewerRole,
+  }) async {
+    final pickupValues = _secureStorage.readAll();
+    final historyRequest = readPageWindow<BookingModel>(
+      throughPage: throughPage,
+      fetch: (page) async {
+        final batch = await _loadBookingPage(
+          page: page,
+          pageSize: 50,
+          viewerRole: viewerRole,
+          historyOnly: true,
+          pickupValues: pickupValues,
+        );
+        return (items: batch.items, hasMore: batch.hasMore);
+      },
+    );
+    final (history, active) = await (
+      historyRequest,
+      _loadActiveBookings(viewerRole, pickupValues),
+    ).wait;
+    final items = {
+      for (final booking in history.items) booking.id: booking,
+      for (final booking in active) booking.id: booking,
+    }.values.toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return (items: items, hasMore: history.hasMore);
+  }
+
+  static Future<List<BookingModel>> _loadActiveBookings(
+    String? viewerRole,
+    Future<Map<String, String>> pickupValues,
+  ) async {
+    final items = <BookingModel>[];
+    for (var page = 0; ; page++) {
+      final batch = await _loadBookingPage(
+        page: page,
+        activeOnly: true,
+        viewerRole: viewerRole,
+        pickupValues: pickupValues,
+      );
+      items.addAll(batch.items);
+      if (!batch.hasMore) return items;
+    }
+  }
+
+  static Future<DataPage<BookingModel>> _loadBookingPage({
+    int page = 0,
+    int pageSize = 200,
+    String? bookingId,
+    bool activeOnly = false,
+    bool historyOnly = false,
+    String? viewerRole,
+    Future<Map<String, String>>? pickupValues,
   }) async {
     final safePage = page < 0 ? 0 : page;
     final safeSize = pageSize.clamp(1, 200).toInt();
     final start = safePage * safeSize;
-    final rows = await _client
-        .from('bookings')
-        .select(
-          '*,booking_stops(*),booking_offers(*),booking_route_changes(*),trip_events(*),payments(*),refunds(*),cash_confirmations(*),booking_reviews(*)',
-        )
-        .order('created_at', ascending: false)
-        .range(start, start + safeSize - 1);
-    final profileIds = <String>{};
-    for (final row in rows) {
-      profileIds.add(row['tourist_id'] as String);
-      if (row['driver_id'] != null) profileIds.add(row['driver_id'] as String);
+    var query = _client.from('bookings').select('''
+    id,tourist_id,driver_id,package_id,quoted_amount_centavos,final_charge_centavos,
+    pickup_latitude,pickup_longitude,pickup_address,passenger_count,luggage_notes,
+    accessibility_needs,payment_method,payment_status,status,created_at,scheduled_at,
+    dispatch_expires_at,accepted_at,started_at,completed_at,replacement_requested_at,
+    replacement_reason,route_adjustment_required,interrupted_at,interruption_reason,
+    tourist_wait_confirmed_at,last_route_deviation_at,cancellation_reason,driver_arrived_at,
+    pickup_wait_expires_at,confirmed_stop_count,arrival_pending,client_request_id,
+    tourist:profiles!bookings_tourist_id_fkey(full_name),
+    driver:profiles!bookings_driver_id_fkey(full_name,driver_profiles!driver_profiles_profile_id_fkey(plate_number)),
+    fare_revisions(revision),
+    cancellation_policies(free_cancellation_minutes,accepted_trip_fee_percent,driver_wait_minutes,no_show_fee_percent),
+    booking_stops(id,spot_id,spot_name_snapshot,latitude_snapshot,longitude_snapshot,stop_order),
+    booking_offers(driver_id,status,expires_at),
+    booking_route_changes(id,requested_by,requested_role,change_type,target_stop_id,proposed_order,reason,created_at,status),
+    trip_events(created_at,actor_role,description),payments(status,amount_centavos),
+    cash_confirmations(direction,actor_role),booking_reviews(rating,review)
+  ''');
+    if (bookingId != null) query = query.eq('id', bookingId);
+    // Give PostgreSQL an indexed participant predicate; RLS still enforces
+    // authorization independently of this query optimization.
+    final viewerId = _client.auth.currentUser?.id;
+    if (viewerId != null && viewerRole == 'tourist') {
+      query = query.eq('tourist_id', viewerId);
+    } else if (viewerId != null && viewerRole == 'driver') {
+      // Pending matched offers have no assigned driver yet. RLS narrows these
+      // pending candidates to this driver's unexpired offers.
+      query = activeOnly
+          ? query.or('driver_id.eq.$viewerId,status.eq.pending')
+          : query.eq('driver_id', viewerId);
     }
-    final profileRows = profileIds.isEmpty
-        ? <Map<String, dynamic>>[]
-        : await _client
-              .from('profiles')
-              .select('id,full_name')
-              .inFilter('id', profileIds.toList());
-    final profiles = {
-      for (final p in profileRows) p['id'] as String: p['full_name'] as String,
-    };
-    final driverRows = profileIds.isEmpty
-        ? <Map<String, dynamic>>[]
-        : await _client
-              .from('driver_profiles')
-              .select('profile_id,plate_number')
-              .inFilter('profile_id', profileIds.toList());
-    final plates = {
-      for (final d in driverRows)
-        d['profile_id'] as String: d['plate_number'] as String,
-    };
-    final fares = await _client.from('fare_revisions').select('id,revision');
-    final revisions = {
-      for (final f in fares) f['id'] as String: f['revision'] as int,
-    };
-    final policyRows = await _client
-        .from('cancellation_policies')
-        .select(
-          'id,free_cancellation_minutes,accepted_trip_fee_percent,driver_wait_minutes,no_show_fee_percent',
-        );
-    final policies = {
-      for (final policy in policyRows)
-        policy['id'] as String: Map<String, dynamic>.from(policy),
-    };
+    if (activeOnly) {
+      query = query.inFilter('status', _activeBookingStatuses);
+    } else if (historyOnly) {
+      query = query.not(
+        'status',
+        'in',
+        '(${_activeBookingStatuses.join(',')})',
+      );
+    }
+    final (rows, secureValues) = await (
+      query
+          .order('created_at', ascending: false)
+          .order('id', ascending: false)
+          .range(start, start + safeSize - 1)
+          .timeout(_readDeadline),
+      pickupValues ?? _secureStorage.readAll(),
+    ).wait;
 
     final result = <BookingModel>[];
     for (final source in rows) {
-      final row = Map<String, dynamic>.from(source);
-      final id = row['id'] as String;
-      final stops =
-          (row['booking_stops'] as List? ?? [])
+      await readRowIndependently(
+        () async {
+          final row = Map<String, dynamic>.from(source);
+          final id = row['id'] as String;
+          final stops =
+              (row['booking_stops'] as List? ?? [])
+                  .map((item) => Map<String, dynamic>.from(item))
+                  .toList()
+                ..sort(
+                  (a, b) => (a['stop_order'] as int).compareTo(
+                    b['stop_order'] as int,
+                  ),
+                );
+          final eventRows =
+              (row['trip_events'] as List? ?? [])
+                  .map((item) => Map<String, dynamic>.from(item))
+                  .toList()
+                ..sort(
+                  (a, b) => (a['created_at'] as String).compareTo(
+                    b['created_at'] as String,
+                  ),
+                );
+          final paymentRows = (row['payments'] as List? ?? [])
               .map((item) => Map<String, dynamic>.from(item))
-              .toList()
-            ..sort(
-              (a, b) =>
-                  (a['stop_order'] as int).compareTo(b['stop_order'] as int),
-            );
-      final eventRows =
-          (row['trip_events'] as List? ?? [])
+              .toList();
+          final cashRows = (row['cash_confirmations'] as List? ?? [])
               .map((item) => Map<String, dynamic>.from(item))
-              .toList()
-            ..sort(
-              (a, b) => (a['created_at'] as String).compareTo(
-                b['created_at'] as String,
-              ),
-            );
-      final paymentRows = (row['payments'] as List? ?? [])
-          .map((item) => Map<String, dynamic>.from(item))
-          .toList();
-      final cashRows = (row['cash_confirmations'] as List? ?? [])
-          .map((item) => Map<String, dynamic>.from(item))
-          .toList();
-      final reviews = row['booking_reviews'] as List? ?? [];
-      final offerRows = (row['booking_offers'] as List? ?? [])
-          .map((item) => Map<String, dynamic>.from(item))
-          .toList();
-      final ownOffer = offerRows
-          .where(
-            (offer) =>
-                offer['driver_id'] == _client.auth.currentUser?.id &&
-                offer['status'] == 'offered',
-          )
-          .firstOrNull;
-      final routeChangeRows = (row['booking_route_changes'] as List? ?? [])
-          .map((item) => Map<String, dynamic>.from(item))
-          .where((item) => item['status'] == 'pending')
-          .toList();
-      final pendingRouteChange = routeChangeRows.firstOrNull;
-      final driverId = row['driver_id'] as String?;
-      final currentUserId = _client.auth.currentUser?.id;
-      final scopedPickupKey = currentUserId == null
-          ? null
-          : 'pickup_code_${currentUserId}_$id';
-      var pickupCode = scopedPickupKey == null
-          ? null
-          : await _secureStorage.read(key: scopedPickupKey);
-      // One-time migration from the original unscoped key. Only the tourist
-      // who owns the booking may claim it, so account switching cannot expose
-      // a previous user's pickup code.
-      if (pickupCode == null &&
-          currentUserId != null &&
-          row['tourist_id'] == currentUserId) {
-        final legacyKey = 'pickup_code_$id';
-        pickupCode = await _secureStorage.read(key: legacyKey);
-        if (pickupCode != null) {
-          await _secureStorage.write(key: scopedPickupKey!, value: pickupCode);
-          await _secureStorage.delete(key: legacyKey);
-        }
-      }
-      final receivedCents = paymentRows
-          .where((p) => p['status'] == 'paid' || p['status'] == 'cash_paid')
-          .fold<int>(0, (sum, p) => sum + (p['amount_centavos'] as int));
-      bool confirmed(String direction, String actor) => cashRows.any(
-        (c) => c['direction'] == direction && c['actor_role'] == actor,
-      );
-      final quoted = row['quoted_amount_centavos'] as int;
-      final policy = policies[row['cancellation_policy_id']] ?? const {};
-      result.add(
-        BookingModel(
-          id: id,
-          touristId: row['tourist_id'],
-          touristName: profiles[row['tourist_id']] ?? 'Tourist',
-          driverId: driverId,
-          driverName: driverId == null ? null : profiles[driverId],
-          driverPlate: driverId == null ? null : plates[driverId],
-          stops: stops
-              .map(
-                (stop) => BookingStop(
-                  id: stop['id'] as String? ?? '',
-                  spotId: stop['spot_id'] ?? '',
-                  spotName: stop['spot_name_snapshot'],
-                  latitude: (stop['latitude_snapshot'] as num).toDouble(),
-                  longitude: (stop['longitude_snapshot'] as num).toDouble(),
-                  fare: 0,
-                ),
+              .toList();
+          final reviews = row['booking_reviews'] as List? ?? [];
+          final offerRows = (row['booking_offers'] as List? ?? [])
+              .map((item) => Map<String, dynamic>.from(item))
+              .toList();
+          final ownOffer = offerRows
+              .where(
+                (offer) =>
+                    offer['driver_id'] == _client.auth.currentUser?.id &&
+                    offer['status'] == 'offered',
               )
-              .toList(),
-          pickupLat: (row['pickup_latitude'] as num).toDouble(),
-          pickupLng: (row['pickup_longitude'] as num).toDouble(),
-          pickupAddress: row['pickup_address'],
-          passengerCount: row['passenger_count'] as int? ?? 1,
-          luggageNotes: row['luggage_notes'] as String? ?? '',
-          accessibilityNeeds: row['accessibility_needs'] as String? ?? '',
-          baseFare: quoted / 100,
-          totalFare: quoted / 100,
-          paymentMethod: row['payment_method'] == 'paymongo'
-              ? PaymentMethod.online
-              : PaymentMethod.cash,
-          paymentStatus: _paymentStatus(row['payment_status']),
-          status: _bookingStatus(row['status']),
-          createdAt: DateTime.parse(row['created_at']),
-          scheduledAt: _date(row['scheduled_at']),
-          dispatchExpiresAt: _date(row['dispatch_expires_at']),
-          offerExpiresAt: _date(ownOffer?['expires_at']),
-          acceptedAt: _date(row['accepted_at']),
-          startedAt: _date(row['started_at']),
-          completedAt: _date(row['completed_at']),
-          replacementRequestedAt: _date(row['replacement_requested_at']),
-          replacementReason: row['replacement_reason'] as String?,
-          pendingRouteChange: pendingRouteChange == null
+              .firstOrNull;
+          final routeChangeRows = (row['booking_route_changes'] as List? ?? [])
+              .map((item) => Map<String, dynamic>.from(item))
+              .where((item) => item['status'] == 'pending')
+              .toList();
+          final pendingRouteChange = routeChangeRows.firstOrNull;
+          final driverId = row['driver_id'] as String?;
+          final currentUserId = _client.auth.currentUser?.id == viewerId
+              ? viewerId
+              : null;
+          final scopedPickupKey = currentUserId == null
               ? null
-              : BookingRouteChange(
-                  id: pendingRouteChange['id'] as String,
-                  requestedBy: pendingRouteChange['requested_by'] as String,
-                  requestedRole: pendingRouteChange['requested_role'] as String,
-                  type: pendingRouteChange['change_type'] as String,
-                  targetStopId: pendingRouteChange['target_stop_id'] as String?,
-                  proposedOrder: List<String>.from(
-                    pendingRouteChange['proposed_order'] as List? ?? const [],
-                  ),
-                  reason: pendingRouteChange['reason'] as String,
-                  createdAt: DateTime.parse(
-                    pendingRouteChange['created_at'] as String,
-                  ),
-                ),
-          routeAdjustmentRequired:
-              row['route_adjustment_required'] as bool? ?? false,
-          interruptedAt: _date(row['interrupted_at']),
-          interruptionReason: row['interruption_reason'] as String?,
-          touristWaitConfirmedAt: _date(row['tourist_wait_confirmed_at']),
-          lastRouteDeviationAt: _date(row['last_route_deviation_at']),
-          cancellationReason: row['cancellation_reason'],
-          driverRating: reviews.isEmpty
+              : 'pickup_code_${currentUserId}_$id';
+          var pickupCode = scopedPickupKey == null
               ? null
-              : (reviews.first['rating'] as num).toDouble(),
-          driverReview: reviews.isEmpty ? null : reviews.first['review'],
-          freeCancellationMinutes:
-              policy['free_cancellation_minutes'] as int? ?? 5,
-          acceptedCancellationPercent:
-              policy['accepted_trip_fee_percent'] as int? ?? 20,
-          driverWaitMinutes: policy['driver_wait_minutes'] as int? ?? 10,
-          noShowFeePercent: policy['no_show_fee_percent'] as int? ?? 50,
-          trip: TripRecord(
-            fareRevision: revisions[row['fare_revision_id']] ?? 1,
-            packageId: row['package_id'],
-            pickupCode: pickupCode ?? '',
-            pickupArrivedAt: _date(row['driver_arrived_at']),
-            pickupWaitExpiresAt: _date(row['pickup_wait_expires_at']),
-            confirmedStops: row['confirmed_stop_count'] ?? 0,
-            arrivalPending: row['arrival_pending'] ?? false,
-            finalChargeCents: row['final_charge_centavos'],
-            reviewRequired: row['payment_status'] == 'under_review',
-            touristCashConfirmed: confirmed('payment', 'tourist'),
-            driverCashConfirmed: confirmed('payment', 'driver'),
-            touristRefundConfirmed: confirmed('refund', 'tourist'),
-            driverRefundConfirmed: confirmed('refund', 'driver'),
-            receivedCents: receivedCents,
-            events: eventRows
-                .map(
-                  (event) => TripEvent(
-                    DateTime.parse(event['created_at']),
-                    _actor(event['actor_role']),
-                    event['description'],
-                  ),
-                )
-                .toList(),
-          ),
-        ),
+              : secureValues[scopedPickupKey];
+          // One-time migration from the original unscoped key. Only the tourist
+          // who owns the booking may claim it, so account switching cannot expose
+          // a previous user's pickup code.
+          if (pickupCode == null &&
+              currentUserId != null &&
+              row['tourist_id'] == currentUserId) {
+            final legacyKey = 'pickup_code_$id';
+            pickupCode = secureValues[legacyKey];
+            if (pickupCode != null) {
+              await _secureStorage.write(
+                key: scopedPickupKey!,
+                value: pickupCode,
+              );
+              await _secureStorage.delete(key: legacyKey);
+            }
+          }
+          // A booking-create response can be lost after the database commits.
+          // Resume only a recovery request that was persisted before its RPC;
+          // the server accepts the same request once and rejects code rotation.
+          if (pickupCode == null &&
+              currentUserId != null &&
+              row['tourist_id'] == currentUserId &&
+              const [
+                'scheduled',
+                'pending',
+                'accepted',
+              ].contains(row['status'])) {
+            final pendingRequest =
+                secureValues[pickupRecoveryRequestKey(currentUserId, id)];
+            final pendingCode =
+                secureValues[pickupRecoveryCodeKey(currentUserId, id)];
+            if (pendingRequest != null && pendingCode != null) {
+              try {
+                pickupCode = await _recoverPickupCode(
+                  userId: currentUserId,
+                  bookingId: id,
+                  recoveryId: pendingRequest,
+                  pickupCode: pendingCode,
+                );
+              } catch (_) {
+                // Loading the booking must remain available while offline. The
+                // persisted request is retried on the next refresh.
+              }
+            }
+          }
+          final receivedCents = paymentRows
+              .where(
+                (p) => const {
+                  'paid',
+                  'cash_paid',
+                  'gcash_paid',
+                }.contains(p['status']),
+              )
+              .fold<int>(0, (sum, p) => sum + (p['amount_centavos'] as int));
+          bool confirmed(String direction, String actor) => cashRows.any(
+            (c) => c['direction'] == direction && c['actor_role'] == actor,
+          );
+          final quoted = row['quoted_amount_centavos'] as int;
+          final policy = row['cancellation_policies'] as Map? ?? const {};
+          final tourist = row['tourist'] as Map?;
+          final driver = row['driver'] as Map?;
+          final driverProfile = driver?['driver_profiles'] as Map?;
+          final fare = row['fare_revisions'] as Map?;
+          result.add(
+            BookingModel(
+              id: id,
+              touristId: row['tourist_id'],
+              touristName:
+                  tourist?['full_name'] as String? ?? MessageCode.tourist,
+              driverId: driverId,
+              driverName: driver?['full_name'] as String?,
+              driverPlate: driverProfile?['plate_number'] as String?,
+              stops: stops
+                  .map(
+                    (stop) => BookingStop(
+                      id: stop['id'] as String? ?? '',
+                      spotId: stop['spot_id'] ?? '',
+                      spotName: stop['spot_name_snapshot'],
+                      latitude: (stop['latitude_snapshot'] as num).toDouble(),
+                      longitude: (stop['longitude_snapshot'] as num).toDouble(),
+                      fare: 0,
+                    ),
+                  )
+                  .toList(),
+              pickupLat: (row['pickup_latitude'] as num).toDouble(),
+              pickupLng: (row['pickup_longitude'] as num).toDouble(),
+              pickupAddress: row['pickup_address'],
+              passengerCount: row['passenger_count'] as int? ?? 1,
+              luggageNotes: row['luggage_notes'] as String? ?? '',
+              accessibilityNeeds: row['accessibility_needs'] as String? ?? '',
+              baseFare: quoted / 100,
+              totalFare: quoted / 100,
+              paymentMethod: switch (row['payment_method']) {
+                'cash' => PaymentMethod.cash,
+                'paymongo' => PaymentMethod.online,
+                'gcash_direct' => PaymentMethod.gcashDirect,
+                _ => PaymentMethod.unknown,
+              },
+              paymentStatus: _paymentStatus(row['payment_status']),
+              status: _bookingStatus(row['status']),
+              createdAt: DateTime.parse(row['created_at']),
+              scheduledAt: _date(row['scheduled_at']),
+              dispatchExpiresAt: _date(row['dispatch_expires_at']),
+              offerExpiresAt: _date(ownOffer?['expires_at']),
+              acceptedAt: _date(row['accepted_at']),
+              startedAt: _date(row['started_at']),
+              completedAt: _date(row['completed_at']),
+              replacementRequestedAt: _date(row['replacement_requested_at']),
+              replacementReason: row['replacement_reason'] as String?,
+              pendingRouteChange: pendingRouteChange == null
+                  ? null
+                  : BookingRouteChange(
+                      id: pendingRouteChange['id'] as String,
+                      requestedBy: pendingRouteChange['requested_by'] as String,
+                      requestedRole:
+                          pendingRouteChange['requested_role'] as String,
+                      type: pendingRouteChange['change_type'] as String,
+                      targetStopId:
+                          pendingRouteChange['target_stop_id'] as String?,
+                      proposedOrder: List<String>.from(
+                        pendingRouteChange['proposed_order'] as List? ??
+                            const [],
+                      ),
+                      reason: pendingRouteChange['reason'] as String,
+                      createdAt: DateTime.parse(
+                        pendingRouteChange['created_at'] as String,
+                      ),
+                    ),
+              routeAdjustmentRequired:
+                  row['route_adjustment_required'] as bool? ?? false,
+              interruptedAt: _date(row['interrupted_at']),
+              interruptionReason: row['interruption_reason'] as String?,
+              touristWaitConfirmedAt: _date(row['tourist_wait_confirmed_at']),
+              lastRouteDeviationAt: _date(row['last_route_deviation_at']),
+              cancellationReason: row['cancellation_reason'],
+              driverRating: reviews.isEmpty
+                  ? null
+                  : (reviews.first['rating'] as num).toDouble(),
+              driverReview: reviews.isEmpty ? null : reviews.first['review'],
+              freeCancellationMinutes:
+                  policy['free_cancellation_minutes'] as int? ?? 5,
+              acceptedCancellationPercent:
+                  policy['accepted_trip_fee_percent'] as int? ?? 20,
+              driverWaitMinutes: policy['driver_wait_minutes'] as int? ?? 10,
+              noShowFeePercent: policy['no_show_fee_percent'] as int? ?? 50,
+              trip: TripRecord(
+                fareRevision: fare?['revision'] as int? ?? 1,
+                packageId: row['package_id'],
+                pickupCode: pickupCode ?? '',
+                pickupArrivedAt: _date(row['driver_arrived_at']),
+                pickupWaitExpiresAt: _date(row['pickup_wait_expires_at']),
+                confirmedStops: row['confirmed_stop_count'] ?? 0,
+                arrivalPending: row['arrival_pending'] ?? false,
+                finalChargeCents: row['final_charge_centavos'],
+                reviewRequired: row['payment_status'] == 'under_review',
+                touristCashConfirmed: confirmed('payment', 'tourist'),
+                driverCashConfirmed: confirmed('payment', 'driver'),
+                touristRefundConfirmed: confirmed('refund', 'tourist'),
+                driverRefundConfirmed: confirmed('refund', 'driver'),
+                receivedCents: receivedCents,
+                events: eventRows
+                    .map(
+                      (event) => TripEvent(
+                        DateTime.parse(event['created_at']),
+                        _actor(event['actor_role']),
+                        event['description'],
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          );
+          if (currentUserId != null &&
+              row['tourist_id'] == currentUserId &&
+              row['client_request_id'] != null &&
+              row['client_request_id'] ==
+                  pendingBookingRequestId(
+                    secureValues['booking_request_$currentUserId'],
+                  )) {
+            await _secureStorage.delete(key: 'booking_request_$currentUserId');
+          }
+        },
+        (error, stack) {
+          unawaited(TelemetryService.recordNonFatal(error, stack));
+        },
       );
     }
-    return result;
+    return DataPage(
+      items: result,
+      page: safePage,
+      pageSize: safeSize,
+      hasMore: rows.length == safeSize,
+    );
   }
 
   static Future<
-    ({List<Map<String, dynamic>> drivers, List<Map<String, dynamic>> tourists})
+    ({
+      List<Map<String, dynamic>> drivers,
+      List<Map<String, dynamic>> tourists,
+      bool hasMore,
+    })
   >
-  loadDirectory() async {
+  loadDirectory({int page = 0, int pageSize = 100}) async {
     final profiles = await _client
         .from('profiles')
         .select('id,full_name,email,role,status,phone,created_at')
-        .limit(500);
-    final driverProfiles = await _client
-        .from('driver_profiles')
-        .select(
-          'profile_id,plate_number,franchise_number,license_document_path,vehicle_document_path,approval_status,rating_average,is_online,last_seen_at,passenger_capacity,accepts_accessibility_requests,license_expires_on,franchise_expires_on,vehicle_inspection_expires_on,service_area_name,service_area_latitude,service_area_longitude,service_area_radius_km,matching_blocked_until,matching_blocked_reason,compliance_reviewed_at,completed_trip_count,driver_cancelled_trip_count,reliability_score',
-        )
-        .limit(500);
-    final locations = await _client
-        .from('driver_locations')
-        .select()
-        .limit(500);
+        .order('id')
+        .range(page * pageSize, page * pageSize + pageSize - 1)
+        .timeout(_readDeadline);
+    if (profiles.isEmpty) {
+      return (
+        drivers: <Map<String, dynamic>>[],
+        tourists: <Map<String, dynamic>>[],
+        hasMore: false,
+      );
+    }
+    final driverIds = profiles
+        .where((profile) => profile['role'] == 'driver')
+        .map((profile) => profile['id'] as String)
+        .toList();
+    final (driverProfiles, locations) = driverIds.isEmpty
+        ? (<Map<String, dynamic>>[], <Map<String, dynamic>>[])
+        : await (
+            _client
+                .from('driver_profiles')
+                .select(
+                  'profile_id,plate_number,franchise_number,license_document_path,vehicle_document_path,approval_status,rating_average,is_online,last_seen_at,passenger_capacity,accepts_accessibility_requests,license_expires_on,franchise_expires_on,vehicle_inspection_expires_on,service_area_name,service_area_latitude,service_area_longitude,service_area_radius_km,matching_blocked_until,matching_blocked_reason,compliance_reviewed_at,completed_trip_count,driver_cancelled_trip_count,reliability_score',
+                )
+                .inFilter('profile_id', driverIds)
+                .timeout(_readDeadline),
+            _client
+                .from('driver_locations')
+                .select(
+                  'driver_id,latitude,longitude,accuracy_meters,heading,speed_mps,recorded_at',
+                )
+                .inFilter('driver_id', driverIds)
+                .timeout(_readDeadline),
+          ).wait;
+    for (final row in driverProfiles) {
+      _driverRecords[row['profile_id'] as String] = Map<String, dynamic>.from(
+        row,
+      );
+    }
     final byDriver = {
       for (final row in driverProfiles) row['profile_id'] as String: row,
     };
@@ -432,7 +654,48 @@ class BackendRepository {
         });
       }
     }
-    return (drivers: drivers, tourists: tourists);
+    return (
+      drivers: drivers,
+      tourists: tourists,
+      hasMore: profiles.length == pageSize,
+    );
+  }
+
+  static Future<
+    ({
+      List<Map<String, dynamic>> drivers,
+      List<Map<String, dynamic>> tourists,
+      bool hasMore,
+    })
+  >
+  loadDirectoryWindow({int throughPage = 0}) async {
+    final result =
+        await readPageWindow<({bool driver, Map<String, dynamic> item})>(
+          throughPage: throughPage,
+          fetch: (page) async {
+            final batch = await loadDirectory(page: page);
+            return (
+              items: [
+                for (final driver in batch.drivers)
+                  (driver: true, item: driver),
+                for (final tourist in batch.tourists)
+                  (driver: false, item: tourist),
+              ],
+              hasMore: batch.hasMore,
+            );
+          },
+        );
+    return (
+      drivers: result.items
+          .where((item) => item.driver)
+          .map((item) => item.item)
+          .toList(),
+      tourists: result.items
+          .where((item) => !item.driver)
+          .map((item) => item.item)
+          .toList(),
+      hasMore: result.hasMore,
+    );
   }
 
   static Future<void> setDriverOnline(bool online) =>
@@ -472,7 +735,7 @@ class BackendRepository {
     String? bookingId,
   }) async {
     final user = _client.auth.currentUser;
-    if (user == null) throw StateError('Sign in before sending feedback.');
+    if (user == null) throw StateError(MessageCode.signInBeforeSendingFeedback);
     await _client.from('feedback').insert({
       'author_id': user.id,
       'booking_id': bookingId,
@@ -549,8 +812,17 @@ class BackendRepository {
     return rows.map((row) => Map<String, dynamic>.from(row)).toList();
   }
 
-  static Future<void> sendAnnouncement(String title, String body) =>
-      rpc('send_announcement', {'p_title': title, 'p_body': body});
+  static Future<void> sendAnnouncement(
+    String title,
+    String body, {
+    required String audience,
+    required String requestId,
+  }) => rpc('send_announcement', {
+    'p_title': title,
+    'p_body': body,
+    'p_audience': audience,
+    'p_request_id': requestId,
+  });
 
   static Future<List<Map<String, dynamic>>> loadNotifications({
     int page = 0,
@@ -606,18 +878,17 @@ class BackendRepository {
   }) async {
     String? imageUrl = spot.imageUrls.firstOrNull;
     if (imageBytes != null) {
-      if (imageBytes.length > 5 * 1024 * 1024) {
-        throw StateError('Tourist spot images must be 5 MB or smaller.');
-      }
-      final path = '${spot.id}/cover.jpg';
+      final material = SpotImageMaterial.create(spot.id, imageBytes);
+      final path = material.path;
       await _client.storage
           .from('tourist-spots')
           .uploadBinary(
             path,
             imageBytes,
-            fileOptions: const FileOptions(
-              contentType: 'image/jpeg',
-              upsert: true,
+            fileOptions: FileOptions(
+              contentType: material.contentType,
+              upsert: false,
+              cacheControl: SpotImageMaterial.cacheControl,
             ),
           );
       imageUrl = _client.storage.from('tourist-spots').getPublicUrl(path);
@@ -641,18 +912,7 @@ class BackendRepository {
       'closed_until': spot.closedUntil?.toUtc().toIso8601String(),
       'closure_reason': spot.closureReason,
     });
-    if (imageBytes != null) {
-      final files = await _client.storage
-          .from('tourist-spots')
-          .list(path: spot.id);
-      final obsolete = files
-          .where((file) => file.name != 'cover.jpg')
-          .map((file) => '${spot.id}/${file.name}')
-          .toList();
-      if (obsolete.isNotEmpty) {
-        await _client.storage.from('tourist-spots').remove(obsolete);
-      }
-    }
+    // Keep prior immutable versions: another device or concurrent edit may still reference them.
   }
 
   static Future<void> setSpotAvailability({
@@ -667,9 +927,16 @@ class BackendRepository {
     'p_closed_until': closedUntil?.toUtc().toIso8601String(),
   });
 
+  static Future<void> setSpotActive(String spotId, bool active) async {
+    await _client
+        .from('tourist_spots')
+        .update({'is_active': active})
+        .eq('id', spotId);
+  }
+
   static Future<Map<String, dynamic>> loadOwnProfile() async {
     final user = _client.auth.currentUser;
-    if (user == null) throw StateError('Sign in first.');
+    if (user == null) throw StateError(MessageCode.signInFirst);
     final profile = await _client
         .from('profiles')
         .select('id,full_name,phone,role,avatar_path')
@@ -698,31 +965,53 @@ class BackendRepository {
     String? franchiseNumber,
   }) async {
     final user = _client.auth.currentUser;
-    if (user == null) throw StateError('Sign in first.');
-    String? avatarPath;
-    if (avatarBytes != null) {
-      if (avatarBytes.length > 5 * 1024 * 1024) {
-        throw StateError('Profile images must be 5 MB or smaller.');
-      }
-      avatarPath = '${user.id}/avatar.jpg';
-      await _client.storage
-          .from('profile-images')
-          .uploadBinary(
-            avatarPath,
-            avatarBytes,
-            fileOptions: const FileOptions(
-              contentType: 'image/jpeg',
-              upsert: true,
-            ),
-          );
-    }
-    await rpc('update_own_profile', {
+    if (user == null) throw StateError(MessageCode.signInFirst);
+    Future<void> writeProfile(String? avatarPath) => rpc('update_own_profile', {
       'p_full_name': fullName,
-      'p_phone': phone,
+      'p_phone': Validators.normalizePhone(phone),
       'p_avatar_path': avatarPath,
       'p_plate_number': plateNumber,
       'p_franchise_number': franchiseNumber,
     });
+
+    if (avatarBytes == null) {
+      await writeProfile(null);
+      return;
+    }
+    final profile = await _client
+        .from('profiles')
+        .select('avatar_path')
+        .eq('id', user.id)
+        .single();
+    final service = AvatarReplacementService(
+      store: _SupabaseAvatarObjectStore(_client),
+      isReferenced: (objectPath) async {
+        final rows = await _client
+            .from('profiles')
+            .select('id')
+            .eq('avatar_path', objectPath)
+            .limit(1);
+        return rows.isNotEmpty;
+      },
+      onCleanupFailure: (objectPath, error, stack) {
+        unawaited(
+          TelemetryService.recordNonFatal(
+            StateError(
+              MessageCode.avatarCleanupPendingForObjectValue(
+                (objectPath).toString(),
+              ),
+            ),
+            stack,
+          ),
+        );
+      },
+    );
+    await service.replace(
+      userId: user.id,
+      bytes: avatarBytes,
+      previousPath: profile['avatar_path'] as String?,
+      updateProfile: writeProfile,
+    );
   }
 
   static Future<void> updateDriverServiceProfile({
@@ -754,27 +1043,35 @@ class BackendRepository {
       '${value.day.toString().padLeft(2, '0')}';
 
   static BookingStatus _bookingStatus(String value) => switch (value) {
+    'payment_pending' => BookingStatus.paymentPending,
     'scheduled' => BookingStatus.scheduled,
     'replacement_pending' => BookingStatus.replacementPending,
-    _ => BookingStatus.values.byName(value),
+    _ =>
+      BookingStatus.values
+              .where((status) => status.name == value)
+              .firstOrNull ??
+          BookingStatus.unknown,
   };
   static TripActor _actor(String? value) => TripActor.values.firstWhere(
     (actor) => actor.name == value,
-    orElse: () => TripActor.system,
+    orElse: () => TripActor.unknown,
   );
   static PaymentStatus _paymentStatus(String value) => switch (value) {
     'checkout_created' => PaymentStatus.checkoutCreated,
     'processing' => PaymentStatus.processing,
     'failed' => PaymentStatus.failed,
     'cash_awaiting_confirmation' => PaymentStatus.awaitingConfirmation,
+    'gcash_awaiting_confirmation' => PaymentStatus.gcashAwaitingConfirmation,
+    'disputed' => PaymentStatus.disputed,
     'under_review' => PaymentStatus.underReview,
-    'paid' || 'cash_paid' => PaymentStatus.paid,
+    'paid' || 'cash_paid' || 'gcash_paid' => PaymentStatus.paid,
     'waived' => PaymentStatus.waived,
     'refund_required' => PaymentStatus.refundDue,
     'refund_processing' => PaymentStatus.refundProcessing,
     'partially_refunded' => PaymentStatus.partiallyRefunded,
     'refunded' => PaymentStatus.refunded,
-    _ => PaymentStatus.unpaid,
+    'unpaid' => PaymentStatus.unpaid,
+    _ => PaymentStatus.unknown,
   };
 
   static Future<String> processPayMongoRefund({
@@ -801,7 +1098,7 @@ class BackendRepository {
       );
     }
     final data = Map<String, dynamic>.from(response.data as Map);
-    return data['message']?.toString() ?? 'Refund decision recorded.';
+    return data['message']?.toString() ?? MessageCode.refundDecisionRecorded;
   }
 
   static Future<String> reconcilePayMongoPayment(String bookingId) async {
@@ -814,11 +1111,11 @@ class BackendRepository {
           ? (response.data as Map)['error']
           : response.data;
       throw StateError(
-        detail?.toString() ?? 'Payment status could not be refreshed.',
+        detail?.toString() ?? MessageCode.paymentStatusCouldNotBeRefreshed,
       );
     }
     final data = Map<String, dynamic>.from(response.data as Map);
-    return data['message']?.toString() ?? 'Payment status refreshed.';
+    return data['message']?.toString() ?? MessageCode.paymentStatusRefreshed;
   }
 
   static Future<List<Map<String, dynamic>>> loadFinancialLedger(
@@ -848,59 +1145,200 @@ class BackendRepository {
     required String accessibilityNeeds,
     DateTime? scheduledAt,
   }) async {
-    final response = Map<String, dynamic>.from(
-      await _client.rpc(
-        'create_booking_with_schedule',
-        params: {
-          'p_package_id': packageId,
-          'p_payment_method': paymentMethod == PaymentMethod.online
-              ? 'paymongo'
-              : 'cash',
-          'p_pickup_address': pickupAddress,
-          'p_pickup_latitude': pickupLatitude,
-          'p_pickup_longitude': pickupLongitude,
-          'p_passenger_count': passengerCount,
-          'p_luggage_notes': luggageNotes,
-          'p_accessibility_needs': accessibilityNeeds,
-          'p_scheduled_at': scheduledAt?.toUtc().toIso8601String(),
-          'p_stops': [
-            for (var i = 0; i < stops.length; i++)
-              {'spot_id': stops[i].id, 'stop_order': i + 1},
-          ],
-        },
-      ),
-    );
-    final id = response['booking_id'] as String;
-    final pickupCode = response['pickup_code'] as String;
     final userId = _client.auth.currentUser?.id;
-    if (userId == null) throw StateError('The booking session expired.');
-    await _secureStorage.write(
-      key: 'pickup_code_${userId}_$id',
-      value: pickupCode,
+    if (userId == null) throw StateError(MessageCode.signInFirst);
+    final params = <String, dynamic>{
+      'p_package_id': packageId,
+      'p_payment_method': switch (paymentMethod) {
+        PaymentMethod.online => 'paymongo',
+        PaymentMethod.gcashDirect => 'gcash_direct',
+        _ => 'cash',
+      },
+      'p_pickup_address': pickupAddress,
+      'p_pickup_latitude': pickupLatitude,
+      'p_pickup_longitude': pickupLongitude,
+      'p_passenger_count': passengerCount,
+      'p_luggage_notes': luggageNotes,
+      'p_accessibility_needs': accessibilityNeeds,
+      'p_scheduled_at': scheduledAt?.toUtc().toIso8601String(),
+      'p_stops': [
+        for (var i = 0; i < stops.length; i++)
+          {'spot_id': stops[i].id, 'stop_order': i + 1},
+      ],
+    };
+    final requestId = await BookingRequestMaterial.prepare(
+      userId: userId,
+      payload: params,
+      read: (key) => _secureStorage.read(key: key),
+      write: (key, value) => _secureStorage.write(key: key, value: value),
     );
-    final bookings = await loadBookings();
-    return BookingCreationResult(
-      bookings.firstWhere((booking) => booking.id == id),
-      pickupCode,
+    params['p_request_id'] = requestId;
+    Map<String, dynamic> response;
+    try {
+      response = Map<String, dynamic>.from(
+        await _client.rpc('create_booking_with_schedule', params: params),
+      );
+    } on PostgrestException catch (error) {
+      if (const ['P0001', '42501', '23514', '22023'].contains(error.code)) {
+        await _secureStorage.delete(key: 'booking_request_$userId');
+      }
+      rethrow;
+    } catch (_) {
+      final row = await _client
+          .from('bookings')
+          .select('id,tourist_id,client_request_id')
+          .eq('tourist_id', userId)
+          .eq('client_request_id', requestId)
+          .maybeSingle();
+      final matchedId = matchingBookingRequest(
+        row,
+        userId: userId,
+        requestId: requestId,
+      );
+      if (matchedId == null) rethrow;
+      response = {'booking_id': matchedId, 'pickup_code': null};
+    }
+    if (userId != _client.auth.currentUser?.id) {
+      throw StateError(MessageCode.bookingSessionChanged);
+    }
+    final id = response['booking_id'] as String;
+    final codeKey = 'pickup_code_${userId}_$id';
+    final pickupCode =
+        response['pickup_code'] as String? ??
+        await _secureStorage.read(key: codeKey) ??
+        await _recoverPickupCode(userId: userId, bookingId: id);
+    await _secureStorage.write(key: codeKey, value: pickupCode);
+    final bookings = await loadBookings(bookingId: id);
+    final booking = bookings.firstWhere((booking) => booking.id == id);
+    await _secureStorage.delete(key: 'booking_request_$userId');
+    return BookingCreationResult(booking, pickupCode);
+  }
+
+  static Future<PickupServiceArea> loadPickupServiceArea() async {
+    final row = await _client
+        .from('service_configuration')
+        .select('centre_latitude,centre_longitude,radius_km')
+        .eq('singleton', true)
+        .single();
+    return PickupServiceArea(
+      (row['centre_latitude'] as num).toDouble(),
+      (row['centre_longitude'] as num).toDouble(),
+      (row['radius_km'] as num).toDouble(),
     );
+  }
+
+  static Future<void> reissuePickupCode(String bookingId) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) throw StateError(MessageCode.signInFirst);
+    await reissuePickupWithMaterial(
+      userId: userId,
+      bookingId: bookingId,
+      read: (key) => _secureStorage.read(key: key),
+      write: (key, value) => _secureStorage.write(key: key, value: value),
+      delete: (key) => _secureStorage.delete(key: key),
+      issue: (material) async {
+        final code = await _client.rpc(
+          'reissue_booking_pickup_code',
+          params: {
+            'p_booking_id': bookingId,
+            'p_request_id': material.requestId,
+            'p_code': material.code,
+          },
+        );
+        if (_client.auth.currentUser?.id != userId) {
+          throw StateError(MessageCode.sessionChanged);
+        }
+        return code as String;
+      },
+    );
+  }
+
+  static Future<String> _recoverPickupCode({
+    required String userId,
+    required String bookingId,
+    String? recoveryId,
+    String? pickupCode,
+  }) async {
+    final material = recoveryId != null && pickupCode != null
+        ? PickupRecoveryMaterial(requestId: recoveryId, code: pickupCode)
+        : await preparePickupRecoveryMaterial(
+            userId: userId,
+            bookingId: bookingId,
+            read: (key) => _secureStorage.read(key: key),
+            write: (key, value) => _secureStorage.write(key: key, value: value),
+          );
+    final stableRequestId = material.requestId;
+    final stableCode = material.code;
+
+    for (var attempt = 0; attempt < 2; attempt++) {
+      try {
+        final recovered =
+            await _client.rpc(
+                  'recover_booking_pickup_code',
+                  params: {
+                    'p_booking_id': bookingId,
+                    'p_recovery_id': stableRequestId,
+                    'p_pickup_code': stableCode,
+                  },
+                )
+                as String;
+        if (recovered != stableCode) {
+          throw StateError(MessageCode.pickupRecoveryFailed);
+        }
+        await finalizePickupRecoveryMaterial(
+          userId: userId,
+          bookingId: bookingId,
+          code: recovered,
+          write: (key, value) => _secureStorage.write(key: key, value: value),
+          delete: (key) => _secureStorage.delete(key: key),
+        );
+        return recovered;
+      } on PostgrestException {
+        rethrow;
+      } catch (_) {
+        // Retry the same recovery operation; surface only the stable message below.
+      }
+    }
+    throw StateError(MessageCode.pickupRecoveryFailed);
   }
 
   static Future<void> rpc(String name, Map<String, dynamic> parameters) async {
     await _client.rpc(name, params: parameters);
-    unawaited(dispatchCommunications());
   }
 
-  static Future<void> dispatchCommunications() async {
-    try {
-      await _client.functions.invoke(
-        'dispatch-communications',
-        body: const {'limit': 20},
-      );
-    } catch (_) {
-      // Delivery is queued server-side. A provider outage must never roll back
-      // the booking action that created the notification.
-    }
+  static Future<Map<String, dynamic>?> driverGcashDetails(String driverId) =>
+      _client
+          .from('driver_gcash_details')
+          .select('gcash_account_name,gcash_number,is_active')
+          .eq('driver_id', driverId)
+          .maybeSingle();
+
+  static Future<void> saveDriverGcashDetails({
+    required String number,
+    required String name,
+    required bool active,
+  }) async {
+    final driverId = _client.auth.currentUser?.id;
+    if (driverId == null) throw StateError(MessageCode.signInFirst);
+    await _client.from('driver_gcash_details').upsert({
+      'driver_id': driverId,
+      'gcash_number': number,
+      'gcash_account_name': name,
+      'is_active': active,
+    });
   }
+
+  static Future<Map<String, dynamic>?> bookingDriverGcash(String bookingId) =>
+      _client
+          .rpc('get_booking_driver_gcash', params: {'p_booking_id': bookingId})
+          .maybeSingle();
+
+  static Future<String?> bookingGcashReference(String bookingId) async =>
+      await _client.rpc(
+            'get_booking_gcash_reference',
+            params: {'p_booking_id': bookingId},
+          )
+          as String?;
 
   static Future<void> registerPushToken({
     required String token,
@@ -917,7 +1355,6 @@ class BackendRepository {
         'p_device_label': deviceLabel,
       },
     );
-    unawaited(dispatchCommunications());
   }
 
   static Future<void> revokePushToken(String token) async {
@@ -932,8 +1369,11 @@ class BackendRepository {
     final prefix = 'pickup_code_${userId}_';
     final removals = values.keys.where(
       (key) =>
-          key.startsWith(prefix) &&
-          !retained.contains(key.substring(prefix.length)),
+          (key.startsWith(prefix) &&
+              !retained.contains(key.substring(prefix.length))) ||
+          ((key.startsWith('pickup_recovery_request_${userId}_') ||
+                  key.startsWith('pickup_recovery_code_${userId}_')) &&
+              !retained.contains(key.split('_').last)),
     );
     for (final key in removals) {
       await _secureStorage.delete(key: key);
@@ -955,10 +1395,9 @@ class BackendRepository {
         },
       ),
     );
-    unawaited(dispatchCommunications());
     return result['status'] == 'succeeded'
-        ? 'Refund completed in PayMongo test mode.'
-        : 'Refund update recorded.';
+        ? MessageCode.refundCompletedInPaymongoTestMode
+        : MessageCode.refundUpdateRecorded;
   }
 
   static Future<String> createCheckout(String bookingId) async {
@@ -968,11 +1407,13 @@ class BackendRepository {
     );
     if (response.status < 200 || response.status >= 300) {
       throw StateError(
-        response.data?['error'] ?? 'Checkout could not be created.',
+        response.data?['error'] ?? MessageCode.checkoutCouldNotBeCreated,
       );
     }
     return response.data['checkout_url'] as String;
   }
+
+  static final _locationUploadGate = LocationUploadGate();
 
   static Future<void> publishLocation({
     required double latitude,
@@ -981,65 +1422,119 @@ class BackendRepository {
     double? heading,
     double? speed,
     required DateTime recordedAt,
-  }) => rpc('publish_driver_location', {
-    'p_latitude': latitude,
-    'p_longitude': longitude,
-    'p_accuracy': accuracy,
-    'p_heading': heading,
-    'p_speed': speed,
-    'p_recorded_at': recordedAt.toUtc().toIso8601String(),
-  });
-
-  static void subscribe(void Function() onChanged) {
-    _channel?.unsubscribe();
-    _channel = _client.channel('tric-gabay-session')
-      ..onPostgresChanges(
-        event: PostgresChangeEvent.all,
-        schema: 'public',
-        table: 'bookings',
-        callback: (_) => _debounce(onChanged),
-      )
-      ..onPostgresChanges(
-        event: PostgresChangeEvent.all,
-        schema: 'public',
-        table: 'booking_offers',
-        callback: (_) => _debounce(onChanged),
-      )
-      ..onPostgresChanges(
-        event: PostgresChangeEvent.all,
-        schema: 'public',
-        table: 'booking_route_changes',
-        callback: (_) => _debounce(onChanged),
-      )
-      ..onPostgresChanges(
-        event: PostgresChangeEvent.all,
-        schema: 'public',
-        table: 'tourist_spots',
-        callback: (_) => _debounce(onChanged),
-      )
-      ..onPostgresChanges(
-        event: PostgresChangeEvent.all,
-        schema: 'public',
-        table: 'driver_locations',
-        callback: (_) => _debounce(onChanged),
-      )
-      ..onPostgresChanges(
-        event: PostgresChangeEvent.all,
-        schema: 'public',
-        table: 'notifications',
-        callback: (_) => _debounce(onChanged),
-      )
-      ..subscribe();
+    bool isMocked = false,
+  }) async {
+    final owner = _client.auth.currentUser?.id;
+    if (owner == null) return;
+    await _locationUploadGate.publish(
+      owner: owner,
+      latitude: latitude,
+      longitude: longitude,
+      now: DateTime.now(),
+      write: () => rpc('publish_driver_location_with_flags', {
+        'p_latitude': latitude,
+        'p_longitude': longitude,
+        'p_accuracy': accuracy,
+        'p_heading': heading,
+        'p_speed': speed,
+        'p_recorded_at': recordedAt.toUtc().toIso8601String(),
+        'p_is_mocked': isMocked,
+      }),
+    );
   }
 
-  static void _debounce(void Function() callback) {
+  static final _pendingRefresh = <RemoteSection>{};
+  static void subscribe(
+    void Function(Set<RemoteSection>) onChanged, {
+    required void Function(Map<String, dynamic>) onLocation,
+  }) {
     _refreshDebounce?.cancel();
-    _refreshDebounce = Timer(const Duration(milliseconds: 300), callback);
+    _refreshDebounce = null;
+    _pendingRefresh.clear();
+    final oldChannel = _channel;
+    if (oldChannel != null) unawaited(_client.removeChannel(oldChannel));
+    final channel = _client.channel('tric-gabay-session');
+    _channel = channel;
+    for (final entry in realtimeSections.entries) {
+      channel.onPostgresChanges(
+        event: PostgresChangeEvent.all,
+        schema: 'public',
+        table: entry.key,
+        callback: (payload) {
+          if (!identical(_channel, channel)) return;
+          if (entry.key == 'driver_profiles') {
+            final row = payload.newRecord;
+            final previous = _driverRecords[row['profile_id']];
+            if (!driverProfileNeedsRefresh(previous, row)) {
+              return;
+            }
+          }
+          _pendingRefresh.add(entry.value);
+          // Fixed window: continuous events cannot postpone the refresh forever.
+          _refreshDebounce ??= Timer(const Duration(milliseconds: 300), () {
+            _refreshDebounce = null;
+            final sections = Set<RemoteSection>.of(_pendingRefresh);
+            _pendingRefresh.clear();
+            onChanged(sections);
+          });
+        },
+      );
+    }
+    channel.onPostgresChanges(
+      event: PostgresChangeEvent.all,
+      schema: 'public',
+      table: 'driver_locations',
+      callback: (payload) {
+        if (!identical(_channel, channel)) return;
+        onLocation(
+          payload.eventType == PostgresChangeEvent.delete
+              ? {'driver_id': payload.oldRecord['driver_id']}
+              : payload.newRecord,
+        );
+      },
+    );
+    var wasSubscribed = false;
+    channel.subscribe((status, error) {
+      if (!identical(_channel, channel)) return;
+      if (status == RealtimeSubscribeStatus.subscribed) {
+        if (wasSubscribed) onChanged(RemoteSection.values.toSet());
+        wasSubscribed = true;
+      }
+    });
   }
 
   static Future<void> dispose() async {
+    _locationUploadGate.reset();
+    _driverRecords.clear();
     _refreshDebounce?.cancel();
-    if (_channel != null) await _client.removeChannel(_channel!);
+    _refreshDebounce = null;
+    _pendingRefresh.clear();
+    final departingChannel = _channel;
     _channel = null;
+    if (departingChannel != null) await _client.removeChannel(departingChannel);
+  }
+}
+
+class _SupabaseAvatarObjectStore implements AvatarObjectStore {
+  final SupabaseClient client;
+
+  const _SupabaseAvatarObjectStore(this.client);
+
+  @override
+  Future<void> upload({
+    required String path,
+    required Uint8List bytes,
+    required String contentType,
+  }) => client.storage
+      .from('profile-images')
+      .uploadBinary(
+        path,
+        bytes,
+        fileOptions: FileOptions(contentType: contentType, upsert: false),
+      );
+
+  @override
+  Future<void> remove(String path) async {
+    await client.storage.from('profile-images').remove([path]);
   }
 }

@@ -1,4 +1,11 @@
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/server_clock.dart';
+import '../../../core/services/error_messages.dart';
 import 'dart:async';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../core/services/backend_repository.dart';
+import '../../../core/services/booking_payment_flow.dart';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +13,8 @@ import '../../../core/prototype/prototype_session.dart';
 import '../../../core/services/trip_rules.dart';
 import '../../../models/booking_model.dart';
 import '../../../models/trip_record.dart';
+import '../../../core/l10n/record_labels.dart';
+import 'gcash_trip_payment.dart';
 
 class BookingDetailScreen extends StatefulWidget {
   final String bookingId;
@@ -37,12 +46,12 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     super.dispose();
   }
 
-  String money(int cents) => '₱${(cents / 100).toStringAsFixed(2)}';
+  String money(int cents) => '₱${AppFormatters.amount((cents / 100))}';
 
   Duration _waitRemaining(BookingModel booking) {
     final deadline = booking.trip.pickupWaitExpiresAt;
     if (deadline == null) return Duration.zero;
-    final remaining = deadline.difference(DateTime.now());
+    final remaining = deadline.difference(ServerClock.now());
     return remaining.isNegative ? Duration.zero : remaining;
   }
 
@@ -58,21 +67,26 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         booking.status == BookingStatus.replacementPending ||
         widget.viewer == TripActor.driver ||
         booking.isWithinFreeCancellation) {
-      return 'This cancellation is currently free. Give the real reason so the event can be audited.';
+      return MessageCode
+          .thisCancellationIsCurrentlyFreeGiveTheRealReasonSoTheEventCan;
     }
-    return 'The ${booking.freeCancellationMinutes}-minute grace period has ended. The published ${booking.acceptedCancellationPercent}% cancellation fee is ${money(booking.lateCancellationFeeCents)}. Give the reason before confirming.';
+    return MessageCode.cancellationGraceExpired(
+      booking.freeCancellationMinutes,
+      booking.acceptedCancellationPercent,
+      money(booking.lateCancellationFeeCents),
+    );
   }
 
-  Future<void> _run(Future<Object?> Function() action) async {
+  Future<void> _run(Future<void> Function() action) async {
     if (_busy) return;
     setState(() => _busy = true);
     try {
       await action();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.message(ErrorMessages.forError(e)))),
+        );
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -88,12 +102,12 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(title),
+        title: Text(context.message(title)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(explanation),
+              Text(context.message(explanation)),
               const SizedBox(height: 16),
               TextField(
                 controller: controller,
@@ -104,9 +118,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     ? TextInputType.number
                     : TextInputType.multiline,
                 decoration: InputDecoration(
-                  labelText: code ? 'Pickup code' : 'Reason / details',
+                  labelText: context.message(
+                    code ? MessageCode.pickupCode : MessageCode.reasonDetails,
+                  ),
                   border: const OutlineInputBorder(),
                 ),
+                onTapOutside: (_) =>
+                    FocusManager.instance.primaryFocus?.unfocus(),
+                scrollPadding: const EdgeInsets.all(96),
               ),
             ],
           ),
@@ -114,11 +133,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Go back'),
+            child: Text(context.l10n.goBack),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, controller.text),
-            child: const Text('Confirm'),
+            child: Text(context.l10n.confirm),
           ),
         ],
       ),
@@ -131,9 +150,12 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Future<void> _cancel(BookingModel b) async {
     final reason = await _input(
-      b.status == BookingStatus.ongoing ? 'End tour early?' : 'Cancel booking?',
       b.status == BookingStatus.ongoing
-          ? 'Stop at a safe place first. The trip will end immediately. Payment will be held for admin review; neither party can demand the full fare automatically. Describe what happened (changed plans, breakdown, safety concern, closed venue, etc.).'
+          ? MessageCode.endTourEarly
+          : MessageCode.cancelBooking,
+      b.status == BookingStatus.ongoing
+          ? MessageCode
+                .stopAtASafePlaceFirstTheTripWillEndImmediatelyPaymentWill
           : _cancellationExplanation(b),
     );
     if (reason != null && mounted) {
@@ -149,8 +171,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Future<void> _requestReplacement(BookingModel booking) async {
     final reason = await _input(
-      'Request another driver?',
-      'Use this only if you cannot complete the pickup. The tourist will decide whether to search for another verified driver or cancel free of charge. Explain what happened.',
+      MessageCode.requestAnotherDriver,
+      MessageCode.useThisOnlyIfYouCannotCompleteThePickupTheTouristWillDecide,
     );
     if (reason != null && mounted) {
       await _run(
@@ -167,21 +189,35 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(
-          findReplacement ? 'Find another driver?' : 'Cancel this booking?',
+          context.message(
+            findReplacement
+                ? MessageCode.findAnotherDriverLabel
+                : MessageCode.cancelThisBooking,
+          ),
         ),
         content: Text(
-          findReplacement
-              ? 'Your fixed fare, route, and payment record stay unchanged. The previous driver is released and a new 10-minute search begins.'
-              : 'The booking will end without a cancellation charge. If an online payment was already received, it will be marked for refund.',
+          context.message(
+            findReplacement
+                ? MessageCode
+                      .yourFixedFareRouteAndPaymentRecordStayUnchangedThePreviousDriverIs
+                : MessageCode
+                      .theBookingWillEndWithoutACancellationChargeIfAnOnlinePaymentWas,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Not yet'),
+            child: Text(context.l10n.notYet),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(findReplacement ? 'Start new search' : 'Cancel free'),
+            child: Text(
+              context.message(
+                findReplacement
+                    ? MessageCode.startNewSearch
+                    : MessageCode.cancelFree,
+              ),
+            ),
           ),
         ],
       ),
@@ -200,18 +236,22 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     final approved = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Report tourist no-show?'),
+        title: Text(context.l10n.reportTouristNoShow),
         content: Text(
-          'Confirm that you stayed at the verified pickup point until the waiting period ended and tried to contact the tourist. The published ${booking.noShowFeePercent}% no-show fee is ${money(booking.noShowFeeCents)}. This action is recorded and can be disputed.',
+          context.l10n
+              .confirmThatYouStayedAtTheVerifiedPickupPointUntilTheWaitingPeriodValue(
+                context.message((booking.noShowFeePercent).toString()),
+                context.message((money(booking.noShowFeeCents)).toString()),
+              ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Keep waiting'),
+            child: Text(context.l10n.keepWaiting),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Confirm no-show'),
+            child: Text(context.l10n.confirmNoShow),
           ),
         ],
       ),
@@ -223,8 +263,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Future<void> _proposeSkip(BookingModel booking, BookingStop stop) async {
     final reason = await _input(
-      'Request to skip ${stop.spotName}?',
-      'The other participant must approve. If approved, final payment will be held for a fair admin review because the delivered route changed.',
+      MessageCode.requestToSkipValue((stop.spotName).toString()),
+      MessageCode
+          .theOtherParticipantMustApproveIfApprovedFinalPaymentWillBeHeldFor,
     );
     if (reason != null && mounted) {
       await _run(
@@ -246,14 +287,16 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Propose a new stop order'),
+          title: Text(context.l10n.proposeANewStopOrder),
           content: SizedBox(
             width: double.maxFinite,
             height: 360,
             child: Column(
               children: [
-                const Text(
-                  'Only unvisited stops move. The other participant must approve before navigation changes.',
+                Text(
+                  context
+                      .l10n
+                      .onlyUnvisitedStopsMoveTheOtherParticipantMustApproveBeforeNavigationChanges,
                 ),
                 const SizedBox(height: 10),
                 Expanded(
@@ -267,8 +310,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     },
                     itemBuilder: (context, index) => ListTile(
                       key: ValueKey(remaining[index].id),
-                      leading: CircleAvatar(child: Text('${index + 1}')),
-                      title: Text(remaining[index].spotName),
+                      leading: CircleAvatar(
+                        child: Text(context.message('${index + 1}')),
+                      ),
+                      title: Text(context.message(remaining[index].spotName)),
                       trailing: const Icon(Icons.drag_handle),
                     ),
                   ),
@@ -276,10 +321,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 TextField(
                   controller: reason,
                   maxLength: 500,
-                  decoration: const InputDecoration(
-                    labelText: 'Reason for changing the order',
+                  decoration: InputDecoration(
+                    labelText: context.l10n.reasonForChangingTheOrder,
                     border: OutlineInputBorder(),
                   ),
+                  onTapOutside: (_) =>
+                      FocusManager.instance.primaryFocus?.unfocus(),
+                  scrollPadding: const EdgeInsets.all(96),
                 ),
               ],
             ),
@@ -287,11 +335,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Go back'),
+              child: Text(context.l10n.goBack),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text('Send proposal'),
+              child: Text(context.l10n.sendProposal),
             ),
           ],
         ),
@@ -327,8 +375,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Future<void> _reportBreakdown(BookingModel booking) async {
     final reason = await _input(
-      'Pause for a vehicle problem?',
-      'Stop somewhere safe first. Your current GPS location and explanation will be recorded. The tourist can wait or end the tour for payment review.',
+      MessageCode.pauseForAVehicleProblem,
+      MessageCode
+          .stopSomewhereSafeFirstYourCurrentGpsLocationAndExplanationWillBeRecorded,
     );
     if (reason != null && mounted) {
       await _run(
@@ -339,19 +388,24 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Future<void> _resolve(BookingModel b) async {
     final amount = TextEditingController(
-      text: (TripRules.suggestedCharge(b) / 100).toStringAsFixed(2),
+      text: AppFormatters.decimalInput((TripRules.suggestedCharge(b) / 100)),
     );
     final reason = TextEditingController();
     final approved = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Resolve payment review'),
+        title: Text(context.l10n.resolvePaymentReview),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Agreed maximum: ${money(b.quotedCents)}. ${b.trip.confirmedStops}/${b.stops.length} stops confirmed by the tourist. The suggested prorated amount is a starting point only. Review both statements, safety concerns and service delivered. No penalties or extras.',
+                context.l10n
+                    .agreedMaximumStopsConfirmedByTheTouristTheSuggestedProratedAmountIsAValue(
+                      context.message((money(b.quotedCents)).toString()),
+                      context.message((b.trip.confirmedStops).toString()),
+                      context.message((b.stops.length).toString()),
+                    ),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -359,20 +413,26 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(
-                  labelText: 'Final charge (₱)',
+                decoration: InputDecoration(
+                  labelText: context.l10n.finalCharge,
                   border: OutlineInputBorder(),
                 ),
+                onTapOutside: (_) =>
+                    FocusManager.instance.primaryFocus?.unfocus(),
+                scrollPadding: const EdgeInsets.all(96),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: reason,
                 maxLength: 1000,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Decision and reasoning',
+                decoration: InputDecoration(
+                  labelText: context.l10n.decisionAndReasoning,
                   border: OutlineInputBorder(),
                 ),
+                onTapOutside: (_) =>
+                    FocusManager.instance.primaryFocus?.unfocus(),
+                scrollPadding: const EdgeInsets.all(96),
               ),
             ],
           ),
@@ -380,11 +440,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Keep under review'),
+            child: Text(context.l10n.keepUnderReview),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Save decision'),
+            child: Text(context.l10n.saveDecision),
           ),
         ],
       ),
@@ -398,10 +458,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     await _run(() async {
       if (!RegExp(r'^\d{1,6}(\.\d{1,2})?$').hasMatch(rawAmount)) {
         throw const TripRuleException(
-          'Enter a valid amount with at most two decimals.',
+          MessageCode.enterAValidAmountWithAtMostTwoDecimals,
         );
       }
-      return PrototypeSession.resolveSettlement(
+      await PrototypeSession.resolveSettlement(
         b.id,
         (double.parse(rawAmount) * 100).round(),
         explanation,
@@ -414,19 +474,30 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(
-          refund ? 'Confirm cash returned?' : 'Confirm cash exchanged?',
+          context.message(
+            refund
+                ? MessageCode.confirmCashReturned
+                : MessageCode.confirmCashExchanged,
+          ),
         ),
         content: Text(
-          'Confirm only after ${money(refund ? b.refundDueCents : b.amountDueCents)} has physically changed hands. The other party must confirm too. Do not confirm a promised or partial payment.',
+          context.l10n
+              .confirmOnlyAfterHasPhysicallyChangedHandsTheOtherPartyMustConfirmTooValue(
+                context.message(
+                  (money(
+                    refund ? b.refundDueCents : b.amountDueCents,
+                  )).toString(),
+                ),
+              ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Not yet'),
+            child: Text(context.l10n.notYet),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Confirm amount'),
+            child: Text(context.l10n.confirmAmount),
           ),
         ],
       ),
@@ -440,8 +511,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   Future<void> _requestPayMongoRefund(BookingModel b) async {
     final reason = await _input(
-      'Send refund to PayMongo?',
-      'This sends the exact amount to PayMongo and records only the provider result. PayMongo currently limits actual refunds to live transactions, so a test-mode rejection will remain clearly marked as not refunded. Enter the decision reason.',
+      MessageCode.sendRefundToPaymongo,
+      MessageCode
+          .thisSendsTheExactAmountToPaymongoAndRecordsOnlyTheProviderResult,
     );
     if (reason == null || reason.trim().length < 5 || !mounted) return;
     await _run(() async {
@@ -453,34 +525,37 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text(message)));
+        ).showSnackBar(SnackBar(content: Text(context.message(message))));
       }
-      return null;
+      return;
     });
   }
 
   Future<void> _completePayMongoTestRefund(BookingModel booking) async {
     final reason = await _input(
-      'Complete test-mode refund?',
-      'This completes the refund workflow for the PayMongo test transaction, records the result, and notifies the tourist. Enter the reason for the refund.',
+      MessageCode.completeTestModeRefund,
+      MessageCode
+          .thisCompletesTheRefundWorkflowForThePaymongoTestTransactionRecordsTheResult,
     );
     if (reason == null || reason.trim().length < 5 || !mounted) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         icon: const Icon(Icons.science_outlined),
-        title: const Text('Confirm refund'),
+        title: Text(context.l10n.confirmRefund),
         content: Text(
-          '${money(booking.refundDueCents)} will be completed in the PayMongo test environment.',
+          context.l10n.willBeCompletedInThePaymongoTestEnvironmentValue(
+            context.message((money(booking.refundDueCents)).toString()),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Go back'),
+            child: Text(context.l10n.goBack),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Complete refund'),
+            child: Text(context.l10n.completeRefund),
           ),
         ],
       ),
@@ -494,10 +569,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result), behavior: SnackBarBehavior.floating),
+          SnackBar(
+            content: Text(context.message(result)),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
-      return null;
+      return;
     });
   }
 
@@ -505,16 +583,19 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     final result = await PrototypeSession.reconcilePayMongoPayment(booking.id);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result), behavior: SnackBarBehavior.floating),
+        SnackBar(
+          content: Text(context.message(result)),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
-    return null;
+    return;
   });
 
   Future<void> _showFinancialRecord(BookingModel booking) async {
     await _run(() async {
       final entries = await PrototypeSession.financialLedger(booking.id);
-      if (!mounted) return null;
+      if (!mounted) return;
       await showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
@@ -530,20 +611,22 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Financial record',
+                  Text(
+                    context.l10n.financialRecord,
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Confirmed entries are permanent and cannot be edited or deleted.',
+                  Text(
+                    context
+                        .l10n
+                        .confirmedEntriesArePermanentAndCannotBeEditedOrDeleted,
                   ),
                   const SizedBox(height: 12),
                   if (entries.isEmpty)
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.symmetric(vertical: 32),
                       child: Center(
-                        child: Text('No confirmed money movement yet.'),
+                        child: Text(context.l10n.noConfirmedMoneyMovementYet),
                       ),
                     )
                   else
@@ -568,18 +651,33 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                               ),
                             ),
                             title: Text(
-                              (entry['description'] as String)
-                                      .toLowerCase()
-                                      .contains('simulated')
-                                  ? 'Refund completed'
-                                  : entry['description'] as String,
+                              context.message(
+                                (entry['description'] as String)
+                                        .toLowerCase()
+                                        .contains('simulated')
+                                    ? MessageCode.refundCompleted
+                                    : entry['description'] as String,
+                              ),
                             ),
                             subtitle: Text(
-                              '${entry['provider'].toString().toUpperCase()} · ${entry['provider_mode']} mode\n${at.toString().split('.').first}',
+                              context.l10n.modeValueLabel(
+                                context.message(
+                                  (entry['provider'].toString().toUpperCase())
+                                      .toString(),
+                                ),
+                                context.message(
+                                  (entry['provider_mode']).toString(),
+                                ),
+                                context.message(
+                                  (at.toString().split('.').first).toString(),
+                                ),
+                              ),
                             ),
                             isThreeLine: true,
                             trailing: Text(
-                              '${debit ? '−' : '+'}${money(entry['amount_centavos'] as int)}',
+                              context.message(
+                                '${debit ? '−' : '+'}${money(entry['amount_centavos'] as int)}',
+                              ),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: debit
@@ -597,7 +695,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           ),
         ),
       );
-      return null;
+      return;
     });
   }
 
@@ -620,13 +718,25 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   : b.touristId == PrototypeSession.currentTouristId));
       if (!allowed) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Booking')),
-          body: const Center(
-            child: Text('Booking not found for this account.'),
-          ),
+          appBar: AppBar(title: Text(context.l10n.booking)),
+          body: Center(child: Text(context.l10n.bookingNotFoundForThisAccount)),
         );
       }
       final booking = b;
+      if (booking.status == BookingStatus.unknown ||
+          booking.paymentMethod == PaymentMethod.unknown ||
+          booking.paymentStatus == PaymentStatus.unknown) {
+        return Scaffold(
+          appBar: AppBar(title: Text(context.l10n.booking)),
+          body: Center(
+            child: Text(
+              context
+                  .l10n
+                  .thisTripUsesANewerStatusUpdateTheAppOrContactSupportBefore,
+            ),
+          ),
+        );
+      }
       final t = booking.trip;
       final cashConfirmed = driver
           ? t.driverCashConfirmed
@@ -635,15 +745,23 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           ? t.driverRefundConfirmed
           : t.touristRefundConfirmed;
       return Scaffold(
-        appBar: AppBar(title: const Text('Trip & payment')),
+        appBar: AppBar(title: Text(context.l10n.tripPayment)),
         body: ListView(
           padding: const EdgeInsets.all(20),
           children: [
             Text(
-              booking.trip.packageName ?? 'Custom tour',
+              context.message(
+                booking.trip.packageName ?? MessageCode.customTour,
+              ),
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            Text(booking.id),
+            Text(
+              context.message(booking.id),
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1A1A2E),
+              ),
+            ),
             const SizedBox(height: 16),
             Card(
               child: Padding(
@@ -651,14 +769,47 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _row('Trip', booking.status.name.toUpperCase()),
-                    _row('Agreed fixed fare', money(booking.quotedCents)),
-                    _row('Price version', 'v${t.fareRevision}'),
-                    _row('Payment', _paymentLabel(booking)),
+                    _row(
+                      MessageCode.trip,
+                      bookingStatusLabel(context, booking.status),
+                    ),
+                    _row(
+                      MessageCode.agreedFixedFare,
+                      money(booking.quotedCents),
+                    ),
+                    _row(MessageCode.priceVersion, 'v${t.fareRevision}'),
+                    _row(MessageCode.payment, _paymentLabel(booking)),
+                    if (!admin &&
+                        !driver &&
+                        booking.status == BookingStatus.paymentPending) ...[
+                      Text(
+                        context
+                            .l10n
+                            .paymentIsPendingADriverWillOnlyBeRequestedAfterPaymentIsConfirmed,
+                      ),
+                      FilledButton(
+                        onPressed: _busy
+                            ? null
+                            : () => _run(() async {
+                                await openBookingPayment(
+                                  bookingId: booking.id,
+                                  createCheckout:
+                                      BackendRepository.createCheckout,
+                                  launch: (uri) => launchUrl(
+                                    uri,
+                                    mode: LaunchMode.externalApplication,
+                                  ),
+                                );
+                              }),
+                        child: Text(context.l10n.resumePayment),
+                      ),
+                    ],
                     if (booking.paymentMethod == PaymentMethod.online) ...[
                       const SizedBox(height: 4),
                       Text(
-                        'PayMongo test mode · status is confirmed by webhook or a direct provider check.',
+                        context
+                            .l10n
+                            .paymongoTestModeStatusIsConfirmedByWebhookOrADirectProviderCheck,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                       const SizedBox(height: 8),
@@ -671,66 +822,73 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                 ? null
                                 : () => _reconcilePayment(booking),
                             icon: const Icon(Icons.sync_rounded),
-                            label: const Text('Refresh payment status'),
+                            label: Text(context.l10n.refreshPaymentStatus),
                           ),
                           OutlinedButton.icon(
                             onPressed: _busy
                                 ? null
                                 : () => _showFinancialRecord(booking),
                             icon: const Icon(Icons.receipt_long_outlined),
-                            label: const Text('Financial record'),
+                            label: Text(context.l10n.financialRecord),
                           ),
                         ],
                       ),
                     ],
                     if (t.reviewRequired)
-                      const Text(
-                        'Payment is on hold. An admin must review the case before collection or a cash return.',
+                      Text(
+                        context
+                            .l10n
+                            .paymentIsOnHoldAnAdminMustReviewTheCaseBeforeCollectionOr,
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     if (!booking.isActive && !t.reviewRequired) ...[
-                      _row('Final charge', money(t.finalChargeCents ?? 0)),
                       _row(
-                        booking.paymentMethod == PaymentMethod.cash
-                            ? 'Cash confirmed by both'
-                            : 'Online payment received',
-                        money(t.receivedCents),
+                        MessageCode.finalChargeLabel,
+                        money(t.finalChargeCents ?? 0),
                       ),
-                      _row('Still to pay', money(booking.amountDueCents)),
+                      _row(switch (booking.paymentMethod) {
+                        PaymentMethod.cash => MessageCode.cashConfirmedByBoth,
+                        PaymentMethod.gcashDirect =>
+                          context.l10n.gcashAmountReceived,
+                        _ => MessageCode.onlinePaymentReceived,
+                      }, money(t.receivedCents)),
+                      _row(
+                        MessageCode.stillToPay,
+                        money(booking.amountDueCents),
+                      ),
                       if (booking.refundDueCents > 0)
                         _row(
                           booking.paymentMethod == PaymentMethod.cash
-                              ? 'Cash to return'
-                              : 'Online refund due',
+                              ? MessageCode.cashToReturn
+                              : MessageCode.onlineRefundDue,
                           money(booking.refundDueCents),
                         ),
                     ],
                     if (booking.driverName != null)
                       _row(
-                        'Driver',
+                        MessageCode.driver,
                         '${booking.driverName} · ${booking.driverPlate ?? ""}',
                       ),
-                    _row('Pickup', booking.pickupAddress),
+                    _row(MessageCode.pickup, booking.pickupAddress),
                     if (booking.scheduledAt != null)
                       _row(
-                        'Scheduled pickup',
-                        booking.scheduledAt!
-                            .toLocal()
-                            .toString()
-                            .split('.')
-                            .first,
+                        MessageCode.scheduledPickup,
+                        ServerClock.formatManila(booking.scheduledAt!),
                       ),
-                    _row('Passengers', '${booking.passengerCount}'),
+                    _row(MessageCode.passengers, '${booking.passengerCount}'),
                     if (booking.luggageNotes.isNotEmpty)
-                      _row('Luggage', booking.luggageNotes),
+                      _row(MessageCode.luggage, booking.luggageNotes),
                     if (booking.accessibilityNeeds.isNotEmpty)
-                      _row('Assistance', booking.accessibilityNeeds),
+                      _row(MessageCode.assistance, booking.accessibilityNeeds),
                     if (t.pickupArrivedAt != null) ...[
-                      _row('Driver arrival', 'Verified near the pickup point'),
                       _row(
-                        'Pickup wait',
+                        MessageCode.driverArrival,
+                        MessageCode.verifiedNearThePickupPoint,
+                      ),
+                      _row(
+                        MessageCode.pickupWait,
                         _waitRemaining(booking) == Duration.zero
-                            ? 'Waiting period completed'
+                            ? MessageCode.waitingPeriodCompleted
                             : '${_clockLabel(_waitRemaining(booking))} remaining',
                       ),
                     ],
@@ -746,19 +904,23 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                        'Driver replacement requested',
+                      Text(
+                        context.l10n.driverReplacementRequested,
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        booking.replacementReason ??
-                            'The assigned driver is unavailable.',
+                        context.message(
+                          booking.replacementReason ??
+                              MessageCode.theAssignedDriverIsUnavailable,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       if (driver)
-                        const Text(
-                          'Waiting for the tourist to choose. Do not proceed to pickup.',
+                        Text(
+                          context
+                              .l10n
+                              .waitingForTheTouristToChooseDoNotProceedToPickup,
                         )
                       else if (!admin) ...[
                         FilledButton.icon(
@@ -769,7 +931,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                   findReplacement: true,
                                 ),
                           icon: const Icon(Icons.person_search_outlined),
-                          label: const Text('Find another driver'),
+                          label: Text(context.l10n.findAnotherDriver),
                         ),
                         OutlinedButton(
                           onPressed: _busy
@@ -778,12 +940,51 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                   booking,
                                   findReplacement: false,
                                 ),
-                          child: const Text('Cancel free of charge'),
+                          child: Text(context.l10n.cancelFreeOfCharge),
                         ),
                       ],
                     ],
                   ),
                 ),
+              ),
+            if (!admin &&
+                !driver &&
+                const [
+                  BookingStatus.paymentPending,
+                  BookingStatus.scheduled,
+                  BookingStatus.pending,
+                  BookingStatus.accepted,
+                ].contains(booking.status))
+              TextButton(
+                onPressed: _busy
+                    ? null
+                    : () => _run(() async {
+                        final approved = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: Text(context.l10n.reissuePickupCode),
+                            content: Text(
+                              context
+                                  .l10n
+                                  .yourPreviousCodeWillStopWorkingShareTheNewCodeOnlyAfterBoarding,
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: Text(context.l10n.keepCurrentCode),
+                              ),
+                              FilledButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: Text(context.l10n.reissueCode),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (approved != true) return;
+                        await BackendRepository.reissuePickupCode(booking.id);
+                        await PrototypeSession.syncRemoteState();
+                      }),
+                child: Text(context.l10n.lostPickupCodeReissue),
               ),
             if (!admin && !driver && booking.status == BookingStatus.accepted)
               Card(
@@ -791,7 +992,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      const Text('Share this code only when you are on board'),
+                      Text(context.l10n.shareThisCodeOnlyWhenYouAreOnBoard),
                       SelectableText(
                         t.pickupCode,
                         style: const TextStyle(
@@ -806,7 +1007,10 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               ),
             const SizedBox(height: 16),
             Text(
-              'Route progress · ${t.confirmedStops}/${booking.stops.length} confirmed',
+              context.l10n.routeProgressConfirmedValue(
+                context.message((t.confirmedStops).toString()),
+                context.message((booking.stops.length).toString()),
+              ),
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             ...booking.stops.asMap().entries.map(
@@ -817,9 +1021,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       ? Icons.check_circle
                       : Icons.radio_button_unchecked,
                 ),
-                title: Text(e.value.spotName),
+                title: Text(context.message(e.value.spotName)),
                 subtitle: e.key == t.confirmedStops && t.arrivalPending
-                    ? const Text('Driver reported arrival · awaiting tourist')
+                    ? Text(context.l10n.driverReportedArrivalAwaitingTourist)
                     : null,
                 trailing:
                     booking.status == BookingStatus.ongoing &&
@@ -828,7 +1032,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                         e.key >= t.confirmedStops &&
                         booking.stops.length - t.confirmedStops > 1
                     ? IconButton(
-                        tooltip: 'Request to skip this stop',
+                        tooltip: context.l10n.requestToSkipThisStop,
                         onPressed: _busy
                             ? null
                             : () => _proposeSkip(booking, e.value),
@@ -846,28 +1050,61 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        booking.pendingRouteChange!.type == 'skip'
-                            ? 'Stop-skip approval needed'
-                            : 'Route reorder approval needed',
+                        context.message(
+                          booking.pendingRouteChange!.type == 'skip'
+                              ? MessageCode.stopSkipApprovalNeeded
+                              : MessageCode.routeReorderApprovalNeeded,
+                        ),
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 6),
-                      Text(booking.pendingRouteChange!.reason),
+                      Text(context.message(booking.pendingRouteChange!.reason)),
                       if (booking.pendingRouteChange!.type == 'skip')
                         Text(
-                          'Stop: ${booking.stops.where((stop) => stop.id == booking.pendingRouteChange!.targetStopId).firstOrNull?.spotName ?? 'Selected stop'}',
+                          context.l10n.stopValue(
+                            context.message(
+                              (booking.stops
+                                          .where(
+                                            (stop) =>
+                                                stop.id ==
+                                                booking
+                                                    .pendingRouteChange!
+                                                    .targetStopId,
+                                          )
+                                          .firstOrNull
+                                          ?.spotName ??
+                                      MessageCode.selectedStop)
+                                  .toString(),
+                            ),
+                          ),
                         ),
                       if (booking.pendingRouteChange!.type == 'reorder') ...[
                         const SizedBox(height: 6),
                         Text(
-                          'Proposed: ${booking.pendingRouteChange!.proposedOrder.map((id) => booking.stops.where((stop) => stop.id == id).firstOrNull?.spotName ?? 'Stop').join(' → ')}',
+                          context.l10n.proposedValue(
+                            context.message(
+                              (booking.pendingRouteChange!.proposedOrder
+                                      .map(
+                                        (id) =>
+                                            booking.stops
+                                                .where((stop) => stop.id == id)
+                                                .firstOrNull
+                                                ?.spotName ??
+                                            MessageCode.stop,
+                                      )
+                                      .join(MessageCode.formattedValue))
+                                  .toString(),
+                            ),
+                          ),
                         ),
                       ],
                       const SizedBox(height: 8),
                       if (booking.pendingRouteChange!.requestedBy ==
                           PrototypeSession.authenticatedUserId)
-                        const Text(
-                          'Waiting for the other participant. Navigation stays on the current route.',
+                        Text(
+                          context
+                              .l10n
+                              .waitingForTheOtherParticipantNavigationStaysOnTheCurrentRoute,
                         )
                       else ...[
                         FilledButton(
@@ -875,14 +1112,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                               ? null
                               : () =>
                                     _decideRouteChange(booking, approve: true),
-                          child: const Text('Approve route change'),
+                          child: Text(context.l10n.approveRouteChange),
                         ),
                         OutlinedButton(
                           onPressed: _busy
                               ? null
                               : () =>
                                     _decideRouteChange(booking, approve: false),
-                          child: const Text('Keep original route'),
+                          child: Text(context.l10n.keepOriginalRoute),
                         ),
                       ],
                     ],
@@ -897,14 +1134,16 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                        'Trip paused · vehicle problem',
+                      Text(
+                        context.l10n.tripPausedVehicleProblem,
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        booking.interruptionReason ??
-                            'The driver reported a vehicle problem.',
+                        context.message(
+                          booking.interruptionReason ??
+                              MessageCode.theDriverReportedAVehicleProblem,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       if (!driver &&
@@ -919,7 +1158,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                     wait: true,
                                   ),
                                 ),
-                          child: const Text('Wait for this driver'),
+                          child: Text(context.l10n.waitForThisDriver),
                         ),
                         OutlinedButton(
                           onPressed: _busy
@@ -930,7 +1169,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                     wait: false,
                                   ),
                                 ),
-                          child: const Text('End safely · review payment'),
+                          child: Text(context.l10n.endSafelyReviewPayment),
                         ),
                       ] else if (driver &&
                           booking.touristWaitConfirmedAt != null)
@@ -942,13 +1181,16 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                     booking.id,
                                   ),
                                 ),
-                          child: const Text('Vehicle is safe · resume trip'),
+                          child: Text(context.l10n.vehicleIsSafeResumeTrip),
                         )
                       else
                         Text(
-                          driver
-                              ? 'Waiting for the tourist’s decision.'
-                              : 'You chose to wait. The driver must confirm the vehicle is safe before navigation resumes.',
+                          context.message(
+                            driver
+                                ? MessageCode.waitingForTheTouristSDecision
+                                : MessageCode
+                                      .youChoseToWaitTheDriverMustConfirmTheVehicleIsSafeBefore,
+                          ),
                         ),
                     ],
                   ),
@@ -956,25 +1198,29 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               ),
             if (!admin && booking.isActive) ...[
               if (booking.status == BookingStatus.scheduled)
-                const Text(
-                  'Your tour is reserved. Driver matching begins 30 minutes before pickup, and reminders will appear in Notifications.',
+                Text(
+                  context
+                      .l10n
+                      .yourTourIsReservedDriverMatchingBegins30MinutesBeforePickupAndReminders,
                 ),
               if (booking.status == BookingStatus.pending)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
-                      'Waiting for a driver to accept. You can leave this page and resume from Trips.',
+                    Text(
+                      context
+                          .l10n
+                          .waitingForADriverToAcceptYouCanLeaveThisPageAndResume,
                     ),
                     if (!driver)
-                      _button('Open driver search', () async {
+                      _button(MessageCode.openDriverSearch, () async {
                         context.push('/tourist/find-driver');
                       }),
                   ],
                 ),
               if (booking.status == BookingStatus.accepted ||
                   booking.status == BookingStatus.ongoing)
-                _button('Open trip map', () async {
+                _button(MessageCode.openTripMap, () async {
                   context.push(
                     driver
                         ? '/driver/trip/${booking.id}'
@@ -984,16 +1230,17 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               if (driver && booking.status == BookingStatus.accepted) ...[
                 if (t.pickupArrivedAt == null)
                   _button(
-                    'I have arrived at pickup',
+                    MessageCode.arrivedAtPickup,
                     () => _run(
                       () => PrototypeSession.reportPickupArrival(booking.id),
                     ),
                   ),
                 if (t.pickupArrivedAt != null)
-                  _button('Verify pickup code & start', () async {
+                  _button(MessageCode.verifyPickupCodeStart, () async {
                     final code = await _input(
-                      'Verify pickup',
-                      'Ask the tourist for their code after they are safely on board.',
+                      MessageCode.verifyPickup,
+                      MessageCode
+                          .askTheTouristForTheirCodeAfterTheyAreSafelyOnBoard,
                       code: true,
                     );
                     if (code != null && mounted) {
@@ -1005,12 +1252,12 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 if (t.pickupWaitExpiresAt != null &&
                     _waitRemaining(booking) == Duration.zero)
                   _button(
-                    'Report tourist no-show',
+                    MessageCode.reportTouristNoShowLabel,
                     () => _confirmNoShow(booking),
                     outlined: true,
                   ),
                 _button(
-                  'I cannot make this pickup · request replacement',
+                  MessageCode.requestPickupReplacement,
                   () => _requestReplacement(booking),
                   outlined: true,
                 ),
@@ -1020,7 +1267,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     booking.pendingRouteChange == null &&
                     booking.stops.length - t.confirmedStops > 1)
                   _button(
-                    'Request a different stop order',
+                    MessageCode.requestADifferentStopOrder,
                     () => _proposeReorder(booking),
                     outlined: true,
                   ),
@@ -1030,7 +1277,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     !t.arrivalPending &&
                     t.confirmedStops < booking.stops.length)
                   _button(
-                    'Report arrival at next stop',
+                    MessageCode.reportArrivalAtNextStop,
                     () =>
                         _run(() => PrototypeSession.reportArrival(booking.id)),
                   ),
@@ -1038,7 +1285,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     booking.interruptedAt == null &&
                     t.arrivalPending)
                   _button(
-                    'Yes, we reached this stop',
+                    MessageCode.confirmReachedStop,
                     () =>
                         _run(() => PrototypeSession.confirmArrival(booking.id)),
                   ),
@@ -1046,12 +1293,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     booking.interruptedAt == null &&
                     t.confirmedStops == booking.stops.length)
                   _button(
-                    'Complete trip · cash still unconfirmed',
+                    booking.paymentMethod == PaymentMethod.gcashDirect
+                        ? context.l10n.gcashCompleteTrip
+                        : MessageCode.completeTripCashStillUnconfirmed,
                     () => _run(() => PrototypeSession.completeTrip(booking.id)),
                   ),
                 if (driver && booking.interruptedAt == null)
                   _button(
-                    'Vehicle problem · pause trip safely',
+                    MessageCode.vehicleProblemPauseTripSafely,
                     () => _reportBreakdown(booking),
                     outlined: true,
                   ),
@@ -1060,41 +1309,61 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   !(driver && booking.status == BookingStatus.accepted))
                 _button(
                   booking.status == BookingStatus.ongoing
-                      ? 'End tour early / report a problem'
+                      ? MessageCode.endTourEarlyReportAProblem
                       : booking.status == BookingStatus.scheduled ||
                             booking.status == BookingStatus.pending ||
                             driver ||
                             booking.isWithinFreeCancellation
-                      ? 'Cancel booking | no charge'
-                      : 'Cancel booking | ${booking.acceptedCancellationPercent}% fee',
+                      ? MessageCode.cancelBookingNoCharge
+                      : MessageCode.cancelBookingFeeValue(
+                          (booking.acceptedCancellationPercent).toString(),
+                        ),
                   () => _cancel(booking),
                   outlined: true,
                 ),
             ],
-            if (!admin && !booking.isActive && !t.reviewRequired) ...[
+            if (!admin &&
+                booking.status == BookingStatus.completed &&
+                booking.paymentMethod == PaymentMethod.gcashDirect &&
+                booking.amountDueCents > 0 &&
+                const {
+                  PaymentStatus.unpaid,
+                  PaymentStatus.gcashAwaitingConfirmation,
+                  PaymentStatus.disputed,
+                }.contains(booking.paymentStatus))
+              GcashTripPayment(
+                key: ValueKey(booking.id),
+                booking: booking,
+                driver: driver,
+              ),
+            if (!admin &&
+                !booking.isActive &&
+                !t.reviewRequired &&
+                booking.paymentMethod != PaymentMethod.gcashDirect) ...[
               if (booking.amountDueCents > 0)
                 _button(
                   cashConfirmed
-                      ? 'Waiting for the other cash confirmation'
+                      ? MessageCode.waitingForTheOtherCashConfirmation
                       : driver
-                      ? 'Confirm cash received'
-                      : 'Confirm cash paid',
+                      ? MessageCode.confirmCashReceived
+                      : MessageCode.confirmCashPaid,
                   cashConfirmed ? null : () => _cash(booking, false),
                 ),
               if (booking.refundDueCents > 0 &&
                   booking.paymentMethod == PaymentMethod.cash)
                 _button(
                   refundConfirmed
-                      ? 'Waiting for cash return confirmation'
+                      ? MessageCode.waitingForCashReturnConfirmation
                       : driver
-                      ? 'Confirm cash returned'
-                      : 'Confirm cash return received',
+                      ? MessageCode.confirmCashReturnedLabel
+                      : MessageCode.confirmCashReturnReceived,
                   refundConfirmed ? null : () => _cash(booking, true),
                 ),
-              _button('Dispute payment / report a problem', () async {
+              _button(MessageCode.disputePaymentReportAProblem, () async {
                 final reason = await _input(
-                  'Open a payment review',
-                  'Describe the disagreement. Collection and refund confirmations will pause until an admin reviews it.',
+                  MessageCode.openAPaymentReview,
+                  MessageCode
+                      .describeTheDisagreementCollectionAndRefundConfirmationsWillPauseUntilAnAdminReviews,
                 );
                 if (reason != null && mounted) {
                   await _run(
@@ -1108,29 +1377,32 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               }, outlined: true),
             ],
             if (admin &&
+                PrototypeSession.hasAdminCapability('finance') &&
                 !booking.isActive &&
                 !t.reviewRequired &&
                 booking.refundDueCents > 0 &&
                 booking.paymentMethod == PaymentMethod.online)
               _button(
-                'Send refund request to PayMongo',
+                MessageCode.sendRefundRequestToPaymongo,
                 () => _requestPayMongoRefund(booking),
               ),
             if (admin &&
+                PrototypeSession.hasAdminCapability('finance') &&
                 !booking.isActive &&
                 !t.reviewRequired &&
                 booking.refundDueCents > 0 &&
                 booking.paymentMethod == PaymentMethod.online)
               _button(
-                'Complete test-mode refund',
+                MessageCode.completeTestModeRefundLabel,
                 () => _completePayMongoTestRefund(booking),
                 outlined: true,
               ),
             if (t.reviewRequired) ...[
-              _button('Add a statement to this case', () async {
+              _button(MessageCode.addAStatementToThisCase, () async {
                 final text = await _input(
-                  'Add your statement',
-                  'Include what happened, where the trip stopped, and any cash already exchanged. Statements are retained with the booking.',
+                  MessageCode.addYourStatement,
+                  MessageCode
+                      .includeWhatHappenedWhereTheTripStoppedAndAnyCashAlreadyExchangedStatements,
                 );
                 if (text != null && mounted) {
                   await _run(
@@ -1143,16 +1415,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 }
               }, outlined: true),
               if (admin)
-                _button(
-                  'Review & decide final charge',
-                  () => _resolve(booking),
-                ),
+                _button(MessageCode.reviewFinalCharge, () => _resolve(booking)),
             ],
             if (!admin &&
                 !driver &&
                 booking.status == BookingStatus.completed &&
                 booking.driverRating == null)
-              _button('Rate driver', () async {
+              _button(MessageCode.rateDriver, () async {
                 context.push('/tourist/review/${booking.id}');
               }, outlined: true),
             if (!admin && booking.isActive)
@@ -1161,29 +1430,36 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   driver ? '/driver/emergency' : '/tourist/emergency',
                 ),
                 icon: const Icon(Icons.emergency_outlined),
-                label: const Text('Emergency help'),
+                label: Text(context.l10n.emergencyHelp),
               ),
             const SizedBox(height: 16),
-            const ExpansionTile(
-              title: Text('Agreed policy'),
+            ExpansionTile(
+              title: Text(context.l10n.agreedPolicy),
               childrenPadding: EdgeInsets.all(16),
-              children: [Text(TripRules.policyText)],
+              children: [Text(context.message(TripRules.policyText))],
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Booking history',
+            Text(
+              context.l10n.bookingHistory,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             ...t.events.reversed.map(
               (e) => ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(
-                  e.description.toLowerCase().contains('simulat')
-                      ? 'Refund completed in the test payment environment.'
-                      : e.description,
+                  context.message(
+                    e.description.toLowerCase().contains('simulat')
+                        ? MessageCode.refundCompletedInTheTestPaymentEnvironment
+                        : e.description,
+                  ),
                 ),
                 subtitle: Text(
-                  '${e.actor.name} · ${e.at.toLocal().toString().split(".").first}',
+                  context.l10n.twoPartSummary(
+                    tripActorLabel(context, e.actor),
+                    context.message(
+                      (AppFormatters.dateTime(e.at.toLocal())).toString(),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -1198,11 +1474,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: Text(label)),
+        Expanded(child: Text(context.message(label))),
         const SizedBox(width: 12),
         Flexible(
           child: Text(
-            value,
+            context.message(value),
             textAlign: TextAlign.end,
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
@@ -1217,37 +1493,50 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   }) => Padding(
     padding: const EdgeInsets.only(top: 12),
     child: outlined
-        ? OutlinedButton(onPressed: _busy ? null : action, child: Text(text))
+        ? OutlinedButton(
+            onPressed: _busy ? null : action,
+            child: Text(context.message(text)),
+          )
         : FilledButton(
             onPressed: _busy ? null : action,
-            child: Text(_busy ? 'Saving…' : text),
+            child: Text(context.message(_busy ? MessageCode.saving : text)),
           ),
   );
   String _paymentLabel(BookingModel booking) => switch (booking.paymentStatus) {
-    PaymentStatus.unpaid =>
-      booking.paymentMethod == PaymentMethod.cash
-          ? 'Cash not confirmed'
-          : 'Online payment not started',
-    PaymentStatus.checkoutCreated => 'PayMongo checkout ready',
-    PaymentStatus.processing => 'PayMongo is processing payment',
-    PaymentStatus.failed => 'Online payment failed — retry available',
-    PaymentStatus.awaitingConfirmation => 'Awaiting both cash confirmations',
-    PaymentStatus.underReview => 'Admin review · payment on hold',
-    PaymentStatus.paid =>
-      booking.paymentMethod == PaymentMethod.cash
-          ? 'Cash confirmed by both parties'
-          : 'Paid online',
-    PaymentStatus.waived => 'No charge',
+    PaymentStatus.unknown =>
+      MessageCode.paymentStatusUnavailableRefreshOrUpdateTheApp,
+    PaymentStatus.unpaid => switch (booking.paymentMethod) {
+      PaymentMethod.gcashDirect => context.l10n.unpaid,
+      PaymentMethod.cash => MessageCode.cashNotConfirmed,
+      _ => MessageCode.onlinePaymentNotStarted,
+    },
+    PaymentStatus.checkoutCreated => MessageCode.paymongoCheckoutReady,
+    PaymentStatus.processing => MessageCode.paymongoIsProcessingPayment,
+    PaymentStatus.failed => MessageCode.onlinePaymentFailedRetryAvailable,
+    PaymentStatus.awaitingConfirmation =>
+      MessageCode.awaitingBothCashConfirmations,
+    PaymentStatus.gcashAwaitingConfirmation =>
+      widget.viewer == TripActor.driver
+          ? context.l10n.gcashAwaitingYour
+          : context.l10n.gcashAwaitingDriver,
+    PaymentStatus.disputed => context.l10n.gcashDisputed,
+    PaymentStatus.underReview => MessageCode.adminReviewPaymentOnHold,
+    PaymentStatus.paid => switch (booking.paymentMethod) {
+      PaymentMethod.gcashDirect => context.l10n.gcashPaidByDriver,
+      PaymentMethod.cash => MessageCode.cashConfirmedByBothParties,
+      _ => MessageCode.paidOnline,
+    },
+    PaymentStatus.waived => MessageCode.noCharge,
     PaymentStatus.refundDue =>
       booking.paymentMethod == PaymentMethod.cash
-          ? 'Cash return outstanding'
-          : 'Online refund awaiting admin action',
+          ? MessageCode.cashReturnOutstanding
+          : MessageCode.onlineRefundAwaitingAdminAction,
     PaymentStatus.refundProcessing =>
-      'Refund sent · awaiting PayMongo confirmation',
-    PaymentStatus.partiallyRefunded => 'Partially refunded',
+      MessageCode.refundSentAwaitingPaymongoConfirmation,
+    PaymentStatus.partiallyRefunded => MessageCode.partiallyRefunded,
     PaymentStatus.refunded =>
       booking.paymentMethod == PaymentMethod.cash
-          ? 'Cash return confirmed'
-          : 'Refund completed',
+          ? MessageCode.cashReturnConfirmed
+          : MessageCode.refundCompleted,
   };
 }

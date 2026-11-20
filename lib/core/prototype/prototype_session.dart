@@ -1,5 +1,12 @@
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/l10n/message_codes.g.dart';
+import '../services/server_clock.dart';
+import '../l10n/locale_controller.dart';
+import '../services/error_messages.dart';
+import '../services/section_refresh.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,10 +16,13 @@ import '../services/fare_policy.dart';
 import '../services/cancellation_policy.dart';
 import '../services/trip_rules.dart';
 import '../services/backend_repository.dart';
+import '../services/realtime_refresh_policy.dart';
 import '../config/backend_config.dart';
 import '../services/auth_service.dart';
 import '../services/push_notification_service.dart';
 import '../services/active_trip_tracking_service.dart';
+import '../services/session_termination_coordinator.dart';
+import '../services/telemetry_service.dart';
 import '../state/offline_state_store.dart';
 import '../state/feature_controllers.dart';
 import '../../models/tourist_spot_model.dart';
@@ -37,6 +47,10 @@ class PrototypeSession {
   static final notifications = AppFeatureControllers.booking.notifications;
   static final currentUserName = AppFeatureControllers.auth.currentUserName;
   static final authRevision = AppFeatureControllers.auth.revision;
+  static final _currentAccount =
+      ValueNotifier<({String id, String name, String email})?>(null);
+  static ValueListenable<({String id, String name, String email})?>
+  get currentAccount => _currentAccount;
   static String? authenticatedUserId;
   static String? authenticatedRole;
 
@@ -73,10 +87,14 @@ class PrototypeSession {
 
   // ── Active Package ───────────────────────────────────────────────────────
 
+  static final tourPackages = ValueNotifier<List<TourPackageModel>>(
+    BackendConfig.isConfigured ? const [] : TourPackageModel.catalog,
+  );
+
   static TourPackageModel? get activePackage {
     final id = activePackageId;
     if (id == null) return null;
-    for (final package in TourPackageModel.catalog) {
+    for (final package in tourPackages.value) {
       if (package.id == id) return package;
     }
     return null;
@@ -96,7 +114,7 @@ class PrototypeSession {
             (spot) =>
                 spot.id == id && spot.isActive && !spot.isTemporarilyClosed,
             orElse: () => throw const TripRuleException(
-              'A package stop is unavailable. Please choose another route.',
+              MessageCode.aPackageStopIsUnavailablePleaseChooseAnotherRoute,
             ),
           ),
         )
@@ -117,7 +135,7 @@ class PrototypeSession {
     if (index == -1) {
       TripRules.require(
         !spot.isTemporarilyClosed,
-        '${spot.name} is temporarily closed and cannot be added right now.',
+        MessageCode.isTemporarilyClosedAndCannotBeAddedRightNow(spot.name),
       );
       next.add(spot);
     } else {
@@ -146,29 +164,43 @@ class PrototypeSession {
   static SharedPreferences? _preferences;
   static Future<void> _queue = Future.value();
   static Future<void>? _syncInFlight;
-  static bool _syncAgain = false;
+  static final _pendingSections = <RemoteSection>{};
   static int _sessionGeneration = 0;
   static String? _subscribedUserId;
   static const _storageKey = 'tric_gabay_transactions_v1';
-  static const _languageKey = 'tric_gabay_language_v1';
   static bool _languagePersistenceAttached = false;
+  static bool _syncingLanguage = false;
 
   static Future<void> initialize() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       _preferences = prefs;
-      isFilipino.value = prefs.getBool(_languageKey) ?? false;
+      await LocaleController.initialize(prefs);
+      _syncingLanguage = true;
+      isFilipino.value = LocaleController.effectiveLocale.languageCode == 'fil';
+      _syncingLanguage = false;
       if (!_languagePersistenceAttached) {
         _languagePersistenceAttached = true;
         isFilipino.addListener(() {
-          final preferences = _preferences;
-          if (preferences != null) {
-            unawaited(preferences.setBool(_languageKey, isFilipino.value));
+          if (!_syncingLanguage) {
+            unawaited(
+              LocaleController.choose(
+                isFilipino.value ? AppLanguage.filipino : AppLanguage.english,
+              ),
+            );
           }
+        });
+        LocaleController.revision.addListener(() {
+          _syncingLanguage = true;
+          isFilipino.value =
+              LocaleController.effectiveLocale.languageCode == 'fil';
+          _syncingLanguage = false;
         });
       }
       await OfflineStateStore.initialize();
       if (BackendConfig.isConfigured) {
+        allSpots.value = [];
+        tourPackages.value = [];
         bookings.value = [];
         activeBookingId = null;
         activeDriverBookingId = null;
@@ -194,18 +226,81 @@ class PrototypeSession {
       storageError.value = null;
     } catch (_) {
       _preferences = null;
-      storageError.value =
-          'Saved trip data could not be read. Booking changes are paused to protect your records. Retry storage or restart the app.';
+      storageError.value = MessageCode
+          .savedTripDataCouldNotBeReadBookingChangesArePausedToProtect;
     }
   }
 
-  static Future<void> syncRemoteState() {
+  static final hasMoreBookings = ValueNotifier<bool>(false);
+  static final hasMoreDirectory = ValueNotifier<bool>(false);
+  static final loadingMoreBookings = ValueNotifier<bool>(false);
+  static final loadingMoreDirectory = ValueNotifier<bool>(false);
+  static final loadingSections = ValueNotifier<Set<RemoteSection>>(const {});
+  static int _bookingWindowPage = 0, _directoryWindowPage = 0;
+  static int _loadedBookingPage = 0, _loadedDirectoryPage = 0;
+  static Future<List<BookingModel>> _readBookingWindow() async {
+    final generation = _sessionGeneration, page = _bookingWindowPage;
+    final result = await BackendRepository.loadBookingWindow(
+      throughPage: page,
+      viewerRole: authenticatedRole,
+    );
+    if (generation == _sessionGeneration) {
+      hasMoreBookings.value = result.hasMore;
+      _loadedBookingPage = page;
+    }
+    return result.items;
+  }
+
+  static Future<
+    ({List<Map<String, dynamic>> drivers, List<Map<String, dynamic>> tourists})
+  >
+  _readDirectoryWindow() async {
+    final generation = _sessionGeneration, page = _directoryWindowPage;
+    final result = await BackendRepository.loadDirectoryWindow(
+      throughPage: page,
+    );
+    if (generation == _sessionGeneration) {
+      hasMoreDirectory.value = result.hasMore;
+      _loadedDirectoryPage = page;
+    }
+    return (drivers: result.drivers, tourists: result.tourists);
+  }
+
+  static Future<void> loadMore({required bool directory}) async {
+    final busy = directory ? loadingMoreDirectory : loadingMoreBookings;
+    if (busy.value ||
+        !(directory ? hasMoreDirectory.value : hasMoreBookings.value)) {
+      return;
+    }
+    final generation = _sessionGeneration;
+    busy.value = true;
+    if (directory) {
+      _directoryWindowPage++;
+    } else {
+      _bookingWindowPage++;
+    }
+    try {
+      await syncRemoteState(
+        sections: {
+          directory ? RemoteSection.directory : RemoteSection.bookings,
+        },
+      );
+    } finally {
+      if (generation == _sessionGeneration) {
+        _directoryWindowPage = _loadedDirectoryPage;
+        _bookingWindowPage = _loadedBookingPage;
+        busy.value = false;
+      }
+    }
+  }
+
+  static Future<void> syncRemoteState({Set<RemoteSection>? sections}) {
     if (!BackendConfig.isConfigured || authenticatedUserId == null) {
       return Future.value();
     }
+    _pendingSections.addAll(sections ?? RemoteSection.values);
     final existing = _syncInFlight;
     if (existing != null) {
-      _syncAgain = true;
       return existing;
     }
     final completer = Completer<void>();
@@ -217,78 +312,192 @@ class PrototypeSession {
   static Future<void> _runSyncLoop(Completer<void> completer) async {
     try {
       do {
-        _syncAgain = false;
-        await _syncRemoteStateOnce();
-      } while (_syncAgain && authenticatedUserId != null);
+        final sections = Set<RemoteSection>.of(_pendingSections);
+        _pendingSections.clear();
+        loadingSections.value = Set.unmodifiable({
+          ...sections,
+          if (sections.contains(RemoteSection.bookings))
+            RemoteSection.directory,
+        });
+        final trace = TimelineTask()..start('refresh_app_data');
+        try {
+          await _syncRemoteStateOnce(sections);
+        } finally {
+          trace.finish();
+        }
+      } while (_pendingSections.isNotEmpty && authenticatedUserId != null);
       completer.complete();
     } catch (error, stackTrace) {
       if (!completer.isCompleted) completer.completeError(error, stackTrace);
     } finally {
       _syncInFlight = null;
+      loadingSections.value = const {};
     }
   }
 
-  static Future<void> _syncRemoteStateOnce() async {
+  static Future<void> _syncRemoteStateOnce(Set<RemoteSection> sections) async {
     final userId = authenticatedUserId;
     final role = authenticatedRole;
     final generation = _sessionGeneration;
     if (userId == null) return;
     try {
-      await BackendRepository.rpc('activate_due_scheduled_bookings', const {});
+      // Revalidate mutable account state on every authoritative refresh. A
+      // long-lived access token must not preserve app access after a profile
+      // suspension or driver-approval revocation.
+      if (!await refreshAccountAccess()) return;
+      if (generation != _sessionGeneration || userId != authenticatedUserId) {
+        return;
+      }
+      final failures = <RemoteSection>{};
+      Future<T> readSection<T>(
+        RemoteSection section,
+        Future<T> Function() load,
+        T previous,
+      ) => refreshSection(load, previous, (error, stack) {
+        failures.add(section);
+        ErrorMessages.forError(error);
+      });
       final results = await Future.wait([
-        BackendRepository.loadFarePolicy(),
-        BackendRepository.loadCancellationPolicy(),
-        BackendRepository.loadSpots(),
-        BackendRepository.loadBookings(),
-        BackendRepository.loadDirectory(),
-        BackendRepository.loadNotifications(),
+        sections.contains(RemoteSection.fares)
+            ? readSection(
+                RemoteSection.fares,
+                BackendRepository.loadFarePolicy,
+                farePolicy.value,
+              )
+            : Future.value(farePolicy.value),
+        sections.contains(RemoteSection.cancellationPolicy)
+            ? readSection(
+                RemoteSection.cancellationPolicy,
+                BackendRepository.loadCancellationPolicy,
+                cancellationPolicy.value,
+              )
+            : Future.value(cancellationPolicy.value),
+        sections.contains(RemoteSection.spots)
+            ? readSection(
+                RemoteSection.spots,
+                () => BackendRepository.loadSpots(
+                  includeInactive: role == 'admin',
+                ),
+                allSpots.value,
+              )
+            : Future.value(allSpots.value),
+        sections.contains(RemoteSection.bookings)
+            ? readSection(
+                RemoteSection.bookings,
+                _readBookingWindow,
+                bookings.value,
+              )
+            : Future.value(bookings.value),
+        sections.contains(RemoteSection.directory) ||
+                sections.contains(RemoteSection.bookings)
+            ? readSection(RemoteSection.directory, _readDirectoryWindow, (
+                drivers: adminDrivers.value,
+                tourists: adminTourists.value,
+              ))
+            : Future.value((
+                drivers: adminDrivers.value,
+                tourists: adminTourists.value,
+              )),
+        sections.contains(RemoteSection.notifications)
+            ? readSection(
+                RemoteSection.notifications,
+                BackendRepository.loadNotifications,
+                <Map<String, dynamic>>[],
+              )
+            : Future.value(<Map<String, dynamic>>[]),
         if (role == 'admin')
-          BackendRepository.loadFeedback()
+          sections.contains(RemoteSection.feedback)
+              ? readSection(
+                  RemoteSection.feedback,
+                  BackendRepository.loadFeedback,
+                  adminFeedbacks.value,
+                )
+              : Future.value(adminFeedbacks.value)
         else
           Future.value(<Map<String, dynamic>>[]),
         if (role == 'admin')
-          BackendRepository.loadAdminCapabilities()
+          sections.contains(RemoteSection.capabilities)
+              ? readSection(
+                  RemoteSection.capabilities,
+                  BackendRepository.loadAdminCapabilities,
+                  adminCapabilities.value,
+                )
+              : Future.value(adminCapabilities.value)
         else
           Future.value(<String>{}),
         if (role == 'admin')
-          BackendRepository.loadOperationalAlerts()
+          sections.contains(RemoteSection.alerts)
+              ? readSection(
+                  RemoteSection.alerts,
+                  BackendRepository.loadOperationalAlerts,
+                  operationalAlerts.value,
+                )
+              : Future.value(operationalAlerts.value)
         else
           Future.value(<Map<String, dynamic>>[]),
+        sections.contains(RemoteSection.spots) && role != 'driver'
+            ? readSection(
+                RemoteSection.spots,
+                BackendRepository.loadTourPackages,
+                tourPackages.value,
+              )
+            : Future.value(tourPackages.value),
       ]);
       if (generation != _sessionGeneration ||
           userId != authenticatedUserId ||
           userId != BackendConfig.client.auth.currentUser?.id) {
         return;
       }
-      farePolicy.value = results[0] as FarePolicy;
-      cancellationPolicy.value = results[1] as CancellationPolicy;
-      allSpots.value = results[2] as List<TouristSpotModel>;
-      bookings.value = results[3] as List<BookingModel>;
+      if (sections.contains(RemoteSection.fares)) {
+        farePolicy.value = results[0] as FarePolicy;
+      }
+      if (sections.contains(RemoteSection.cancellationPolicy)) {
+        cancellationPolicy.value = results[1] as CancellationPolicy;
+      }
+      if (sections.contains(RemoteSection.spots)) {
+        allSpots.value = results[2] as List<TouristSpotModel>;
+        tourPackages.value = results[9] as List<TourPackageModel>;
+      }
+      if (sections.contains(RemoteSection.bookings)) {
+        bookings.value = results[3] as List<BookingModel>;
+      }
       final directory =
           results[4]
               as ({
                 List<Map<String, dynamic>> drivers,
                 List<Map<String, dynamic>> tourists,
               });
-      adminDrivers.value = directory.drivers;
-      adminTourists.value = directory.tourists;
+      if (sections.contains(RemoteSection.directory) ||
+          sections.contains(RemoteSection.bookings)) {
+        adminDrivers.value = directory.drivers;
+        adminTourists.value = directory.tourists;
+      }
       final remoteNotifications = results[5] as List<Map<String, dynamic>>;
-      notifications.value = remoteNotifications
-          .map(
-            (item) => NotificationItem(
-              id: item['id'],
-              title: item['title'],
-              subtitle: item['body'],
-              time: DateTime.parse(item['created_at']),
-              type: _notificationType(item['category'] as String?),
-              isRead: item['read_at'] != null,
-              routePath: item['route_path'],
-            ),
-          )
-          .toList();
-      adminFeedbacks.value = results[6] as List<Map<String, dynamic>>;
-      adminCapabilities.value = results[7] as Set<String>;
-      operationalAlerts.value = results[8] as List<Map<String, dynamic>>;
+      if (sections.contains(RemoteSection.notifications) &&
+          !failures.contains(RemoteSection.notifications)) {
+        notifications.value = remoteNotifications
+            .map(
+              (item) => NotificationItem(
+                id: item['id'],
+                title: item['title'],
+                subtitle: item['body'],
+                time: DateTime.parse(item['created_at']),
+                type: _notificationType(item['category'] as String?),
+                isRead: item['read_at'] != null,
+                routePath: item['route_path'],
+              ),
+            )
+            .toList();
+      }
+      if (sections.contains(RemoteSection.feedback)) {
+        adminFeedbacks.value = results[6] as List<Map<String, dynamic>>;
+      }
+      if (sections.contains(RemoteSection.capabilities)) {
+        adminCapabilities.value = results[7] as Set<String>;
+      }
+      if (sections.contains(RemoteSection.alerts)) {
+        operationalAlerts.value = results[8] as List<Map<String, dynamic>>;
+      }
       if (role == 'driver') {
         final ownDriver = directory.drivers
             .where((driver) => driver['id'] == userId)
@@ -296,7 +505,9 @@ class PrototypeSession {
         isDriverOnline.value = ownDriver?['isOnline'] == true;
       }
       _restoreActiveIds();
-      if (role == 'driver') {
+      if (role == 'driver' &&
+          sections.contains(RemoteSection.bookings) &&
+          !failures.contains(RemoteSection.bookings)) {
         final active = bookings.value
             .where(
               (booking) =>
@@ -306,12 +517,16 @@ class PrototypeSession {
             )
             .firstOrNull;
         if (active == null) {
-          await ActiveTripTrackingService.stop();
+          await ActiveTripTrackingService.reconcileAuthoritativeBooking(null);
         } else {
-          await ActiveTripTrackingService.start(active.id);
+          await ActiveTripTrackingService.reconcileAuthoritativeBooking(
+            active.id,
+          );
         }
       }
-      if (role == 'tourist') {
+      if (role == 'tourist' &&
+          sections.contains(RemoteSection.bookings) &&
+          !failures.contains(RemoteSection.bookings)) {
         final retained = bookings.value
             .where((booking) => booking.touristId == userId && booking.isActive)
             .map((booking) => booking.id)
@@ -321,12 +536,32 @@ class PrototypeSession {
           retained: retained,
         );
       }
-      storageError.value = null;
+      storageError.value = failures.isEmpty
+          ? null
+          : MessageCode
+                .someInformationCouldNotRefreshPreviouslyLoadedDataIsShownReconnectAndRetry;
       if (_subscribedUserId != userId) {
         _subscribedUserId = userId;
-        BackendRepository.subscribe(() {
-          unawaited(syncRemoteState());
-        });
+        BackendRepository.subscribe(
+          (sections) {
+            if (generation != _sessionGeneration ||
+                userId != authenticatedUserId) {
+              return;
+            }
+            unawaited(
+              syncRemoteState(sections: sections).catchError((Object _) {
+                // storageError exposes the retryable failure.
+              }),
+            );
+          },
+          onLocation: (row) {
+            if (generation != _sessionGeneration ||
+                userId != authenticatedUserId) {
+              return;
+            }
+            adminDrivers.value = patchDriverLocation(adminDrivers.value, row);
+          },
+        );
       }
       await OfflineStateStore.saveSnapshot(
         userId: userId,
@@ -346,7 +581,7 @@ class PrototypeSession {
             await BackendRepository.markAllNotificationsRead();
             return;
           default:
-            throw StateError('Unsupported offline command.');
+            throw StateError(MessageCode.unsupportedOfflineCommand);
         }
       });
     } catch (error) {
@@ -359,9 +594,12 @@ class PrototypeSession {
           cancellationPolicy.value = cached.cancellationPolicy;
           _restoreActiveIds();
           storageError.value =
-              'Offline mode · showing saved data from ${cached.savedAt}. Critical actions require a connection.';
+              MessageCode.offlineModeShowingSavedDataFromCriticalActionsRequireAConnectionValue(
+                (cached.savedAt).toString(),
+              );
         } else {
-          storageError.value = 'Could not synchronize with the server: $error';
+          storageError.value = MessageCode
+              .couldNotSynchronizeWithTheServerCheckYourConnectionAndRetry;
         }
       }
       rethrow;
@@ -405,7 +643,7 @@ class PrototypeSession {
     final prefs = _preferences;
     TripRules.require(
       prefs != null,
-      'Storage is unavailable. Retry storage before making changes.',
+      MessageCode.storageIsUnavailableRetryStorageBeforeMakingChanges,
     );
     final encoded = jsonEncode({
       'fares': policy.toMap(),
@@ -413,13 +651,13 @@ class PrototypeSession {
     });
     try {
       final saved = await prefs!.setString(_storageKey, encoded);
-      if (!saved) throw StateError('Save failed');
+      if (!saved) throw StateError(MessageCode.saveFailed);
       storageError.value = null;
     } catch (_) {
-      storageError.value =
-          'Could not save this change. Please retry; the previous trip state has been kept.';
+      storageError.value = MessageCode
+          .couldNotSaveThisChangePleaseRetryThePreviousTripStateHasBeen;
       throw const TripRuleException(
-        'Could not save. No booking or payment state was changed.',
+        MessageCode.couldNotSaveNoBookingOrPaymentStateWasChanged,
       );
     }
   }
@@ -428,19 +666,20 @@ class PrototypeSession {
     required int customCents,
     required Map<String, int> packages,
     required int expectedRevision,
-    String reason = 'Administrator updated fixed fares.',
+    String reason = MessageCode.administratorUpdatedFixedFares,
   }) => _serial(() async {
     final old = farePolicy.value;
     TripRules.require(
       old.revision == expectedRevision,
-      'Prices changed while you were editing. Reopen this page and review the latest rates.',
+      MessageCode
+          .pricesChangedWhileYouWereEditingReopenThisPageAndReviewTheLatest,
     );
     TripRules.require(
       customCents > 0 &&
           customCents <= 10000000 &&
           packages.values.every((v) => v > 0 && v <= 10000000) &&
-          TourPackageModel.catalog.every((p) => packages.containsKey(p.id)),
-      'Enter valid fixed fares for every route.',
+          tourPackages.value.every((p) => packages.containsKey(p.id)),
+      MessageCode.enterValidFixedFaresForEveryRoute,
     );
     final next = FarePolicy(
       revision: old.revision + 1,
@@ -448,7 +687,7 @@ class PrototypeSession {
       packageFares: Map.unmodifiable(packages),
       history: [
         ...old.history,
-        '${DateTime.now().toIso8601String()} • Admin • ${reason.trim()} • v${old.revision + 1}: custom ₱${(customCents / 100).toStringAsFixed(2)}; ${packages.entries.map((e) => "${e.key} ₱${(e.value / 100).toStringAsFixed(2)}").join(", ")}',
+        '${ServerClock.now().toIso8601String()} • Admin • ${reason.trim()} • v${old.revision + 1}: custom ₱${AppFormatters.amount((customCents / 100))}; ${packages.entries.map((e) => "${e.key} ₱${AppFormatters.amount((e.value / 100))}").join(", ")}',
       ],
     );
     if (BackendConfig.isConfigured) {
@@ -475,11 +714,11 @@ class PrototypeSession {
   }) async {
     TripRules.require(
       BackendConfig.isConfigured && authenticatedRole == 'admin',
-      'A configured server and administrator account are required.',
+      MessageCode.aConfiguredServerAndAdministratorAccountAreRequired,
     );
     TripRules.require(
       cancellationPolicy.value.version == expectedVersion,
-      'The policy changed while you were editing. Reopen this page.',
+      MessageCode.thePolicyChangedWhileYouWereEditingReopenThisPage,
     );
     await BackendRepository.saveCancellationPolicy(
       expectedVersion: expectedVersion,
@@ -499,30 +738,31 @@ class PrototypeSession {
   }) => _serial(() async {
     TripRules.require(
       paymentMethod == PaymentMethod.cash || BackendConfig.isConfigured,
-      'Online payment requires the configured server.',
+      MessageCode.onlinePaymentRequiresTheConfiguredServer,
     );
     TripRules.require(
       !bookings.value.any((b) => b.touristId == currentTouristId && b.isActive),
-      'You already have an active booking. Open Trips to continue or cancel it.',
+      MessageCode.youAlreadyHaveAnActiveBookingOpenTripsToContinueOrCancelIt,
     );
     TripRules.require(
-      adminTourists.value.any(
-        (u) => u['id'] == currentTouristId && u['status'] == 'active',
-      ),
-      'This tourist account cannot book right now. Contact the administrator.',
+      BackendConfig.isConfigured ||
+          adminTourists.value.any(
+            (u) => u['id'] == currentTouristId && u['status'] == 'active',
+          ),
+      MessageCode.thisTouristAccountCannotBookRightNowContactTheAdministrator,
     );
     TripRules.require(
       farePolicy.value.revision == expectedFareRevision,
-      'The price changed. Review the updated fare and confirm again.',
+      MessageCode.thePriceChangedReviewTheUpdatedFareAndConfirmAgain,
     );
     final spots = List<TouristSpotModel>.from(itinerary.value);
     TripRules.require(
       spots.isNotEmpty && spots.length <= 12,
-      'Select between 1 and 12 destinations.',
+      MessageCode.selectBetween1And12Destinations,
     );
     TripRules.require(
       spots.map((s) => s.id).toSet().length == spots.length,
-      'Remove duplicate destinations.',
+      MessageCode.removeDuplicateDestinations,
     );
     TripRules.require(
       spots.every(
@@ -531,7 +771,7 @@ class PrototypeSession {
               live.id == s.id && live.isActive && !live.isTemporarilyClosed,
         ),
       ),
-      'A destination is no longer available. Update your itinerary.',
+      MessageCode.aDestinationIsNoLongerAvailableUpdateYourItinerary,
     );
     final lat = customPickupLat ?? userLatitude.value;
     final lng = customPickupLng ?? userLongitude.value;
@@ -544,23 +784,29 @@ class PrototypeSession {
           lat <= 90 &&
           lng >= -180 &&
           lng <= 180,
-      'Choose a pickup point on the map or enable location first.',
+      MessageCode.chooseAPickupPointOnTheMapOrEnableLocationFirst,
     );
     final pkg = activePackage;
     if (pkg != null) {
       TripRules.require(
         listEquals(pkg.spotIds, spots.map((s) => s.id).toList()),
-        'Package stops changed. Select the package again.',
+        MessageCode.packageStopsChangedSelectThePackageAgain,
       );
     }
     final cents = farePolicy.value.quote(activePackageId);
     if (BackendConfig.isConfigured) {
+      final serviceArea = await BackendRepository.loadPickupServiceArea();
+      TripRules.require(
+        serviceArea.contains(lat!, lng!),
+        MessageCode.thePickupPinIsOutsideTheServiceAreaChooseANearbyPickupPoint,
+      );
       final created = await BackendRepository.createBooking(
         packageId: activePackageId,
         paymentMethod: paymentMethod,
-        pickupAddress: customPickupAddress.value ?? 'Current GPS pickup',
-        pickupLatitude: lat!,
-        pickupLongitude: lng!,
+        pickupAddress:
+            customPickupAddress.value ?? MessageCode.currentGpsPickup,
+        pickupLatitude: lat,
+        pickupLongitude: lng,
         stops: spots,
         passengerCount: passengerCount,
         luggageNotes: luggageNotes,
@@ -588,20 +834,20 @@ class PrototypeSession {
       ),
       pickupLat: lat!,
       pickupLng: lng!,
-      pickupAddress: customPickupAddress.value ?? 'Current GPS pickup',
+      pickupAddress: customPickupAddress.value ?? MessageCode.currentGpsPickup,
       passengerCount: passengerCount,
       luggageNotes: luggageNotes,
       accessibilityNeeds: accessibilityNeeds,
       baseFare: cents / 100,
       totalFare: cents / 100,
       paymentMethod: PaymentMethod.cash,
-      createdAt: DateTime.now(),
+      createdAt: ServerClock.now(),
       scheduledAt: scheduledAt,
       status: scheduledAt == null
           ? BookingStatus.pending
           : BookingStatus.scheduled,
       dispatchExpiresAt: scheduledAt == null
-          ? DateTime.now().add(const Duration(minutes: 10))
+          ? ServerClock.now().add(const Duration(minutes: 10))
           : scheduledAt!.subtract(const Duration(minutes: 20)),
       trip: TripRecord(
         fareRevision: farePolicy.value.revision,
@@ -613,7 +859,9 @@ class PrototypeSession {
     booking = TripRules.record(
       booking,
       TripActor.tourist,
-      'Fixed fare ₱${booking.totalFare.toStringAsFixed(2)} accepted; cancellation/payment policy v1 accepted.',
+      MessageCode.fixedFareAcceptedCancellationPaymentPolicyV1AcceptedValue(
+        (AppFormatters.amount(booking.totalFare)).toString(),
+      ),
     );
     await _persist([booking, ...bookings.value], farePolicy.value);
     bookings.value = [booking, ...bookings.value];
@@ -623,7 +871,7 @@ class PrototypeSession {
 
   static BookingModel bookingById(String id) {
     final b = bookings.value.where((b) => b.id == id).firstOrNull;
-    TripRules.require(b != null, 'This booking could not be found.');
+    TripRules.require(b != null, MessageCode.thisBookingCouldNotBeFound);
     return b!;
   }
 
@@ -635,18 +883,18 @@ class PrototypeSession {
     if (actor == TripActor.tourist) {
       TripRules.require(
         b.touristId == currentTouristId,
-        'This booking belongs to another tourist.',
+        MessageCode.thisBookingBelongsToAnotherTourist,
       );
     }
     if (actor == TripActor.driver) {
       TripRules.require(
         ownsDriverBooking(b),
-        'This booking is assigned to another driver.',
+        MessageCode.thisBookingIsAssignedToAnotherDriver,
       );
     }
     TripRules.require(
       actor != TripActor.system,
-      'System actions are unavailable here.',
+      MessageCode.systemActionsAreUnavailableHere,
     );
   }
 
@@ -692,28 +940,22 @@ class PrototypeSession {
     return _change(id, TripActor.tourist, (booking) {
       TripRules.require(
         booking.status == BookingStatus.pending && booking.isDispatchExpired,
-        'This booking request is not ready to retry.',
+        MessageCode.thisBookingRequestIsNotReadyToRetry,
       );
       return TripRules.record(
         booking.copyWith(
-          dispatchExpiresAt: DateTime.now().add(const Duration(minutes: 10)),
+          dispatchExpiresAt: ServerClock.now().add(const Duration(minutes: 10)),
         ),
         TripActor.tourist,
-        'Driver search retried for another 10 minutes.',
+        MessageCode.driverSearchRetriedForAnother10Minutes,
       );
     });
-  }
-
-  static Future<void> refreshDriverOffers(String id) async {
-    if (!BackendConfig.isConfigured) return;
-    await BackendRepository.rpc('refresh_booking_offers', {'p_booking_id': id});
-    await syncRemoteState();
   }
 
   static Future<void> declineDriverOffer(String id) async {
     TripRules.require(
       BackendConfig.isConfigured,
-      'Declining matched offers requires the configured server.',
+      MessageCode.decliningMatchedOffersRequiresTheConfiguredServer,
     );
     await BackendRepository.rpc('decline_booking_offer', {'p_booking_id': id});
     await syncRemoteState();
@@ -725,7 +967,7 @@ class PrototypeSession {
   ) async {
     TripRules.require(
       BackendConfig.isConfigured,
-      'Driver replacement requires the configured server.',
+      MessageCode.driverReplacementRequiresTheConfiguredServer,
     );
     await BackendRepository.rpc('request_driver_replacement', {
       'p_booking_id': id,
@@ -741,7 +983,7 @@ class PrototypeSession {
   }) async {
     TripRules.require(
       BackendConfig.isConfigured,
-      'Driver replacement requires the configured server.',
+      MessageCode.driverReplacementRequiresTheConfiguredServer,
     );
     await BackendRepository.rpc('decide_driver_replacement', {
       'p_booking_id': id,
@@ -790,7 +1032,8 @@ class PrototypeSession {
       final booking = bookingById(id);
       if (booking.status != BookingStatus.ongoing) {
         throw StateError(
-          'That pickup code is incorrect or temporarily locked after repeated attempts.',
+          MessageCode
+              .thatPickupCodeIsIncorrectOrTemporarilyLockedAfterRepeatedAttempts,
         );
       }
       return booking;
@@ -825,7 +1068,7 @@ class PrototypeSession {
   }) async {
     TripRules.require(
       BackendConfig.isConfigured,
-      'Audited route changes require the configured server.',
+      MessageCode.auditedRouteChangesRequireTheConfiguredServer,
     );
     await BackendRepository.rpc('propose_route_change', {
       'p_booking_id': id,
@@ -980,8 +1223,10 @@ class PrototypeSession {
     String reason,
   ) async {
     TripRules.require(
-      BackendConfig.isConfigured && authenticatedRole == 'admin',
-      'An authenticated administrator and configured server are required.',
+      BackendConfig.isConfigured &&
+          authenticatedRole == 'admin' &&
+          hasAdminCapability('finance'),
+      MessageCode.financeAdministratorAccessIsRequired,
     );
     final message = await BackendRepository.processPayMongoRefund(
       bookingId: id,
@@ -995,7 +1240,7 @@ class PrototypeSession {
   static Future<String> reconcilePayMongoPayment(String id) async {
     TripRules.require(
       BackendConfig.isConfigured,
-      'Payment verification requires the configured server.',
+      MessageCode.paymentVerificationRequiresTheConfiguredServer,
     );
     final result = await BackendRepository.reconcilePayMongoPayment(id);
     await syncRemoteState();
@@ -1008,8 +1253,10 @@ class PrototypeSession {
     String reason,
   ) async {
     TripRules.require(
-      BackendConfig.isConfigured && authenticatedRole == 'admin',
-      'An authenticated administrator is required.',
+      BackendConfig.isConfigured &&
+          authenticatedRole == 'admin' &&
+          hasAdminCapability('finance'),
+      MessageCode.financeAdministratorAccessIsRequired,
     );
     final result = await BackendRepository.completePayMongoTestRefund(
       bookingId: id,
@@ -1023,7 +1270,7 @@ class PrototypeSession {
   static Future<List<Map<String, dynamic>>> financialLedger(String id) {
     TripRules.require(
       BackendConfig.isConfigured,
-      'The financial record requires the configured server.',
+      MessageCode.theFinancialRecordRequiresTheConfiguredServer,
     );
     return BackendRepository.loadFinancialLedger(id);
   }
@@ -1045,16 +1292,16 @@ class PrototypeSession {
     return _change(id, TripActor.tourist, (b) {
       TripRules.require(
         b.status == BookingStatus.completed && b.driverRating == null,
-        'Only a completed, unrated trip can be reviewed.',
+        MessageCode.onlyACompletedUnratedTripCanBeReviewed,
       );
       TripRules.require(
         rating.isFinite && rating >= 1 && rating <= 5,
-        'Select a rating between 1 and 5.',
+        MessageCode.selectARatingBetween1And5,
       );
       return TripRules.record(
         b.copyWith(driverRating: rating, driverReview: review.trim()),
         TripActor.tourist,
-        'Driver review submitted.',
+        MessageCode.driverReviewSubmitted,
       );
     });
   }
@@ -1089,23 +1336,23 @@ class PrototypeSession {
           .firstOrNull;
       TripRules.require(
         driver != null && driver['status'] == 'active' && isDriverOnline.value,
-        'Go online with an approved driver account first.',
+        MessageCode.goOnlineWithAnApprovedDriverAccountFirst,
       );
       TripRules.require(
         b.status == BookingStatus.pending,
-        'This request is no longer available.',
+        MessageCode.thisRequestIsNoLongerAvailable,
       );
       TripRules.require(
         adminTourists.value.any(
           (u) => u['id'] == b.touristId && u['status'] == 'active',
         ),
-        'This tourist account is currently unavailable.',
+        MessageCode.thisTouristAccountIsCurrentlyUnavailable,
       );
       TripRules.require(
         !bookings.value.any(
           (other) => other.driverId == acceptingDriverId && other.isActive,
         ),
-        'Finish your current trip before accepting another.',
+        MessageCode.finishYourCurrentTripBeforeAcceptingAnother,
       );
       final updated = TripRules.record(
         b.copyWith(
@@ -1113,10 +1360,10 @@ class PrototypeSession {
           driverId: acceptingDriverId,
           driverName: driver!['name'],
           driverPlate: driver['plate'],
-          acceptedAt: DateTime.now(),
+          acceptedAt: ServerClock.now(),
         ),
         TripActor.driver,
-        'Driver accepted the fixed fare and pickup.',
+        MessageCode.driverAcceptedTheFixedFareAndPickup,
       );
       final next = bookings.value
           .map((item) => item.id == id ? updated : item)
@@ -1137,11 +1384,19 @@ class PrototypeSession {
       }
       notifications.value = [...notifications.value];
       final userId = authenticatedUserId;
+      final generation = _sessionGeneration;
       unawaited(
         BackendRepository.markAllNotificationsRead()
-            .then((_) => syncRemoteState())
+            .then((_) {
+              if (userId == authenticatedUserId &&
+                  generation == _sessionGeneration) {
+                return syncRemoteState(sections: {RemoteSection.notifications});
+              }
+            })
             .catchError((Object _) async {
-              if (userId != null) {
+              if (userId != null &&
+                  userId == authenticatedUserId &&
+                  generation == _sessionGeneration) {
                 await OfflineStateStore.enqueue(
                   userId: userId,
                   id: 'notifications_read_all',
@@ -1165,19 +1420,27 @@ class PrototypeSession {
       }
       notifications.value = [...notifications.value];
       final userId = authenticatedUserId;
+      final generation = _sessionGeneration;
       unawaited(
-        BackendRepository.markNotificationRead(
-          id,
-        ).then((_) => syncRemoteState()).catchError((Object _) async {
-          if (userId != null) {
-            await OfflineStateStore.enqueue(
-              userId: userId,
-              id: 'notification_read:$id',
-              type: 'notification_read',
-              payload: {'notification_id': id},
-            );
-          }
-        }),
+        BackendRepository.markNotificationRead(id)
+            .then((_) {
+              if (userId == authenticatedUserId &&
+                  generation == _sessionGeneration) {
+                return syncRemoteState(sections: {RemoteSection.notifications});
+              }
+            })
+            .catchError((Object _) async {
+              if (userId != null &&
+                  userId == authenticatedUserId &&
+                  generation == _sessionGeneration) {
+                await OfflineStateStore.enqueue(
+                  userId: userId,
+                  id: 'notification_read:$id',
+                  type: 'notification_read',
+                  payload: {'notification_id': id},
+                );
+              }
+            }),
       );
       return;
     }
@@ -1196,8 +1459,19 @@ class PrototypeSession {
 
   // ── User Profile ──────────────────────────────────────────────────────────
 
-  static void updateUserName(String name) {
-    currentUserName.value = name;
+  static void updateAccountName(String name) {
+    final account = _currentAccount.value;
+    if (account == null || account.id != authenticatedUserId) return;
+    _setAccountIdentity(account.id, name, account.email);
+  }
+
+  static void _setAccountIdentity(String id, String name, String email) {
+    _currentAccount.value = (id: id, name: name, email: email);
+    if (authenticatedRole == 'driver') {
+      currentDriverName.value = name;
+    } else if (authenticatedRole == 'tourist') {
+      currentUserName.value = name;
+    }
   }
 
   static void setAuthenticatedUser({
@@ -1207,22 +1481,28 @@ class PrototypeSession {
     required String email,
     String? plateNumber,
   }) {
-    if (authenticatedUserId != id) {
+    if (authenticatedUserId != id || authenticatedRole != role) {
       _sessionGeneration++;
       _subscribedUserId = null;
+      _pendingSections.clear();
+      _bookingWindowPage = 0;
+      _directoryWindowPage = 0;
+      _loadedBookingPage = 0;
+      _loadedDirectoryPage = 0;
+      hasMoreBookings.value = false;
+      hasMoreDirectory.value = false;
+      loadingMoreBookings.value = false;
+      loadingMoreDirectory.value = false;
       // The unconfigured in-memory adapter is retained only for isolated unit
       // tests. Real builds always clear the previous account before applying
       // another user's state.
-      if (BackendConfig.isConfigured) _clearUserScopedState();
+      if (BackendConfig.isConfigured || authenticatedUserId == id) {
+        _clearUserScopedState();
+      }
     }
     authenticatedUserId = id;
     authenticatedRole = role;
-    authRevision.value++;
-    if (role == 'driver') {
-      currentDriverName.value = name;
-    } else if (role == 'tourist') {
-      currentUserName.value = name;
-    }
+    _setAccountIdentity(id, name, email);
     if (role == 'tourist') {
       adminTourists.value = [
         ...adminTourists.value.where((u) => u['id'] != id),
@@ -1246,6 +1526,7 @@ class PrototypeSession {
         },
       ];
     }
+    authRevision.value++;
     unawaited(PushNotificationService.refreshRegistration());
   }
 
@@ -1255,17 +1536,84 @@ class PrototypeSession {
     authenticatedUserId = null;
     authenticatedRole = null;
     _clearUserScopedState();
+    // Optional collection from the departing account must not carry into the
+    // next account's sign-in or first privacy notice.
+    unawaited(TelemetryService.setConsent(false).catchError((Object _) {}));
     authRevision.value++;
   }
 
   static Future<void> handleSessionEnded() async {
-    await PushNotificationService.deactivate();
-    await BackendRepository.dispose();
+    final departingUserId = authenticatedUserId;
     clearAuthenticatedUser();
+    await Future.wait([
+      _disconnectSessionServices(),
+      if (departingUserId != null) OfflineStateStore.clearUser(departingUserId),
+    ]);
+  }
+
+  static Future<void> _disconnectSessionServices() async {
+    Future<void> attempt(Future<void> action) async {
+      try {
+        await action;
+      } catch (_) {
+        /* Local state is already cleared. */
+      }
+    }
+
+    await Future.wait([
+      attempt(PushNotificationService.deactivate()),
+      attempt(BackendRepository.dispose()),
+    ]);
+  }
+
+  /// Refresh the account's effective app role before loading role-scoped data.
+  /// A result for a departed session must never alter the new account.
+  static Future<bool> refreshAccountAccess({
+    Future<SignedInProfile?> Function()? load,
+  }) async {
+    final userId = authenticatedUserId;
+    final generation = _sessionGeneration;
+    if (userId == null) return false;
+    final profile = await (load ?? AuthService.restoreSession)();
+    if (generation != _sessionGeneration || userId != authenticatedUserId) {
+      return false;
+    }
+    if (profile == null || profile.id != userId) {
+      await handleSessionEnded();
+      return false;
+    }
+    final role = profile.applicationPending
+        ? 'driver_pending'
+        : profile.role.name;
+    if (role != authenticatedRole) {
+      setAuthenticatedUser(
+        id: profile.id,
+        name: profile.name,
+        role: role,
+        email: profile.email,
+        plateNumber: profile.plateNumber,
+      );
+      if (role != 'driver_pending') {
+        _pendingSections.addAll(RemoteSection.values);
+      }
+      return false;
+    }
+    _setAccountIdentity(profile.id, profile.name, profile.email);
+    return role != 'driver_pending';
   }
 
   static void _clearUserScopedState() {
+    loadingSections.value = const {};
+    _bookingWindowPage = 0;
+    _directoryWindowPage = 0;
+    _loadedBookingPage = 0;
+    _loadedDirectoryPage = 0;
+    hasMoreBookings.value = false;
+    hasMoreDirectory.value = false;
+    loadingMoreBookings.value = false;
+    loadingMoreDirectory.value = false;
     unawaited(ActiveTripTrackingService.stop());
+    _currentAccount.value = null;
     currentUserName.value = '';
     currentDriverName.value = '';
     isDriverOnline.value = false;
@@ -1294,14 +1642,24 @@ class PrototypeSession {
   }
 
   static Future<void> signOut() async {
+    final departingUserId = authenticatedUserId;
     if (BackendConfig.isConfigured) {
-      await PushNotificationService.deactivate();
-      await BackendRepository.dispose();
-      clearAuthenticatedUser();
-      await AuthService.signOut();
+      await SessionTerminationCoordinator(
+        clearLocal: () async {
+          clearAuthenticatedUser();
+          if (departingUserId != null) {
+            await OfflineStateStore.clearUser(departingUserId);
+          }
+        },
+        disconnect: _disconnectSessionServices,
+        remoteSignOut: AuthService.signOut,
+      ).terminate();
       return;
     }
     clearAuthenticatedUser();
+    if (departingUserId != null) {
+      await OfflineStateStore.clearUser(departingUserId);
+    }
   }
 
   // ── Admin Specific Methods ────────────────────────────────────────────────
@@ -1332,21 +1690,24 @@ class PrototypeSession {
     }).toList();
   }
 
-  static void updateDriverStatus(
+  static Future<void> updateDriverStatus(
     String id,
     String status, {
-    String reason = 'Status changed by an administrator.',
+    required String reason,
     DateTime? blockedUntil,
-  }) {
+  }) async {
+    TripRules.require(
+      reason.trim().length >= 5,
+      MessageCode.enterAReasonOfAtLeastFiveCharacters,
+    );
     if (BackendConfig.isConfigured) {
-      unawaited(
-        BackendRepository.setDriverApproval(
-          id,
-          status,
-          reason: reason,
-          blockedUntil: blockedUntil,
-        ).then((_) => syncRemoteState()),
+      await BackendRepository.setDriverApproval(
+        id,
+        status,
+        reason: reason,
+        blockedUntil: blockedUntil,
       );
+      await syncRemoteState();
       return;
     }
     adminDrivers.value = adminDrivers.value.map((d) {
@@ -1357,43 +1718,49 @@ class PrototypeSession {
     }).toList();
   }
 
-  static void addSystemAnnouncement(String title, String message) {
+  static Future<void> addSystemAnnouncement(
+    String title,
+    String message, {
+    required String audience,
+    required String requestId,
+  }) async {
     if (BackendConfig.isConfigured) {
-      unawaited(
-        BackendRepository.sendAnnouncement(
-          title,
-          message,
-        ).then((_) => syncRemoteState()),
+      await BackendRepository.sendAnnouncement(
+        title,
+        message,
+        audience: audience,
+        requestId: requestId,
       );
+      await syncRemoteState();
       return;
     }
     _addNotification(
       NotificationItem(
-        id: 'a${DateTime.now().millisecondsSinceEpoch}',
+        id: 'a${ServerClock.now().millisecondsSinceEpoch}',
         title: title,
         subtitle: message,
-        time: DateTime.now(),
+        time: ServerClock.now(),
         type: NotificationType.system,
       ),
     );
   }
 
-  static void toggleTouristStatus(String id) {
+  static Future<void> toggleTouristStatus(
+    String id, {
+    required String reason,
+  }) async {
+    TripRules.require(
+      reason.trim().length >= 5,
+      MessageCode.enterAReasonOfAtLeastFiveCharacters,
+    );
     if (BackendConfig.isConfigured) {
       final current = adminTourists.value
           .where((u) => u['id'] == id)
           .firstOrNull;
       if (current != null) {
         final status = current['status'] == 'active' ? 'suspended' : 'active';
-        unawaited(
-          BackendRepository.setTouristStatus(
-            id,
-            status,
-            reason: status == 'suspended'
-                ? 'Administrator suspended account access after a support review.'
-                : 'Administrator restored account access after a support review.',
-          ).then((_) => syncRemoteState()),
-        );
+        await BackendRepository.setTouristStatus(id, status, reason: reason);
+        await syncRemoteState();
       }
       return;
     }
@@ -1419,21 +1786,19 @@ class PrototypeSession {
     }
   }
 
-  static void deleteSpot(String spotId) {
+  static Future<void> deleteSpot(String spotId) async {
     TripRules.require(
-      !TourPackageModel.catalog.any((p) => p.spotIds.contains(spotId)),
-      'This attraction belongs to a tour package. Hide it instead of deleting it.',
+      !tourPackages.value.any((p) => p.spotIds.contains(spotId)),
+      MessageCode.thisAttractionBelongsToATourPackageHideItInsteadOfDeletingIt,
     );
     TripRules.require(
       !bookings.value.any(
         (b) => b.isActive && b.stops.any((s) => s.spotId == spotId),
       ),
-      'This attraction is in an active booking. Hide it for new trips instead.',
+      MessageCode.thisAttractionIsInAnActiveBookingHideItForNewTripsInstead,
     );
     if (BackendConfig.isConfigured) {
-      unawaited(
-        BackendRepository.deleteSpot(spotId).then((_) => syncRemoteState()),
-      );
+      await BackendRepository.deleteSpot(spotId);
       return;
     }
     allSpots.value = allSpots.value.where((s) => s.id != spotId).toList();

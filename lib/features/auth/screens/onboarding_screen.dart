@@ -1,3 +1,4 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,21 +31,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             children: [
               _buildSlide(
                 icon: Icons.explore_rounded,
-                title: 'Discover Bustos',
-                description:
-                    'Explore the heritage, nature, and beauty of Bustos, Bulacan with ease.',
+                title: MessageCode.discoverBustos,
+                description: MessageCode
+                    .exploreTheHeritageNatureAndBeautyOfBustosBulacanWithEase,
               ),
               _buildSlide(
                 icon: Icons.electric_rickshaw,
-                title: 'Book a Tricycle',
-                description:
-                    'Get around quickly and safely by booking local tricycle drivers in seconds.',
+                title: MessageCode.bookATricycle,
+                description: MessageCode
+                    .getAroundQuicklyAndSafelyByBookingLocalTricycleDriversInSeconds,
               ),
               _buildSlide(
                 icon: Icons.route,
-                title: 'Your Journey, Your Way',
-                description:
-                    'Build your itinerary and enjoy a personalized tour experience.',
+                title: MessageCode.yourJourneyYourWay,
+                description: MessageCode
+                    .buildYourItineraryAndEnjoyAPersonalizedTourExperience,
               ),
             ],
           ),
@@ -54,7 +55,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: TextButton(
                 onPressed: () => context.go('/login'),
                 child: Text(
-                  'Skip',
+                  context.l10n.skip,
                   style: GoogleFonts.poppins(
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w600,
@@ -83,13 +84,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ? SizedBox(
                         width: 140,
                         child: AppButton(
-                          label: 'Get Started',
+                          label: context.l10n.getStarted,
                           onPressed: () => context.go('/login'),
                         ),
                       )
                     : IconButton(
+                        tooltip: context.l10n.next,
                         onPressed: () => _controller.nextPage(
-                          duration: const Duration(milliseconds: 300),
+                          duration: MediaQuery.disableAnimationsOf(context)
+                              ? Duration.zero
+                              : const Duration(milliseconds: 300),
                           curve: Curves.easeIn,
                         ),
                         icon: const Icon(Icons.arrow_forward_ios),
@@ -113,30 +117,32 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }) {
     return Padding(
       padding: const EdgeInsets.all(40),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 120, color: AppColors.primary),
-          const SizedBox(height: 48),
-          Text(
-            title,
-            style: GoogleFonts.poppins(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 120, color: AppColors.primary),
+            const SizedBox(height: 48),
+            Text(
+              context.message(title),
+              style: GoogleFonts.poppins(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            description,
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              color: AppColors.textSecondary,
+            const SizedBox(height: 16),
+            Text(
+              context.message(description),
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,3 +1,6 @@
+import 'package:tricgabay_app/core/l10n/feedback_category.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,7 +18,7 @@ class FeedbackScreen extends StatefulWidget {
 }
 
 class _FeedbackScreenState extends State<FeedbackScreen> {
-  String _selectedCategory = 'Suggestion';
+  FeedbackCategory _selectedCategory = FeedbackCategory.suggestion;
   final _msgCtrl = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
@@ -28,36 +31,19 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final categories = [
-      'Bug Report',
-      'Suggestion',
-      'Driver Concern',
-      'Tourist Spot Issue',
-      'Other',
-    ];
+    final categories = FeedbackCategory.values;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(
-          'Submit Feedback',
-          style: GoogleFonts.poppins(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: AppColors.surface,
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
-      ),
+      appBar: AppBar(title: Text(context.l10n.submitFeedback)),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 48),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Category',
+                context.l10n.category,
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -71,12 +57,14 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                 children: categories.map((cat) {
                   final isSelected = _selectedCategory == cat;
                   return ChoiceChip(
-                    label: Text(cat),
+                    label: Text(cat.label(context)),
                     selected: isSelected,
                     onSelected: (val) =>
                         setState(() => _selectedCategory = cat),
                     selectedColor: AppColors.primary,
                     labelStyle: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                       color: isSelected ? Colors.white : AppColors.textPrimary,
                     ),
                   );
@@ -84,7 +72,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               ),
               const SizedBox(height: 32),
               Text(
-                'Message',
+                context.l10n.message,
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -93,20 +81,21 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               ),
               const SizedBox(height: 12),
               AppTextField(
-                label: 'Message',
+                label: context.l10n.message,
                 controller: _msgCtrl,
-                hint: 'Please describe your concern or suggestion in detail...',
+                hint:
+                    context.l10n.pleaseDescribeYourConcernOrSuggestionInDetail,
                 maxLines: 6,
                 validator: (val) {
                   if (val == null || val.trim().length < 20) {
-                    return 'Please enter at least 20 characters.';
+                    return MessageCode.pleaseEnterAtLeast20Characters;
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 40),
               AppButton(
-                label: 'Submit',
+                label: context.l10n.submit,
                 isLoading: _isLoading,
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
@@ -114,27 +103,31 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     try {
                       if (!BackendConfig.isConfigured) {
                         throw StateError(
-                          'Server setup is incomplete. Feedback was not sent.',
+                          MessageCode.serverSetupIsIncompleteFeedbackWasNotSent,
                         );
                       }
                       await BackendRepository.submitFeedback(
-                        category: _selectedCategory,
+                        category: _selectedCategory.wireValue,
                         message: _msgCtrl.text,
                       );
                     } catch (error) {
                       if (!context.mounted) return;
                       setState(() => _isLoading = false);
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text('$error')));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            context.message(ErrorMessages.forError(error)),
+                          ),
+                        ),
+                      );
                       return;
                     }
 
                     if (!context.mounted) return;
                     setState(() => _isLoading = false);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Feedback submitted! Thank you 🙏'),
+                      SnackBar(
+                        content: Text(context.l10n.feedbackSubmittedThankYou),
                         backgroundColor: Colors.green,
                       ),
                     );

@@ -1,3 +1,4 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,11 +13,11 @@ class DriverNotificationsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(context.l10n.notifications),
         actions: [
           IconButton(
             icon: const Icon(Icons.done_all),
-            tooltip: 'Mark all as read',
+            tooltip: context.l10n.markAllAsRead,
             onPressed: () {
               PrototypeSession.markAllNotificationsRead();
             },
@@ -38,7 +39,7 @@ class DriverNotificationsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'No notifications yet',
+                    context.l10n.noNotificationsYet,
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       color: AppColors.textSecondary,
@@ -72,7 +73,7 @@ class DriverNotificationsScreen extends ConsumerWidget {
             children: [
               if (todayNotifs.isNotEmpty) ...[
                 Text(
-                  'Today',
+                  context.l10n.today,
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.bold,
                     color: AppColors.textSecondary,
@@ -84,7 +85,7 @@ class DriverNotificationsScreen extends ConsumerWidget {
               ],
               if (earlierNotifs.isNotEmpty) ...[
                 Text(
-                  'Earlier',
+                  context.l10n.earlier,
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.bold,
                     color: AppColors.textSecondary,
@@ -130,12 +131,12 @@ class DriverNotificationsScreen extends ConsumerWidget {
     final difference = DateTime.now().difference(notification.time);
     String timeString;
     if (difference.inMinutes < 60) {
-      timeString = '${difference.inMinutes} mins ago';
-      if (difference.inMinutes == 0) timeString = 'Just now';
+      timeString = MessageCode.minsAgoValue((difference.inMinutes).toString());
+      if (difference.inMinutes == 0) timeString = MessageCode.justNow;
     } else if (difference.inHours < 24) {
-      timeString = '${difference.inHours} hours ago';
+      timeString = MessageCode.hoursAgoValue((difference.inHours).toString());
     } else {
-      timeString = '${difference.inDays} days ago';
+      timeString = MessageCode.daysAgoValue((difference.inDays).toString());
     }
 
     return Card(
@@ -163,7 +164,7 @@ class DriverNotificationsScreen extends ConsumerWidget {
             child: Icon(icon, color: color),
           ),
           title: Text(
-            notification.title,
+            context.message(notification.title),
             style: GoogleFonts.poppins(
               fontWeight: !notification.isRead
                   ? FontWeight.bold
@@ -175,7 +176,7 @@ class DriverNotificationsScreen extends ConsumerWidget {
             children: [
               const SizedBox(height: 4),
               Text(
-                notification.subtitle,
+                context.message(notification.subtitle),
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   color: AppColors.textSecondary,
@@ -183,7 +184,7 @@ class DriverNotificationsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                timeString,
+                context.message(timeString),
                 style: GoogleFonts.poppins(
                   fontSize: 11,
                   color: AppColors.textSecondary,

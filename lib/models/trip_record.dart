@@ -1,5 +1,5 @@
 /// Local transaction metadata. All money is stored in centavos.
-enum TripActor { tourist, driver, admin, system }
+enum TripActor { unknown, tourist, driver, admin, system }
 
 class TripEvent {
   final DateTime at;
@@ -13,7 +13,8 @@ class TripEvent {
   };
   factory TripEvent.fromMap(Map<String, dynamic> map) => TripEvent(
     DateTime.parse(map['at']),
-    TripActor.values.byName(map['actor']),
+    TripActor.values.where((actor) => actor.name == map['actor']).firstOrNull ??
+        TripActor.unknown,
     map['description'],
   );
 }

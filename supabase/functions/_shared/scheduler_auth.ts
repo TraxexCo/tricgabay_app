@@ -11,7 +11,7 @@ export function isSchedulerRequest(
   headers: Headers,
   expectedToken: string | null | undefined,
 ): boolean {
-  const supplied = headers.get('x-tricgabay-scheduler') ?? '';
+  const supplied = headers.get("x-tricgabay-scheduler") ?? "";
   return supplied.length >= 32 &&
     Boolean(expectedToken) &&
     constantTimeEqual(supplied, expectedToken!);

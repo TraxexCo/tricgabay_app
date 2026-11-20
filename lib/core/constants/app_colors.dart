@@ -16,23 +16,23 @@ class AppColors {
   static const Color secondaryDark = Color(0xFFC99A00);
 
   // Status colors
-  static const Color success = Color(0xFF27AE60);
+  static const Color success = Color(0xFF167840);
   static const Color successLight = Color(0xFFD4EFDF);
   static const Color danger = Color(0xFFCE1126);
   static const Color dangerLight = Color(0xFFFFE8EA);
-  static const Color warning = Color(0xFFF39C12);
+  static const Color warning = Color(0xFF8A5100);
   static const Color warningLight = Color(0xFFFEF3CD);
   static const Color info = Color(0xFF2980B9);
   static const Color infoLight = Color(0xFFD6EAF8);
 
   // Driver status
-  static const Color online = Color(0xFF27AE60);
+  static const Color online = Color(0xFF167840);
   static const Color offline = Color(0xFF95A5A6);
   static const Color busy = Color(0xFFE67E22);
 
   // Booking status
-  static const Color pending = Color(0xFFF39C12);
-  static const Color accepted = Color(0xFF27AE60);
+  static const Color pending = Color(0xFF8A5100);
+  static const Color accepted = Color(0xFF167840);
   static const Color ongoing = Color(0xFF1B6CA8);
   static const Color completed = Color(0xFF8E44AD);
   static const Color cancelled = Color(0xFFE74C3C);
@@ -51,15 +51,15 @@ class AppColors {
 
   // Text
   static const Color textPrimary = Color(0xFF1A1A2E);
-  static const Color textSecondary = Color(0xFF6B7280);
-  static const Color textHint = Color(0xFF9CA3AF);
+  static const Color textSecondary = Color(0xFF374151);
+  static const Color textHint = Color(0xFF4B5563);
   static const Color textOnPrimary = Color(0xFFFFFFFF);
   static const Color textOnSecondary = Color(0xFF1A1A2E);
 
   // Map pin colors
   static const Color spotPin = Color(0xFFCE1126);
   static const Color driverPin = Color(0xFF0038A8);
-  static const Color userPin = Color(0xFF27AE60);
+  static const Color userPin = Color(0xFF167840);
 
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(

@@ -1,9 +1,8 @@
-name: Quality gates
+name: Local validation gates
 
+# Prepared locally only: no automatic push/PR trigger or deployment.
 on:
-  pull_request:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -11,33 +10,82 @@ permissions:
 jobs:
   flutter:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.44.6'
           channel: stable
           cache: true
       - run: flutter pub get
-      - run: dart format --output=none --set-exit-if-changed lib test
-      - run: flutter analyze
-      - run: flutter test --coverage
-      - run: flutter build apk --debug
+      - run: flutter gen-l10n
+      - name: Check generated localization
+        run: |
+          git diff --exit-code -- lib/l10n
+          test -z "$(git ls-files --others --exclude-standard lib/l10n)"
+      - run: flutter analyze --no-pub
+      - run: flutter test --no-pub
+      - run: flutter build apk --debug --flavor dev --dart-define=APP_ENV=dev
+      - name: Release configuration fails closed
+        shell: pwsh
+        run: ./scripts/test_android_configuration.ps1
 
-  supabase:
+  database-and-security:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          fetch-depth: 0
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: supabase start
-      - run: supabase db lint --local --level warning
-      - run: supabase test db
-      - run: deno test supabase/functions/tests --allow-env
-      - run: deno check supabase/functions/*/index.ts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: SQL parse
+        shell: pwsh
+        run: ./scripts/check_sql.ps1
+      - name: Start unlinked isolated services
+        shell: pwsh
+        run: ./scripts/start_local_validation.ps1
+      - name: Full chain, pgTAP and concurrency
+        shell: pwsh
+        run: ./scripts/validate_database.ps1
+      - name: Catalog authorization and SECURITY DEFINER snapshot
+        run: deno run --allow-run=docker --allow-read --allow-write=.audit-output --allow-env scripts/test_catalog_access.ts
+      - name: Unknown-object and unsafe-definer rejection
+        run: deno run --allow-run --allow-env scripts/test_catalog_registration.ts
+      - name: Edge type checks
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem supabase/functions -Filter index.ts -Recurse | ForEach-Object FullName
+          deno check --config supabase/functions/deno.json @files
+          if ($LASTEXITCODE -ne 0) { throw 'Edge type checks failed' }
+      - name: Deno, Auth, Storage and Realtime tests
+        shell: pwsh
+        run: ./scripts/run_local_integrations.ps1
+      - name: Locked dependency vulnerability scan
+        run: deno run --allow-read=pubspec.lock,supabase/functions/deno.lock --allow-write=.audit-output --allow-net=api.osv.dev scripts/scan_dependencies.ts
+      - name: Source secret scan
+        run: >-
+          docker run --rm --network none
+          --mount type=bind,source=${{ github.workspace }},target=/repo,readonly
+          ghcr.io/gitleaks/gitleaks:v8.24.3 dir /repo
+          --config /repo/.gitleaks.toml --no-banner --redact --max-target-megabytes 2
+      - name: Git history secret scan
+        run: >-
+          docker run --rm --network none --user "$(id -u):$(id -g)"
+          --mount type=bind,source=${{ github.workspace }},target=/repo,readonly
+          ghcr.io/gitleaks/gitleaks:v8.24.3 git /repo
+          --config /repo/.gitleaks.toml --no-banner --redact --log-opts=--all
+      - name: Stop only the task-owned stack
+        if: always()
+        shell: pwsh
+        run: |
+          $workspace = Join-Path ([IO.Path]::GetTempPath()) 'tricgabay-batch4-isolated'
+          if (Test-Path (Join-Path $workspace 'supabase/config.toml')) {
+            npx --yes supabase@2.121.0 stop --workdir $workspace --no-backup
+          }
 

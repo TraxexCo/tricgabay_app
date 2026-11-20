@@ -1,3 +1,5 @@
+import 'package:tricgabay_app/core/l10n/feedback_category.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,26 +18,28 @@ class RatingsFeedbackScreen extends ConsumerWidget {
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F8FB),
         appBar: AppBar(
-          title: const Text('Ratings & Feedback'),
-          bottom: const TabBar(
+          title: Text(context.l10n.ratingsFeedback),
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Reviews'),
-              Tab(text: 'System Feedback'),
+              Tab(text: context.l10n.reviews),
+              Tab(text: context.l10n.systemFeedback),
             ],
           ),
         ),
-        body: TabBarView(children: [_buildReviewsList(), _buildFeedbackList()]),
+        body: TabBarView(
+          children: [_buildReviewsList(context), _buildFeedbackList()],
+        ),
       ),
     );
   }
 
-  Widget _buildReviewsList() {
+  Widget _buildReviewsList(BuildContext context) {
     final reviews = PrototypeSession.bookings.value
         .where((b) => b.status == BookingStatus.completed)
         .toList();
 
     if (reviews.isEmpty) {
-      return const Center(child: Text('No reviews found.'));
+      return Center(child: Text(context.l10n.noReviewsFound));
     }
 
     return ListView.builder(
@@ -54,7 +58,7 @@ class RatingsFeedbackScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      review.touristName,
+                      context.message(review.touristName),
                       style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                     ),
                     Row(
@@ -70,7 +74,11 @@ class RatingsFeedbackScreen extends ConsumerWidget {
                   ],
                 ),
                 Text(
-                  'Driver: ${review.driverName ?? 'Unknown'}',
+                  context.l10n.driverValue(
+                    context.message(
+                      (review.driverName ?? MessageCode.unknown).toString(),
+                    ),
+                  ),
                   style: GoogleFonts.poppins(
                     color: AppColors.textSecondary,
                     fontSize: 12,
@@ -78,7 +86,7 @@ class RatingsFeedbackScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Great ride, very knowledgeable about Bustos!',
+                  context.l10n.greatRideVeryKnowledgeableAboutBustos,
                   style: GoogleFonts.poppins(),
                 ),
                 const SizedBox(height: 8),
@@ -86,8 +94,8 @@ class RatingsFeedbackScreen extends ConsumerWidget {
                   alignment: Alignment.centerRight,
                   child: TextButton.icon(
                     onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Review flagged for follow-up'),
+                      SnackBar(
+                        content: Text(context.l10n.reviewFlaggedForFollowUp),
                       ),
                     ),
                     icon: const Icon(
@@ -95,8 +103,8 @@ class RatingsFeedbackScreen extends ConsumerWidget {
                       size: 16,
                       color: AppColors.danger,
                     ),
-                    label: const Text(
-                      'Flag',
+                    label: Text(
+                      context.l10n.flag,
                       style: TextStyle(color: AppColors.danger),
                     ),
                   ),
@@ -114,7 +122,7 @@ class RatingsFeedbackScreen extends ConsumerWidget {
       valueListenable: PrototypeSession.adminFeedbacks,
       builder: (context, feedbacks, child) {
         if (feedbacks.isEmpty) {
-          return const Center(child: Text('No system feedback found.'));
+          return Center(child: Text(context.l10n.noSystemFeedbackFound));
         }
 
         return ListView.builder(
@@ -130,17 +138,27 @@ class RatingsFeedbackScreen extends ConsumerWidget {
                   child: Icon(Icons.bug_report, color: Colors.white),
                 ),
                 title: Text(
-                  '${fb['category'] ?? 'Feedback'} from ${fb['tourist_name'] ?? 'Unknown'}',
+                  context.l10n.fromValue(
+                    FeedbackCategory.fromWire(
+                      (fb['category'] ?? '').toString(),
+                    ).label(context),
+                    context.message(
+                      (fb['tourist_name'] ?? MessageCode.unknown).toString(),
+                    ),
+                  ),
                   style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                 ),
-                subtitle: Text('${fb['message'] ?? ''}'),
+                subtitle: Text(context.message('${fb['message'] ?? ''}')),
                 trailing: IconButton(
+                  tooltip: context.l10n.markResolved,
                   icon: const Icon(
                     Icons.check_circle_outline,
                     color: AppColors.success,
                   ),
                   onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Feedback marked resolved')),
+                    SnackBar(
+                      content: Text(context.l10n.feedbackMarkedResolved),
+                    ),
                   ),
                 ),
               ),

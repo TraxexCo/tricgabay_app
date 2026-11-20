@@ -1,3 +1,5 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -26,7 +28,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (!BackendConfig.isConfigured) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Server setup is incomplete.')),
+        SnackBar(content: Text(context.l10n.serverSetupIsIncomplete)),
       );
       return;
     }
@@ -47,9 +49,11 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
       if (mounted) context.go('/admin/dashboard');
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.toString())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.message(ErrorMessages.forError(error))),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -79,7 +83,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                   const AppLogo(size: 112, showShadow: true),
                   const SizedBox(height: 24),
                   Text(
-                    'Admin Portal',
+                    context.l10n.adminPortal,
                     style: GoogleFonts.poppins(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -87,7 +91,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                     ),
                   ),
                   Text(
-                    'Tric Gabay Management System',
+                    context.l10n.appManagementSystem(AppBrand.name),
                     style: GoogleFonts.poppins(color: Colors.white70),
                   ),
                   const SizedBox(height: 48),
@@ -101,28 +105,28 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                       children: [
                         AppTextField(
                           controller: _emailController,
-                          label: 'Admin Email',
+                          label: context.l10n.adminEmail,
                           prefixIcon: Icons.email,
                           validator: (value) =>
                               value == null || value.trim().isEmpty
-                              ? 'Enter an admin email'
+                              ? MessageCode.enterAnAdminEmail
                               : null,
                         ),
                         const SizedBox(height: 16),
                         AppTextField(
                           controller: _passwordController,
-                          label: 'Password',
+                          label: context.l10n.password,
                           prefixIcon: Icons.lock,
                           obscureText: true,
                           validator: (value) => value == null || value.isEmpty
-                              ? 'Enter your password'
+                              ? MessageCode.enterYourPassword
                               : null,
                         ),
                         const SizedBox(height: 32),
                         SizedBox(
                           width: double.infinity,
                           child: AppButton(
-                            label: 'Login as Admin',
+                            label: context.l10n.loginAsAdmin,
                             isLoading: _loading,
                             onPressed: _login,
                           ),
@@ -134,7 +138,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                   TextButton(
                     onPressed: () => context.go('/login'),
                     child: Text(
-                      'Back to User Login',
+                      context.l10n.backToUserLogin,
                       style: GoogleFonts.poppins(color: Colors.white70),
                     ),
                   ),

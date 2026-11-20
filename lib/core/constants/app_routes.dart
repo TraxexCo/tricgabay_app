@@ -50,6 +50,7 @@ class AppRoutes {
   static const String driverNotifications = '/driver/notifications';
   static const String driverEditProfile = '/driver/profile/edit';
   static const String driverEmergency = '/driver/emergency';
+  static const String driverFeedback = '/driver/feedback';
 
   // Admin shell
   static const String adminShell = '/admin';

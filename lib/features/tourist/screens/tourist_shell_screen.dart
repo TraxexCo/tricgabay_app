@@ -1,5 +1,5 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/role_navigation_bar.dart';
 
@@ -14,11 +14,9 @@ class TouristShellScreen extends StatefulWidget {
 
 class _TouristShellScreenState extends State<TouristShellScreen> {
   final List<int> _tabHistory = [0];
-  DateTime? _lastBackPressed;
 
   void _rememberTab(int index) {
     if (_tabHistory.last == index) return;
-    _tabHistory.remove(index);
     _tabHistory.add(index);
   }
 
@@ -37,27 +35,6 @@ class _TouristShellScreenState extends State<TouristShellScreen> {
       widget.navigationShell.goBranch(_tabHistory.last);
       return;
     }
-
-    final now = DateTime.now();
-    final shouldExit =
-        _lastBackPressed != null &&
-        now.difference(_lastBackPressed!) < const Duration(seconds: 2);
-
-    if (shouldExit) {
-      SystemNavigator.pop();
-      return;
-    }
-
-    _lastBackPressed = now;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('Press back again to exit'),
-          behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 2),
-        ),
-      );
   }
 
   @override
@@ -65,7 +42,8 @@ class _TouristShellScreenState extends State<TouristShellScreen> {
     _rememberTab(widget.navigationShell.currentIndex);
 
     return PopScope(
-      canPop: false,
+      canPop:
+          _tabHistory.length == 1 && widget.navigationShell.currentIndex == 0,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) _handleBack();
       },
@@ -75,26 +53,26 @@ class _TouristShellScreenState extends State<TouristShellScreen> {
         bottomNavigationBar: RoleNavigationBar(
           currentIndex: widget.navigationShell.currentIndex,
           onSelected: _selectTab,
-          destinations: const [
+          destinations: [
             RoleNavigationDestination(
               icon: Icons.explore_outlined,
               selectedIcon: Icons.explore,
-              label: 'Explore',
+              label: context.l10n.explore,
             ),
             RoleNavigationDestination(
               icon: Icons.search_outlined,
               selectedIcon: Icons.search,
-              label: 'Discover',
+              label: context.l10n.discover,
             ),
             RoleNavigationDestination(
               icon: Icons.luggage_outlined,
               selectedIcon: Icons.luggage,
-              label: 'Trips',
+              label: context.l10n.trips,
             ),
             RoleNavigationDestination(
               icon: Icons.person_outline,
               selectedIcon: Icons.person,
-              label: 'Account',
+              label: context.l10n.account,
             ),
           ],
         ),

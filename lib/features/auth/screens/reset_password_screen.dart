@@ -1,3 +1,5 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -35,14 +37,16 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       await AuthService.updateRecoveredPassword(_password.text);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password updated. Sign in again.')),
+        SnackBar(content: Text(context.l10n.passwordUpdatedSignInAgain)),
       );
       context.go(AppRoutes.login);
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$error')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.message(ErrorMessages.forError(error))),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -53,7 +57,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('Create a new password')),
+      appBar: AppBar(title: Text(context.l10n.createANewPassword)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -63,37 +67,40 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Secure your account',
+                  context.l10n.secureYourAccount,
                   style: GoogleFonts.poppins(
                     fontSize: 26,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Use at least eight characters. Avoid a password you use on another service.',
+                Text(
+                  context
+                      .l10n
+                      .useAtLeastEightCharactersAvoidAPasswordYouUseOnAnotherService,
                 ),
                 const SizedBox(height: 28),
                 AppTextField(
                   controller: _password,
-                  label: 'New password',
+                  label: context.l10n.newPassword,
                   obscureText: true,
                   validator: (value) => value == null || value.length < 8
-                      ? 'Use at least 8 characters'
+                      ? MessageCode.useAtLeast8Characters
                       : null,
                 ),
                 const SizedBox(height: 16),
                 AppTextField(
                   controller: _confirm,
-                  label: 'Confirm new password',
+                  label: context.l10n.confirmNewPassword,
                   obscureText: true,
                   textInputAction: TextInputAction.done,
-                  validator: (value) =>
-                      value != _password.text ? 'Passwords do not match' : null,
+                  validator: (value) => value != _password.text
+                      ? MessageCode.passwordsDoNotMatch
+                      : null,
                 ),
                 const SizedBox(height: 28),
                 AppButton(
-                  label: 'Update password',
+                  label: context.l10n.updatePassword,
                   isLoading: _saving,
                   onPressed: _save,
                 ),

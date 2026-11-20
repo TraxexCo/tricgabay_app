@@ -1,3 +1,4 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -17,30 +18,24 @@ class FavoritesScreen extends StatelessWidget {
             .where((spot) => favoriteIds.contains(spot.id))
             .toList();
         return Scaffold(
-          backgroundColor: const Color(0xFFF5F8FB),
-          appBar: AppBar(
-            title: Text(
-              'Saved Places',
-              style: GoogleFonts.poppins(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            backgroundColor: AppColors.surface,
-            iconTheme: const IconThemeData(color: AppColors.textPrimary),
-          ),
+          appBar: AppBar(title: Text(context.l10n.savedPlaces)),
           body: favorites.isEmpty
-              ? const EmptyStateWidget(
+              ? EmptyStateWidget(
                   icon: Icons.favorite_border_rounded,
-                  title: 'Save places you love',
+                  title: context.l10n.savePlacesYouLove,
                   subtitle:
-                      'Tap the heart on any tourist spot to keep it here.',
+                      context.l10n.tapTheHeartOnAnyTouristSpotToKeepItHere,
                 )
               : GridView.builder(
                   padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.75, // adjusted for the new button
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount:
+                        MediaQuery.sizeOf(context).width < 360 ||
+                            MediaQuery.textScalerOf(context).scale(14) > 20
+                        ? 1
+                        : 2,
+                    mainAxisExtent:
+                        240 + MediaQuery.textScalerOf(context).scale(14) * 5,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
                   ),
@@ -67,25 +62,17 @@ class FavoritesScreen extends StatelessWidget {
                                   Positioned(
                                     top: 8,
                                     right: 8,
-                                    child: GestureDetector(
-                                      onTap: () =>
+                                    child: IconButton(
+                                      tooltip: context.l10n.removeSavedPlace,
+                                      onPressed: () =>
                                           PrototypeSession.toggleFavorite(
                                             spot.id,
                                           ),
-                                      child: Container(
-                                        padding: const EdgeInsets.all(6),
-                                        decoration: BoxDecoration(
-                                          color: Colors.red.withValues(
-                                            alpha: 0.9,
-                                          ),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.favorite_rounded,
-                                          color: Colors.white,
-                                          size: 16,
-                                        ),
+                                      style: IconButton.styleFrom(
+                                        backgroundColor: AppColors.danger,
+                                        foregroundColor: Colors.white,
                                       ),
+                                      icon: const Icon(Icons.favorite_rounded),
                                     ),
                                   ),
                                 ],
@@ -97,7 +84,7 @@ class FavoritesScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    spot.name,
+                                    context.message(spot.name),
                                     style: GoogleFonts.poppins(
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -105,7 +92,7 @@ class FavoritesScreen extends StatelessWidget {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   Text(
-                                    spot.categoryLabel,
+                                    context.message(spot.categoryLabel),
                                     style: GoogleFonts.poppins(
                                       color: AppColors.textSecondary,
                                       fontSize: 12,
@@ -122,11 +109,11 @@ class FavoritesScreen extends StatelessWidget {
                                       PrototypeSession.toggleItinerary(spot);
                                       AppSnackbar.showSuccess(
                                         context,
-                                        'Added to itinerary!',
+                                        MessageCode.addedToItinerary,
                                       );
                                     },
-                                    child: const Text(
-                                      '+ Add to Trip',
+                                    child: Text(
+                                      context.l10n.addToTrip,
                                       style: TextStyle(fontSize: 11),
                                     ),
                                   ),

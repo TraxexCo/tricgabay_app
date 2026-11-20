@@ -1,11 +1,14 @@
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/server_clock.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/prototype/prototype_session.dart';
 import '../../../core/services/trip_rules.dart';
-import '../../../core/services/backend_repository.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../models/booking_model.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../../../core/constants/app_colors.dart';
 
 class FareSummaryScreen extends StatefulWidget {
   const FareSummaryScreen({super.key});
@@ -37,41 +40,39 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
 
   String _scheduleLabel(BuildContext context) {
     final value = _scheduledAt;
-    if (value == null) return 'Request a driver now';
-    final local = value.toLocal();
-    final material = MaterialLocalizations.of(context);
-    return '${material.formatMediumDate(local)} at ${material.formatTimeOfDay(TimeOfDay.fromDateTime(local))}';
+    if (value == null) return MessageCode.requestADriverNow;
+    return ServerClock.formatManila(value);
   }
 
   Future<void> _chooseSchedule() async {
-    final now = DateTime.now();
-    final initial = _scheduledAt ?? now.add(const Duration(hours: 2));
+    final now = ServerClock.manila(ServerClock.now());
+    final initial = _scheduledAt == null
+        ? now.add(const Duration(hours: 2))
+        : ServerClock.manila(_scheduledAt!);
     final date = await showDatePicker(
       context: context,
       initialDate: initial,
       firstDate: now,
       lastDate: now.add(const Duration(days: 30)),
-      helpText: 'Choose pickup date',
+      helpText: context.l10n.choosePickupDate,
     );
     if (date == null || !mounted) return;
     final time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(initial),
-      helpText: 'Choose pickup time',
+      helpText: context.l10n.choosePickupTime,
     );
     if (time == null || !mounted) return;
-    final chosen = DateTime(
+    final chosen = ServerClock.fromManila(
       date.year,
       date.month,
       date.day,
       time.hour,
       time.minute,
     );
-    if (chosen.isBefore(DateTime.now().add(const Duration(hours: 1)))) {
+    if (chosen.isBefore(ServerClock.now().add(const Duration(hours: 1)))) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Schedule pickup at least 1 hour from now.'),
-        ),
+        SnackBar(content: Text(context.l10n.schedulePickupAtLeast1HourFromNow)),
       );
       return;
     }
@@ -102,24 +103,26 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
       final package = PrototypeSession.activePackage;
       final fare = PrototypeSession.estimatedFare;
       return Scaffold(
-        appBar: AppBar(title: const Text('Review your booking')),
+        appBar: AppBar(title: Text(context.l10n.reviewYourBooking)),
         body: ListView(
           padding: const EdgeInsets.all(20),
           children: [
             Text(
-              package?.name ?? 'Custom tour',
+              context.message(package?.name ?? MessageCode.customTour),
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Card(
               child: ListTile(
                 leading: const Icon(Icons.lock_outline),
-                title: const Text('Fixed fare for this route'),
-                subtitle: const Text(
-                  'No distance, waiting or surge additions. Entrance fees and purchases are separate.',
+                title: Text(context.l10n.fixedFareForThisRoute),
+                subtitle: Text(
+                  context
+                      .l10n
+                      .noDistanceWaitingOrSurgeAdditionsEntranceFeesAndPurchasesAreSeparate,
                 ),
                 trailing: Text(
-                  '₱${fare.toStringAsFixed(2)}',
+                  context.message('₱${AppFormatters.amount(fare)}'),
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -131,12 +134,14 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
             Card(
               child: ListTile(
                 leading: const Icon(Icons.location_on_outlined),
-                title: const Text('Pickup point'),
+                title: Text(context.l10n.pickupPoint),
                 subtitle: Text(
-                  PrototypeSession.customPickupAddress.value ??
-                      (PrototypeSession.userLatitude.value == null
-                          ? 'Choose an exact pickup point before booking'
-                          : 'Current GPS location'),
+                  context.message(
+                    PrototypeSession.customPickupAddress.value ??
+                        (PrototypeSession.userLatitude.value == null
+                            ? MessageCode.chooseAnExactPickupPointBeforeBooking
+                            : MessageCode.currentGpsLocation),
+                  ),
                 ),
                 trailing: const Icon(Icons.edit_location_alt_outlined),
                 onTap: () async {
@@ -156,9 +161,13 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                           : Icons.event_available_outlined,
                     ),
                     title: Text(
-                      _scheduledAt == null ? 'Book now' : 'Scheduled pickup',
+                      context.message(
+                        _scheduledAt == null
+                            ? MessageCode.bookNow
+                            : MessageCode.scheduledPickup,
+                      ),
                     ),
-                    subtitle: Text(_scheduleLabel(context)),
+                    subtitle: Text(context.message(_scheduleLabel(context))),
                     trailing: const Icon(Icons.edit_calendar_outlined),
                     onTap: _busy ? null : _chooseSchedule,
                   ),
@@ -167,9 +176,11 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                       child: Row(
                         children: [
-                          const Expanded(
+                          Expanded(
                             child: Text(
-                              'Driver matching begins 30 minutes before pickup.',
+                              context
+                                  .l10n
+                                  .driverMatchingBegins30MinutesBeforePickup,
                             ),
                           ),
                           TextButton(
@@ -179,7 +190,7 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                                     _scheduledAt = null;
                                     _agreed = false;
                                   }),
-                            child: const Text('Use now'),
+                            child: Text(context.l10n.useNow),
                           ),
                         ],
                       ),
@@ -188,40 +199,52 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Included stops',
+            Text(
+              context.l10n.includedStops,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             if (spots.isEmpty)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(16),
-                child: Text('Select at least one destination first.'),
+                child: Text(context.l10n.selectAtLeastOneDestinationFirst),
               ),
             ...spots.asMap().entries.map(
               (entry) => ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: CircleAvatar(child: Text('${entry.key + 1}')),
-                title: Text(entry.value.name),
+                leading: CircleAvatar(
+                  child: Text(context.message('${entry.key + 1}')),
+                ),
+                title: Text(context.message(entry.value.name)),
               ),
             ),
             const Divider(height: 32),
-            const Text(
-              'Passenger requirements',
+            Text(
+              context.l10n.passengerRequirements,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<int>(
               initialValue: _passengerCount,
-              decoration: const InputDecoration(
-                labelText: 'Passengers',
-                helperText:
-                    'Maximum capacity is checked before offering the booking.',
+              decoration: InputDecoration(
+                labelText: context.l10n.passengers,
+                helperText: context
+                    .l10n
+                    .maximumCapacityIsCheckedBeforeOfferingTheBooking,
                 border: OutlineInputBorder(),
               ),
-              items: const [
-                DropdownMenuItem(value: 1, child: Text('1 passenger')),
-                DropdownMenuItem(value: 2, child: Text('2 passengers')),
-                DropdownMenuItem(value: 3, child: Text('3 passengers')),
+              items: [
+                DropdownMenuItem(
+                  value: 1,
+                  child: Text(context.l10n.onePassenger),
+                ),
+                DropdownMenuItem(
+                  value: 2,
+                  child: Text(context.l10n.twoPassengers),
+                ),
+                DropdownMenuItem(
+                  value: 3,
+                  child: Text(context.l10n.threePassengers),
+                ),
               ],
               onChanged: _busy
                   ? null
@@ -233,11 +256,14 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
               enabled: !_busy,
               maxLength: 300,
               maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Luggage or bulky items',
-                hintText: 'Example: two backpacks and one folding stroller',
+              decoration: InputDecoration(
+                labelText: context.l10n.luggageOrBulkyItems,
+                hintText: context.l10n.exampleTwoBackpacksAndOneFoldingStroller,
                 border: OutlineInputBorder(),
               ),
+              onTapOutside: (_) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
+              scrollPadding: const EdgeInsets.all(96),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -245,27 +271,48 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
               enabled: !_busy,
               maxLength: 300,
               maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Accessibility or assistance needs',
-                hintText: 'Example: senior passenger needs extra boarding time',
+              decoration: InputDecoration(
+                labelText: context.l10n.accessibilityOrAssistanceNeeds,
+                hintText:
+                    context.l10n.exampleSeniorPassengerNeedsExtraBoardingTime,
                 border: OutlineInputBorder(),
               ),
+              onTapOutside: (_) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
+              scrollPadding: const EdgeInsets.all(96),
             ),
             const Divider(height: 32),
             SegmentedButton<PaymentMethod>(
+              direction: MediaQuery.sizeOf(context).width < 460
+                  ? Axis.vertical
+                  : Axis.horizontal,
+              style: const ButtonStyle(
+                foregroundColor: WidgetStatePropertyAll(Color(0xFF1A1A2E)),
+                textStyle: WidgetStatePropertyAll(
+                  TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+              ),
               segments: [
-                const ButtonSegment(
+                ButtonSegment(
                   value: PaymentMethod.cash,
                   icon: Icon(Icons.payments_outlined),
-                  label: Text('Cash'),
+                  label: Text(context.l10n.cash),
+                ),
+                ButtonSegment(
+                  value: PaymentMethod.gcashDirect,
+                  icon: const Icon(Icons.phone_android_outlined),
+                  label: Text(context.l10n.gcashSendToDriver),
+                  enabled: BackendConfig.isConfigured,
                 ),
                 ButtonSegment(
                   value: PaymentMethod.online,
                   icon: const Icon(Icons.account_balance_wallet_outlined),
                   label: Text(
-                    BackendConfig.isConfigured
-                        ? 'PayMongo'
-                        : 'PayMongo unavailable',
+                    context.message(
+                      BackendConfig.isConfigured
+                          ? MessageCode.paymongo
+                          : MessageCode.paymongoUnavailable,
+                    ),
                   ),
                   enabled: BackendConfig.isConfigured,
                 ),
@@ -278,17 +325,39 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              _paymentMethod == PaymentMethod.cash
-                  ? 'Pay the final amount after the trip. Tourist and driver must both confirm the cash handover.'
-                  : 'You will be sent to PayMongo test checkout. Payment is confirmed only after the secure webhook reaches Tric-Gabay.',
+              context.message(switch (_paymentMethod) {
+                PaymentMethod.gcashDirect => context.l10n.gcashAfterTrip,
+                PaymentMethod.online =>
+                  MessageCode
+                      .youWillBeSentToPaymongoTestCheckoutPaymentIsConfirmedOnlyAfter,
+                _ =>
+                  MessageCode
+                      .payTheFinalAmountAfterTheTripTouristAndDriverMustBothConfirm,
+              }),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'If plans change',
+            Text(
+              context.l10n.ifPlansChange,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(TripRules.policyText),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  context.message(TripRules.policyText),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: 12),
             CheckboxListTile(
               contentPadding: EdgeInsets.zero,
@@ -296,8 +365,8 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
               onChanged: _busy
                   ? null
                   : (v) => setState(() => _agreed = v ?? false),
-              title: const Text(
-                'I agree to the fixed fare and cancellation/payment policy.',
+              title: Text(
+                context.l10n.iAgreeToTheFixedFareAndCancellationPaymentPolicy,
               ),
               controlAffinity: ListTileControlAffinity.leading,
             ),
@@ -323,19 +392,12 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                           expectedFareRevision: revision,
                         );
                         if (_paymentMethod == PaymentMethod.online) {
-                          final checkoutUrl =
-                              await BackendRepository.createCheckout(
-                                booking.id,
-                              );
-                          final opened = await launchUrl(
-                            Uri.parse(checkoutUrl),
-                            mode: LaunchMode.externalApplication,
-                          );
-                          if (!opened) {
-                            throw StateError(
-                              'Could not open the secure PayMongo checkout.',
+                          if (context.mounted) {
+                            context.pushReplacement(
+                              '/tourist/bookings/${booking.id}',
                             );
                           }
+                          return;
                         }
                         if (context.mounted) {
                           context.pushReplacement(
@@ -345,18 +407,26 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                       } catch (e) {
                         if (context.mounted) {
                           setState(() => _agreed = false);
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(SnackBar(content: Text('$e')));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                context.message(ErrorMessages.forError(e)),
+                              ),
+                            ),
+                          );
                         }
                       } finally {
                         if (mounted) setState(() => _busy = false);
                       }
                     },
               child: Text(
-                _busy
-                    ? 'Saving booking…'
-                    : 'Book for ₱${fare.toStringAsFixed(2)}',
+                context.message(
+                  _busy
+                      ? MessageCode.savingBooking
+                      : MessageCode.bookForValue(
+                          (AppFormatters.amount(fare)).toString(),
+                        ),
+                ),
               ),
             ),
           ),

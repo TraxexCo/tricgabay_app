@@ -1,3 +1,4 @@
+import 'package:tricgabay_app/core/l10n/message_codes.g.dart';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -164,7 +165,7 @@ class OfflineStateStore {
     Map<String, dynamic> payload = const {},
   }) async {
     if (!_safeCommandTypes.contains(type)) {
-      throw StateError('$type is not safe for offline replay.');
+      throw StateError(MessageCode.offlineReplayUnsafe);
     }
     await initialize();
     final commands = await _readQueue(userId);

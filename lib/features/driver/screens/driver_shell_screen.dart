@@ -1,5 +1,5 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/role_navigation_bar.dart';
 
@@ -13,11 +13,9 @@ class DriverShellScreen extends StatefulWidget {
 
 class _DriverShellScreenState extends State<DriverShellScreen> {
   final List<int> _tabHistory = [0];
-  DateTime? _lastBackPressed;
 
   void _rememberTab(int index) {
     if (_tabHistory.last == index) return;
-    _tabHistory.remove(index);
     _tabHistory.add(index);
   }
 
@@ -34,29 +32,14 @@ class _DriverShellScreenState extends State<DriverShellScreen> {
       widget.navigationShell.goBranch(_tabHistory.last);
       return;
     }
-    final now = DateTime.now();
-    if (_lastBackPressed != null &&
-        now.difference(_lastBackPressed!) < const Duration(seconds: 2)) {
-      SystemNavigator.pop();
-      return;
-    }
-    _lastBackPressed = now;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('Press back again to exit'),
-          behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 2),
-        ),
-      );
   }
 
   @override
   Widget build(BuildContext context) {
     _rememberTab(widget.navigationShell.currentIndex);
     return PopScope(
-      canPop: false,
+      canPop:
+          _tabHistory.length == 1 && widget.navigationShell.currentIndex == 0,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) _handleBack();
       },
@@ -66,26 +49,26 @@ class _DriverShellScreenState extends State<DriverShellScreen> {
         bottomNavigationBar: RoleNavigationBar(
           currentIndex: widget.navigationShell.currentIndex,
           onSelected: _selectTab,
-          destinations: const [
+          destinations: [
             RoleNavigationDestination(
               icon: Icons.radar_outlined,
               selectedIcon: Icons.radar,
-              label: 'Ride',
+              label: context.l10n.ride,
             ),
             RoleNavigationDestination(
               icon: Icons.assignment_outlined,
               selectedIcon: Icons.assignment,
-              label: 'Jobs',
+              label: context.l10n.jobs,
             ),
             RoleNavigationDestination(
               icon: Icons.insights_outlined,
               selectedIcon: Icons.insights,
-              label: 'Earnings',
+              label: context.l10n.earnings,
             ),
             RoleNavigationDestination(
               icon: Icons.person_outline,
               selectedIcon: Icons.person,
-              label: 'Account',
+              label: context.l10n.account,
             ),
           ],
         ),

@@ -1,9 +1,16 @@
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/widgets/remote_page_controls.dart';
+import '../../../core/widgets/list_skeleton.dart';
+import '../../../core/services/realtime_refresh_policy.dart';
+import '../../../core/services/server_clock.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/prototype/prototype_session.dart';
 import '../../../models/booking_model.dart';
+import '../../../core/l10n/record_labels.dart';
 
 class DriverBookingsScreen extends StatefulWidget {
   const DriverBookingsScreen({super.key});
@@ -18,13 +25,42 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
   @override
   void initState() {
     super.initState();
-    _clock = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) setState(() {});
+    PrototypeSession.bookings.addListener(_scheduleExpiry);
+    _scheduleExpiry();
+  }
+
+  void _scheduleExpiry() {
+    _clock?.cancel();
+    final now = ServerClock.now();
+    DateTime? next;
+    for (final booking in PrototypeSession.bookings.value) {
+      if (booking.status != BookingStatus.pending ||
+          booking.isDispatchExpired ||
+          booking.isOfferExpired) {
+        continue;
+      }
+      for (final deadline in [
+        booking.dispatchExpiresAt,
+        booking.offerExpiresAt,
+      ]) {
+        if (deadline != null &&
+            deadline.isAfter(now) &&
+            (next == null || deadline.isBefore(next))) {
+          next = deadline;
+        }
+      }
+    }
+    if (next == null) return;
+    _clock = Timer(next.difference(now), () {
+      if (!mounted) return;
+      setState(() {});
+      _scheduleExpiry();
     });
   }
 
   @override
   void dispose() {
+    PrototypeSession.bookings.removeListener(_scheduleExpiry);
     _clock?.cancel();
     super.dispose();
   }
@@ -33,13 +69,14 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
   Widget build(BuildContext context) => DefaultTabController(
     length: 3,
     child: Scaffold(
+      bottomNavigationBar: const RemotePageControls(directory: false),
       appBar: AppBar(
-        title: const Text('Driver bookings'),
-        bottom: const TabBar(
+        title: Text(context.l10n.driverBookings),
+        bottom: TabBar(
           tabs: [
-            Tab(text: 'Requests'),
-            Tab(text: 'Active'),
-            Tab(text: 'History'),
+            Tab(text: context.l10n.requests),
+            Tab(text: context.l10n.active),
+            Tab(text: context.l10n.history),
           ],
         ),
       ),
@@ -48,8 +85,15 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
           PrototypeSession.bookings,
           PrototypeSession.isDriverOnline,
           PrototypeSession.adminDrivers,
+          PrototypeSession.loadingSections,
         ]),
         builder: (context, _) {
+          if (PrototypeSession.bookings.value.isEmpty &&
+              PrototypeSession.loadingSections.value.contains(
+                RemoteSection.bookings,
+              )) {
+            return const ListSkeleton();
+          }
           final own = PrototypeSession.bookings.value
               .where(PrototypeSession.ownsDriverBooking)
               .toList();
@@ -76,11 +120,13 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
                           .toList(),
                       request: true,
                     )
-                  : const Center(
+                  : Center(
                       child: Padding(
                         padding: EdgeInsets.all(24),
                         child: Text(
-                          'Go online with an approved account and finish your current trip to accept a new request.',
+                          context
+                              .l10n
+                              .goOnlineWithAnApprovedAccountAndFinishYourCurrentTripToAccept,
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -99,34 +145,48 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
     bool request = false,
   }) {
     if (bookings.isEmpty) {
-      return const Center(child: Text('No bookings here yet.'));
+      return Center(child: Text(context.l10n.noBookingsHereYet));
     }
-    return ListView(
+    return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
-      children: bookings
-          .map(
-            (b) => Card(
-              child: ListTile(
-                title: Text(
-                  b.trip.packageName ?? '${b.stops.length} stop custom tour',
-                ),
-                subtitle: Text(
-                  '${b.touristName} · ${b.status.name}\n${b.trip.reviewRequired ? "Payment review pending" : b.pickupAddress}',
-                ),
-                isThreeLine: true,
-                trailing: Text(
-                  'Agreed\n₱${b.totalFare.toStringAsFixed(2)}',
-                  textAlign: TextAlign.end,
-                ),
-                onTap: () => context.push(
-                  request
-                      ? '/driver/incoming/${b.id}'
-                      : '/driver/bookings/${b.id}',
+      itemCount: bookings.length,
+      itemBuilder: (context, index) {
+        final b = bookings[index];
+        return Card(
+          child: ListTile(
+            title: Text(
+              context.message(
+                b.trip.packageName ??
+                    MessageCode.stopCustomTourValue(
+                      (b.stops.length).toString(),
+                    ),
+              ),
+            ),
+            subtitle: Text(
+              context.l10n.threeLineSummary(
+                context.message((b.touristName).toString()),
+                context.message(bookingStatusLabel(context, b.status)),
+                context.message(
+                  (b.trip.reviewRequired
+                          ? context.l10n.paymentReviewPending
+                          : b.pickupAddress)
+                      .toString(),
                 ),
               ),
             ),
-          )
-          .toList(),
+            isThreeLine: true,
+            trailing: Text(
+              context.l10n.agreedValue(
+                context.message((AppFormatters.amount(b.totalFare)).toString()),
+              ),
+              textAlign: TextAlign.end,
+            ),
+            onTap: () => context.push(
+              request ? '/driver/incoming/${b.id}' : '/driver/bookings/${b.id}',
+            ),
+          ),
+        );
+      },
     );
   }
 }

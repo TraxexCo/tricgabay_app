@@ -1,150 +1,225 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { json, message } from "../_shared/http.ts";
+import { requireEnabledMode, webhookMode } from "../_shared/provider_mode.ts";
+import { createClient } from "@supabase/supabase-js";
+import { json } from "../_shared/http.ts";
+import { verifyPayMongoSignature } from "../_shared/paymongo_webhook_auth.ts";
+import { providerPaymentIdForRefundResource } from "../_shared/paymongo_refund.ts";
 
-async function requireSuccess<T>(
-  request: PromiseLike<{ data: T; error: unknown }>,
-): Promise<T> {
-  const result = await request;
-  if (result.error) throw result.error;
-  return result.data;
-}
+type JsonObject = Record<string, unknown>;
+type ProviderPayment = {
+  id?: string;
+  attributes?: {
+    status?: string;
+    amount?: number;
+    currency?: string;
+    paid_at?: number;
+  };
+};
 
-function bytesToHex(bytes: ArrayBuffer): string {
-  return [...new Uint8Array(bytes)].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let result = 0;
-  for (let i = 0; i < a.length; i++) result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return result === 0;
-}
-
-async function verifySignature(raw: string, header: string, secret: string): Promise<boolean> {
-  const parts = Object.fromEntries(header.split(",").map((part) => part.trim().split("=", 2)));
-  const timestamp = parts.t;
-  const testSignature = parts.te;
-  if (!timestamp || !testSignature) return false;
-  if (Math.abs(Date.now() / 1000 - Number(timestamp)) > 300) return false;
-  const key = await crypto.subtle.importKey(
-    "raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
-  );
-  const signed = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${timestamp}.${raw}`));
-  return timingSafeEqual(bytesToHex(signed), testSignature);
-}
+const object = (value: unknown): JsonObject | null =>
+  value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value as JsonObject
+    : null;
 
 Deno.serve(async (request) => {
-  if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (request.method !== "POST") {
+    return json({ error: "Method not allowed" }, 405);
+  }
+  const correlationId = crypto.randomUUID();
   const raw = await request.text();
   try {
-    const webhookSecret = Deno.env.get("PAYMONGO_TEST_WEBHOOK_SECRET") ?? "";
-    const signature = request.headers.get("Paymongo-Signature") ?? "";
-    if (!webhookSecret || !(await verifySignature(raw, signature, webhookSecret))) {
-      return json({ error: "Invalid webhook signature" }, 401);
+    const payload = object(JSON.parse(raw));
+    const event = object(payload?.data);
+    const eventAttributes = object(event?.attributes);
+    const resource = object(eventAttributes?.data);
+    if (typeof eventAttributes?.livemode !== "boolean") {
+      return json({ error: "Invalid webhook mode" }, 400);
     }
-    const payload = JSON.parse(raw);
-    const event = payload.data;
-    if (event.attributes.livemode) return json({ error: "Live events are rejected by this test deployment." }, 409);
-
+    const mode = webhookMode(eventAttributes.livemode);
+    const webhookSecret = Deno.env.get(
+      mode === "test"
+        ? "PAYMONGO_TEST_WEBHOOK_SECRET"
+        : "PAYMONGO_LIVE_WEBHOOK_SECRET",
+    ) ?? "";
+    if (
+      !await verifyPayMongoSignature(
+        raw,
+        request.headers.get("Paymongo-Signature") ?? "",
+        webhookSecret,
+        mode,
+      )
+    ) {
+      return json({
+        error: "Invalid webhook signature",
+        correlation_id: correlationId,
+      }, 401);
+    }
+    const eventId = typeof event?.id === "string" ? event.id : "";
+    const eventType = typeof eventAttributes?.type === "string"
+      ? eventAttributes.type
+      : "";
+    if (
+      !payload || !event || !eventAttributes || !resource || !eventId ||
+      !eventType
+    ) {
+      return json({
+        error: "Invalid webhook event",
+        correlation_id: correlationId,
+      }, 400);
+    }
     const admin = createClient(
-      Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
-    const eventType = event.attributes.type as string;
-    const resource = event.attributes.data;
-    const { error: eventError } = await admin.from("payment_webhook_events").insert({
-      provider_event_id: event.id,
-      event_type: eventType,
-      livemode: false,
-      payload,
-    });
-    if (eventError?.code === "23505") return json({ received: true, duplicate: true });
-    if (eventError) throw eventError;
 
-    try {
-      const attributes = resource.attributes ?? {};
-      if (eventType === "checkout_session.payment.paid") {
-        const paidPayment = (attributes.payments ?? []).find(
-          (candidate: { attributes?: { status?: string } }) => candidate.attributes?.status === "paid",
-        );
-        const payment = await requireSuccess(admin.from("payments")
-          .select("id, booking_id, amount_centavos")
-          .eq("provider_checkout_id", resource.id)
-          .maybeSingle());
-        const paidAttributes = paidPayment?.attributes ?? {};
-        const amountMatches = paidAttributes.amount === payment?.amount_centavos;
-        const currencyMatches = paidAttributes.currency === "PHP";
-        if (payment && paidPayment && amountMatches && currencyMatches) {
-          await requireSuccess(admin.from("payments").update({
-            provider_payment_id: paidPayment.id,
-            provider_status: "paid",
-            provider_error_code: null,
-            provider_error_message: null,
-            provider_metadata: resource,
-            last_reconciled_at: new Date().toISOString(),
-            status: "paid",
-            paid_at: new Date((paidAttributes.paid_at ?? event.attributes.created_at) * 1000).toISOString(),
-          }).eq("id", payment.id));
-          await requireSuccess(
-            admin.from("bookings").update({ payment_status: "paid" }).eq("id", payment.booking_id),
-          );
-        } else if (payment) {
-          await requireSuccess(admin.from("payments").update({
-            provider_status: "amount_mismatch",
-            provider_error_message: "Webhook amount or currency did not match the fixed fare.",
-            provider_metadata: resource,
-            last_reconciled_at: new Date().toISOString(),
-          }).eq("id", payment.id));
-          await requireSuccess(admin.from("bookings").update({ payment_status: "under_review" }).eq("id", payment.booking_id));
-        }
-      } else if (eventType === "payment.failed") {
-        const checkoutId = attributes.checkout_session_id;
-        let paymentQuery = admin.from("payments").select("id, booking_id");
-        paymentQuery = checkoutId
-          ? paymentQuery.eq("provider_checkout_id", checkoutId)
-          : paymentQuery.eq("provider_payment_id", resource.id);
-        const payment = await requireSuccess(paymentQuery.maybeSingle());
-        if (payment) {
-          const failure = attributes.last_payment_error ?? attributes.failure_code ?? null;
-          await requireSuccess(admin.from("payments").update({
-            status: "failed",
-            provider_status: "failed",
-            provider_error_code: typeof failure === "string" ? failure : failure?.code ?? null,
-            provider_error_message: typeof failure === "string" ? null : failure?.message ?? null,
-            provider_metadata: resource,
-            last_reconciled_at: new Date().toISOString(),
-          }).eq("id", payment.id));
-          await requireSuccess(
-            admin.from("bookings").update({ payment_status: "failed" }).eq("id", payment.booking_id),
-          );
-        }
-      } else if (eventType === "payment.refunded" || eventType === "payment.refund.updated") {
-        const refunds = attributes.refunds ?? [resource];
-        for (const providerRefund of refunds) {
-          const providerStatus = providerRefund.attributes?.status ?? providerRefund.status ?? "processing";
-          const status = providerStatus === "succeeded" || providerStatus === "refunded" ? "succeeded" :
-            providerStatus === "failed" ? "failed" : "processing";
-          const { data: refund } = await admin.from("refunds").select("id")
-            .eq("provider_refund_id", providerRefund.id).maybeSingle();
-          if (refund) {
-            await requireSuccess(admin.rpc("finalize_paymongo_refund", {
-              p_refund_id: refund.id,
-              p_provider_refund_id: providerRefund.id,
-              p_provider_status: providerStatus,
-              p_status: status,
-              p_failure_reason: providerRefund.attributes?.failure_reason ?? null,
-              p_metadata: providerRefund,
-            }));
-          }
-        }
-      }
-      return json({ received: true });
-    } catch (processingError) {
-      // Release the idempotency reservation so PayMongo's retry can safely
-      // process an event that failed after it was first recorded.
-      await admin.from("payment_webhook_events").delete().eq("provider_event_id", event.id);
-      throw processingError;
+    const { data: modeSettings, error: modeError } = await admin.from(
+      "service_configuration",
+    ).select("live_payments_enabled").eq("singleton", true).single();
+    if (modeError) {
+      throw modeError;
     }
-  } catch (error) {
-    return json({ error: message(error) }, 500);
+    requireEnabledMode(mode, modeSettings.live_payments_enabled);
+    const attributes = object(resource.attributes) ?? {};
+    let result: JsonObject | null = null;
+
+    if (eventType === "checkout_session.payment.paid") {
+      const payments = Array.isArray(attributes.payments)
+        ? attributes.payments as ProviderPayment[]
+        : [];
+      const paid = payments.find((candidate) =>
+        candidate.attributes?.status === "paid"
+      );
+      const paidAt = paid?.attributes?.paid_at;
+      const { data, error } = await admin.rpc(
+        "process_paymongo_payment_event_in_mode",
+        {
+          p_provider_event_id: eventId,
+          p_event_type: eventType,
+          p_resource_id: String(resource.id ?? ""),
+          p_checkout_id: String(resource.id ?? ""),
+          p_provider_payment_id: paid?.id ?? null,
+          p_amount_centavos: paid?.attributes?.amount ?? null,
+          p_currency: paid?.attributes?.currency ?? null,
+          p_provider_status: paid?.attributes?.status ?? null,
+          p_error_code: null,
+          p_error_message: null,
+          p_paid_at: typeof paidAt === "number"
+            ? new Date(paidAt * 1000).toISOString()
+            : null,
+          p_payload: {
+            source: "webhook",
+            resource_id: String(resource.id ?? ""),
+            payment_id: paid?.id ?? null,
+            provider_status: paid?.attributes?.status ?? null,
+            amount: paid?.attributes?.amount ?? null,
+            currency: paid?.attributes?.currency ?? null,
+          },
+          p_correlation_id: correlationId,
+          p_mode: mode,
+        },
+      );
+      if (error) throw error;
+      result = object(data);
+    } else if (eventType === "payment.failed") {
+      const failure = object(attributes.last_payment_error);
+      const { data, error } = await admin.rpc(
+        "process_paymongo_payment_event_in_mode",
+        {
+          p_provider_event_id: eventId,
+          p_event_type: eventType,
+          p_resource_id: String(resource.id ?? ""),
+          p_checkout_id: typeof attributes.checkout_session_id === "string"
+            ? attributes.checkout_session_id
+            : null,
+          p_provider_payment_id: String(resource.id ?? ""),
+          p_amount_centavos: null,
+          p_currency: null,
+          p_provider_status: "failed",
+          p_error_code: typeof attributes.failure_code === "string"
+            ? attributes.failure_code
+            : typeof failure?.code === "string"
+            ? failure.code
+            : null,
+          p_error_message: typeof failure?.message === "string"
+            ? failure.message
+            : null,
+          p_paid_at: null,
+          p_payload: {
+            source: "webhook",
+            resource_id: String(resource.id ?? ""),
+            checkout_id: typeof attributes.checkout_session_id === "string"
+              ? attributes.checkout_session_id
+              : null,
+            provider_status: "failed",
+          },
+          p_correlation_id: correlationId,
+          p_mode: mode,
+        },
+      );
+      if (error) throw error;
+      result = object(data);
+    } else if (
+      eventType === "payment.refunded" || eventType === "payment.refund.updated"
+    ) {
+      const refunds = Array.isArray(attributes.refunds)
+        ? attributes.refunds
+        : [resource];
+      const providerPaymentId = providerPaymentIdForRefundResource(resource);
+      const { data, error } = await admin.rpc(
+        "process_paymongo_refund_event_in_mode",
+        {
+          p_provider_event_id: eventId,
+          p_event_type: eventType,
+          p_refunds: refunds,
+          p_payload: {
+            source: "webhook",
+            resource_id: String(resource.id ?? ""),
+            provider_payment_id: providerPaymentId,
+            refund_ids: refunds.map((refund) => object(refund)?.id ?? null)
+              .filter(Boolean),
+          },
+          p_correlation_id: correlationId,
+          p_mode: mode,
+        },
+      );
+      if (error) throw error;
+      result = object(data);
+    } else {
+      const { data, error } = await admin.rpc(
+        "process_paymongo_payment_event_in_mode",
+        {
+          p_provider_event_id: eventId,
+          p_event_type: eventType,
+          p_resource_id: String(resource.id ?? ""),
+          p_checkout_id: null,
+          p_provider_payment_id: null,
+          p_amount_centavos: null,
+          p_currency: null,
+          p_provider_status: null,
+          p_error_code: null,
+          p_error_message: null,
+          p_paid_at: null,
+          p_payload: {
+            source: "webhook",
+            resource_id: String(resource.id ?? ""),
+          },
+          p_correlation_id: correlationId,
+          p_mode: mode,
+        },
+      );
+      if (error) throw error;
+      result = object(data);
+    }
+
+    return json({
+      received: true,
+      result: result?.result ?? "processed",
+      correlation_id: correlationId,
+    });
+  } catch (_) {
+    console.error(`[${correlationId}] PayMongo webhook processing failed`);
+    return json({
+      error: "Webhook processing failed",
+      correlation_id: correlationId,
+    }, 500);
   }
 });

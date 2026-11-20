@@ -1,3 +1,7 @@
+import '../../../core/constants/app_colors.dart';
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
 import '../../../core/prototype/prototype_session.dart';
 import '../../../core/services/fare_policy.dart';
@@ -23,6 +27,7 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
   final _noShowPercent = TextEditingController();
   late int _revision;
   late int _policyVersion;
+  late final List<TourPackageModel> _packages;
   bool _saving = false;
   bool _savingPolicy = false;
   @override
@@ -38,11 +43,13 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
     _noShowPercent.text = '${cancellation.noShowFeePercent}';
     _policyTerms.text = cancellation.terms;
     _prices['custom'] = TextEditingController(
-      text: (policy.customFareCents / 100).toStringAsFixed(2),
+      text: AppFormatters.decimalInput((policy.customFareCents / 100)),
     );
-    for (final p in TourPackageModel.catalog) {
+    _packages = List.of(PrototypeSession.tourPackages.value);
+    for (final p in _packages) {
+      final cents = policy.packageFares[p.id];
       _prices[p.id] = TextEditingController(
-        text: (policy.quote(p.id) / 100).toStringAsFixed(2),
+        text: cents == null ? '' : AppFormatters.decimalInput(cents / 100),
       );
     }
   }
@@ -69,49 +76,55 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
         _graceMinutes.text,
         minimum: 0,
         maximum: 120,
-        label: 'Free cancellation',
+        label: MessageCode.freeCancellation,
       );
       final lateFee = CancellationPolicy.parseBounded(
         _lateFeePercent.text,
         minimum: 0,
         maximum: 100,
-        label: 'Late cancellation fee',
+        label: MessageCode.lateCancellationFee,
       );
       final wait = CancellationPolicy.parseBounded(
         _waitMinutes.text,
         minimum: 1,
         maximum: 120,
-        label: 'Pickup wait',
+        label: MessageCode.pickupWait,
       );
       final noShow = CancellationPolicy.parseBounded(
         _noShowPercent.text,
         minimum: 0,
         maximum: 100,
-        label: 'No-show fee',
+        label: MessageCode.noShowFee,
       );
       if (_policyTerms.text.trim().length < 20) {
         throw const FormatException(
-          'Explain the policy in at least 20 characters.',
+          MessageCode.explainThePolicyInAtLeast20Characters,
         );
       }
       if (_policyReason.text.trim().length < 5) {
-        throw const FormatException('Enter a clear reason for this change.');
+        throw const FormatException(MessageCode.enterAClearReasonForThisChange);
       }
       final approved = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Publish cancellation policy?'),
+          title: Text(context.l10n.publishCancellationPolicy),
           content: Text(
-            'Free cancellation: $grace minutes\nLate tourist cancellation: $lateFee%\nVerified pickup wait: $wait minutes\nTourist no-show fee: $noShow%\n\nExisting bookings keep their original policy.',
+            context.l10n
+                .freeCancellationMinutesLateTouristCancellationVerifiedPickupWaitMinutesTouristNoShowValue(
+                  context.message((grace).toString()),
+                  context.message((lateFee).toString()),
+                  context.message((wait).toString()),
+                  context.message((noShow).toString()),
+                ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Keep editing'),
+              child: Text(context.l10n.keepEditing),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Publish policy'),
+              child: Text(context.l10n.publishPolicy),
             ),
           ],
         ),
@@ -130,16 +143,20 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
       _policyVersion = PrototypeSession.cancellationPolicy.value.version;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Policy published. Existing bookings are unchanged.'),
+          SnackBar(
+            content: Text(
+              context.l10n.policyPublishedExistingBookingsAreUnchanged,
+            ),
           ),
         );
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$error')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.message(ErrorMessages.forError(error))),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _savingPolicy = false);
@@ -150,24 +167,39 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
     if (_saving || !_form.currentState!.validate()) return;
     final custom = FarePolicy.parsePrice(_prices['custom']!.text);
     final packages = {
-      for (final p in TourPackageModel.catalog)
+      ...PrototypeSession.farePolicy.value.packageFares,
+      for (final p in _packages)
         p.id: FarePolicy.parsePrice(_prices[p.id]!.text),
     };
     final approved = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Publish these fixed fares?'),
+        title: Text(context.l10n.publishTheseFixedFares),
         content: Text(
-          'Custom tour: ₱${(custom / 100).toStringAsFixed(2)}\n${TourPackageModel.catalog.map((p) => "${p.name}: ₱${(packages[p.id]! / 100).toStringAsFixed(2)}").join("\n")}\n\nNew bookings use these rates. Existing bookings keep their agreed fare.',
+          context.l10n
+              .customTourNewBookingsUseTheseRatesExistingBookingsKeepTheirAgreedFareValue(
+                context.message(
+                  (AppFormatters.amount((custom / 100))).toString(),
+                ),
+                context.message(
+                  (_packages
+                          .map(
+                            (p) =>
+                                "${p.name}: ₱${AppFormatters.amount((packages[p.id]! / 100))}",
+                          )
+                          .join("\n"))
+                      .toString(),
+                ),
+              ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Keep editing'),
+            child: Text(context.l10n.keepEditing),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Publish'),
+            child: Text(context.l10n.publish),
           ),
         ],
       ),
@@ -184,18 +216,18 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
       _revision = PrototypeSession.farePolicy.value.revision;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Fixed fares saved. Existing booking prices are unchanged.',
+              context.l10n.fixedFaresSavedExistingBookingPricesAreUnchanged,
             ),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.message(ErrorMessages.forError(e)))),
+        );
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -204,54 +236,65 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Fixed fares')),
+    appBar: AppBar(title: Text(context.l10n.fixedFares)),
     body: Form(
       key: _form,
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          const Text(
-            'One price for the booked route',
+          Text(
+            context.l10n.onePriceForTheBookedRoute,
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Set a flat custom-tour fare and a fixed fare for each package. No automatic per-stop, distance, waiting-time or surge additions. Entrance fees are paid separately.',
-          ),
+          Text(context.l10n.setAFlatCustomTourFareAndAFixedFareForEachPackage),
           const SizedBox(height: 24),
-          _field('custom', 'Custom tour (1–12 selected stops)'),
-          ...TourPackageModel.catalog.map((p) => _field(p.id, p.name)),
+          _field('custom', MessageCode.customTour112SelectedStops),
+          ..._packages.map((p) => _field(p.id, p.name)),
           TextFormField(
             controller: _reason,
             enabled: !_saving,
             maxLength: 300,
             maxLines: 2,
-            decoration: const InputDecoration(
-              labelText: 'Reason for price change',
-              hintText: 'Example: Updated operating cost approved by admin',
+            decoration: InputDecoration(
+              labelText: context.l10n.reasonForPriceChange,
+              hintText: context.l10n.exampleUpdatedOperatingCostApprovedByAdmin,
               border: OutlineInputBorder(),
             ),
-            validator: (value) => (value ?? '').trim().length < 5
-                ? 'Enter a clear reason for the audit history'
-                : null,
+            validator: localizeValidator(
+              context,
+              (value) => (value ?? '').trim().length < 5
+                  ? MessageCode.enterAClearReasonForTheAuditHistory
+                  : null,
+            ),
+            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+            scrollPadding: const EdgeInsets.all(96),
           ),
           const SizedBox(height: 12),
           const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: _saving ? null : _save,
             icon: const Icon(Icons.price_check),
-            label: Text(_saving ? 'Saving…' : 'Review and publish fares'),
+            label: Text(
+              context.message(
+                _saving
+                    ? MessageCode.saving
+                    : MessageCode.reviewAndPublishFares,
+              ),
+            ),
           ),
           const SizedBox(height: 24),
-          const Text(
-            'Cancellation and payment policy',
+          Text(
+            context.l10n.cancellationAndPaymentPolicy,
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          const Text(TripRules.policyText),
+          Text(context.message(TripRules.policyText)),
           const SizedBox(height: 16),
           Text(
-            'Policy version $_policyVersion',
+            context.l10n.policyVersionValue(
+              context.message((_policyVersion).toString()),
+            ),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
@@ -260,23 +303,33 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
               Expanded(
                 child: _policyField(
                   _graceMinutes,
-                  'Free cancellation',
+                  MessageCode.freeCancellation,
                   'minutes',
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _policyField(_lateFeePercent, 'Late cancellation', '%'),
+                child: _policyField(
+                  _lateFeePercent,
+                  MessageCode.lateCancellation,
+                  '%',
+                ),
               ),
             ],
           ),
           Row(
             children: [
               Expanded(
-                child: _policyField(_waitMinutes, 'Pickup wait', 'minutes'),
+                child: _policyField(
+                  _waitMinutes,
+                  MessageCode.pickupWait,
+                  'minutes',
+                ),
               ),
               const SizedBox(width: 12),
-              Expanded(child: _policyField(_noShowPercent, 'No-show fee', '%')),
+              Expanded(
+                child: _policyField(_noShowPercent, MessageCode.noShowFee, '%'),
+              ),
             ],
           ),
           TextField(
@@ -284,10 +337,12 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
             enabled: !_savingPolicy,
             maxLength: 1000,
             maxLines: 4,
-            decoration: const InputDecoration(
-              labelText: 'Tourist and driver policy terms',
+            decoration: InputDecoration(
+              labelText: context.l10n.touristAndDriverPolicyTerms,
               border: OutlineInputBorder(),
             ),
+            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+            scrollPadding: const EdgeInsets.all(96),
           ),
           const SizedBox(height: 12),
           TextField(
@@ -295,27 +350,35 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
             enabled: !_savingPolicy,
             maxLength: 300,
             maxLines: 2,
-            decoration: const InputDecoration(
-              labelText: 'Reason for policy change',
+            decoration: InputDecoration(
+              labelText: context.l10n.reasonForPolicyChange,
               border: OutlineInputBorder(),
             ),
+            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+            scrollPadding: const EdgeInsets.all(96),
           ),
           FilledButton.icon(
             onPressed: _savingPolicy ? null : _savePolicy,
             icon: const Icon(Icons.policy_outlined),
             label: Text(
-              _savingPolicy ? 'Publishing...' : 'Review and publish policy',
+              context.message(
+                _savingPolicy
+                    ? MessageCode.publishing
+                    : MessageCode.reviewAndPublishPolicy,
+              ),
             ),
           ),
           const SizedBox(height: 24),
           Text(
-            'Price history · current version $_revision',
+            context.l10n.priceHistoryCurrentVersionValue(
+              context.message((_revision).toString()),
+            ),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           ...PrototypeSession.farePolicy.value.history.reversed.map(
             (entry) => Padding(
               padding: const EdgeInsets.only(top: 12),
-              child: Text(entry),
+              child: Text(context.message(entry)),
             ),
           ),
           const SizedBox(height: 32),
@@ -330,18 +393,27 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
       enabled: !_saving,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       decoration: InputDecoration(
-        labelText: label,
+        labelText: context.message(label),
         prefixText: '₱ ',
+        prefixStyle: const TextStyle(
+          color: AppColors.textPrimary,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
         border: const OutlineInputBorder(),
       ),
-      validator: (value) {
+      validator: localizeValidator(context, (value) {
         try {
           FarePolicy.parsePrice(value ?? '');
           return null;
         } catch (e) {
-          return e is FormatException ? e.message : 'Enter a valid price';
+          return e is FormatException
+              ? e.message
+              : MessageCode.enterAValidPrice;
         }
-      },
+      }),
+      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+      scrollPadding: const EdgeInsets.all(96),
     ),
   );
 
@@ -356,10 +428,17 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
       enabled: !_savingPolicy,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
-        labelText: label,
+        labelText: context.message(label),
         suffixText: suffix,
+        suffixStyle: const TextStyle(
+          color: AppColors.textPrimary,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
         border: const OutlineInputBorder(),
       ),
+      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+      scrollPadding: const EdgeInsets.all(96),
     ),
   );
 }

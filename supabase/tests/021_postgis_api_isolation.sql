@@ -1,0 +1,15 @@
+begin;
+create extension if not exists pgtap with schema extensions;
+set local search_path=public,extensions;
+select plan(9);
+select is((select n.nspname::text from pg_extension e join pg_namespace n on n.oid=e.extnamespace where e.extname='postgis'),'extensions','PostGIS is outside public');
+select ok(to_regclass('public.spatial_ref_sys') is null,'spatial references are absent from public API');
+select is((select count(*)::integer from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='st_estimatedextent'),0,'extent RPCs are absent from public API');
+select is((select count(*)::integer from pg_class where relname in('tourist_spots_geo_idx','driver_locations_geo_idx') and relkind='i'),2,'both spatial indexes restored');
+select ok(extensions.st_distance(extensions.st_setsrid(extensions.st_makepoint(120.9188,14.9571),4326)::extensions.geography,extensions.st_setsrid(extensions.st_makepoint(120.9188,14.9571),4326)::extensions.geography)=0,'geography distance still resolves');
+select lives_ok($$select public.require_pickup_in_service_area(14.9571,120.9188)$$,'pickup geofence still resolves PostGIS');
+select is((select count(*)::integer from pg_proc p where p.oid in('public.notification_booking_id(text)'::regprocedure,'public.prevent_announcement_audit_mutation()'::regprocedure) and array_to_string(p.proconfig,',') like '%search_path=%'),2,'both helpers have fixed paths');
+select is(public.notification_booking_id('/bookings/2ff0f749-9594-4aec-b5ae-a33ee5d68fdd'),'2ff0f749-9594-4aec-b5ae-a33ee5d68fdd'::uuid,'notification UUID extraction unchanged');
+select is((select count(*)::integer from pg_proc p where p.oid in('public.driver_is_match_eligible(uuid,double precision,double precision,integer,boolean)'::regprocedure,'public.create_ranked_driver_offers(uuid)'::regprocedure,'public.report_pickup_arrival(uuid)'::regprocedure) and array_to_string(p.proconfig,',') like '%extensions%'),3,'matching and arrival paths include spatial schema');
+select * from finish();
+rollback;

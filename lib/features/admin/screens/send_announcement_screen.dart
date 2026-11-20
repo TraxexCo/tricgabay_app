@@ -1,3 +1,6 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import 'package:uuid/uuid.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
@@ -10,7 +13,8 @@ import '../../../core/services/backend_repository.dart';
 import '../../../core/config/backend_config.dart';
 
 class SendAnnouncementScreen extends StatefulWidget {
-  const SendAnnouncementScreen({super.key});
+  final Future<void> Function(String, String, String, String)? send;
+  const SendAnnouncementScreen({super.key, this.send});
 
   @override
   State<SendAnnouncementScreen> createState() => _SendAnnouncementScreenState();
@@ -22,30 +26,97 @@ class _SendAnnouncementScreenState extends State<SendAnnouncementScreen> {
   final _messageController = TextEditingController();
 
   bool _sending = false;
+  String _audience = 'all';
+  String? _requestId;
+  bool _previewing = false;
 
   Future<void> _sendAnnouncement() async {
-    if (!_formKey.currentState!.validate() || _sending) return;
-    if (!BackendConfig.isConfigured) {
+    if (_previewing || !_formKey.currentState!.validate() || _sending) return;
+    if (!BackendConfig.isConfigured && widget.send == null) {
       AppSnackbar.showError(
         context,
-        'Server setup is incomplete. Nothing was sent.',
+        MessageCode.serverSetupIsIncompleteNothingWasSent,
       );
       return;
     }
+    _previewing = true;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.l10n.previewAnnouncement),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.audienceValue(
+                  context.message((_audience).toString()),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(context.message(_titleController.text.trim())),
+              const SizedBox(height: 8),
+              Text(context.message(_messageController.text.trim())),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(context.l10n.edit),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(context.l10n.confirmAndSend),
+          ),
+        ],
+      ),
+    );
+    _previewing = false;
+    if (confirmed != true || !mounted) return;
+    _requestId ??= const Uuid().v4();
     setState(() => _sending = true);
     try {
-      await BackendRepository.sendAnnouncement(
-        _titleController.text,
-        _messageController.text,
-      );
+      if (widget.send != null) {
+        await widget.send!(
+          _titleController.text,
+          _messageController.text,
+          _audience,
+          _requestId!,
+        );
+      } else {
+        await BackendRepository.sendAnnouncement(
+          _titleController.text,
+          _messageController.text,
+          audience: _audience,
+          requestId: _requestId!,
+        );
+      }
       if (!mounted) return;
-      AppSnackbar.showSuccess(context, 'Announcement sent successfully');
+      AppSnackbar.showSuccess(
+        context,
+        MessageCode.announcementSentSuccessfully,
+      );
       context.pop();
     } catch (error) {
-      if (mounted) AppSnackbar.showError(context, '$error');
+      if (mounted) {
+        AppSnackbar.showError(context, ErrorMessages.forError(error));
+      }
     } finally {
       if (mounted) setState(() => _sending = false);
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController.addListener(_draftChanged);
+    _messageController.addListener(_draftChanged);
+  }
+
+  void _draftChanged() {
+    if (!_sending) _requestId = null;
   }
 
   @override
@@ -61,7 +132,7 @@ class _SendAnnouncementScreenState extends State<SendAnnouncementScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          'Send Announcement',
+          context.l10n.sendAnnouncement,
           style: GoogleFonts.poppins(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
@@ -79,7 +150,7 @@ class _SendAnnouncementScreenState extends State<SendAnnouncementScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Broadcast a Message',
+                context.l10n.broadcastAMessage,
                 style: GoogleFonts.poppins(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -88,34 +159,61 @@ class _SendAnnouncementScreenState extends State<SendAnnouncementScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'This will send a notification to all users in the system.',
+                context
+                    .l10n
+                    .chooseWhoShouldReceiveThisAnnouncementThenReviewBeforeSending,
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 24),
+              DropdownButtonFormField<String>(
+                isExpanded: true,
+                initialValue: _audience,
+                decoration: InputDecoration(labelText: context.l10n.audience),
+                items: [
+                  DropdownMenuItem(
+                    value: 'all',
+                    child: Text(context.l10n.touristsAndDrivers),
+                  ),
+                  DropdownMenuItem(
+                    value: 'tourists',
+                    child: Text(context.l10n.tourists),
+                  ),
+                  DropdownMenuItem(
+                    value: 'drivers',
+                    child: Text(context.l10n.drivers),
+                  ),
+                ],
+                onChanged: _sending
+                    ? null
+                    : (value) => setState(() {
+                        _audience = value!;
+                        _requestId = null;
+                      }),
+              ),
               AppTextField(
                 controller: _titleController,
-                label: 'Title',
-                hint: 'e.g. System Maintenance',
+                label: context.l10n.title,
+                hint: context.l10n.eGSystemMaintenance,
                 prefixIcon: Icons.title,
                 validator: (value) =>
-                    Validators.required(value, fieldName: 'Title'),
+                    Validators.required(value, fieldName: MessageCode.title),
               ),
               const SizedBox(height: 16),
               AppTextField(
                 controller: _messageController,
-                label: 'Message',
-                hint: 'Enter your announcement details here...',
+                label: context.l10n.message,
+                hint: context.l10n.enterYourAnnouncementDetailsHere,
                 prefixIcon: Icons.message,
                 maxLines: 5,
                 validator: (value) =>
-                    Validators.required(value, fieldName: 'Message'),
+                    Validators.required(value, fieldName: MessageCode.message),
               ),
               const SizedBox(height: 32),
               AppButton(
-                label: 'Send Announcement',
+                label: context.l10n.sendAnnouncement,
                 isLoading: _sending,
                 onPressed: _sendAnnouncement,
                 prefixIcon: Icons.send,

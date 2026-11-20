@@ -1,3 +1,4 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../constants/app_colors.dart';
@@ -34,7 +35,7 @@ class RoleNavigationBar extends StatelessWidget {
           ],
         ),
         child: SizedBox(
-          height: 68,
+          height: 68 + (MediaQuery.textScalerOf(context).scale(10) - 10) * 4,
           child: Row(
             children: List.generate(destinations.length, (index) {
               final destination = destinations[index];
@@ -43,7 +44,7 @@ class RoleNavigationBar extends StatelessWidget {
                 child: Semantics(
                   selected: selected,
                   button: true,
-                  label: destination.label,
+                  label: context.message(destination.label),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(22),
                     onTap: () {
@@ -51,7 +52,9 @@ class RoleNavigationBar extends StatelessWidget {
                       onSelected(index);
                     },
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
+                      duration: MediaQuery.disableAnimationsOf(context)
+                          ? Duration.zero
+                          : const Duration(milliseconds: 180),
                       margin: const EdgeInsets.symmetric(
                         horizontal: 4,
                         vertical: 9,
@@ -75,16 +78,19 @@ class RoleNavigationBar extends StatelessWidget {
                             size: 21,
                           ),
                           const SizedBox(height: 3),
-                          Text(
-                            destination.label,
-                            style: TextStyle(
-                              color: selected
-                                  ? Colors.white
-                                  : const Color(0xFFB8C7D6),
-                              fontSize: 10,
-                              fontWeight: selected
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
+                          Flexible(
+                            child: Text(
+                              context.message(destination.label),
+                              style: TextStyle(
+                                color: selected
+                                    ? Colors.white
+                                    : const Color(0xFFB8C7D6),
+                                fontSize: 10,
+                                fontWeight: selected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
                         ],

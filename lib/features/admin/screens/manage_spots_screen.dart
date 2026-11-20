@@ -1,3 +1,6 @@
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,15 +19,49 @@ class ManageSpotsScreen extends ConsumerStatefulWidget {
 }
 
 class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
-  String _selectedCategory = 'All';
+  String _selectedCategory = MessageCode.all;
+  final Set<String> _pendingSpotIds = {};
 
-  Future<void> _setAvailability(TouristSpotModel spot) async {
-    if (spot.isTemporarilyClosed) {
-      await BackendRepository.setSpotAvailability(
-        spotId: spot.id,
-        closed: false,
-      );
+  Future<void> _runSpotMutation(
+    TouristSpotModel spot,
+    Future<void> Function() operation,
+    String successMessage,
+  ) async {
+    if (_pendingSpotIds.contains(spot.id)) return;
+    setState(() => _pendingSpotIds.add(spot.id));
+    try {
+      await operation();
       await PrototypeSession.syncRemoteState();
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.message(successMessage))));
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.message(ErrorMessages.forError(error))),
+          action: SnackBarAction(
+            label: context.l10n.refresh,
+            onPressed: () => PrototypeSession.syncRemoteState(),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _pendingSpotIds.remove(spot.id));
+    }
+  }
+
+  Future<void> _changeAvailability(TouristSpotModel spot) async {
+    if (spot.isTemporarilyClosed) {
+      await _runSpotMutation(
+        spot,
+        () => BackendRepository.setSpotAvailability(
+          spotId: spot.id,
+          closed: false,
+        ),
+        MessageCode.reopenedValue((spot.name).toString()),
+      );
       return;
     }
     final reason = TextEditingController();
@@ -33,31 +70,38 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Temporarily close attraction'),
+          title: Text(context.l10n.temporarilyCloseAttraction),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'Affected tourists and assigned drivers will be notified. Existing bookings keep an audit record.',
+                Text(
+                  context
+                      .l10n
+                      .affectedTouristsAndAssignedDriversWillBeNotifiedExistingBookingsKeepAnAudit,
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: reason,
                   maxLength: 500,
                   maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Closure reason',
+                  decoration: InputDecoration(
+                    labelText: context.l10n.closureReason,
                     border: OutlineInputBorder(),
                   ),
+                  onTapOutside: (_) =>
+                      FocusManager.instance.primaryFocus?.unfocus(),
+                  scrollPadding: const EdgeInsets.all(96),
                 ),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Expected reopening'),
+                  title: Text(context.l10n.expectedReopening),
                   subtitle: Text(
-                    until == null
-                        ? 'Unknown / until manually reopened'
-                        : until!.toLocal().toString().split('.').first,
+                    context.message(
+                      until == null
+                          ? MessageCode.unknownUntilManuallyReopened
+                          : AppFormatters.dateTime(until!.toLocal()),
+                    ),
                   ),
                   trailing: const Icon(Icons.event_outlined),
                   onTap: () async {
@@ -86,11 +130,11 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Keep open'),
+              child: Text(context.l10n.keepOpen),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text('Close and notify'),
+              child: Text(context.l10n.closeAndNotify),
             ),
           ],
         ),
@@ -98,21 +142,30 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
     );
     final explanation = reason.text.trim();
     reason.dispose();
-    if (approved != true || explanation.length < 5 || !mounted) return;
-    await BackendRepository.setSpotAvailability(
-      spotId: spot.id,
-      closed: true,
-      reason: explanation,
-      closedUntil: until,
+    if (approved != true || !mounted) return;
+    if (explanation.length < 5) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.enterAClearClosureReason)),
+      );
+      return;
+    }
+    await _runSpotMutation(
+      spot,
+      () => BackendRepository.setSpotAvailability(
+        spotId: spot.id,
+        closed: true,
+        reason: explanation,
+        closedUntil: until,
+      ),
+      MessageCode.temporarilyClosedValue((spot.name).toString()),
     );
-    await PrototypeSession.syncRemoteState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8FB),
-      appBar: AppBar(title: const Text('Tourist Spots')),
+      appBar: AppBar(title: Text(context.l10n.touristSpots)),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/admin/spots/form'),
         backgroundColor: AppColors.primary,
@@ -126,20 +179,20 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
             child: Row(
               children:
                   [
-                        'All',
-                        'Heritage',
-                        'Nature',
-                        'Church',
-                        'Park',
-                        'Market',
-                        'Other',
+                        MessageCode.all,
+                        MessageCode.heritage,
+                        MessageCode.nature,
+                        MessageCode.church,
+                        MessageCode.park,
+                        MessageCode.market,
+                        MessageCode.other,
                       ]
                       .map(
                         (c) => Padding(
                           padding: const EdgeInsets.only(right: 8.0),
                           child: ChoiceChip(
                             label: Text(
-                              c,
+                              context.message(c),
                               style: TextStyle(
                                 color: _selectedCategory == c
                                     ? Colors.white
@@ -164,7 +217,7 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
             child: ValueListenableBuilder<List<TouristSpotModel>>(
               valueListenable: PrototypeSession.allSpots,
               builder: (context, spots, _) {
-                final filteredSpots = _selectedCategory == 'All'
+                final filteredSpots = _selectedCategory == MessageCode.all
                     ? spots
                     : spots
                           .where(
@@ -175,20 +228,26 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
                           .toList();
 
                 if (filteredSpots.isEmpty) {
-                  return const Center(child: Text('No tourist spots found.'));
+                  return Center(child: Text(context.l10n.noTouristSpotsFound));
                 }
 
                 return GridView.builder(
                   padding: const EdgeInsets.fromLTRB(20, 4, 20, 104),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.75,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount:
+                        MediaQuery.sizeOf(context).width < 412 ||
+                            MediaQuery.textScalerOf(context).scale(14) > 20
+                        ? 1
+                        : 2,
+                    mainAxisExtent:
+                        240 + MediaQuery.textScalerOf(context).scale(14) * 5,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
                   ),
                   itemCount: filteredSpots.length,
                   itemBuilder: (context, index) {
                     final spot = filteredSpots[index];
+                    final pending = _pendingSpotIds.contains(spot.id);
                     return AppCard(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,8 +283,8 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
                                         color: Colors.black54,
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: const Text(
-                                        'HIDDEN',
+                                      child: Text(
+                                        context.l10n.hidden,
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 10,
@@ -248,8 +307,8 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
                                         color: AppColors.danger,
                                         borderRadius: BorderRadius.circular(6),
                                       ),
-                                      child: const Text(
-                                        'TEMPORARILY CLOSED',
+                                      child: Text(
+                                        context.l10n.temporarilyClosed,
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: Colors.white,
@@ -268,7 +327,7 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  spot.name,
+                                  context.message(spot.name),
                                   style: GoogleFonts.poppins(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
@@ -277,7 +336,7 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 Text(
-                                  spot.categoryLabel,
+                                  context.message(spot.categoryLabel),
                                   style: GoogleFonts.poppins(
                                     color: AppColors.secondary,
                                     fontSize: 12,
@@ -288,47 +347,49 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Switch(
-                                      value: spot.isActive,
-                                      onChanged: (val) {
-                                        final updatedSpot = TouristSpotModel(
-                                          id: spot.id,
-                                          name: spot.name,
-                                          description: spot.description,
-                                          history: spot.history,
-                                          latitude: spot.latitude,
-                                          longitude: spot.longitude,
-                                          category: spot.category,
-                                          imageUrls: spot.imageUrls,
-                                          openingHours: spot.openingHours,
-                                          entranceFee: spot.entranceFee,
-                                          tips: spot.tips,
-                                          distanceFromTown:
-                                              spot.distanceFromTown,
-                                          isActive: val,
-                                          availabilityStatus:
-                                              spot.availabilityStatus,
-                                          closedUntil: spot.closedUntil,
-                                          closureReason: spot.closureReason,
-                                        );
-                                        PrototypeSession.addOrUpdateSpot(
-                                          updatedSpot,
-                                        );
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              val
-                                                  ? '${spot.name} is now visible'
-                                                  : '${spot.name} is now hidden',
+                                    Semantics(
+                                      label: context.l10n
+                                          .touristVisibilityValue(
+                                            context.message(
+                                              (spot.name).toString(),
                                             ),
                                           ),
-                                        );
-                                      },
-                                      activeThumbColor: AppColors.success,
+                                      value: context.message(
+                                        spot.isActive
+                                            ? MessageCode.visible
+                                            : MessageCode.hidden,
+                                      ),
+                                      enabled: !pending,
+                                      child: pending
+                                          ? const SizedBox.square(
+                                              dimension: 24,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                              ),
+                                            )
+                                          : Switch(
+                                              value: spot.isActive,
+                                              onChanged: (value) => _runSpotMutation(
+                                                spot,
+                                                () =>
+                                                    BackendRepository.setSpotActive(
+                                                      spot.id,
+                                                      value,
+                                                    ),
+                                                value
+                                                    ? MessageCode.isNowVisibleValue(
+                                                        (spot.name).toString(),
+                                                      )
+                                                    : MessageCode.isNowHiddenValue(
+                                                        (spot.name).toString(),
+                                                      ),
+                                              ),
+                                              activeThumbColor:
+                                                  AppColors.success,
+                                            ),
                                     ),
                                     PopupMenuButton<String>(
+                                      enabled: !pending,
                                       onSelected: (value) async {
                                         if (value == 'edit') {
                                           context.push(
@@ -336,60 +397,39 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
                                             extra: spot,
                                           );
                                         } else if (value == 'delete') {
-                                          try {
-                                            PrototypeSession.deleteSpot(
+                                          await _runSpotMutation(
+                                            spot,
+                                            () => PrototypeSession.deleteSpot(
                                               spot.id,
-                                            );
-                                          } catch (e) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(content: Text('$e')),
-                                            );
-                                            return;
-                                          }
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                '${spot.name} deleted',
-                                              ),
+                                            ),
+                                            MessageCode.deletedValue(
+                                              (spot.name).toString(),
                                             ),
                                           );
                                         } else if (value == 'availability') {
-                                          try {
-                                            await _setAvailability(spot);
-                                          } catch (error) {
-                                            if (context.mounted) {
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                SnackBar(
-                                                  content: Text('$error'),
-                                                ),
-                                              );
-                                            }
-                                          }
+                                          await _changeAvailability(spot);
                                         }
                                       },
                                       itemBuilder: (context) => [
                                         PopupMenuItem(
                                           value: 'availability',
                                           child: Text(
-                                            spot.isTemporarilyClosed
-                                                ? 'Reopen attraction'
-                                                : 'Close temporarily',
+                                            context.message(
+                                              spot.isTemporarilyClosed
+                                                  ? MessageCode.reopenAttraction
+                                                  : MessageCode
+                                                        .closeTemporarily,
+                                            ),
                                           ),
                                         ),
-                                        const PopupMenuItem(
+                                        PopupMenuItem(
                                           value: 'edit',
-                                          child: Text('Edit'),
+                                          child: Text(context.l10n.edit),
                                         ),
-                                        const PopupMenuItem(
+                                        PopupMenuItem(
                                           value: 'delete',
                                           child: Text(
-                                            'Delete',
+                                            context.l10n.delete,
                                             style: TextStyle(
                                               color: AppColors.danger,
                                             ),

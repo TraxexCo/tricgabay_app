@@ -1,3 +1,5 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
-import '../../../core/utils/app_translations.dart';
+
 import '../../../core/prototype/prototype_session.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../core/services/auth_service.dart';
@@ -29,9 +31,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (!BackendConfig.isConfigured) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Server setup is incomplete. Add the Supabase build configuration before signing in.',
+            context
+                .l10n
+                .serverSetupIsIncompleteAddTheSupabaseBuildConfigurationBeforeSigningIn,
           ),
         ),
       );
@@ -48,20 +52,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       PrototypeSession.setAuthenticatedUser(
         id: profile.id,
         name: profile.name,
-        role: profile.role.name,
+        role: profile.applicationPending ? 'driver_pending' : profile.role.name,
         email: profile.email,
         plateNumber: profile.plateNumber,
       );
       await PrototypeSession.syncRemoteState();
       if (!mounted) return;
       context.go(
-        profile.role == AppRole.driver ? '/driver/home' : '/tourist/home',
+        profile.applicationPending
+            ? '/driver/application-pending'
+            : profile.role == AppRole.driver
+            ? '/driver/home'
+            : '/tourist/home',
       );
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.toString())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.message(ErrorMessages.forError(error)))),
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -110,7 +118,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'TRIC-GABAY',
+                                context.l10n.appName(AppBrand.name),
                                 style: GoogleFonts.poppins(
                                   color: Colors.white,
                                   fontSize: 18,
@@ -119,10 +127,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                               ),
                               Text(
-                                context.tr(
-                                  'Your local journey starts here',
-                                  'Ang iyong lokal na paglalakbay ay nagsisimula dito',
-                                ),
+                                context.l10n.yourLocalJourneyStartsHere,
                                 style: GoogleFonts.poppins(
                                   color: Colors.white.withValues(alpha: 0.82),
                                   fontSize: 12,
@@ -136,7 +141,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 34),
                   Text(
-                    context.tr('Welcome back', 'Maligayang pagbabalik'),
+                    context.l10n.welcomeBack,
                     style: GoogleFonts.poppins(
                       fontSize: 30,
                       fontWeight: FontWeight.w700,
@@ -146,10 +151,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    context.tr(
-                      'Choose your workspace, then sign in to continue.',
-                      'Piliin ang iyong workspace, pagkatapos ay mag-sign in upang magpatuloy.',
-                    ),
+                    context.l10n.chooseYourWorkspaceThenSignInToContinue,
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       color: AppColors.textSecondary,
@@ -167,12 +169,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         _roleOption(
                           'tourist',
                           Icons.explore_outlined,
-                          context.tr('Explore', 'Tuklasin'),
+                          context.l10n.explore,
                         ),
                         _roleOption(
                           'driver',
                           Icons.electric_rickshaw_outlined,
-                          context.tr('Drive', 'Magmaneho'),
+                          context.l10n.drive,
                         ),
                       ],
                     ),
@@ -180,38 +182,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 26),
                   AppTextField(
                     controller: _emailCtrl,
-                    label: context.tr('Email Address', 'Email Address'),
-                    hint: context.tr(
-                      'Enter your email',
-                      'Ilagay ang iyong email',
-                    ),
+                    label: context.l10n.emailAddress,
+                    hint: context.l10n.enterYourEmail,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    validator: (v) =>
-                        v == null || v.isEmpty ? 'Email is required' : null,
+                    validator: (v) => v == null || v.isEmpty
+                        ? MessageCode.emailIsRequired
+                        : null,
                   ),
                   const SizedBox(height: 16),
                   AppTextField(
                     controller: _pwdCtrl,
-                    label: context.tr('Password', 'Password'),
-                    hint: context.tr(
-                      'Enter your password',
-                      'Ilagay ang iyong password',
-                    ),
+                    label: context.l10n.password,
+                    hint: context.l10n.enterYourPassword,
                     obscureText: true,
                     textInputAction: TextInputAction.done,
-                    validator: (v) =>
-                        v == null || v.isEmpty ? 'Password is required' : null,
+                    validator: (v) => v == null || v.isEmpty
+                        ? MessageCode.passwordIsRequired
+                        : null,
                   ),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () => context.push('/forgot-password'),
                       child: Text(
-                        context.tr(
-                          'Forgot Password?',
-                          'Nakalimutan ang Password?',
-                        ),
+                        context.l10n.forgotPasswordLabel,
                         style: GoogleFonts.poppins(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w500,
@@ -222,14 +217,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 24),
                   AppButton(
                     label: _role == 'tourist'
-                        ? context.tr(
-                            'Enter tourist app',
-                            'Pumasok sa tourist app',
-                          )
-                        : context.tr(
-                            'Enter driver app',
-                            'Pumasok sa driver app',
-                          ),
+                        ? context.l10n.enterTouristApp
+                        : context.l10n.enterDriverApp,
                     prefixIcon: _role == 'tourist'
                         ? Icons.explore
                         : Icons.electric_rickshaw,
@@ -240,22 +229,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        context.tr(
-                          "Don't have an account?",
-                          "Wala pang account?",
-                        ),
-                        style: GoogleFonts.poppins(
-                          color: AppColors.textSecondary,
+                      Flexible(
+                        child: Text(
+                          context.l10n.donTHaveAnAccount,
+                          style: GoogleFonts.poppins(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ),
-                      TextButton(
-                        onPressed: () => context.push('/register/role'),
-                        child: Text(
-                          context.tr('Sign Up', 'Mag-sign Up'),
-                          style: GoogleFonts.poppins(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
+                      Flexible(
+                        child: TextButton(
+                          onPressed: () => context.push('/register/role'),
+                          child: Text(
+                            context.l10n.signUp,
+                            style: GoogleFonts.poppins(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -264,10 +254,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   TextButton(
                     onPressed: () => context.push('/admin/login'),
                     child: Text(
-                      context.tr(
-                        'Manage Tric-Gabay? Open the admin portal',
-                        'Pamahalaan ang Tric-Gabay? Buksan ang admin portal',
-                      ),
+                      context.l10n.manageAppOpenTheAdminPortal(AppBrand.name),
                       style: GoogleFonts.poppins(
                         color: AppColors.textSecondary,
                       ),
@@ -288,12 +275,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       child: Semantics(
         selected: selected,
         button: true,
-        label: '$label mode',
+        label: context.l10n.modeValue(context.message((label).toString())),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () => setState(() => _role = value),
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
+            duration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : const Duration(milliseconds: 180),
+            constraints: const BoxConstraints(minHeight: 48),
             padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
               color: selected ? Colors.white : Colors.transparent,
@@ -317,14 +307,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   color: selected ? AppColors.primary : AppColors.textSecondary,
                 ),
                 const SizedBox(width: 7),
-                Text(
-                  label,
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                    color: selected
-                        ? AppColors.primary
-                        : AppColors.textSecondary,
+                Flexible(
+                  child: Text(
+                    context.message(label),
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: selected
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                    ),
                   ),
                 ),
               ],

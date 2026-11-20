@@ -1,6 +1,9 @@
+import '../core/services/server_clock.dart';
 import 'trip_record.dart';
 
 enum BookingStatus {
+  unknown,
+  paymentPending,
   scheduled,
   pending,
   accepted,
@@ -10,14 +13,17 @@ enum BookingStatus {
   cancelled,
 }
 
-enum PaymentMethod { cash, online }
+enum PaymentMethod { unknown, cash, online, gcashDirect }
 
 enum PaymentStatus {
+  unknown,
   unpaid,
   checkoutCreated,
   processing,
   failed,
   awaitingConfirmation,
+  gcashAwaitingConfirmation,
+  disputed,
   underReview,
   paid,
   waived,
@@ -94,7 +100,7 @@ class BookingRouteChange {
         proposedOrder: List<String>.from(map['proposedOrder'] ?? const []),
         reason: map['reason'] ?? '',
         createdAt: map['createdAt'] == null
-            ? DateTime.now()
+            ? ServerClock.now()
             : DateTime.parse(map['createdAt']),
       );
 
@@ -154,6 +160,8 @@ class BookingModel {
   final TripRecord trip;
 
   bool get isActive =>
+      status == BookingStatus.unknown ||
+      status == BookingStatus.paymentPending ||
       status == BookingStatus.scheduled ||
       status == BookingStatus.pending ||
       status == BookingStatus.accepted ||
@@ -174,16 +182,16 @@ class BookingModel {
       acceptedAt?.add(Duration(minutes: freeCancellationMinutes));
   bool get isWithinFreeCancellation =>
       freeCancellationUntil == null ||
-      !DateTime.now().isAfter(freeCancellationUntil!);
+      !ServerClock.now().isAfter(freeCancellationUntil!);
   int get lateCancellationFeeCents =>
       (quotedCents * acceptedCancellationPercent / 100).round();
   int get noShowFeeCents => (quotedCents * noShowFeePercent / 100).round();
   bool get isDispatchExpired =>
       status == BookingStatus.pending &&
       dispatchExpiresAt != null &&
-      !DateTime.now().isBefore(dispatchExpiresAt!);
+      !ServerClock.now().isBefore(dispatchExpiresAt!);
   bool get isOfferExpired =>
-      offerExpiresAt != null && !DateTime.now().isBefore(offerExpiresAt!);
+      offerExpiresAt != null && !ServerClock.now().isBefore(offerExpiresAt!);
 
   const BookingModel({
     required this.id,
@@ -252,19 +260,19 @@ class BookingModel {
       totalFare: (map['totalFare'] ?? 0.0).toDouble(),
       paymentMethod: PaymentMethod.values.firstWhere(
         (p) => p.name == map['paymentMethod'],
-        orElse: () => PaymentMethod.cash,
+        orElse: () => PaymentMethod.unknown,
       ),
       paymentStatus: PaymentStatus.values.firstWhere(
         (p) => p.name == map['paymentStatus'],
-        orElse: () => PaymentStatus.unpaid,
+        orElse: () => PaymentStatus.unknown,
       ),
       status: BookingStatus.values.firstWhere(
         (s) => s.name == map['status'],
-        orElse: () => BookingStatus.pending,
+        orElse: () => BookingStatus.unknown,
       ),
       createdAt: map['createdAt'] != null
           ? DateTime.parse(map['createdAt'])
-          : DateTime.now(),
+          : ServerClock.now(),
       scheduledAt: map['scheduledAt'] == null
           ? null
           : DateTime.parse(map['scheduledAt']),
