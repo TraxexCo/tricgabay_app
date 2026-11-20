@@ -62,7 +62,7 @@ The pgTAP regression is `supabase/tests/023_gcash_direct_payment.sql`. On a disp
 
 ## 2026-11-20 update: QR, proof on dispute, admin rulings
 
-Migration `202611200001_gcash_receipts_disputes_rulings.sql` replaces PayMongo as the only online path.
+Migration `20261120143304_gcash_receipts_disputes_rulings.sql` replaces PayMongo as the only online path (the base GCash schema is in the `20261120142544`–`20261120142653` files).
 Design: `docs/superpowers/specs/2026-11-20-gcash-payment-and-cleanup-design.md`.
 
 **Normal trip.** The tourist sees the fare, the driver's GCash name and number, and the driver's

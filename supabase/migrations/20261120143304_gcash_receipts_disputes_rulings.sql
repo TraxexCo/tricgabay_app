@@ -546,6 +546,3 @@ grant execute on function public.set_driver_gcash_qr(text), public.get_booking_g
 -- ── Scheduling ──────────────────────────────────────────────────────────────
 select cron.schedule('tric-gabay-gcash-escalation', '*/15 * * * *',
   'select public.auto_escalate_gcash_disputes()');
--- PayMongo is retired: pause (do not remove) its scheduled jobs.
-select cron.alter_job(jobid, active := false) from cron.job
-  where jobname in ('expire-paymongo-provider-checkouts', 'monitor-checkout-expiries');

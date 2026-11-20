@@ -1,57 +1,3 @@
--- Driver-received GCash payments use the booking's normal dispatch and payment records.
-alter type public.payment_method add value if not exists 'gcash_direct';
-alter type public.payment_status add value if not exists 'gcash_awaiting_confirmation';
-alter type public.payment_status add value if not exists 'gcash_paid';
-alter type public.payment_status add value if not exists 'disputed';
-
-create table public.driver_gcash_details (
-  driver_id uuid primary key references public.driver_profiles(profile_id) on delete cascade,
-  gcash_number text not null check (gcash_number ~ '^09[0-9]{9}$'),
-  gcash_account_name text not null check (
-    gcash_account_name = btrim(gcash_account_name)
-    and char_length(gcash_account_name) between 2 and 120
-    and gcash_account_name !~ '[[:cntrl:]]'
-  ),
-  is_active boolean not null default false,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-alter table public.driver_gcash_details enable row level security;
-revoke all on public.driver_gcash_details from public, anon, authenticated;
-grant select on public.driver_gcash_details to authenticated;
-grant insert (driver_id, gcash_number, gcash_account_name, is_active),
-      update (driver_id, gcash_number, gcash_account_name, is_active)
-  on public.driver_gcash_details to authenticated;
-create policy driver_gcash_read on public.driver_gcash_details for select to authenticated
-using ((driver_id = auth.uid() and public.current_profile_role() = 'driver') or public.is_admin());
-create policy driver_gcash_insert on public.driver_gcash_details for insert to authenticated
-with check (driver_id = auth.uid() and public.current_profile_role() = 'driver');
-create policy driver_gcash_update on public.driver_gcash_details for update to authenticated
-using (driver_id = auth.uid() and public.current_profile_role() = 'driver')
-with check (driver_id = auth.uid() and public.current_profile_role() = 'driver');
-create trigger driver_gcash_updated before update on public.driver_gcash_details
-for each row execute function public.set_updated_at();
-
--- Keep private details and reference numbers out of published booking rows.
--- Only the booking's coarse payment status needs to go through realtime.
-create table public.gcash_payment_confirmations (
-  booking_id uuid primary key references public.bookings(id) on delete cascade,
-  gcash_reference_no text check (gcash_reference_no ~ '^[A-Za-z0-9]{8,20}$'),
-  tourist_marked_sent_at timestamptz,
-  driver_confirmed_received_at timestamptz,
-  driver_confirmed_by uuid references public.profiles(id) on delete set null,
-  dispute_note text check (char_length(dispute_note) <= 200),
-  disputed_at timestamptz
-);
-alter table public.gcash_payment_confirmations enable row level security;
-revoke all on public.gcash_payment_confirmations from public, anon, authenticated;
-
-alter table public.payments drop constraint payments_provider_check;
-alter table public.payments add constraint payments_provider_check
-  check (provider in ('cash', 'paymongo', 'gcash_direct'));
-create unique index one_gcash_payment_per_booking on public.payments(booking_id)
-  where provider = 'gcash_direct';
-
 -- Legacy charge-review RPCs can change the status and amount of a completed
 -- booking. A recorded direct GCash receipt is final in this workflow.
 create function public.protect_confirmed_gcash_booking()
@@ -231,27 +177,11 @@ begin
       '/tourist/bookings/' || b.id);
   end if;
 end $$;
-
-create function public.tourist_switch_gcash_to_cash(p_booking_id uuid)
-returns void
-language plpgsql security definer set search_path = public as $$
-declare b public.bookings;
-begin
-  b := public.lock_gcash_payment_booking(p_booking_id, 'tourist');
-  if b.payment_method = 'cash' and b.payment_status = 'cash_awaiting_confirmation' then
-    return;
-  end if;
-  perform public.require_gcash_payment_due(b);
-  delete from public.gcash_payment_confirmations where booking_id = b.id;
-  update public.bookings set payment_method = 'cash', payment_status = 'cash_awaiting_confirmation'
-    where id = b.id;
-end $$;
-
 revoke all on function public.get_booking_driver_gcash(uuid),
   public.get_booking_gcash_reference(uuid), public.tourist_mark_gcash_sent(uuid, text),
-  public.driver_confirm_gcash_received(uuid), public.driver_flag_gcash_not_received(uuid, text),
-  public.tourist_switch_gcash_to_cash(uuid) from public, anon, authenticated;
+  public.driver_confirm_gcash_received(uuid), public.driver_flag_gcash_not_received(uuid, text)
+  from public, anon, authenticated;
 grant execute on function public.get_booking_driver_gcash(uuid),
   public.get_booking_gcash_reference(uuid), public.tourist_mark_gcash_sent(uuid, text),
-  public.driver_confirm_gcash_received(uuid), public.driver_flag_gcash_not_received(uuid, text),
-  public.tourist_switch_gcash_to_cash(uuid) to authenticated;
+  public.driver_confirm_gcash_received(uuid), public.driver_flag_gcash_not_received(uuid, text)
+  to authenticated;

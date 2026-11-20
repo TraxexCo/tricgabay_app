@@ -59,7 +59,7 @@ remain administrator-editable placeholders until the owner fills verified number
 ## Direct GCash payment
 
 Use the updated client and a disposable or test backend with
-`202611150001_gcash_direct_payment.sql` applied. Use separate tourist and
+the `20261120142544_gcash_direct_payment_*` and `20261120143304_gcash_receipts_disputes_rulings` migrations applied. Use separate tourist and
 driver sessions. A real GCash transfer moves money independently of the
 app. For a walkthrough, stop at GCash's send screen or use a mutually
 agreed test transfer.

@@ -123,7 +123,7 @@ select throws_ok($$ select public.tourist_mark_gcash_sent('b6170000-0000-4000-80
  'P0001','GCash payment is no longer due','paid fare cannot be reported again');
 select throws_ok($$ select public.open_dispute('b6170000-0000-4000-8000-000000000002','Legacy review request') $$,
  'P0001','Confirmed GCash payment cannot be changed','legacy review cannot reopen a confirmed GCash fare');
--- 202611200001: once disputed, the tourist answers with proof (see 024).
+-- 20261120143304: once disputed, the tourist answers with proof (see 024).
 select throws_ok($$ select public.tourist_mark_gcash_sent('b6170000-0000-4000-8000-000000000001','NEXT1234') $$,
  'P0001','GCASH_PROOF_REQUIRED','a disputed fare needs proof rather than another report');
 select is((select payment_status::text from public.bookings where id='b6170000-0000-4000-8000-000000000001'),

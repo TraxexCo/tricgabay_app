@@ -4,7 +4,7 @@ This describes the implementation at Batch 4, 3 November 2026. See TESTING.md an
 
 ## Client and server boundaries
 
-The Android Flutter app uses Supabase Auth, PostgreSQL RPCs and RLS, Storage, Realtime and Deno Edge Functions. Mapbox supplies maps/routes; Firebase supplies messaging and optional diagnostics. Online payment is a direct tourist-to-driver GCash transfer recorded by the app (202611200001); PayMongo was retired and new PayMongo bookings are rejected. Their real services were not called during this batch's functional tests.
+The Android Flutter app uses Supabase Auth, PostgreSQL RPCs and RLS, Storage, Realtime and Deno Edge Functions. Mapbox supplies maps/routes; Firebase supplies messaging and optional diagnostics. Online payment is a direct tourist-to-driver GCash transfer recorded by the app (migrations 20261120142544 through 20261120145147); PayMongo was retired and new PayMongo bookings are rejected. Their real services were not called during this batch's functional tests.
 
 `AppSession` (`lib/core/session/app_session.dart`, formerly `PrototypeSession`) remains the session coordinator and publishes state through feature controllers and ValueNotifiers. The pre-booking trip (pickup, passengers, schedule) lives in `BookingDraft`. Riverpod is present but is not the sole state system. `BackendRepository` hydrates booking pages and their child records, maintains scoped Realtime subscriptions, patches location updates and invalidates affected sections. Session generations discard late results belonging to another login. Offline snapshots support reading; there is no durable offline booking queue.
 
