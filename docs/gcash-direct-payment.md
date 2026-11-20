@@ -59,3 +59,40 @@ The existing booking realtime events carry the coarse status. Neither private ta
 - Tric-Gabay does not hold or forward money. It does not charge a commission or a fee on this flow.
 
 The pgTAP regression is `supabase/tests/023_gcash_direct_payment.sql`. On a disposable local Supabase stack, apply the migrations with `supabase db reset`, then run `supabase test db`. Flutter coverage is in `test/gcash_direct_payment_test.dart`. See [Physical phone testing](physical-phone-testing.md) for the device checklist.
+
+## 2026-11-20 update: QR, proof on dispute, admin rulings
+
+Migration `202611200001_gcash_receipts_disputes_rulings.sql` replaces PayMongo as the only online path.
+Design: `docs/superpowers/specs/2026-11-20-gcash-payment-and-cleanup-design.md`.
+
+**Normal trip.** The tourist sees the fare, the driver's GCash name and number, and the driver's
+**QR image** with **Share or save QR**. GCash can read a saved QR through Scan QR → Upload QR, and
+the tourist can also scan the QR sticker on the tricycle. The driver checks their own GCash and
+slides to confirm. Nothing is uploaded.
+
+**Problem case.**
+1. The driver taps **Not received**. The tourist is then asked for **proof**: a receipt screenshot
+   (private bucket `gcash-receipts`) and the **reference number**, which is required at this step.
+   A reference number can settle only one booking (`gcash_reference_unique`).
+2. The two of them can still settle it themselves: the driver confirms later, or the tourist
+   switches to cash. Switching to cash now keeps the GCash record as evidence instead of deleting it.
+3. Either party can tap **Ask admin to decide**. Disputes nobody touches escalate automatically after
+   **24 hours** (`tric-gabay-gcash-escalation`, every 15 minutes).
+4. A finance or operations admin opens **Admin → GCash disputes** and rules **Paid** (records the
+   payment like a driver confirmation) or **Not paid**.
+5. **Not paid blocks new bookings** (`OUTSTANDING_FARE`) until the fare is settled: the driver
+   confirms a later GCash transfer, both parties confirm cash after a switch, or an admin **waives** it.
+
+| RPC | Caller | Effect |
+| --- | --- | --- |
+| `set_driver_gcash_qr` | Driver | Attaches an uploaded QR (`driver-gcash-qr/{driver}/{uuid}.jpg/png`) |
+| `get_booking_gcash_payee` | Booking tourist | Name, number, fare and QR path while the fare is due |
+| `tourist_submit_gcash_proof` | Booking tourist | Receipt path + reference, only while disputed |
+| `request_gcash_admin_review` | Tourist or driver | Escalates once; notifies the other party and admins |
+| `admin_rule_gcash_dispute` | Finance/operations admin | `paid` or `not_paid`, with a reason of at least 5 characters |
+| `admin_waive_unpaid_ruling` | Finance/operations admin | Waives an unsettled `not_paid` ruling |
+| `list_gcash_disputes`, `get_gcash_dispute_detail` | Admin; detail also for participants | Queue and evidence |
+| `get_my_outstanding_fare` | Tourist | The booking blocking new bookings, if any |
+
+Tests: `supabase/tests/024_gcash_disputes_rulings.sql` (35 assertions; they passed against the
+hosted project inside a rolled-back transaction) and `test/gcash_disputes_test.dart`.

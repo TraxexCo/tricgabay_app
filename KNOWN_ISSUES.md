@@ -28,3 +28,11 @@ Batch 4 is local coding and validation work, not permission to launch. Read the 
 iOS support; admin MFA/web admin; masked calling/chat; SOS/share-trip; offline cache encryption; Firebase major upgrades; favorites sync; a retention schedule. Existing generated cross-platform registration files may change during dependency tooling; that is not iOS implementation or validation.
 
 Owner decisions are collected in RELEASE_CHECKLIST.md. None of these pending decisions silently enables live payments.
+
+## 2026-11-20 payment redesign follow-ups
+
+- The hosted PayMongo Edge Functions (`create-paymongo-checkout`, `paymongo-webhook`, `process-paymongo-refund`, `reconcile-paymongo-payment`, `expire-paymongo-checkouts`) are still deployed. Their source was removed and new PayMongo bookings are rejected, but the deployments themselves have to be deleted by the owner with `supabase functions delete <name>` or from the dashboard. The two PayMongo cron jobs are paused, not removed. The legacy PayMongo RPCs `reserve_paymongo_refund` and `complete_paymongo_test_refund` no longer have execute grants.
+- The Supabase connector rejects `DROP`/`DELETE` statements, so `202611150001` and `202611200001` were applied to the hosted project in smaller named parts (for example `gcash_direct_payment_tables`). The end state matches the local files. Before running `supabase db push`, reconcile the history with `supabase migration repair`.
+- Receipt screenshots have no automatic retention or deletion yet. They are private and visible only to the booking's tourist, its driver and finance/operations admins.
+- Leaked-password protection is disabled in Supabase Auth (security advisor). Turn it on in Dashboard → Authentication.
+- Older pgTAP files that insert `paymongo` bookings directly still work. Only bookings created through the app's RPC are rejected.

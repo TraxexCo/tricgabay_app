@@ -5,10 +5,17 @@ booking fixed-price tricycle tours, assigning approved drivers, following live
 trip location, confirming tour stops, and resolving payments, cancellations,
 disputes, and refunds.
 
-The application uses Supabase as its authoritative backend and PayMongo Hosted
-Checkout in test mode. Firebase supports push delivery and optional diagnostics. See
-`docs/backend-setup.md` for configuration and `docs/booking-scenario-review.md`
-for the implemented rules and real-world scenario coverage.
+The application uses Supabase as its authoritative backend. Fares are paid in
+cash or by direct GCash transfer to the driver (QR or Open GCash, then the driver
+slides to confirm); the app records payments but never holds money, so no
+payment gateway or business registration is needed. Disputed GCash fares can be
+settled by the two parties or ruled on by an admin; see
+`docs/gcash-direct-payment.md`. Firebase supports push delivery and optional
+diagnostics. See `docs/backend-setup.md` for configuration and
+`docs/booking-scenario-review.md` for the implemented rules and scenarios.
+
+Demo data for presentations: `supabase/seed/demo_seed.sql` (idempotent; demo
+accounts cannot sign in). Older batch and audit reports live in `docs/archive/`.
 
 ## Mobile dependency pins
 
@@ -20,7 +27,7 @@ for the implemented rules and real-world scenario coverage.
 When changing either pin, run analysis, Flutter tests, and an Android build,
 then exercise sharing and maps on a device.
 
-## Batch 4 implementation and release preparation
+## Architecture and release preparation
 
 The current architecture, security contract, local test commands and environment
 requirements are documented in [ARCHITECTURE.md](ARCHITECTURE.md),
