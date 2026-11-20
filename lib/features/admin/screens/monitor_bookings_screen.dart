@@ -2,7 +2,7 @@ import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import '../../../core/widgets/remote_page_controls.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../models/booking_model.dart';
 import '../../../core/l10n/record_labels.dart';
 
@@ -27,7 +27,7 @@ class MonitorBookingsScreen extends StatelessWidget {
         ),
       ),
       body: ValueListenableBuilder<List<BookingModel>>(
-        valueListenable: PrototypeSession.bookings,
+        valueListenable: AppSession.bookings,
         builder: (context, bookings, _) => TabBarView(
           children: [
             _list(

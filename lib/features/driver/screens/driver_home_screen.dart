@@ -12,7 +12,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/widgets/shared_widgets.dart';
 import '../../../core/widgets/web_map_fallback.dart';
 import '../../../models/booking_model.dart';
@@ -70,7 +70,7 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
       ),
       streamSettings: _onlineLocationSettings,
     );
-    if (PrototypeSession.isDriverOnline.value) {
+    if (AppSession.isDriverOnline.value) {
       _checkLocationPermission();
     }
   }
@@ -82,9 +82,9 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
   }
 
   bool get _hasActiveTrip {
-    final activeId = PrototypeSession.activeDriverBookingId;
+    final activeId = AppSession.activeDriverBookingId;
     if (activeId == null) return false;
-    return PrototypeSession.bookings.value.any(
+    return AppSession.bookings.value.any(
       (booking) =>
           booking.id == activeId &&
           (booking.status == BookingStatus.accepted ||
@@ -111,8 +111,8 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
   }
 
   void _receiveDriverPosition(geo.Position position) {
-    PrototypeSession.userLatitude.value = position.latitude;
-    PrototypeSession.userLongitude.value = position.longitude;
+    AppSession.userLatitude.value = position.latitude;
+    AppSession.userLongitude.value = position.longitude;
     _updateCamera();
   }
 
@@ -144,8 +144,8 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
         }
       }
     }
-    final driverName = PrototypeSession.currentDriverName.value;
-    PrototypeSession.adminDrivers.value = PrototypeSession.adminDrivers.value
+    final driverName = AppSession.currentDriverName.value;
+    AppSession.adminDrivers.value = AppSession.adminDrivers.value
         .map(
           (driver) => driver['name'] == driverName
               ? {
@@ -184,7 +184,7 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
         }
         return;
       }
-      PrototypeSession.isDriverOnline.value = value;
+      AppSession.isDriverOnline.value = value;
       _locationMessage = null;
     } catch (error) {
       if (mounted) {
@@ -212,8 +212,8 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
       CameraOptions(
         center: Point(
           coordinates: Position(
-            PrototypeSession.userLongitude.value ?? 120.91,
-            PrototypeSession.userLatitude.value ?? 14.95,
+            AppSession.userLongitude.value ?? 120.91,
+            AppSession.userLatitude.value ?? 14.95,
           ),
         ),
         zoom: 14.0,
@@ -239,7 +239,7 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ValueListenableBuilder<String>(
-                          valueListenable: PrototypeSession.currentDriverName,
+                          valueListenable: AppSession.currentDriverName,
                           builder: (context, driverName, _) {
                             return Text(
                               context.l10n.goodMorningValue(
@@ -304,7 +304,7 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
               ),
               const SizedBox(height: 26),
               ValueListenableBuilder<bool>(
-                valueListenable: PrototypeSession.isDriverOnline,
+                valueListenable: AppSession.isDriverOnline,
                 builder: (context, isOnline, child) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -369,7 +369,7 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                             ),
                             const SizedBox(height: 20),
                             ValueListenableBuilder<double?>(
-                              valueListenable: PrototypeSession.userLatitude,
+                              valueListenable: AppSession.userLatitude,
                               builder: (context, lat, _) {
                                 return Container(
                                   height:
@@ -507,10 +507,10 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                       ),
                       const SizedBox(height: 12),
                       ValueListenableBuilder(
-                        valueListenable: PrototypeSession.bookings,
+                        valueListenable: AppSession.bookings,
                         builder: (context, bookings, child) {
-                          final earnings = PrototypeSession.driverEarnings;
-                          final trips = PrototypeSession.driverTripsCompleted;
+                          final earnings = AppSession.driverEarnings;
+                          final trips = AppSession.driverTripsCompleted;
                           return Row(
                             children: [
                               _stat(

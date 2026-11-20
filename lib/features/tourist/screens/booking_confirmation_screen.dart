@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/shared_widgets.dart';
 import '../../../models/booking_model.dart';
@@ -15,8 +15,8 @@ class BookingConfirmationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final id = PrototypeSession.activeBookingId;
-    final booking = PrototypeSession.bookings.value
+    final id = AppSession.activeBookingId;
+    final booking = AppSession.bookings.value
         .where((booking) => booking.id == id)
         .firstOrNull;
     if (booking == null) {
@@ -141,12 +141,12 @@ class BookingConfirmationScreen extends StatelessWidget {
                           Icons.event_available_outlined,
                         ),
                       ],
-                      if (PrototypeSession.activePackage != null) ...[
+                      if (AppSession.activePackage != null) ...[
                         const SizedBox(height: 13),
                         _row(
                           context,
                           MessageCode.tourPackage,
-                          PrototypeSession.activePackage!.name,
+                          AppSession.activePackage!.name,
                           Icons.auto_awesome_outlined,
                         ),
                       ],

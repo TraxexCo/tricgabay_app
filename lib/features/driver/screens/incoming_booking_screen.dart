@@ -10,7 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import '../../../core/config/mapbox_config.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/empty_state_widget.dart';
@@ -24,7 +24,7 @@ class IncomingBookingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ValueListenableBuilder<List<BookingModel>>(
-      valueListenable: PrototypeSession.bookings,
+      valueListenable: AppSession.bookings,
       builder: (context, bookings, _) {
         final booking = bookings
             .where(
@@ -260,7 +260,7 @@ class IncomingBookingScreen extends ConsumerWidget {
                                 label: context.l10n.decline,
                                 onPressed: () async {
                                   try {
-                                    await PrototypeSession.declineDriverOffer(
+                                    await AppSession.declineDriverOffer(
                                       booking.id,
                                     );
                                     if (context.mounted) context.pop();
@@ -289,9 +289,7 @@ class IncomingBookingScreen extends ConsumerWidget {
                                 label: context.l10n.accept,
                                 onPressed: () async {
                                   try {
-                                    await PrototypeSession.acceptBooking(
-                                      booking.id,
-                                    );
+                                    await AppSession.acceptBooking(booking.id);
                                     if (context.mounted) {
                                       context.pushReplacement(
                                         '/driver/trip/${booking.id}',

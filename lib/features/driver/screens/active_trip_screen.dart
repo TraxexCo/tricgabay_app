@@ -20,7 +20,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../models/trip_record.dart';
 import '../../tourist/screens/booking_detail_screen.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../models/booking_model.dart';
 import '../../../core/widgets/web_map_fallback.dart';
 import '../../../core/services/active_trip_tracking_service.dart';
@@ -50,13 +50,13 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
   @override
   void initState() {
     super.initState();
-    PrototypeSession.bookings.addListener(_bookingChanged);
+    AppSession.bookings.addListener(_bookingChanged);
     ActiveTripTrackingService.position.addListener(_driverPositionChanged);
     _startDriverLocationTracking();
   }
 
   void _bookingChanged() {
-    final booking = PrototypeSession.bookings.value
+    final booking = AppSession.bookings.value
         .where((b) => b.id == widget.bookingId)
         .firstOrNull;
     if (booking == null || !booking.isActive) {
@@ -68,7 +68,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
 
   @override
   void dispose() {
-    PrototypeSession.bookings.removeListener(_bookingChanged);
+    AppSession.bookings.removeListener(_bookingChanged);
     ActiveTripTrackingService.position.removeListener(_driverPositionChanged);
     _routeRefreshTimer?.cancel();
     _routeManager?.deleteAll();
@@ -83,11 +83,11 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
   void _driverPositionChanged() {
     final position = ActiveTripTrackingService.position.value;
     if (position == null) return;
-    PrototypeSession.userLatitude.value = position.latitude;
-    PrototypeSession.userLongitude.value = position.longitude;
+    AppSession.userLatitude.value = position.latitude;
+    AppSession.userLongitude.value = position.longitude;
     _checkRouteDeviation(position);
-    final driverName = PrototypeSession.currentDriverName.value;
-    PrototypeSession.adminDrivers.value = PrototypeSession.adminDrivers.value
+    final driverName = AppSession.currentDriverName.value;
+    AppSession.adminDrivers.value = AppSession.adminDrivers.value
         .map(
           (driver) => driver['name'] == driverName
               ? {
@@ -103,7 +103,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
         .toList();
     if (_routeRefreshTimer?.isActive ?? false) return;
     _routeRefreshTimer = Timer(const Duration(seconds: 6), () {
-      final booking = PrototypeSession.bookings.value
+      final booking = AppSession.bookings.value
           .where((item) => item.id == widget.bookingId)
           .firstOrNull;
       if (booking != null) _drawRoute(booking);
@@ -111,7 +111,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
   }
 
   void _checkRouteDeviation(geo.Position position) {
-    final booking = PrototypeSession.bookings.value
+    final booking = AppSession.bookings.value
         .where((item) => item.id == widget.bookingId)
         .firstOrNull;
     final geometry = _routePlan?.geometry;
@@ -142,7 +142,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
     if (mayReport) {
       _lastDeviationReport = ServerClock.now();
       unawaited(
-        PrototypeSession.reportRouteDeviation(
+        AppSession.reportRouteDeviation(
           booking!.id,
           nearest,
         ).catchError((Object _) {}),
@@ -152,8 +152,8 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
 
   List<Position> _waypointsFor(BookingModel booking) {
     final points = <Position>[];
-    final currentLat = PrototypeSession.userLatitude.value;
-    final currentLng = PrototypeSession.userLongitude.value;
+    final currentLat = AppSession.userLatitude.value;
+    final currentLng = AppSession.userLongitude.value;
     if (currentLat != null && currentLng != null) {
       points.add(Position(currentLng, currentLat));
     } else {
@@ -303,7 +303,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<List<BookingModel>>(
-      valueListenable: PrototypeSession.bookings,
+      valueListenable: AppSession.bookings,
       builder: (context, bookings, _) {
         final booking = bookings
             .where((b) => b.id == widget.bookingId)
@@ -320,7 +320,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
           );
         }
 
-        if (!PrototypeSession.ownsDriverBooking(booking) || !booking.isActive) {
+        if (!AppSession.ownsDriverBooking(booking) || !booking.isActive) {
           return BookingDetailScreen(
             bookingId: booking.id,
             viewer: TripActor.driver,
@@ -578,7 +578,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
                                     ),
                                     onPressed: () async {
                                       final phone =
-                                          PrototypeSession.adminTourists.value
+                                          AppSession.adminTourists.value
                                                   .where(
                                                     (u) =>
                                                         u['id'] ==

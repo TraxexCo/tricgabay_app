@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tricgabay_app/core/prototype/prototype_session.dart';
+import 'package:tricgabay_app/core/session/app_session.dart';
 import 'package:tricgabay_app/core/services/auth_service.dart';
 import 'package:tricgabay_app/core/services/session_termination_coordinator.dart';
 
@@ -19,30 +19,30 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() {
     SharedPreferences.setMockInitialValues({});
-    PrototypeSession.clearAuthenticatedUser();
+    AppSession.clearAuthenticatedUser();
   });
   tearDown(() async {
-    PrototypeSession.clearAuthenticatedUser();
+    AppSession.clearAuthenticatedUser();
     await Future<void>.delayed(Duration.zero);
   });
   test(
     'pending approval promotes to driver and clears old role-scoped state',
     () async {
-      PrototypeSession.setAuthenticatedUser(
+      AppSession.setAuthenticatedUser(
         id: 'driver-a',
         name: 'Test',
         role: 'driver_pending',
         email: 'driver@example.test',
       );
-      PrototypeSession.adminCapabilities.value = {'super_admin'};
+      AppSession.adminCapabilities.value = {'super_admin'};
       expect(
-        await PrototypeSession.refreshAccountAccess(load: () async => driver()),
+        await AppSession.refreshAccountAccess(load: () async => driver()),
         isFalse,
       );
-      expect(PrototypeSession.authenticatedRole, 'driver');
-      expect(PrototypeSession.adminCapabilities.value, isEmpty);
+      expect(AppSession.authenticatedRole, 'driver');
+      expect(AppSession.adminCapabilities.value, isEmpty);
       expect(
-        await PrototypeSession.refreshAccountAccess(load: () async => driver()),
+        await AppSession.refreshAccountAccess(load: () async => driver()),
         isTrue,
       );
     },
@@ -50,24 +50,24 @@ void main() {
   test(
     'approval revoked to pending removes operational role without signing out',
     () async {
-      PrototypeSession.setAuthenticatedUser(
+      AppSession.setAuthenticatedUser(
         id: 'driver-a',
         name: 'Test',
         role: 'driver',
         email: 'driver@example.test',
       );
-      PrototypeSession.isDriverOnline.value = true;
+      AppSession.isDriverOnline.value = true;
       expect(
-        await PrototypeSession.refreshAccountAccess(
+        await AppSession.refreshAccountAccess(
           load: () async => driver(pending: true),
         ),
         isFalse,
       );
-      expect(PrototypeSession.authenticatedUserId, 'driver-a');
-      expect(PrototypeSession.authenticatedRole, 'driver_pending');
-      expect(PrototypeSession.isDriverOnline.value, isFalse);
+      expect(AppSession.authenticatedUserId, 'driver-a');
+      expect(AppSession.authenticatedRole, 'driver_pending');
+      expect(AppSession.isDriverOnline.value, isFalse);
       expect(
-        await PrototypeSession.refreshAccountAccess(
+        await AppSession.refreshAccountAccess(
           load: () async => driver(pending: true),
         ),
         isFalse,
@@ -77,17 +77,17 @@ void main() {
   test(
     'late approval result from account A cannot overwrite account B',
     () async {
-      PrototypeSession.setAuthenticatedUser(
+      AppSession.setAuthenticatedUser(
         id: 'driver-a',
         name: 'A',
         role: 'driver_pending',
         email: 'a@example.test',
       );
       final pending = Completer<SignedInProfile?>();
-      final refresh = PrototypeSession.refreshAccountAccess(
+      final refresh = AppSession.refreshAccountAccess(
         load: () => pending.future,
       );
-      PrototypeSession.setAuthenticatedUser(
+      AppSession.setAuthenticatedUser(
         id: 'driver-b',
         name: 'B',
         role: 'driver_pending',
@@ -95,8 +95,8 @@ void main() {
       );
       pending.complete(driver());
       expect(await refresh, isFalse);
-      expect(PrototypeSession.authenticatedUserId, 'driver-b');
-      expect(PrototypeSession.authenticatedRole, 'driver_pending');
+      expect(AppSession.authenticatedUserId, 'driver-b');
+      expect(AppSession.authenticatedRole, 'driver_pending');
     },
   );
   test(
@@ -137,7 +137,7 @@ void main() {
     () async {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('telemetry_consent_v1', true);
-      PrototypeSession.clearAuthenticatedUser();
+      AppSession.clearAuthenticatedUser();
       await Future<void>.delayed(Duration.zero);
       expect(prefs.getBool('telemetry_consent_v1'), isFalse);
     },

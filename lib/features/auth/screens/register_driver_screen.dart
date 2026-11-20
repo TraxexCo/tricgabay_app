@@ -1,5 +1,5 @@
 import 'package:tricgabay_app/core/utils/formatters.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import '../../../core/widgets/registration_privacy.dart';
 import '../../../core/services/error_messages.dart';
@@ -126,7 +126,7 @@ class _RegisterDriverScreenState extends ConsumerState<RegisterDriverScreen> {
         );
         final profile = await AuthService.restoreSession();
         if (profile != null) {
-          PrototypeSession.setAuthenticatedUser(
+          AppSession.setAuthenticatedUser(
             id: profile.id,
             name: profile.name,
             role: profile.applicationPending

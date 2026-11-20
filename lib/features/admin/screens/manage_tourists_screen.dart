@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/shared_widgets.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 
 class ManageTouristsScreen extends StatefulWidget {
   const ManageTouristsScreen({super.key});
@@ -60,7 +60,7 @@ class _ManageTouristsScreenState extends State<ManageTouristsScreen> {
     if (reason == null || !mounted) return;
     setState(() => _pending.add(id));
     try {
-      await PrototypeSession.toggleTouristStatus(id, reason: reason);
+      await AppSession.toggleTouristStatus(id, reason: reason);
       if (!mounted) return;
       final activated = tourist['status'] != 'active';
       ScaffoldMessenger.of(context).showSnackBar(
@@ -81,7 +81,7 @@ class _ManageTouristsScreenState extends State<ManageTouristsScreen> {
           content: Text(context.message(ErrorMessages.forError(error))),
           action: SnackBarAction(
             label: context.l10n.refresh,
-            onPressed: () => PrototypeSession.syncRemoteState(),
+            onPressed: () => AppSession.syncRemoteState(),
           ),
         ),
       );
@@ -108,7 +108,7 @@ class _ManageTouristsScreenState extends State<ManageTouristsScreen> {
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
       body: ValueListenableBuilder<List<Map<String, dynamic>>>(
-        valueListenable: PrototypeSession.adminTourists,
+        valueListenable: AppSession.adminTourists,
         builder: (context, tourists, _) {
           if (tourists.isEmpty) {
             return EmptyStateWidget(

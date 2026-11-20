@@ -4,7 +4,7 @@ import '../../../core/services/error_messages.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../models/booking_model.dart';
 
 class FindDriverScreen extends StatefulWidget {
@@ -20,8 +20,8 @@ class _FindDriverScreenState extends State<FindDriverScreen> {
   @override
   void initState() {
     super.initState();
-    _bookingId = PrototypeSession.activeBookingId;
-    PrototypeSession.bookings.addListener(_updated);
+    _bookingId = AppSession.activeBookingId;
+    AppSession.bookings.addListener(_updated);
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
     });
@@ -32,7 +32,7 @@ class _FindDriverScreenState extends State<FindDriverScreen> {
 
   void _updated() {
     if (!mounted || _navigating) return;
-    final booking = PrototypeSession.bookings.value
+    final booking = AppSession.bookings.value
         .where((b) => b.id == _bookingId)
         .firstOrNull;
     if (booking?.status == BookingStatus.accepted ||
@@ -47,13 +47,13 @@ class _FindDriverScreenState extends State<FindDriverScreen> {
   @override
   void dispose() {
     _timer?.cancel();
-    PrototypeSession.bookings.removeListener(_updated);
+    AppSession.bookings.removeListener(_updated);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final b = PrototypeSession.bookings.value
+    final b = AppSession.bookings.value
         .where((b) => b.id == _bookingId)
         .firstOrNull;
     final pending =
@@ -108,7 +108,7 @@ class _FindDriverScreenState extends State<FindDriverScreen> {
                 FilledButton.icon(
                   onPressed: () async {
                     try {
-                      await PrototypeSession.retryDriverSearch(b.id);
+                      await AppSession.retryDriverSearch(b.id);
                     } catch (error) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tricgabay_app/core/prototype/prototype_session.dart';
+import 'package:tricgabay_app/core/session/app_session.dart';
 import 'package:tricgabay_app/features/admin/screens/admin_shell_screen.dart';
 import 'package:tricgabay_app/features/driver/screens/driver_shell_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/tourist_shell_screen.dart';
@@ -165,8 +165,8 @@ void main() {
       (shell) => DriverShellScreen(navigationShell: shell),
     );
     addTearDown(router.dispose);
-    PrototypeSession.activeDriverBookingId = 'active-booking';
-    addTearDown(() => PrototypeSession.activeDriverBookingId = null);
+    AppSession.activeDriverBookingId = 'active-booking';
+    addTearDown(() => AppSession.activeDriverBookingId = null);
     await _pumpRouter(tester, router);
 
     router.push('/detail');
@@ -174,7 +174,7 @@ void main() {
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
 
-    expect(PrototypeSession.activeDriverBookingId, 'active-booking');
+    expect(AppSession.activeDriverBookingId, 'active-booking');
     expect(find.text('root page'), findsOneWidget);
   });
 }

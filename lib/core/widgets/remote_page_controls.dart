@@ -1,6 +1,6 @@
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
-import '../prototype/prototype_session.dart';
+import '../session/app_session.dart';
 import '../services/error_messages.dart';
 
 class RemotePageControls extends StatelessWidget {
@@ -9,14 +9,14 @@ class RemotePageControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ValueListenableBuilder<bool>(
     valueListenable: directory
-        ? PrototypeSession.hasMoreDirectory
-        : PrototypeSession.hasMoreBookings,
+        ? AppSession.hasMoreDirectory
+        : AppSession.hasMoreBookings,
     builder: (context, hasMore, _) {
       if (!hasMore) return const SizedBox.shrink();
       return ValueListenableBuilder<bool>(
         valueListenable: directory
-            ? PrototypeSession.loadingMoreDirectory
-            : PrototypeSession.loadingMoreBookings,
+            ? AppSession.loadingMoreDirectory
+            : AppSession.loadingMoreBookings,
         builder: (context, busy, _) => SafeArea(
           top: false,
           child: TextButton(
@@ -24,7 +24,7 @@ class RemotePageControls extends StatelessWidget {
                 ? null
                 : () async {
                     try {
-                      await PrototypeSession.loadMore(directory: directory);
+                      await AppSession.loadMore(directory: directory);
                     } catch (error) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(

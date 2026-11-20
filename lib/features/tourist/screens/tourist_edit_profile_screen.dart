@@ -8,7 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/shared_widgets.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../core/services/backend_repository.dart';
 import '../../../core/utils/validators.dart';
@@ -26,7 +26,7 @@ class _TouristEditProfileScreenState extends State<TouristEditProfileScreen> {
   bool _isLoading = false;
 
   late final _nameCtrl = TextEditingController(
-    text: PrototypeSession.currentUserName.value,
+    text: AppSession.currentUserName.value,
   );
   late final _phoneCtrl = TextEditingController(text: '');
   late final _emailCtrl = TextEditingController();
@@ -81,7 +81,7 @@ class _TouristEditProfileScreenState extends State<TouristEditProfileScreen> {
             BackendConfig.client.auth.currentUser?.id != accountId) {
           return;
         }
-        PrototypeSession.updateAccountName(savedName);
+        AppSession.updateAccountName(savedName);
         AppSnackbar.showSuccess(
           context,
           MessageCode.profileUpdatedSuccessfullyLabel,

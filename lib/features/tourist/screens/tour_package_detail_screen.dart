@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/shared_widgets.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 
 class TourPackageDetailScreen extends StatelessWidget {
   final String packageId;
@@ -16,16 +16,16 @@ class TourPackageDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: Listenable.merge([
-      PrototypeSession.farePolicy,
-      PrototypeSession.tourPackages,
-      PrototypeSession.allSpots,
+      AppSession.farePolicy,
+      AppSession.tourPackages,
+      AppSession.allSpots,
     ]),
     builder: (context, _) {
-      final pkg = PrototypeSession.tourPackages.value
+      final pkg = AppSession.tourPackages.value
           .where((p) => p.id == packageId)
           .firstOrNull;
       if (pkg == null ||
-          !PrototypeSession.farePolicy.value.packageFares.containsKey(pkg.id)) {
+          !AppSession.farePolicy.value.packageFares.containsKey(pkg.id)) {
         return Scaffold(
           appBar: AppBar(title: Text(context.l10n.tourPackage)),
           body: Center(child: Text(context.l10n.packageNotFound)),
@@ -98,7 +98,7 @@ class TourPackageDetailScreen extends StatelessWidget {
                         Flexible(
                           child: Text(
                             context.message(
-                              '₱${AppFormatters.integer(PrototypeSession.packageFare(pkg))}',
+                              '₱${AppFormatters.integer(AppSession.packageFare(pkg))}',
                             ),
                             style: GoogleFonts.poppins(
                               fontSize: 20,
@@ -203,7 +203,7 @@ class TourPackageDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     ...pkg.spotIds.asMap().entries.map((entry) {
-                      final spot = PrototypeSession.allSpots.value
+                      final spot = AppSession.allSpots.value
                           .where((s) => s.id == entry.value && s.isActive)
                           .firstOrNull;
                       if (spot == null) {
@@ -280,7 +280,7 @@ class TourPackageDetailScreen extends StatelessWidget {
                               context.message((pkg.spotIds.length).toString()),
                               context.message(
                                 (AppFormatters.integer(
-                                  PrototypeSession.packageFare(pkg),
+                                  AppSession.packageFare(pkg),
                                 )).toString(),
                               ),
                             ),
@@ -303,7 +303,7 @@ class TourPackageDetailScreen extends StatelessWidget {
                   label: context.l10n.bookThisTour,
                   onPressed: () {
                     try {
-                      PrototypeSession.selectPackage(pkg);
+                      AppSession.selectPackage(pkg);
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(

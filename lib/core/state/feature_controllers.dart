@@ -6,7 +6,7 @@ import '../../models/tourist_spot_model.dart';
 import '../services/cancellation_policy.dart';
 import '../services/fare_policy.dart';
 
-/// Feature-owned state containers. `PrototypeSession` remains a transitional
+/// Feature-owned state containers. `AppSession` remains a transitional
 /// command facade while screens are migrated, but it no longer owns one giant
 /// collection of unrelated notifiers.
 class AuthStateController {

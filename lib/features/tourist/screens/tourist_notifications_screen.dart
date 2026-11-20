@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/widgets/shared_widgets.dart';
 
 class TouristNotificationsScreen extends StatelessWidget {
@@ -26,13 +26,13 @@ class TouristNotificationsScreen extends StatelessWidget {
         actions: [
           IconButton(
             tooltip: context.l10n.markAllRead,
-            onPressed: () => PrototypeSession.markAllNotificationsRead(),
+            onPressed: () => AppSession.markAllNotificationsRead(),
             icon: const Icon(Icons.done_all),
           ),
         ],
       ),
       body: ValueListenableBuilder<List<NotificationItem>>(
-        valueListenable: PrototypeSession.notifications,
+        valueListenable: AppSession.notifications,
         builder: (context, items, _) {
           if (items.isEmpty) {
             return EmptyStateWidget(
@@ -106,7 +106,7 @@ class _NotificationTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        PrototypeSession.markNotificationRead(item.id);
+        AppSession.markNotificationRead(item.id);
         if (item.routePath != null) context.push(item.routePath!);
       },
       child: Container(

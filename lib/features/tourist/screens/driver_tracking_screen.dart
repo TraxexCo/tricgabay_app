@@ -18,7 +18,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/services/map_route_service.dart';
 import '../../../core/widgets/app_button.dart';
 
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/widgets/web_map_fallback.dart';
 import '../../../models/booking_model.dart';
 import 'booking_detail_screen.dart';
@@ -63,7 +63,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
   Map<String, dynamic>? get _assignedDriver {
     final driverId = _booking?.driverId;
     if (driverId == null) return null;
-    return PrototypeSession.adminDrivers.value
+    return AppSession.adminDrivers.value
         .where((driver) => driver['id'] == driverId)
         .firstOrNull;
   }
@@ -80,8 +80,8 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
   double? get _distanceToRelevantPoint {
     final driverLocation = _driverLocation;
     if (driverLocation == null) return null;
-    final touristLat = PrototypeSession.userLatitude.value;
-    final touristLng = PrototypeSession.userLongitude.value;
+    final touristLat = AppSession.userLatitude.value;
+    final touristLng = AppSession.userLongitude.value;
     final trackTourist =
         _booking?.status == BookingStatus.ongoing &&
         touristLat != null &&
@@ -146,7 +146,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
   void initState() {
     super.initState();
     try {
-      _booking = PrototypeSession.bookings.value.firstWhere(
+      _booking = AppSession.bookings.value.firstWhere(
         (b) => b.id == widget.bookingId,
       );
     } catch (_) {
@@ -156,8 +156,8 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
     _pickupLat = _booking?.pickupLat ?? MapboxConfig.bustosLat;
     _pickupLng = _booking?.pickupLng ?? MapboxConfig.bustosLng;
 
-    PrototypeSession.adminDrivers.addListener(_syncDriverLocation);
-    PrototypeSession.bookings.addListener(_onBookingUpdated);
+    AppSession.adminDrivers.addListener(_syncDriverLocation);
+    AppSession.bookings.addListener(_onBookingUpdated);
     _ensureLocationPermission();
     _freshnessTimer = Timer.periodic(const Duration(seconds: 15), (_) {
       if (mounted) setState(() {});
@@ -166,8 +166,8 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
 
   @override
   void dispose() {
-    PrototypeSession.adminDrivers.removeListener(_syncDriverLocation);
-    PrototypeSession.bookings.removeListener(_onBookingUpdated);
+    AppSession.adminDrivers.removeListener(_syncDriverLocation);
+    AppSession.bookings.removeListener(_onBookingUpdated);
     _freshnessTimer?.cancel();
     _routeRefreshDebounce?.cancel();
     _touristPositionSubscription?.cancel();
@@ -194,15 +194,15 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
             distanceFilter: 8,
           ),
         ).listen((position) {
-          PrototypeSession.userLatitude.value = position.latitude;
-          PrototypeSession.userLongitude.value = position.longitude;
+          AppSession.userLatitude.value = position.latitude;
+          AppSession.userLongitude.value = position.longitude;
           if (mounted) setState(() {});
           _scheduleRouteRefresh();
         });
   }
 
   void _onBookingUpdated() {
-    final updated = PrototypeSession.bookings.value
+    final updated = AppSession.bookings.value
         .where((booking) => booking.id == widget.bookingId)
         .firstOrNull;
     if (updated == null || !mounted) return;
@@ -461,7 +461,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
     final centerLng = _booking?.pickupLng ?? MapboxConfig.bustosLng;
 
     return ValueListenableBuilder<bool>(
-      valueListenable: PrototypeSession.isFilipino,
+      valueListenable: AppSession.isFilipino,
       builder: (context, isFilipino, _) => Scaffold(
         body: Stack(
           children: [

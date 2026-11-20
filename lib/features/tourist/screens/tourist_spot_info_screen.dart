@@ -8,7 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/shared_widgets.dart';
 import '../../../core/widgets/app_button.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 
 class TouristSpotInfoScreen extends StatelessWidget {
   final String spotId;
@@ -17,7 +17,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spot = PrototypeSession.allSpots.value
+    final spot = AppSession.allSpots.value
         .where((s) => s.id == spotId && s.isActive)
         .firstOrNull;
     if (spot == null) {
@@ -58,7 +58,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
                 },
               ),
               ValueListenableBuilder<Set<String>>(
-                valueListenable: PrototypeSession.favorites,
+                valueListenable: AppSession.favorites,
                 builder: (context, favorites, _) => IconButton(
                   tooltip: context.l10n.savePlace,
                   icon: Icon(
@@ -67,7 +67,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
                         : Icons.favorite_border,
                     color: AppColors.surface,
                   ),
-                  onPressed: () => PrototypeSession.toggleFavorite(spotId),
+                  onPressed: () => AppSession.toggleFavorite(spotId),
                 ),
               ),
             ],
@@ -406,7 +406,7 @@ class TouristSpotInfoScreen extends StatelessWidget {
                   label: context.l10n.viewMap,
                   type: AppButtonType.outline,
                   onPressed: () {
-                    PrototypeSession.focusedSpotId.value = spot.id;
+                    AppSession.focusedSpotId.value = spot.id;
                     context.go('/tourist/home');
                   },
                 ),
@@ -444,9 +444,10 @@ class TouristSpotInfoScreen extends StatelessWidget {
                   onPressed: spot.isTemporarilyClosed
                       ? null
                       : () {
-                          final alreadyAdded = PrototypeSession.itinerary.value
-                              .any((item) => item.id == spot.id);
-                          PrototypeSession.toggleItinerary(spot);
+                          final alreadyAdded = AppSession.itinerary.value.any(
+                            (item) => item.id == spot.id,
+                          );
+                          AppSession.toggleItinerary(spot);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(

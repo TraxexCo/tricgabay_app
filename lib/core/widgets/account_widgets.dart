@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_routes.dart';
 import '../l10n/app_l10n.dart';
-import '../prototype/prototype_session.dart';
+import '../session/app_session.dart';
 import 'language_selection.dart';
 import 'shared_widgets.dart';
 
@@ -15,7 +15,7 @@ class AccountIdentityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ValueListenableBuilder(
-    valueListenable: PrototypeSession.currentAccount,
+    valueListenable: AppSession.currentAccount,
     builder: (context, account, _) {
       final name = account?.name.trim();
       final email = account?.email.trim();
@@ -144,7 +144,7 @@ class AccountLogoutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => TextButton.icon(
     onPressed: () async {
-      final accountId = PrototypeSession.authenticatedUserId;
+      final accountId = AppSession.authenticatedUserId;
       final confirm = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
@@ -166,10 +166,10 @@ class AccountLogoutButton extends StatelessWidget {
       );
       if (confirm != true ||
           !context.mounted ||
-          PrototypeSession.authenticatedUserId != accountId) {
+          AppSession.authenticatedUserId != accountId) {
         return;
       }
-      await PrototypeSession.signOut();
+      await AppSession.signOut();
       if (context.mounted) context.go(AppRoutes.login);
     },
     style: TextButton.styleFrom(foregroundColor: AppColors.danger),

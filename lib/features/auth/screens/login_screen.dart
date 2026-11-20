@@ -8,7 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/widgets/shared_widgets.dart';
@@ -49,14 +49,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         password: _pwdCtrl.text,
         expectedRole: role,
       );
-      PrototypeSession.setAuthenticatedUser(
+      AppSession.setAuthenticatedUser(
         id: profile.id,
         name: profile.name,
         role: profile.applicationPending ? 'driver_pending' : profile.role.name,
         email: profile.email,
         plateNumber: profile.plateNumber,
       );
-      await PrototypeSession.syncRemoteState();
+      await AppSession.syncRemoteState();
       if (!mounted) return;
       context.go(
         profile.applicationPending
@@ -85,7 +85,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: PrototypeSession.isFilipino,
+      valueListenable: AppSession.isFilipino,
       builder: (context, isFilipino, _) => Scaffold(
         backgroundColor: AppColors.background,
         body: SafeArea(

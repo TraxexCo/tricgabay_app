@@ -7,7 +7,7 @@ import '../../../core/config/backend_config.dart';
 import 'driver_gcash_settings_screen.dart';
 import '../../../core/l10n/app_l10n.dart';
 import '../../../core/l10n/record_labels.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/account_widgets.dart';
 import '../../../core/widgets/delete_account_button.dart';
@@ -18,7 +18,7 @@ class DriverProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final driverId = PrototypeSession.currentDriverId;
+    final driverId = AppSession.currentDriverId;
     return AccountPage(
       title: l10n.driverAccount,
       roleLabel: l10n.driver,
@@ -50,10 +50,10 @@ class DriverProfileScreen extends StatelessWidget {
             ),
           ),
         ValueListenableBuilder(
-          valueListenable: PrototypeSession.adminDrivers,
+          valueListenable: AppSession.adminDrivers,
           builder: (context, drivers, _) {
             final driver = drivers
-                .where((row) => row['id'] == PrototypeSession.currentDriverId)
+                .where((row) => row['id'] == AppSession.currentDriverId)
                 .firstOrNull;
             if (driver == null) return const SizedBox.shrink();
             final rating = driver['rating'] as num?;

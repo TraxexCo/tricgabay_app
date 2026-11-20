@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../core/widgets/shared_widgets.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/error_messages.dart';
 
@@ -57,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen>
       if (profile != null &&
           (!BackendConfig.isConfigured ||
               BackendConfig.client.auth.currentUser?.id == profile.id)) {
-        PrototypeSession.setAuthenticatedUser(
+        AppSession.setAuthenticatedUser(
           id: profile.id,
           name: profile.name,
           role: profile.applicationPending
@@ -67,17 +67,17 @@ class _SplashScreenState extends State<SplashScreen>
           plateNumber: profile.plateNumber,
         );
         unawaited(
-          PrototypeSession.syncRemoteState().catchError((Object error) {
+          AppSession.syncRemoteState().catchError((Object error) {
             ErrorMessages.forError(error);
           }),
         );
       }
     } catch (error) {
       if (!mounted) return;
-      PrototypeSession.storageError.value = ErrorMessages.forError(error);
+      AppSession.storageError.value = ErrorMessages.forError(error);
     }
     if (!mounted) return;
-    context.go(switch (PrototypeSession.authenticatedRole) {
+    context.go(switch (AppSession.authenticatedRole) {
       'admin' => '/admin/dashboard',
       'driver' => '/driver/home',
       'driver_pending' => '/driver/application-pending',

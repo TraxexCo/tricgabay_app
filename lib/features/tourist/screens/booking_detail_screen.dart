@@ -7,7 +7,7 @@ import '../../../core/services/backend_repository.dart';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/services/trip_rules.dart';
 import '../../../models/booking_model.dart';
 import '../../../models/trip_record.dart';
@@ -158,7 +158,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     );
     if (reason != null && mounted) {
       await _run(
-        () => PrototypeSession.cancelBooking(
+        () => AppSession.cancelBooking(
           b.id,
           actor: widget.viewer,
           reason: reason,
@@ -173,9 +173,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       MessageCode.useThisOnlyIfYouCannotCompleteThePickupTheTouristWillDecide,
     );
     if (reason != null && mounted) {
-      await _run(
-        () => PrototypeSession.requestDriverReplacement(booking.id, reason),
-      );
+      await _run(() => AppSession.requestDriverReplacement(booking.id, reason));
     }
   }
 
@@ -222,7 +220,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     );
     if (approved == true && mounted) {
       await _run(
-        () => PrototypeSession.decideDriverReplacement(
+        () => AppSession.decideDriverReplacement(
           booking.id,
           findReplacement: findReplacement,
         ),
@@ -255,7 +253,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
       ),
     );
     if (approved == true && mounted) {
-      await _run(() => PrototypeSession.declareTouristNoShow(booking.id));
+      await _run(() => AppSession.declareTouristNoShow(booking.id));
     }
   }
 
@@ -267,7 +265,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     );
     if (reason != null && mounted) {
       await _run(
-        () => PrototypeSession.proposeRouteChange(
+        () => AppSession.proposeRouteChange(
           booking.id,
           type: 'skip',
           targetStopId: stop.id,
@@ -347,7 +345,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     reason.dispose();
     if (approved != true || explanation.length < 5 || !mounted) return;
     await _run(
-      () => PrototypeSession.proposeRouteChange(
+      () => AppSession.proposeRouteChange(
         booking.id,
         type: 'reorder',
         proposedOrder: remaining.map((stop) => stop.id).toList(),
@@ -363,7 +361,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     final request = booking.pendingRouteChange;
     if (request == null) return;
     await _run(
-      () => PrototypeSession.decideRouteChange(
+      () => AppSession.decideRouteChange(
         booking.id,
         request.id,
         approve: approve,
@@ -378,9 +376,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           .stopSomewhereSafeFirstYourCurrentGpsLocationAndExplanationWillBeRecorded,
     );
     if (reason != null && mounted) {
-      await _run(
-        () => PrototypeSession.reportVehicleBreakdown(booking.id, reason),
-      );
+      await _run(() => AppSession.reportVehicleBreakdown(booking.id, reason));
     }
   }
 
@@ -459,7 +455,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           MessageCode.enterAValidAmountWithAtMostTwoDecimals,
         );
       }
-      await PrototypeSession.resolveSettlement(
+      await AppSession.resolveSettlement(
         b.id,
         (double.parse(rawAmount) * 100).round(),
         explanation,
@@ -502,14 +498,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     );
     if (approved == true && mounted) {
       await _run(
-        () => PrototypeSession.confirmCash(b.id, widget.viewer, refund: refund),
+        () => AppSession.confirmCash(b.id, widget.viewer, refund: refund),
       );
     }
   }
 
   Future<void> _showFinancialRecord(BookingModel booking) async {
     await _run(() async {
-      final entries = await PrototypeSession.financialLedger(booking.id);
+      final entries = await AppSession.financialLedger(booking.id);
       if (!mounted) return;
       await showModalBottomSheet<void>(
         context: context,
@@ -618,7 +614,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   Widget build(
     BuildContext context,
   ) => ValueListenableBuilder<List<BookingModel>>(
-    valueListenable: PrototypeSession.bookings,
+    valueListenable: AppSession.bookings,
     builder: (context, bookings, _) {
       final b = bookings
           .where((item) => item.id == widget.bookingId)
@@ -629,8 +625,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           b != null &&
           (admin ||
               (driver
-                  ? PrototypeSession.ownsDriverBooking(b)
-                  : b.touristId == PrototypeSession.currentTouristId));
+                  ? AppSession.ownsDriverBooking(b)
+                  : b.touristId == AppSession.currentTouristId));
       if (!allowed) {
         return Scaffold(
           appBar: AppBar(title: Text(context.l10n.booking)),
@@ -854,7 +850,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                         );
                         if (approved != true) return;
                         await BackendRepository.reissuePickupCode(booking.id);
-                        await PrototypeSession.syncRemoteState();
+                        await AppSession.syncRemoteState();
                       }),
                 child: Text(context.l10n.lostPickupCodeReissue),
               ),
@@ -972,7 +968,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       ],
                       const SizedBox(height: 8),
                       if (booking.pendingRouteChange!.requestedBy ==
-                          PrototypeSession.authenticatedUserId)
+                          AppSession.authenticatedUserId)
                         Text(
                           context
                               .l10n
@@ -1025,7 +1021,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           onPressed: _busy
                               ? null
                               : () => _run(
-                                  () => PrototypeSession.decideBreakdownWait(
+                                  () => AppSession.decideBreakdownWait(
                                     booking.id,
                                     wait: true,
                                   ),
@@ -1036,7 +1032,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           onPressed: _busy
                               ? null
                               : () => _run(
-                                  () => PrototypeSession.decideBreakdownWait(
+                                  () => AppSession.decideBreakdownWait(
                                     booking.id,
                                     wait: false,
                                   ),
@@ -1049,7 +1045,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           onPressed: _busy
                               ? null
                               : () => _run(
-                                  () => PrototypeSession.resumeAfterBreakdown(
+                                  () => AppSession.resumeAfterBreakdown(
                                     booking.id,
                                   ),
                                 ),
@@ -1103,9 +1099,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 if (t.pickupArrivedAt == null)
                   _button(
                     MessageCode.arrivedAtPickup,
-                    () => _run(
-                      () => PrototypeSession.reportPickupArrival(booking.id),
-                    ),
+                    () =>
+                        _run(() => AppSession.reportPickupArrival(booking.id)),
                   ),
                 if (t.pickupArrivedAt != null)
                   _button(MessageCode.verifyPickupCodeStart, () async {
@@ -1116,9 +1111,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       code: true,
                     );
                     if (code != null && mounted) {
-                      await _run(
-                        () => PrototypeSession.startTrip(booking.id, code),
-                      );
+                      await _run(() => AppSession.startTrip(booking.id, code));
                     }
                   }),
                 if (t.pickupWaitExpiresAt != null &&
@@ -1150,16 +1143,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     t.confirmedStops < booking.stops.length)
                   _button(
                     MessageCode.reportArrivalAtNextStop,
-                    () =>
-                        _run(() => PrototypeSession.reportArrival(booking.id)),
+                    () => _run(() => AppSession.reportArrival(booking.id)),
                   ),
                 if (!driver &&
                     booking.interruptedAt == null &&
                     t.arrivalPending)
                   _button(
                     MessageCode.confirmReachedStop,
-                    () =>
-                        _run(() => PrototypeSession.confirmArrival(booking.id)),
+                    () => _run(() => AppSession.confirmArrival(booking.id)),
                   ),
                 if (driver &&
                     booking.interruptedAt == null &&
@@ -1168,7 +1159,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     booking.paymentMethod == PaymentMethod.gcashDirect
                         ? context.l10n.gcashCompleteTrip
                         : MessageCode.completeTripCashStillUnconfirmed,
-                    () => _run(() => PrototypeSession.completeTrip(booking.id)),
+                    () => _run(() => AppSession.completeTrip(booking.id)),
                   ),
                 if (driver && booking.interruptedAt == null)
                   _button(
@@ -1246,7 +1237,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 );
                 if (reason != null && mounted) {
                   await _run(
-                    () => PrototypeSession.disputeBooking(
+                    () => AppSession.disputeBooking(
                       booking.id,
                       widget.viewer,
                       reason,
@@ -1264,7 +1255,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 );
                 if (text != null && mounted) {
                   await _run(
-                    () => PrototypeSession.addCaseStatement(
+                    () => AppSession.addCaseStatement(
                       booking.id,
                       widget.viewer,
                       text,

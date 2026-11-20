@@ -4,7 +4,7 @@ import '../../../core/services/server_clock.dart';
 import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/services/trip_rules.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../models/booking_model.dart';
@@ -21,18 +21,18 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
   bool _busy = false;
   bool _agreed = false;
   PaymentMethod _paymentMethod = PaymentMethod.cash;
-  int _passengerCount = PrototypeSession.passengerCount;
-  DateTime? _scheduledAt = PrototypeSession.scheduledAt;
+  int _passengerCount = AppSession.draft.passengerCount;
+  DateTime? _scheduledAt = AppSession.draft.scheduledAt;
   late final TextEditingController _luggageNotes;
   late final TextEditingController _accessibilityNeeds;
   @override
   void initState() {
     super.initState();
-    _luggageNotes = TextEditingController(text: PrototypeSession.luggageNotes);
+    _luggageNotes = TextEditingController(text: AppSession.draft.luggageNotes);
     _accessibilityNeeds = TextEditingController(
-      text: PrototypeSession.accessibilityNeeds,
+      text: AppSession.draft.accessibilityNeeds,
     );
-    PrototypeSession.farePolicy.addListener(_priceChanged);
+    AppSession.farePolicy.addListener(_priceChanged);
   }
 
   void _priceChanged() {
@@ -85,7 +85,7 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
 
   @override
   void dispose() {
-    PrototypeSession.farePolicy.removeListener(_priceChanged);
+    AppSession.farePolicy.removeListener(_priceChanged);
     _luggageNotes.dispose();
     _accessibilityNeeds.dispose();
     super.dispose();
@@ -94,15 +94,15 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: Listenable.merge([
-      PrototypeSession.farePolicy,
-      PrototypeSession.itinerary,
-      PrototypeSession.customPickupAddress,
+      AppSession.farePolicy,
+      AppSession.itinerary,
+      AppSession.draft.pickupAddress,
     ]),
     builder: (context, _) {
-      final revision = PrototypeSession.farePolicy.value.revision;
-      final spots = PrototypeSession.itinerary.value;
-      final package = PrototypeSession.activePackage;
-      final fare = PrototypeSession.estimatedFare;
+      final revision = AppSession.farePolicy.value.revision;
+      final spots = AppSession.itinerary.value;
+      final package = AppSession.activePackage;
+      final fare = AppSession.estimatedFare;
       return Scaffold(
         appBar: AppBar(title: Text(context.l10n.reviewYourBooking)),
         body: ListView(
@@ -139,8 +139,8 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                 title: Text(context.l10n.pickupPoint),
                 subtitle: Text(
                   context.message(
-                    PrototypeSession.customPickupAddress.value ??
-                        (PrototypeSession.userLatitude.value == null
+                    AppSession.draft.pickupAddress.value ??
+                        (AppSession.userLatitude.value == null
                             ? MessageCode.chooseAnExactPickupPointBeforeBooking
                             : MessageCode.currentGpsLocation),
                   ),
@@ -368,13 +368,13 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                   : () async {
                       setState(() => _busy = true);
                       try {
-                        PrototypeSession.passengerCount = _passengerCount;
-                        PrototypeSession.luggageNotes = _luggageNotes.text
+                        AppSession.draft.passengerCount = _passengerCount;
+                        AppSession.draft.luggageNotes = _luggageNotes.text
                             .trim();
-                        PrototypeSession.accessibilityNeeds =
+                        AppSession.draft.accessibilityNeeds =
                             _accessibilityNeeds.text.trim();
-                        PrototypeSession.scheduledAt = _scheduledAt;
-                        await PrototypeSession.createBooking(
+                        AppSession.draft.scheduledAt = _scheduledAt;
+                        await AppSession.createBooking(
                           paymentMethod: _paymentMethod,
                           expectedFareRevision: revision,
                         );

@@ -10,7 +10,7 @@ import '../../../core/services/trip_rules.dart';
 import '../../../core/services/image_upload_validator.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/config/backend_config.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 
 class DriverApplicationPendingScreen extends StatefulWidget {
   final Future<Map<String, dynamic>> Function()? loader;
@@ -52,15 +52,15 @@ class _DriverApplicationPendingScreenState
       }
       final profile = await AuthService.restoreSession();
       if (profile == null) {
-        await PrototypeSession.handleSessionEnded();
+        await AppSession.handleSessionEnded();
         return;
       }
       final desiredRole = profile.applicationPending
           ? 'driver_pending'
           : profile.role.name;
-      if (PrototypeSession.authenticatedRole != desiredRole ||
-          PrototypeSession.authenticatedUserId != profile.id) {
-        PrototypeSession.setAuthenticatedUser(
+      if (AppSession.authenticatedRole != desiredRole ||
+          AppSession.authenticatedUserId != profile.id) {
+        AppSession.setAuthenticatedUser(
           id: profile.id,
           name: profile.name,
           role: profile.applicationPending
@@ -146,7 +146,7 @@ class _DriverApplicationPendingScreenState
     try {
       final consent = await PrivacyService.status();
       if (!consent.accepted) {
-        PrototypeSession.authRevision.value++;
+        AppSession.authRevision.value++;
         throw const TripRuleException(
           MessageCode.acceptTheCurrentPrivacyNoticeBeforeSubmitting,
         );
@@ -337,7 +337,7 @@ class _DriverApplicationPendingScreenState
               child: Text(context.l10n.checkApproval),
             ),
             TextButton(
-              onPressed: _busy ? null : PrototypeSession.signOut,
+              onPressed: _busy ? null : AppSession.signOut,
               child: Text(context.l10n.signOut),
             ),
           ],

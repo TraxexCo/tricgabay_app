@@ -1,22 +1,22 @@
-import 'package:tricgabay_app/core/prototype/prototype_session.dart';
+import 'package:tricgabay_app/core/session/app_session.dart';
 import 'package:tricgabay_app/models/tourist_spot_model.dart';
 import 'package:tricgabay_app/models/booking_model.dart';
 import '../trip_rules_test.dart' show accepted;
 
 void seedScreen(String role, String name) {
-  PrototypeSession.setAuthenticatedUser(
+  AppSession.setAuthenticatedUser(
     id: role == 'driver' ? 'd1' : 'u1',
     name: role == 'driver' ? 'Alejandro dela Cruz' : 'María Victoria dela Cruz',
     role: role,
     email: 'fixture.profile@example.test',
   );
-  PrototypeSession.currentUserName.value = 'María Victoria dela Cruz';
-  PrototypeSession.currentDriverName.value = 'Alejandro dela Cruz';
-  PrototypeSession.isDriverOnline.value = false;
-  PrototypeSession.allSpots.value = TouristSpotModel.catalog;
-  PrototypeSession.itinerary.value = TouristSpotModel.catalog.take(3).toList();
-  PrototypeSession.favorites.value = {TouristSpotModel.catalog.first.id};
-  PrototypeSession.adminCapabilities.value = {
+  AppSession.currentUserName.value = 'María Victoria dela Cruz';
+  AppSession.currentDriverName.value = 'Alejandro dela Cruz';
+  AppSession.isDriverOnline.value = false;
+  AppSession.allSpots.value = TouristSpotModel.catalog;
+  AppSession.itinerary.value = TouristSpotModel.catalog.take(3).toList();
+  AppSession.favorites.value = {TouristSpotModel.catalog.first.id};
+  AppSession.adminCapabilities.value = {
     'super_admin',
     'operations',
     'finance',
@@ -35,14 +35,14 @@ void seedScreen(String role, String name) {
         ? BookingStatus.pending
         : BookingStatus.accepted,
   );
-  PrototypeSession.bookings.value = [b];
-  PrototypeSession.activeBookingId = b.id;
-  PrototypeSession.activeDriverBookingId = b.id;
-  PrototypeSession.activePackageId = null;
-  PrototypeSession.userLatitude.value = 14.9571;
-  PrototypeSession.userLongitude.value = 120.9188;
-  PrototypeSession.customPickupAddress.value = 'Bustos Municipal Hall, Bulacan';
-  PrototypeSession.adminDrivers.value = [
+  AppSession.bookings.value = [b];
+  AppSession.activeBookingId = b.id;
+  AppSession.activeDriverBookingId = b.id;
+  AppSession.activePackageId = null;
+  AppSession.userLatitude.value = 14.9571;
+  AppSession.userLongitude.value = 120.9188;
+  AppSession.draft.pickupAddress.value = 'Bustos Municipal Hall, Bulacan';
+  AppSession.adminDrivers.value = [
     {
       'id': 'd1',
       'name': 'Alejandro dela Cruz',
@@ -71,7 +71,7 @@ void seedScreen(String role, String name) {
       'updatedAt': '2026-11-01T00:00:00Z',
     },
   ];
-  PrototypeSession.adminTourists.value = [
+  AppSession.adminTourists.value = [
     {
       'id': 'u1',
       'name': 'María Victoria dela Cruz',
@@ -81,7 +81,7 @@ void seedScreen(String role, String name) {
       'bookings': 2,
     },
   ];
-  PrototypeSession.adminFeedbacks.value = [];
-  PrototypeSession.notifications.value = [];
-  PrototypeSession.operationalAlerts.value = [];
+  AppSession.adminFeedbacks.value = [];
+  AppSession.notifications.value = [];
+  AppSession.operationalAlerts.value = [];
 }

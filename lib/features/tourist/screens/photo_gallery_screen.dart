@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/widgets/shared_widgets.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 
 class PhotoGalleryScreen extends StatefulWidget {
   final String spotId;
@@ -28,7 +28,7 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final spot = PrototypeSession.allSpots.value
+    final spot = AppSession.allSpots.value
         .where((s) => s.id == widget.spotId && s.isActive)
         .firstOrNull;
     if (spot == null) {

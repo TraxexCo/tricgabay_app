@@ -7,7 +7,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/shared_widgets.dart';
 import '../../../core/widgets/list_skeleton.dart';
 import '../../../core/services/realtime_refresh_policy.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 
 class TourPackagesScreen extends StatelessWidget {
   const TourPackagesScreen({super.key});
@@ -15,22 +15,20 @@ class TourPackagesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: Listenable.merge([
-      PrototypeSession.farePolicy,
-      PrototypeSession.tourPackages,
-      PrototypeSession.loadingSections,
+      AppSession.farePolicy,
+      AppSession.tourPackages,
+      AppSession.loadingSections,
     ]),
     builder: (context, _) {
-      final publishedFares = PrototypeSession.farePolicy.value.packageFares;
-      final packages = PrototypeSession.tourPackages.value
+      final publishedFares = AppSession.farePolicy.value.packageFares;
+      final packages = AppSession.tourPackages.value
           .where((package) => publishedFares.containsKey(package.id))
           .toList();
       return Scaffold(
         appBar: AppBar(title: Text(context.l10n.tourPackages)),
         body:
             packages.isEmpty &&
-                PrototypeSession.loadingSections.value.contains(
-                  RemoteSection.spots,
-                )
+                AppSession.loadingSections.value.contains(RemoteSection.spots)
             ? const ListSkeleton()
             : ListView.builder(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 104),
@@ -187,7 +185,7 @@ class TourPackagesScreen extends StatelessWidget {
                                       context.l10n.fixedFareValue(
                                         context.message(
                                           (AppFormatters.integer(
-                                            PrototypeSession.packageFare(pkg),
+                                            AppSession.packageFare(pkg),
                                           )).toString(),
                                         ),
                                       ),
@@ -225,7 +223,7 @@ class TourPackagesScreen extends StatelessWidget {
           minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
           child: OutlinedButton.icon(
             onPressed: () {
-              PrototypeSession.startCustomItinerary();
+              AppSession.startCustomItinerary();
               context.push('/tourist/itinerary');
             },
             icon: const Icon(Icons.tune_rounded),

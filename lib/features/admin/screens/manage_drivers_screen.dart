@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/empty_state_widget.dart';
@@ -91,7 +91,7 @@ class _ManageDriversScreenState extends ConsumerState<ManageDriversScreen> {
             ),
             Expanded(
               child: ValueListenableBuilder<List<Map<String, dynamic>>>(
-                valueListenable: PrototypeSession.adminDrivers,
+                valueListenable: AppSession.adminDrivers,
                 builder: (context, allDrivers, _) {
                   final drivers = _matching(allDrivers);
                   final review = drivers

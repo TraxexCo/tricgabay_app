@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/shared_widgets.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
@@ -12,9 +12,9 @@ class FavoritesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Set<String>>(
-      valueListenable: PrototypeSession.favorites,
+      valueListenable: AppSession.favorites,
       builder: (context, favoriteIds, _) {
-        final favorites = PrototypeSession.allSpots.value
+        final favorites = AppSession.allSpots.value
             .where((spot) => favoriteIds.contains(spot.id))
             .toList();
         return Scaffold(
@@ -65,9 +65,7 @@ class FavoritesScreen extends StatelessWidget {
                                     child: IconButton(
                                       tooltip: context.l10n.removeSavedPlace,
                                       onPressed: () =>
-                                          PrototypeSession.toggleFavorite(
-                                            spot.id,
-                                          ),
+                                          AppSession.toggleFavorite(spot.id),
                                       style: IconButton.styleFrom(
                                         backgroundColor: AppColors.danger,
                                         foregroundColor: Colors.white,
@@ -106,7 +104,7 @@ class FavoritesScreen extends StatelessWidget {
                                       alignment: Alignment.centerLeft,
                                     ),
                                     onPressed: () {
-                                      PrototypeSession.toggleItinerary(spot);
+                                      AppSession.toggleItinerary(spot);
                                       AppSnackbar.showSuccess(
                                         context,
                                         MessageCode.addedToItinerary,

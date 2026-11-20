@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:tricgabay_app/core/prototype/prototype_session.dart';
+import 'package:tricgabay_app/core/session/app_session.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tricgabay_app/core/services/privacy_service.dart';
@@ -25,7 +25,7 @@ void main() {
       await tester.tap(find.byType(Switch));
       await tester.pumpAndSettle();
       expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
-      PrototypeSession.authRevision.value++;
+      AppSession.authRevision.value++;
       await tester.pumpAndSettle();
       expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
       expect(
@@ -67,7 +67,7 @@ void main() {
 
       await accept();
       version = 'account-b';
-      PrototypeSession.authRevision.value++;
+      AppSession.authRevision.value++;
       await tester.pumpAndSettle();
       await accept();
       a.completeError(StateError('Account A failed'));

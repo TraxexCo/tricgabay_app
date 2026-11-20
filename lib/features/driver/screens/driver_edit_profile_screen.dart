@@ -9,7 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../core/services/backend_repository.dart';
 import '../../../core/utils/validators.dart';
@@ -41,7 +41,7 @@ class _DriverEditProfileScreenState
   void initState() {
     super.initState();
     _nameController = TextEditingController(
-      text: PrototypeSession.currentDriverName.value,
+      text: AppSession.currentDriverName.value,
     );
     _phoneController = TextEditingController();
     _plateController = TextEditingController();
@@ -121,12 +121,12 @@ class _DriverEditProfileScreenState
           BackendConfig.client.auth.currentUser?.id != accountId) {
         return;
       }
-      PrototypeSession.updateAccountName(savedName);
+      AppSession.updateAccountName(savedName);
       await BackendRepository.updateDriverServiceProfile(
         passengerCapacity: passengerCapacity,
         acceptsAccessibilityRequests: acceptsAccessibilityRequests,
       );
-      await PrototypeSession.syncRemoteState();
+      await AppSession.syncRemoteState();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

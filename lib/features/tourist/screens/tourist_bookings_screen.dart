@@ -9,7 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/shared_widgets.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/l10n/record_labels.dart';
 
 class TouristBookingsScreen extends StatelessWidget {
@@ -53,29 +53,27 @@ class _BookingList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: Listenable.merge([
-        PrototypeSession.bookings,
-        PrototypeSession.loadingSections,
+        AppSession.bookings,
+        AppSession.loadingSections,
       ]),
       builder: (context, _) {
-        final bookingsList = PrototypeSession.bookings.value;
+        final bookingsList = AppSession.bookings.value;
         if (bookingsList.isEmpty &&
-            PrototypeSession.loadingSections.value.contains(
-              RemoteSection.bookings,
-            )) {
+            AppSession.loadingSections.value.contains(RemoteSection.bookings)) {
           return const ListSkeleton();
         }
         final bookings = status == 'ongoing'
             ? bookingsList
                   .where(
                     (b) =>
-                        b.touristId == PrototypeSession.currentTouristId &&
+                        b.touristId == AppSession.currentTouristId &&
                         b.isActive,
                   )
                   .toList()
             : bookingsList
                   .where(
                     (b) =>
-                        b.touristId == PrototypeSession.currentTouristId &&
+                        b.touristId == AppSession.currentTouristId &&
                         !b.isActive,
                   )
                   .toList();

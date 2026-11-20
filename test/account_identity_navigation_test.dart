@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tricgabay_app/app.dart';
 import 'package:tricgabay_app/core/constants/app_routes.dart';
-import 'package:tricgabay_app/core/prototype/prototype_session.dart';
+import 'package:tricgabay_app/core/session/app_session.dart';
 import 'package:tricgabay_app/core/services/auth_service.dart';
 import 'package:tricgabay_app/core/theme/app_theme.dart';
 import 'package:tricgabay_app/core/widgets/account_widgets.dart';
@@ -16,12 +16,12 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     GoogleFonts.config.allowRuntimeFetching = false;
-    PrototypeSession.clearAuthenticatedUser();
+    AppSession.clearAuthenticatedUser();
   });
-  tearDown(PrototypeSession.clearAuthenticatedUser);
+  tearDown(AppSession.clearAuthenticatedUser);
 
   void signInDriver() {
-    PrototypeSession.setAuthenticatedUser(
+    AppSession.setAuthenticatedUser(
       id: 'driver-account',
       name: 'Test Driver',
       role: 'driver',
@@ -46,7 +46,7 @@ void main() {
   testWidgets(
     'identity card updates the name and email together when accounts change',
     (tester) async {
-      PrototypeSession.setAuthenticatedUser(
+      AppSession.setAuthenticatedUser(
         id: 'tourist-account',
         name: 'Test Tourist',
         role: 'tourist',
@@ -69,7 +69,7 @@ void main() {
       expect(find.text('Test Driver'), findsOneWidget);
       expect(find.text('driver-account@example.test'), findsOneWidget);
 
-      await PrototypeSession.refreshAccountAccess(
+      await AppSession.refreshAccountAccess(
         load: () async => const SignedInProfile(
           id: 'driver-account',
           name: 'Updated Driver',
@@ -82,7 +82,7 @@ void main() {
       expect(find.text('Updated Driver'), findsOneWidget);
       expect(find.text('updated@example.test'), findsOneWidget);
 
-      PrototypeSession.clearAuthenticatedUser();
+      AppSession.clearAuthenticatedUser();
       await tester.pump();
       expect(find.text('updated@example.test'), findsNothing);
     },

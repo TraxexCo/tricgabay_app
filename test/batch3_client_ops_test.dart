@@ -14,7 +14,7 @@ import 'package:tricgabay_app/core/services/error_messages.dart';
 import 'package:tricgabay_app/core/config/auth_link_config.dart';
 import 'package:tricgabay_app/core/services/connectivity_monitor.dart';
 import 'package:tricgabay_app/core/widgets/offline_banner.dart';
-import 'package:tricgabay_app/core/prototype/prototype_session.dart';
+import 'package:tricgabay_app/core/session/app_session.dart';
 import 'package:tricgabay_app/features/tourist/screens/tourist_home_screen.dart';
 import 'package:tricgabay_app/features/driver/screens/driver_home_screen.dart';
 import 'package:tricgabay_app/features/driver/screens/driver_application_pending_screen.dart';
@@ -136,12 +136,12 @@ void main() {
           tester.view.devicePixelRatio = 1;
           addTearDown(tester.view.resetPhysicalSize);
           addTearDown(tester.view.resetDevicePixelRatio);
-          final oldOnline = PrototypeSession.isDriverOnline.value;
-          PrototypeSession.isDriverOnline.value = false;
-          addTearDown(() => PrototypeSession.isDriverOnline.value = oldOnline);
-          final oldLanguage = PrototypeSession.isFilipino.value;
-          PrototypeSession.isFilipino.value = filipino;
-          addTearDown(() => PrototypeSession.isFilipino.value = oldLanguage);
+          final oldOnline = AppSession.isDriverOnline.value;
+          AppSession.isDriverOnline.value = false;
+          addTearDown(() => AppSession.isDriverOnline.value = oldOnline);
+          final oldLanguage = AppSession.isFilipino.value;
+          AppSession.isFilipino.value = filipino;
+          addTearDown(() => AppSession.isFilipino.value = oldLanguage);
           final semantics = tester.ensureSemantics();
 
           await tester.pumpWidget(

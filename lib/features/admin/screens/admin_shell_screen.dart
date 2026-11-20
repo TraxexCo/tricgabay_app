@@ -2,7 +2,7 @@ import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/role_navigation_bar.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 
 class AdminShellScreen extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -27,7 +27,7 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
       3 => 'operations',
       _ => null,
     };
-    if (required != null && !PrototypeSession.hasAdminCapability(required)) {
+    if (required != null && !AppSession.hasAdminCapability(required)) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(

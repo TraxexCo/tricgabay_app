@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../models/tourist_spot_model.dart';
 
@@ -35,10 +35,10 @@ class _ItineraryBuilderScreenState extends State<ItineraryBuilderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedCount = PrototypeSession.itinerary.value.length;
-    final estimatedFare = PrototypeSession.estimatedFare;
+    final selectedCount = AppSession.itinerary.value.length;
+    final estimatedFare = AppSession.estimatedFare;
 
-    bool hasEntranceFees = PrototypeSession.itinerary.value.any(
+    bool hasEntranceFees = AppSession.itinerary.value.any(
       (spot) =>
           spot.entranceFee.toLowerCase() != 'free' &&
           !spot.entranceFee.toLowerCase().startsWith('free'),
@@ -58,12 +58,12 @@ class _ItineraryBuilderScreenState extends State<ItineraryBuilderScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
         actions: [
-          if (PrototypeSession.itinerary.value.isNotEmpty)
+          if (AppSession.itinerary.value.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.clear_all_rounded),
               tooltip: context.l10n.clearAll,
               onPressed: () {
-                PrototypeSession.clearTripPlan();
+                AppSession.clearTripPlan();
                 setState(() {});
               },
             ),
@@ -125,10 +125,10 @@ class _ItineraryBuilderScreenState extends State<ItineraryBuilderScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-              itemCount: PrototypeSession.allSpots.value.length,
+              itemCount: AppSession.allSpots.value.length,
               itemBuilder: (context, index) {
-                final spot = PrototypeSession.allSpots.value[index];
-                final selected = PrototypeSession.itinerary.value.any(
+                final spot = AppSession.allSpots.value[index];
+                final selected = AppSession.itinerary.value.any(
                   (item) => item.id == spot.id,
                 );
                 return Padding(
@@ -141,7 +141,7 @@ class _ItineraryBuilderScreenState extends State<ItineraryBuilderScreen> {
                       onTap: spot.isTemporarilyClosed
                           ? null
                           : () => setState(
-                              () => PrototypeSession.toggleItinerary(spot),
+                              () => AppSession.toggleItinerary(spot),
                             ),
                       child: AnimatedContainer(
                         duration: MediaQuery.disableAnimationsOf(context)

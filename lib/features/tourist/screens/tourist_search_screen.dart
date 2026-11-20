@@ -9,7 +9,7 @@ import '../../../core/widgets/shared_widgets.dart';
 import '../../../core/widgets/list_skeleton.dart';
 import '../../../core/services/realtime_refresh_policy.dart';
 import '../../../models/tourist_spot_model.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../spot_filters.dart';
 
 class TouristSearchScreen extends StatefulWidget {
@@ -22,18 +22,18 @@ class TouristSearchScreen extends StatefulWidget {
 class _TouristSearchScreenState extends State<TouristSearchScreen> {
   final _searchCtrl = TextEditingController();
   String _selectedCategory = MessageCode.all;
-  List<TouristSpotModel> _results = PrototypeSession.allSpots.value;
+  List<TouristSpotModel> _results = AppSession.allSpots.value;
   Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
-    PrototypeSession.allSpots.addListener(_filter);
+    AppSession.allSpots.addListener(_filter);
   }
 
   @override
   void dispose() {
-    PrototypeSession.allSpots.removeListener(_filter);
+    AppSession.allSpots.removeListener(_filter);
     _debounce?.cancel();
     _searchCtrl.dispose();
     super.dispose();
@@ -44,7 +44,7 @@ class _TouristSearchScreenState extends State<TouristSearchScreen> {
   void _applyFilter(String category) {
     _debounce?.cancel();
     final results = filterSpots(
-      PrototypeSession.allSpots.value,
+      AppSession.allSpots.value,
       category,
       query: _searchCtrl.text,
     );
@@ -137,7 +137,7 @@ class _TouristSearchScreenState extends State<TouristSearchScreen> {
           Expanded(
             child: _results.isEmpty
                 ? ValueListenableBuilder(
-                    valueListenable: PrototypeSession.loadingSections,
+                    valueListenable: AppSession.loadingSections,
                     builder: (context, sections, _) =>
                         sections.contains(RemoteSection.spots)
                         ? const ListSkeleton()

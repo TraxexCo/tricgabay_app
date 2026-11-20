@@ -36,3 +36,4 @@ Owner decisions are collected in RELEASE_CHECKLIST.md. None of these pending dec
 - Receipt screenshots have no automatic retention or deletion yet. They are private and visible only to the booking's tourist, its driver and finance/operations admins.
 - Leaked-password protection is disabled in Supabase Auth (security advisor). Turn it on in Dashboard → Authentication.
 - Older pgTAP files that insert `paymongo` bookings directly still work. Only bookings created through the app's RPC are rejected.
+- `AppSession` still has an offline "local mode" branch next to every server call. The Flutter test suite exercises that branch, so removing it needs a fake backend for the tests first. It was left in place on purpose. `booking_detail_screen.dart` (about 1,400 lines) and `tourist_home_screen.dart` (about 1,450 lines) are the next candidates to split into widgets.

@@ -2,7 +2,7 @@ import 'package:tricgabay_app/core/utils/formatters.dart';
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../models/booking_model.dart';
 import '../../../core/l10n/record_labels.dart';
 
@@ -18,7 +18,7 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> {
   Widget build(
     BuildContext context,
   ) => ValueListenableBuilder<List<BookingModel>>(
-    valueListenable: PrototypeSession.bookings,
+    valueListenable: AppSession.bookings,
     builder: (context, bookings, _) {
       final now = DateTime.now();
       final start = DateTime(
@@ -29,7 +29,7 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> {
       final own = bookings
           .where(
             (b) =>
-                PrototypeSession.ownsDriverBooking(b) &&
+                AppSession.ownsDriverBooking(b) &&
                 !b.isActive &&
                 (b.completedAt ?? b.createdAt).isAfter(
                   start.subtract(const Duration(microseconds: 1)),

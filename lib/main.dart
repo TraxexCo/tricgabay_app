@@ -26,7 +26,7 @@ import 'core/config/firebase_config.dart';
 import 'core/config/auth_link_config.dart';
 import 'core/constants/app_routes.dart';
 import 'core/theme/app_theme.dart';
-import 'core/prototype/prototype_session.dart';
+import 'core/session/app_session.dart';
 import 'core/services/push_notification_service.dart';
 import 'core/services/telemetry_service.dart';
 
@@ -51,10 +51,7 @@ void main() async {
     BackendConfig.initialize(),
     PushNotificationService.initializeCore(),
   ]);
-  await Future.wait([
-    PrototypeSession.initialize(),
-    TelemetryService.initialize(),
-  ]);
+  await Future.wait([AppSession.initialize(), TelemetryService.initialize()]);
 
   // The Mapbox native SDK initialization is not supported by Flutter web.
   // Calling it in a browser prevents runApp from ever rendering a first frame.
@@ -90,9 +87,8 @@ class _TricGabayAppState extends State<TricGabayApp>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _connectivity = ConnectivityMonitor(
-      onReconnect: PrototypeSession.syncRemoteState,
-    )..start();
+    _connectivity = ConnectivityMonitor(onReconnect: AppSession.syncRemoteState)
+      ..start();
     if (BackendConfig.isConfigured) {
       _authSubscription = BackendConfig.client.auth.onAuthStateChange.listen((
         state,
@@ -102,8 +98,8 @@ class _TricGabayAppState extends State<TricGabayApp>
           return;
         }
         if (state.event == AuthChangeEvent.signedOut &&
-            PrototypeSession.authenticatedUserId != null) {
-          unawaited(PrototypeSession.handleSessionEnded());
+            AppSession.authenticatedUserId != null) {
+          unawaited(AppSession.handleSessionEnded());
         }
       });
     }
@@ -131,12 +127,12 @@ class _TricGabayAppState extends State<TricGabayApp>
   Future<void> _refreshAfterResume() async {
     if (_refreshing ||
         !BackendConfig.isConfigured ||
-        PrototypeSession.authenticatedUserId == null) {
+        AppSession.authenticatedUserId == null) {
       return;
     }
     _refreshing = true;
     try {
-      await PrototypeSession.syncRemoteState();
+      await AppSession.syncRemoteState();
     } catch (_) {
       // syncRemoteState exposes a retryable, user-facing connectivity message.
     } finally {
@@ -170,12 +166,12 @@ class _TricGabayAppState extends State<TricGabayApp>
           routerConfig: appRouter,
           builder: (context, child) => ResponsiveAppFrame(
             child: ValueListenableBuilder<String?>(
-              valueListenable: PrototypeSession.storageError,
+              valueListenable: AppSession.storageError,
               builder: (context, error, _) => Column(
                 children: [
                   OfflineBanner(
                     monitor: _connectivity,
-                    retry: PrototypeSession.syncRemoteState,
+                    retry: AppSession.syncRemoteState,
                   ),
                   if (error != null)
                     Material(
@@ -189,7 +185,7 @@ class _TricGabayAppState extends State<TricGabayApp>
                               children: [
                                 Text(context.message(error)),
                                 TextButton(
-                                  onPressed: PrototypeSession.initialize,
+                                  onPressed: AppSession.initialize,
                                   child: Text(context.l10n.retryStorage),
                                 ),
                               ],

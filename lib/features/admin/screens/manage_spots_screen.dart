@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/widgets/shared_widgets.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/services/backend_repository.dart';
 import '../../../models/tourist_spot_model.dart';
 
@@ -31,7 +31,7 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
     setState(() => _pendingSpotIds.add(spot.id));
     try {
       await operation();
-      await PrototypeSession.syncRemoteState();
+      await AppSession.syncRemoteState();
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -43,7 +43,7 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
           content: Text(context.message(ErrorMessages.forError(error))),
           action: SnackBarAction(
             label: context.l10n.refresh,
-            onPressed: () => PrototypeSession.syncRemoteState(),
+            onPressed: () => AppSession.syncRemoteState(),
           ),
         ),
       );
@@ -215,7 +215,7 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
           ),
           Expanded(
             child: ValueListenableBuilder<List<TouristSpotModel>>(
-              valueListenable: PrototypeSession.allSpots,
+              valueListenable: AppSession.allSpots,
               builder: (context, spots, _) {
                 final filteredSpots = _selectedCategory == MessageCode.all
                     ? spots
@@ -399,9 +399,8 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
                                         } else if (value == 'delete') {
                                           await _runSpotMutation(
                                             spot,
-                                            () => PrototypeSession.deleteSpot(
-                                              spot.id,
-                                            ),
+                                            () =>
+                                                AppSession.deleteSpot(spot.id),
                                             MessageCode.deletedValue(
                                               (spot.name).toString(),
                                             ),

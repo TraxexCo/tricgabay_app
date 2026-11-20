@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tricgabay_app/core/services/remote_pagination.dart';
-import 'package:tricgabay_app/core/prototype/prototype_session.dart';
+import 'package:tricgabay_app/core/session/app_session.dart';
 import 'package:tricgabay_app/core/widgets/remote_page_controls.dart';
 
 void main() {
@@ -25,28 +25,28 @@ void main() {
   testWidgets('load-more control shows progress and disappears at the end', (
     tester,
   ) async {
-    final oldMore = PrototypeSession.hasMoreBookings.value,
-        oldBusy = PrototypeSession.loadingMoreBookings.value;
+    final oldMore = AppSession.hasMoreBookings.value,
+        oldBusy = AppSession.loadingMoreBookings.value;
     addTearDown(() {
-      PrototypeSession.hasMoreBookings.value = oldMore;
-      PrototypeSession.loadingMoreBookings.value = oldBusy;
+      AppSession.hasMoreBookings.value = oldMore;
+      AppSession.loadingMoreBookings.value = oldBusy;
     });
-    PrototypeSession.hasMoreBookings.value = true;
-    PrototypeSession.loadingMoreBookings.value = false;
+    AppSession.hasMoreBookings.value = true;
+    AppSession.loadingMoreBookings.value = false;
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(bottomNavigationBar: RemotePageControls()),
       ),
     );
     expect(find.text('Load more bookings'), findsOneWidget);
-    PrototypeSession.loadingMoreBookings.value = true;
+    AppSession.loadingMoreBookings.value = true;
     await tester.pump();
     expect(find.text('Loading more…'), findsOneWidget);
     expect(
       tester.widget<TextButton>(find.byType(TextButton)).onPressed,
       isNull,
     );
-    PrototypeSession.hasMoreBookings.value = false;
+    AppSession.hasMoreBookings.value = false;
     await tester.pump();
     expect(find.byType(TextButton), findsNothing);
   });

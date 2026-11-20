@@ -3,7 +3,7 @@ import 'package:tricgabay_app/core/utils/formatters.dart';
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/services/fare_policy.dart';
 import '../../../core/services/cancellation_policy.dart';
 import '../../../core/services/trip_rules.dart';
@@ -33,9 +33,9 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
   @override
   void initState() {
     super.initState();
-    final policy = PrototypeSession.farePolicy.value;
+    final policy = AppSession.farePolicy.value;
     _revision = policy.revision;
-    final cancellation = PrototypeSession.cancellationPolicy.value;
+    final cancellation = AppSession.cancellationPolicy.value;
     _policyVersion = cancellation.version;
     _graceMinutes.text = '${cancellation.freeCancellationMinutes}';
     _lateFeePercent.text = '${cancellation.acceptedTripFeePercent}';
@@ -45,7 +45,7 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
     _prices['custom'] = TextEditingController(
       text: AppFormatters.decimalInput((policy.customFareCents / 100)),
     );
-    _packages = List.of(PrototypeSession.tourPackages.value);
+    _packages = List.of(AppSession.tourPackages.value);
     for (final p in _packages) {
       final cents = policy.packageFares[p.id];
       _prices[p.id] = TextEditingController(
@@ -131,7 +131,7 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
       );
       if (approved != true || !mounted) return;
       setState(() => _savingPolicy = true);
-      await PrototypeSession.saveCancellationPolicy(
+      await AppSession.saveCancellationPolicy(
         expectedVersion: _policyVersion,
         freeCancellationMinutes: grace,
         acceptedTripFeePercent: lateFee,
@@ -140,7 +140,7 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
         terms: _policyTerms.text.trim(),
         reason: _policyReason.text.trim(),
       );
-      _policyVersion = PrototypeSession.cancellationPolicy.value.version;
+      _policyVersion = AppSession.cancellationPolicy.value.version;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -167,7 +167,7 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
     if (_saving || !_form.currentState!.validate()) return;
     final custom = FarePolicy.parsePrice(_prices['custom']!.text);
     final packages = {
-      ...PrototypeSession.farePolicy.value.packageFares,
+      ...AppSession.farePolicy.value.packageFares,
       for (final p in _packages)
         p.id: FarePolicy.parsePrice(_prices[p.id]!.text),
     };
@@ -207,13 +207,13 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
     if (approved != true || !mounted) return;
     setState(() => _saving = true);
     try {
-      await PrototypeSession.saveFares(
+      await AppSession.saveFares(
         customCents: custom,
         packages: packages,
         expectedRevision: _revision,
         reason: _reason.text,
       );
-      _revision = PrototypeSession.farePolicy.value.revision;
+      _revision = AppSession.farePolicy.value.revision;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -375,7 +375,7 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
             ),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          ...PrototypeSession.farePolicy.value.history.reversed.map(
+          ...AppSession.farePolicy.value.history.reversed.map(
             (entry) => Padding(
               padding: const EdgeInsets.only(top: 12),
               child: Text(context.message(entry)),

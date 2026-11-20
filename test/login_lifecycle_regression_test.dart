@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tricgabay_app/app.dart';
-import 'package:tricgabay_app/core/prototype/prototype_session.dart';
+import 'package:tricgabay_app/core/session/app_session.dart';
 import 'package:tricgabay_app/core/services/privacy_service.dart';
 import 'package:tricgabay_app/core/widgets/map_surface.dart';
 import 'package:tricgabay_app/core/widgets/minimum_version_gate.dart';
@@ -30,8 +30,8 @@ void main() {
     GoogleFonts.config.allowRuntimeFetching = false;
     HttpOverrides.global = FixtureHttp();
     MapSurface.testBuilder = (_) => const ColoredBox(color: Colors.white);
-    PrototypeSession.authenticatedUserId = null;
-    PrototypeSession.authenticatedRole = null;
+    AppSession.authenticatedUserId = null;
+    AppSession.authenticatedRole = null;
     for (final channel in [
       'flutter.baseflow.com/geolocator',
       'flutter.baseflow.com/geolocator_android',
@@ -47,8 +47,8 @@ void main() {
   tearDown(() {
     HttpOverrides.global = null;
     MapSurface.testBuilder = null;
-    PrototypeSession.authenticatedUserId = null;
-    PrototypeSession.authenticatedRole = null;
+    AppSession.authenticatedUserId = null;
+    AppSession.authenticatedRole = null;
   });
 
   testWidgets(
@@ -147,8 +147,8 @@ void main() {
         expect(appRouter.routeInformationProvider.value.uri.path, '/login');
         seedScreen(entry.key == 'driver_pending' ? 'driver' : entry.key, '');
         signedIn = true;
-        PrototypeSession.authenticatedRole = entry.key;
-        PrototypeSession.authRevision.value++;
+        AppSession.authenticatedRole = entry.key;
+        AppSession.authRevision.value++;
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 250));
         expect(appRouter.routeInformationProvider.value.uri.path, entry.value);

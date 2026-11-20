@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tricgabay_app/core/prototype/prototype_session.dart';
+import 'package:tricgabay_app/core/session/app_session.dart';
 import 'package:tricgabay_app/core/services/trip_rules.dart';
 import 'package:tricgabay_app/features/admin/screens/fare_settings_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/booking_detail_screen.dart';
@@ -11,14 +11,14 @@ import 'trip_rules_test.dart' show accepted;
 void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
-    PrototypeSession.bookings.value = [];
-    PrototypeSession.setAuthenticatedUser(
+    AppSession.bookings.value = [];
+    AppSession.setAuthenticatedUser(
       id: 'u1',
       name: 'Tourist',
       role: 'tourist',
       email: 'tourist@example.test',
     );
-    await PrototypeSession.initialize();
+    await AppSession.initialize();
   });
   Future<void> showSmall(WidgetTester tester, Widget screen) async {
     tester.view.physicalSize = const Size(320, 640);
@@ -43,7 +43,7 @@ void main() {
     'small-screen tourist details expose code, route and cancellation without overflow',
     (tester) async {
       final b = accepted();
-      PrototypeSession.bookings.value = [b];
+      AppSession.bookings.value = [b];
       await showSmall(tester, BookingDetailScreen(bookingId: b.id));
       await tester.scrollUntilVisible(
         find.text('1234'),
@@ -68,7 +68,7 @@ void main() {
         TripActor.driver,
         'Vehicle breakdown',
       );
-      PrototypeSession.bookings.value = [b];
+      AppSession.bookings.value = [b];
       await showSmall(
         tester,
         BookingDetailScreen(bookingId: b.id, viewer: TripActor.admin),

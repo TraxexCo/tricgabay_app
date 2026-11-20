@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../models/booking_model.dart';
 import '../../../core/l10n/record_labels.dart';
 
@@ -25,7 +25,7 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
   @override
   void initState() {
     super.initState();
-    PrototypeSession.bookings.addListener(_scheduleExpiry);
+    AppSession.bookings.addListener(_scheduleExpiry);
     _scheduleExpiry();
   }
 
@@ -33,7 +33,7 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
     _clock?.cancel();
     final now = ServerClock.now();
     DateTime? next;
-    for (final booking in PrototypeSession.bookings.value) {
+    for (final booking in AppSession.bookings.value) {
       if (booking.status != BookingStatus.pending ||
           booking.isDispatchExpired ||
           booking.isOfferExpired) {
@@ -60,7 +60,7 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
 
   @override
   void dispose() {
-    PrototypeSession.bookings.removeListener(_scheduleExpiry);
+    AppSession.bookings.removeListener(_scheduleExpiry);
     _clock?.cancel();
     super.dispose();
   }
@@ -82,27 +82,27 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
       ),
       body: ListenableBuilder(
         listenable: Listenable.merge([
-          PrototypeSession.bookings,
-          PrototypeSession.isDriverOnline,
-          PrototypeSession.adminDrivers,
-          PrototypeSession.loadingSections,
+          AppSession.bookings,
+          AppSession.isDriverOnline,
+          AppSession.adminDrivers,
+          AppSession.loadingSections,
         ]),
         builder: (context, _) {
-          if (PrototypeSession.bookings.value.isEmpty &&
-              PrototypeSession.loadingSections.value.contains(
+          if (AppSession.bookings.value.isEmpty &&
+              AppSession.loadingSections.value.contains(
                 RemoteSection.bookings,
               )) {
             return const ListSkeleton();
           }
-          final own = PrototypeSession.bookings.value
-              .where(PrototypeSession.ownsDriverBooking)
+          final own = AppSession.bookings.value
+              .where(AppSession.ownsDriverBooking)
               .toList();
           final canAccept =
-              PrototypeSession.isDriverOnline.value &&
+              AppSession.isDriverOnline.value &&
               !own.any((b) => b.isActive) &&
-              PrototypeSession.adminDrivers.value.any(
+              AppSession.adminDrivers.value.any(
                 (d) =>
-                    d['id'] == PrototypeSession.currentDriverId &&
+                    d['id'] == AppSession.currentDriverId &&
                     d['status'] == 'active',
               );
           return TabBarView(
@@ -110,7 +110,7 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
               canAccept
                   ? _list(
                       context,
-                      PrototypeSession.bookings.value
+                      AppSession.bookings.value
                           .where(
                             (b) =>
                                 b.status == BookingStatus.pending &&
@@ -177,7 +177,9 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
             isThreeLine: true,
             trailing: Text(
               context.l10n.agreedValue(
-                context.message((AppFormatters.amount(b.totalFareCents / 100)).toString()),
+                context.message(
+                  (AppFormatters.amount(b.totalFareCents / 100)).toString(),
+                ),
               ),
               textAlign: TextAlign.end,
             ),

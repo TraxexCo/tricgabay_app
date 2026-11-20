@@ -9,7 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/config/backend_config.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/services/backend_repository.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
@@ -211,7 +211,7 @@ class _DriverDetailAdminScreenState
         approve: approve,
         reviewNote: _reviewNote.text.trim(),
       );
-      await PrototypeSession.syncRemoteState();
+      await AppSession.syncRemoteState();
       if (!mounted) return;
       _message(
         approve
@@ -239,7 +239,7 @@ class _DriverDetailAdminScreenState
             ? DateTime.now().add(const Duration(days: 30))
             : null,
       );
-      await PrototypeSession.syncRemoteState();
+      await AppSession.syncRemoteState();
       if (!mounted) return;
       _message(
         status == 'rejected'
@@ -307,7 +307,7 @@ class _DriverDetailAdminScreenState
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<List<Map<String, dynamic>>>(
-      valueListenable: PrototypeSession.adminDrivers,
+      valueListenable: AppSession.adminDrivers,
       builder: (context, drivers, _) {
         final index = drivers.indexWhere((d) => d['id'] == widget.driverId);
         if (index == -1) {

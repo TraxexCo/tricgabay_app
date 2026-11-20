@@ -42,7 +42,8 @@ String paymentStatusLabel(BuildContext context, PaymentStatus status) =>
       PaymentStatus.failed => context.l10n.paymentFailed,
       PaymentStatus.awaitingConfirmation =>
         context.l10n.paymentAwaitingConfirmation,
-      PaymentStatus.gcashAwaitingConfirmation => context.l10n.gcashAwaitingDriver,
+      PaymentStatus.gcashAwaitingConfirmation =>
+        context.l10n.gcashAwaitingDriver,
       PaymentStatus.disputed => context.l10n.gcashDisputed,
       PaymentStatus.underReview => context.l10n.underReview,
       PaymentStatus.paid => context.l10n.paid,

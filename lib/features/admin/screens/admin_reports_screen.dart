@@ -8,7 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../models/booking_model.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -29,7 +29,7 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
 
   List<({String name, double rating, int trips})> _driverPerformance() {
     final grouped = <String, List<BookingModel>>{};
-    for (final booking in PrototypeSession.bookings.value.where(
+    for (final booking in AppSession.bookings.value.where(
       (b) => b.status == BookingStatus.completed && b.driverName != null,
     )) {
       grouped.putIfAbsent(booking.driverName!, () => []).add(booking);
@@ -87,7 +87,7 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
   }
 
   List<BookingModel> _getFilteredBookings() {
-    final bookings = PrototypeSession.bookings.value;
+    final bookings = AppSession.bookings.value;
     final now = DateTime.now();
 
     return bookings.where((b) {

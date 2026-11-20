@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'core/constants/app_routes.dart';
-import 'core/prototype/prototype_session.dart';
+import 'core/session/app_session.dart';
 import 'models/trip_record.dart';
 
 // Auth screens
@@ -82,10 +82,10 @@ final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: AppRoutes.splash,
   debugLogDiagnostics: kDebugMode,
-  refreshListenable: PrototypeSession.authRevision,
+  refreshListenable: AppSession.authRevision,
   redirect: (context, state) {
     final path = state.uri.path;
-    final role = PrototypeSession.authenticatedRole;
+    final role = AppSession.authenticatedRole;
     // Authentication may finish while a root consent/version overlay is shown.
     // Route from session state rather than relying on a login widget's lifetime.
     if (role != null &&
@@ -156,7 +156,7 @@ final appRouter = GoRouter(
           _ => null,
         };
         if (requiredCapabilities != null &&
-            !requiredCapabilities.any(PrototypeSession.hasAdminCapability)) {
+            !requiredCapabilities.any(AppSession.hasAdminCapability)) {
           return AppRoutes.adminDashboard;
         }
       }

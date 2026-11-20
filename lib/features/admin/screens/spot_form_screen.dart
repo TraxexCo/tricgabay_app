@@ -8,7 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/shared_widgets.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../models/tourist_spot_model.dart';
 import '../../../core/l10n/record_labels.dart';
 import '../../../core/config/backend_config.dart';
@@ -140,7 +140,7 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
           address: _addressController.text,
           imageBytes: _imageBytes,
         );
-        await PrototypeSession.syncRemoteState();
+        await AppSession.syncRemoteState();
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

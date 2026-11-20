@@ -13,7 +13,7 @@ import 'package:geolocator/geolocator.dart' as geo;
 
 import '../../../core/config/mapbox_config.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../models/tourist_spot_model.dart';
 
 import '../../../core/widgets/shared_widgets.dart';
@@ -43,7 +43,7 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
   /// Maps annotation.id → TouristSpotModel so we can look up which spot was tapped.
   final Map<String, TouristSpotModel> _annotationSpotMap = {};
 
-  List<TouristSpotModel> get _spots => PrototypeSession.allSpots.value;
+  List<TouristSpotModel> get _spots => AppSession.allSpots.value;
   String _selectedCategory = MessageCode.all;
   late List<TouristSpotModel> _filteredSpots;
   final _pinBitmaps = <Color, Future<Uint8List>>{};
@@ -56,22 +56,22 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
   void initState() {
     super.initState();
     _filteredSpots = _spots;
-    PrototypeSession.allSpots.addListener(_catalogChanged);
-    PrototypeSession.focusedSpotId.addListener(_onFocusedSpotChanged);
+    AppSession.allSpots.addListener(_catalogChanged);
+    AppSession.focusedSpotId.addListener(_onFocusedSpotChanged);
     if (widget.mapPlaceholder == null) _startLocationTracking();
   }
 
   @override
   void dispose() {
-    PrototypeSession.allSpots.removeListener(_catalogChanged);
-    PrototypeSession.focusedSpotId.removeListener(_onFocusedSpotChanged);
+    AppSession.allSpots.removeListener(_catalogChanged);
+    AppSession.focusedSpotId.removeListener(_onFocusedSpotChanged);
     _annotationManager?.deleteAll();
     _positionSubscription?.cancel();
     super.dispose();
   }
 
   void _onFocusedSpotChanged() async {
-    final spotId = PrototypeSession.focusedSpotId.value;
+    final spotId = AppSession.focusedSpotId.value;
     if (spotId != null) {
       final spot = _spots.where((s) => s.id == spotId).firstOrNull;
       if (spot == null) return;
@@ -85,7 +85,7 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
         ),
       );
       _showSpotBottomSheet(spot);
-      PrototypeSession.focusedSpotId.value = null;
+      AppSession.focusedSpotId.value = null;
     }
   }
 
@@ -159,7 +159,7 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: PrototypeSession.isFilipino,
+      valueListenable: AppSession.isFilipino,
       builder: (context, isFilipino, _) => Scaffold(
         body: LayoutBuilder(
           builder: (context, constraints) {
@@ -217,7 +217,7 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
                                       children: [
                                         ValueListenableBuilder<String>(
                                           valueListenable:
-                                              PrototypeSession.currentUserName,
+                                              AppSession.currentUserName,
                                           builder: (ctx, name, _) {
                                             final hour = DateTime.now().hour;
                                             String greeting =
@@ -607,7 +607,7 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
                               ),
                               child: GestureDetector(
                                 onTap: () {
-                                  PrototypeSession.startCustomItinerary();
+                                  AppSession.startCustomItinerary();
                                   context.push('/tourist/itinerary');
                                 },
                                 child: Container(
@@ -650,7 +650,7 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
                                               List<TouristSpotModel>
                                             >(
                                               valueListenable:
-                                                  PrototypeSession.itinerary,
+                                                  AppSession.itinerary,
                                               builder: (context, itinerary, child) {
                                                 return Text(
                                                   context.message(
@@ -797,8 +797,8 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
               distanceFilter: 8,
             ),
           ).listen((position) {
-            PrototypeSession.userLatitude.value = position.latitude;
-            PrototypeSession.userLongitude.value = position.longitude;
+            AppSession.userLatitude.value = position.latitude;
+            AppSession.userLongitude.value = position.longitude;
           }, onError: (Object error) => ErrorMessages.forError(error));
     } catch (error) {
       ErrorMessages.forError(error);
@@ -921,8 +921,8 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
           accuracy: geo.LocationAccuracy.high,
         ),
       );
-      PrototypeSession.userLatitude.value = pos.latitude;
-      PrototypeSession.userLongitude.value = pos.longitude;
+      AppSession.userLatitude.value = pos.latitude;
+      AppSession.userLongitude.value = pos.longitude;
       await _mapboxMap?.setCamera(
         CameraOptions(
           center: Point(coordinates: Position(pos.longitude, pos.latitude)),
@@ -1331,8 +1331,8 @@ class _SpotInfoSheet extends StatelessWidget {
                               onPressed: spot.isTemporarilyClosed
                                   ? null
                                   : () {
-                                      PrototypeSession.startCustomItinerary();
-                                      PrototypeSession.toggleItinerary(
+                                      AppSession.startCustomItinerary();
+                                      AppSession.toggleItinerary(
                                         spot,
                                       ); // ADD THE SPOT FIRST
                                       Navigator.pop(context);

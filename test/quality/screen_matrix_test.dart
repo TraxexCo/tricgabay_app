@@ -12,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:tricgabay_app/l10n/app_localizations.dart';
 import 'package:tricgabay_app/core/theme/app_theme.dart';
-import 'package:tricgabay_app/core/prototype/prototype_session.dart';
+import 'package:tricgabay_app/core/session/app_session.dart';
 import 'package:tricgabay_app/core/widgets/map_surface.dart';
 import 'screen_registry.dart';
 import 'screen_fixtures.dart';
@@ -95,7 +95,7 @@ void main() {
               addTearDown(tester.view.resetDevicePixelRatio);
               Intl.defaultLocale = locale == 'fil' ? 'fil_PH' : 'en_PH';
               seedScreen(screen.role, screen.name);
-              PrototypeSession.isFilipino.value = locale == 'fil';
+              AppSession.isFilipino.value = locale == 'fil';
               final errors = <String>[];
               final oldHandler = FlutterError.onError;
               FlutterError.onError = (details) {

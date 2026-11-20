@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../models/booking_model.dart';
 import '../../../core/l10n/record_labels.dart';
 import '../../../core/widgets/account_widgets.dart';
@@ -19,10 +19,10 @@ class AdminDashboardScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: ValueListenableBuilder<List<BookingModel>>(
-          valueListenable: PrototypeSession.bookings,
+          valueListenable: AppSession.bookings,
           builder: (context, bookings, _) {
             return ValueListenableBuilder<List<Map<String, dynamic>>>(
-              valueListenable: PrototypeSession.adminDrivers,
+              valueListenable: AppSession.adminDrivers,
               builder: (context, drivers, _) {
                 final settled = bookings.where(
                   (b) =>
@@ -56,8 +56,7 @@ class AdminDashboardScreen extends StatelessWidget {
                     .where((d) => d['status'] == 'pending')
                     .length;
                 final int totalAccounts =
-                    drivers.length +
-                    PrototypeSession.adminTourists.value.length;
+                    drivers.length + AppSession.adminTourists.value.length;
 
                 final recentBookings = bookings.toList()
                   ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -101,7 +100,7 @@ class AdminDashboardScreen extends StatelessWidget {
                               builder: (_) => const LanguageSelection(),
                             ),
                           ),
-                          if (PrototypeSession.hasAdminCapability('support'))
+                          if (AppSession.hasAdminCapability('support'))
                             IconButton(
                               tooltip: context.l10n.sendAnAnnouncement,
                               onPressed: () =>
@@ -111,7 +110,7 @@ class AdminDashboardScreen extends StatelessWidget {
                           IconButton(
                             tooltip: context.l10n.logOut,
                             onPressed: () async {
-                              await PrototypeSession.signOut();
+                              await AppSession.signOut();
                               if (context.mounted) context.go('/login');
                             },
                             icon: const Icon(Icons.logout_rounded),
@@ -122,8 +121,8 @@ class AdminDashboardScreen extends StatelessWidget {
                       AccountIdentityCard(
                         roleLabel: context.l10n.administrator,
                       ),
-                      if (PrototypeSession.hasAdminCapability('operations') &&
-                          PrototypeSession.operationalAlerts.value.isNotEmpty)
+                      if (AppSession.hasAdminCapability('operations') &&
+                          AppSession.operationalAlerts.value.isNotEmpty)
                         Container(
                           margin: const EdgeInsets.only(top: 14),
                           padding: const EdgeInsets.all(15),
@@ -143,7 +142,7 @@ class AdminDashboardScreen extends StatelessWidget {
                                 child: Text(
                                   context.l10n.operationalAlertSNeedReviewValue(
                                     context.message(
-                                      (PrototypeSession
+                                      (AppSession
                                               .operationalAlerts
                                               .value
                                               .length)
@@ -296,9 +295,7 @@ class AdminDashboardScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 11),
-                      if (PrototypeSession.hasAdminCapability(
-                        'driver_compliance',
-                      ))
+                      if (AppSession.hasAdminCapability('driver_compliance'))
                         _action(
                           context,
                           Icons.verified_user_outlined,
@@ -309,7 +306,7 @@ class AdminDashboardScreen extends StatelessWidget {
                           '/admin/drivers',
                           AppColors.warning,
                         ),
-                      if (PrototypeSession.hasAdminCapability('support')) ...[
+                      if (AppSession.hasAdminCapability('support')) ...[
                         _action(
                           context,
                           Icons.campaign_outlined,
@@ -335,8 +332,8 @@ class AdminDashboardScreen extends StatelessWidget {
                           AppColors.secondary,
                         ),
                       ],
-                      if (PrototypeSession.hasAdminCapability('finance') ||
-                          PrototypeSession.hasAdminCapability('operations'))
+                      if (AppSession.hasAdminCapability('finance') ||
+                          AppSession.hasAdminCapability('operations'))
                         _action(
                           context,
                           Icons.gavel_rounded,
@@ -354,7 +351,7 @@ class AdminDashboardScreen extends StatelessWidget {
                           '/admin/gcash-disputes',
                           AppColors.danger,
                         ),
-                      if (PrototypeSession.hasAdminCapability('operations'))
+                      if (AppSession.hasAdminCapability('operations'))
                         _action(
                           context,
                           Icons.map_outlined,
@@ -363,7 +360,7 @@ class AdminDashboardScreen extends StatelessWidget {
                           '/admin/live-map',
                           const Color(0xFF8E44AD),
                         ),
-                      if (PrototypeSession.hasAdminCapability('support'))
+                      if (AppSession.hasAdminCapability('support'))
                         _action(
                           context,
                           Icons.download_outlined,
@@ -372,9 +369,7 @@ class AdminDashboardScreen extends StatelessWidget {
                           '/admin/data-requests',
                           AppColors.primary,
                         ),
-                      if (PrototypeSession.hasAdminCapability(
-                        'operations',
-                      )) ...[
+                      if (AppSession.hasAdminCapability('operations')) ...[
                         _action(
                           context,
                           Icons.local_hospital_outlined,

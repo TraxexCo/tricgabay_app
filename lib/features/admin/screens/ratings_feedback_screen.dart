@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../models/booking_model.dart';
 
 class RatingsFeedbackScreen extends ConsumerWidget {
@@ -34,7 +34,7 @@ class RatingsFeedbackScreen extends ConsumerWidget {
   }
 
   Widget _buildReviewsList(BuildContext context) {
-    final reviews = PrototypeSession.bookings.value
+    final reviews = AppSession.bookings.value
         .where((b) => b.status == BookingStatus.completed)
         .toList();
 
@@ -119,7 +119,7 @@ class RatingsFeedbackScreen extends ConsumerWidget {
 
   Widget _buildFeedbackList() {
     return ValueListenableBuilder<List<Map<String, dynamic>>>(
-      valueListenable: PrototypeSession.adminFeedbacks,
+      valueListenable: AppSession.adminFeedbacks,
       builder: (context, feedbacks, child) {
         if (feedbacks.isEmpty) {
           return Center(child: Text(context.l10n.noSystemFeedbackFound));

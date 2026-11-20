@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 
 class DriverNotificationsScreen extends ConsumerWidget {
   const DriverNotificationsScreen({super.key});
@@ -19,13 +19,13 @@ class DriverNotificationsScreen extends ConsumerWidget {
             icon: const Icon(Icons.done_all),
             tooltip: context.l10n.markAllAsRead,
             onPressed: () {
-              PrototypeSession.markAllNotificationsRead();
+              AppSession.markAllNotificationsRead();
             },
           ),
         ],
       ),
       body: ValueListenableBuilder<List<NotificationItem>>(
-        valueListenable: PrototypeSession.notifications,
+        valueListenable: AppSession.notifications,
         builder: (context, notifications, child) {
           if (notifications.isEmpty) {
             return Center(
@@ -152,7 +152,7 @@ class DriverNotificationsScreen extends ConsumerWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          PrototypeSession.markNotificationRead(notification.id);
+          AppSession.markNotificationRead(notification.id);
           if (notification.routePath != null) {
             context.push(notification.routePath!);
           }

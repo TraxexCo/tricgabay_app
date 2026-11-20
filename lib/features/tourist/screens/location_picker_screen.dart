@@ -11,7 +11,7 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/widgets/web_map_fallback.dart';
 
 class LocationPickerScreen extends StatefulWidget {
@@ -47,10 +47,10 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   @override
   void initState() {
     super.initState();
-    final parts = (PrototypeSession.customPickupAddress.value ?? '').split(',');
+    final parts = (AppSession.draft.pickupAddress.value ?? '').split(',');
     _hasSelectedPin =
-        PrototypeSession.customPickupLat != null &&
-        PrototypeSession.customPickupLng != null;
+        AppSession.draft.pickupLat != null &&
+        AppSession.draft.pickupLng != null;
     if (parts.isNotEmpty &&
         parts[0].isNotEmpty &&
         parts[0] != MessageCode.currentLocation) {
@@ -67,12 +67,10 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   Future<void> _onMapCreated(MapboxMap mapboxMap) async {
     _mapboxMap = mapboxMap;
     final lat =
-        PrototypeSession.customPickupLat ??
-        PrototypeSession.userLatitude.value ??
-        14.9520;
+        AppSession.draft.pickupLat ?? AppSession.userLatitude.value ?? 14.9520;
     final lng =
-        PrototypeSession.customPickupLng ??
-        PrototypeSession.userLongitude.value ??
+        AppSession.draft.pickupLng ??
+        AppSession.userLongitude.value ??
         120.9180;
 
     await mapboxMap.compass.updateSettings(CompassSettings(enabled: false));
@@ -126,8 +124,8 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
         accuracy: geo.LocationAccuracy.high,
       ),
     );
-    PrototypeSession.userLatitude.value = position.latitude;
-    PrototypeSession.userLongitude.value = position.longitude;
+    AppSession.userLatitude.value = position.latitude;
+    AppSession.userLongitude.value = position.longitude;
     if (mounted) setState(() => _hasSelectedPin = true);
     if (!mounted) return;
     await _mapboxMap?.flyTo(
@@ -227,9 +225,9 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
       final fullAddress =
           '${_streetCtrl.text.trim()}, $_selectedBarangay, Bustos, Bulacan';
 
-      PrototypeSession.customPickupAddress.value = fullAddress;
-      PrototypeSession.customPickupLat = lat;
-      PrototypeSession.customPickupLng = lng;
+      AppSession.draft.pickupAddress.value = fullAddress;
+      AppSession.draft.pickupLat = lat;
+      AppSession.draft.pickupLng = lng;
 
       if (mounted) {
         context.pop();

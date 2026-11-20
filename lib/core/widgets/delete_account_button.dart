@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../config/backend_config.dart';
-import '../prototype/prototype_session.dart';
+import '../session/app_session.dart';
 import '../services/error_messages.dart';
 
 class DeleteAccountButton extends StatefulWidget {
@@ -67,7 +67,7 @@ class _DeleteAccountButtonState extends State<DeleteAccountButton> {
         throw StateError(MessageCode.deletionPending);
       }
       await storage.delete(key: key);
-      await PrototypeSession.signOut();
+      await AppSession.signOut();
       if (mounted) context.go('/login');
     } catch (error) {
       if (mounted) {

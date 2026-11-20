@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/backend_config.dart';
-import '../prototype/prototype_session.dart';
+import '../session/app_session.dart';
 import '../services/privacy_service.dart';
 import '../services/error_messages.dart';
 import '../services/telemetry_service.dart';
@@ -37,7 +37,7 @@ class _PrivacyConsentGateState extends State<PrivacyConsentGate>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    PrototypeSession.authRevision.addListener(_authChanged);
+    AppSession.authRevision.addListener(_authChanged);
     _refresh();
     if (BackendConfig.isConfigured) {
       _authUserId = BackendConfig.client.auth.currentUser?.id;
@@ -56,7 +56,7 @@ class _PrivacyConsentGateState extends State<PrivacyConsentGate>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    PrototypeSession.authRevision.removeListener(_authChanged);
+    AppSession.authRevision.removeListener(_authChanged);
     _auth?.cancel();
     super.dispose();
   }
@@ -158,9 +158,7 @@ class _PrivacyConsentGateState extends State<PrivacyConsentGate>
             _error = null;
             _refresh();
           }),
-          onSignOut: BackendConfig.isConfigured
-              ? PrototypeSession.signOut
-              : null,
+          onSignOut: BackendConfig.isConfigured ? AppSession.signOut : null,
         ),
         child: widget.child,
       );

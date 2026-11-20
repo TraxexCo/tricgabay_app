@@ -8,7 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/shared_widgets.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../models/booking_model.dart';
 
 class RateReviewScreen extends StatefulWidget {
@@ -30,7 +30,7 @@ class _RateReviewScreenState extends State<RateReviewScreen> {
   void initState() {
     super.initState();
     try {
-      _booking = PrototypeSession.bookings.value.firstWhere(
+      _booking = AppSession.bookings.value.firstWhere(
         (b) => b.id == widget.bookingId,
       );
     } catch (_) {}
@@ -177,7 +177,7 @@ class _RateReviewScreenState extends State<RateReviewScreen> {
                 setState(() => _isSubmitting = true);
                 if (!mounted) return;
                 try {
-                  await PrototypeSession.markBookingRated(
+                  await AppSession.markBookingRated(
                     widget.bookingId,
                     _rating,
                     review: _reviewCtrl.text,

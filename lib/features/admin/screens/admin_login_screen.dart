@@ -9,7 +9,7 @@ import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/shared_widgets.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../core/services/auth_service.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 
 class AdminLoginScreen extends ConsumerStatefulWidget {
   const AdminLoginScreen({super.key});
@@ -39,13 +39,13 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
         password: _passwordController.text,
         expectedRole: AppRole.admin,
       );
-      PrototypeSession.setAuthenticatedUser(
+      AppSession.setAuthenticatedUser(
         id: profile.id,
         name: profile.name,
         role: profile.role.name,
         email: profile.email,
       );
-      await PrototypeSession.syncRemoteState();
+      await AppSession.syncRemoteState();
       if (mounted) context.go('/admin/dashboard');
     } catch (error) {
       if (mounted) {

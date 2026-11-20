@@ -1,3 +1,4 @@
+import 'booking_draft.dart';
 import 'package:tricgabay_app/core/utils/formatters.dart';
 import 'package:tricgabay_app/core/l10n/message_codes.g.dart';
 import '../services/server_clock.dart';
@@ -37,8 +38,8 @@ export '../../models/notification_item.dart';
 
 /// Local app state with persisted bookings and fare policies.
 /// Cross-device synchronization and trusted authorization need a backend.
-class PrototypeSession {
-  PrototypeSession._();
+class AppSession {
+  AppSession._();
 
   static final itinerary = AppFeatureControllers.catalog.itinerary;
   static final favorites = AppFeatureControllers.catalog.favorites;
@@ -64,15 +65,10 @@ class PrototypeSession {
       AppFeatureControllers.admin.operationalAlerts;
   static final focusedSpotId = AppFeatureControllers.catalog.focusedSpotId;
 
-  // Authentication State
-  static final customPickupAddress =
-      AppFeatureControllers.booking.customPickupAddress;
-  static double? customPickupLat;
-  static double? customPickupLng;
-  static int passengerCount = 1;
-  static String luggageNotes = '';
-  static String accessibilityNeeds = '';
-  static DateTime? scheduledAt;
+  // ── Booking draft ─────────────────────────────────────────────────────
+  static final draft = BookingDraft(
+    AppFeatureControllers.booking.customPickupAddress,
+  );
 
   // ── Fare ────────────────────────────────────────────────────────────────
 
@@ -773,8 +769,8 @@ class PrototypeSession {
       ),
       MessageCode.aDestinationIsNoLongerAvailableUpdateYourItinerary,
     );
-    final lat = customPickupLat ?? userLatitude.value;
-    final lng = customPickupLng ?? userLongitude.value;
+    final lat = draft.pickupLat ?? userLatitude.value;
+    final lng = draft.pickupLng ?? userLongitude.value;
     TripRules.require(
       lat != null &&
           lng != null &&
@@ -804,14 +800,14 @@ class PrototypeSession {
         packageId: activePackageId,
         paymentMethod: paymentMethod,
         pickupAddress:
-            customPickupAddress.value ?? MessageCode.currentGpsPickup,
+            draft.pickupAddress.value ?? MessageCode.currentGpsPickup,
         pickupLatitude: lat,
         pickupLongitude: lng,
         stops: spots,
-        passengerCount: passengerCount,
-        luggageNotes: luggageNotes,
-        accessibilityNeeds: accessibilityNeeds,
-        scheduledAt: scheduledAt,
+        passengerCount: draft.passengerCount,
+        luggageNotes: draft.luggageNotes,
+        accessibilityNeeds: draft.accessibilityNeeds,
+        scheduledAt: draft.scheduledAt,
       );
       await syncRemoteState();
       activeBookingId = created.booking.id;
@@ -834,21 +830,21 @@ class PrototypeSession {
       ),
       pickupLat: lat!,
       pickupLng: lng!,
-      pickupAddress: customPickupAddress.value ?? MessageCode.currentGpsPickup,
-      passengerCount: passengerCount,
-      luggageNotes: luggageNotes,
-      accessibilityNeeds: accessibilityNeeds,
+      pickupAddress: draft.pickupAddress.value ?? MessageCode.currentGpsPickup,
+      passengerCount: draft.passengerCount,
+      luggageNotes: draft.luggageNotes,
+      accessibilityNeeds: draft.accessibilityNeeds,
       baseFareCents: cents,
       totalFareCents: cents,
       paymentMethod: PaymentMethod.cash,
       createdAt: ServerClock.now(),
-      scheduledAt: scheduledAt,
-      status: scheduledAt == null
+      scheduledAt: draft.scheduledAt,
+      status: draft.scheduledAt == null
           ? BookingStatus.pending
           : BookingStatus.scheduled,
-      dispatchExpiresAt: scheduledAt == null
+      dispatchExpiresAt: draft.scheduledAt == null
           ? ServerClock.now().add(const Duration(minutes: 10))
-          : scheduledAt!.subtract(const Duration(minutes: 20)),
+          : draft.scheduledAt!.subtract(const Duration(minutes: 20)),
       trip: TripRecord(
         fareRevision: farePolicy.value.revision,
         packageId: activePackageId,
@@ -1579,16 +1575,10 @@ class PrototypeSession {
     activePackageId = null;
     activeBookingId = null;
     activeDriverBookingId = null;
-    customPickupAddress.value = null;
-    customPickupLat = null;
-    customPickupLng = null;
-    passengerCount = 1;
-    luggageNotes = '';
-    accessibilityNeeds = '';
+    draft.clear();
     userLatitude.value = null;
     userLongitude.value = null;
     focusedSpotId.value = null;
-    scheduledAt = null;
   }
 
   static Future<void> signOut() async {
@@ -1625,20 +1615,6 @@ class PrototypeSession {
   static bool hasAdminCapability(String capability) =>
       adminCapabilities.value.contains('super_admin') ||
       adminCapabilities.value.contains(capability);
-
-  static void approveDriver(String id) {
-    if (BackendConfig.isConfigured) {
-      // Remote approval requires verified expiry and service-area information
-      // and is therefore completed by the admin compliance review screen.
-      return;
-    }
-    adminDrivers.value = adminDrivers.value.map((d) {
-      if (d['id'] == id) {
-        return {...d, 'status': 'active'};
-      }
-      return d;
-    }).toList();
-  }
 
   static Future<void> updateDriverStatus(
     String id,
@@ -1723,17 +1699,6 @@ class PrototypeSession {
       }
       return u;
     }).toList();
-  }
-
-  static void addOrUpdateSpot(TouristSpotModel spot) {
-    final exists = allSpots.value.any((s) => s.id == spot.id);
-    if (exists) {
-      allSpots.value = allSpots.value
-          .map((s) => s.id == spot.id ? spot : s)
-          .toList();
-    } else {
-      allSpots.value = [...allSpots.value, spot];
-    }
   }
 
   static Future<void> deleteSpot(String spotId) async {

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/widgets/web_map_fallback.dart';
 import '../../../core/utils/map_coordinate_validator.dart';
 
@@ -27,7 +27,7 @@ class _AdminLiveMapScreenState extends State<AdminLiveMapScreen> {
   void initState() {
     super.initState();
     _initPinImage();
-    PrototypeSession.adminDrivers.addListener(_updateMarkers);
+    AppSession.adminDrivers.addListener(_updateMarkers);
   }
 
   Future<void> _initPinImage() async {
@@ -68,7 +68,7 @@ class _AdminLiveMapScreenState extends State<AdminLiveMapScreen> {
 
   @override
   void dispose() {
-    PrototypeSession.adminDrivers.removeListener(_updateMarkers);
+    AppSession.adminDrivers.removeListener(_updateMarkers);
     super.dispose();
   }
 
@@ -81,7 +81,7 @@ class _AdminLiveMapScreenState extends State<AdminLiveMapScreen> {
   void _updateMarkers() async {
     if (_pointAnnotationManager == null || _pinImage == null) return;
 
-    final drivers = PrototypeSession.adminDrivers.value;
+    final drivers = AppSession.adminDrivers.value;
     final activeDrivers = drivers
         .where((d) => d['status'] == 'active')
         .toList();

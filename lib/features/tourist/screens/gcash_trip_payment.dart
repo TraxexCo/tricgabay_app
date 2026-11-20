@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/l10n/app_l10n.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/services/backend_repository.dart';
 import '../../../core/services/gcash_launcher.dart';
 import '../../../core/services/gcash_repository.dart';
@@ -16,7 +16,7 @@ import '../../../models/booking_model.dart';
 import '../../payment/gcash_dispute_panel.dart';
 
 Future<void> _refreshBookings() =>
-    PrototypeSession.syncRemoteState(sections: {RemoteSection.bookings});
+    AppSession.syncRemoteState(sections: {RemoteSection.bookings});
 
 Future<void> _updatePayment(
   String rpc,
