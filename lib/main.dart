@@ -8,6 +8,7 @@ import 'core/widgets/offline_banner.dart';
 import 'core/widgets/privacy_consent_gate.dart';
 import 'l10n/app_localizations.dart';
 import 'core/widgets/minimum_version_gate.dart';
+import 'core/navigation/back_handling.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 
@@ -164,6 +165,7 @@ class _TricGabayAppState extends State<TricGabayApp>
             GlobalCupertinoLocalizations.delegate,
           ],
           routerConfig: appRouter,
+          onNavigationNotification: keepBackInFlutter,
           builder: (context, child) => ResponsiveAppFrame(
             child: ValueListenableBuilder<String?>(
               valueListenable: AppSession.storageError,
