@@ -4,6 +4,7 @@ import '../../models/booking_model.dart';
 import '../l10n/record_labels.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../constants/app_colors.dart';
+import '../motion/motion.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppLogo extends StatelessWidget {
@@ -205,13 +206,22 @@ class EmptyStateWidget extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.08),
-                  shape: BoxShape.circle,
+              // The icon pops in and the text follows, so an empty list reads
+              // as a deliberate state rather than a blank screen.
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.6, end: 1),
+                duration: Motion.of(context, Motion.long),
+                curve: Motion.pop,
+                builder: (context, scale, child) =>
+                    Transform.scale(scale: scale, child: child),
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 48, color: AppColors.primary),
                 ),
-                child: Icon(icon, size: 48, color: AppColors.primary),
               ),
               const SizedBox(height: 20),
               Text(

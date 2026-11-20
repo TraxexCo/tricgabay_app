@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/motion/motion.dart';
+import '../../../core/motion/motion_widgets.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/navigation/launch_preferences.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -16,6 +19,11 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   bool isLastPage = false;
+
+  Future<void> _finish() async {
+    await LaunchPreferences.markOnboardingSeen();
+    if (mounted) context.go('/login');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +61,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             child: Align(
               alignment: Alignment.topRight,
               child: TextButton(
-                onPressed: () => context.go('/login'),
+                onPressed: _finish,
                 child: Text(
                   context.l10n.skip,
                   style: GoogleFonts.poppins(
@@ -85,7 +93,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         width: 140,
                         child: AppButton(
                           label: context.l10n.getStarted,
-                          onPressed: () => context.go('/login'),
+                          onPressed: _finish,
                         ),
                       )
                     : IconButton(
@@ -115,33 +123,77 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     required String title,
     required String description,
   }) {
-    return Padding(
-      padding: const EdgeInsets.all(40),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 120, color: AppColors.primary),
-            const SizedBox(height: 48),
-            Text(
-              context.message(title),
-              style: GoogleFonts.poppins(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+    // Centred vertically, with room at the bottom for the page controls.
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(32, 72, 32, 120),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: (constraints.maxHeight - 192).clamp(0, double.infinity),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: .7, end: 1),
+                duration: Motion.of(context, const Duration(milliseconds: 600)),
+                curve: Motion.pop,
+                builder: (context, scale, child) =>
+                    Transform.scale(scale: scale, child: child),
+                child: Container(
+                  width: 200,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.primary.withValues(alpha: .07),
+                  ),
+                  alignment: Alignment.center,
+                  child: Container(
+                    width: 136,
+                    height: 136,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: AppColors.primaryGradient,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: .3),
+                          blurRadius: 24,
+                          offset: const Offset(0, 12),
+                        ),
+                      ],
+                    ),
+                    child: Icon(icon, size: 64, color: Colors.white),
+                  ),
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              context.message(description),
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                color: AppColors.textSecondary,
+              const SizedBox(height: 44),
+              FadeSlideIn(
+                delay: Motion.short,
+                child: Text(
+                  context.message(title),
+                  style: GoogleFonts.poppins(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              const SizedBox(height: 12),
+              FadeSlideIn(
+                delay: Motion.short + Motion.stagger,
+                child: Text(
+                  context.message(description),
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    height: 1.5,
+                    color: AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

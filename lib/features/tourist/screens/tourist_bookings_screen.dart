@@ -5,6 +5,7 @@ import '../../../core/services/realtime_refresh_policy.dart';
 import '../../../core/widgets/list_skeleton.dart';
 import '../../../core/services/server_clock.dart';
 import 'package:flutter/material.dart';
+import '../../../core/motion/motion_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
@@ -93,114 +94,120 @@ class _BookingList extends StatelessWidget {
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
           itemCount: bookings.length,
-          itemBuilder: (context, index) {
-            final b = bookings[index];
-            final names = b.stops.map((s) => s.spotName).toList();
-            final preview = names.take(2).join(', ');
-            final overflow = names.length > 2
-                ? ' +${names.length - 2} more'
-                : '';
+          itemBuilder: (context, index) => FadeSlideIn.staggered(
+            index: index,
+            child: Builder(
+              builder: (context) {
+                final b = bookings[index];
+                final names = b.stops.map((s) => s.spotName).toList();
+                final preview = names.take(2).join(', ');
+                final overflow = names.length > 2
+                    ? ' +${names.length - 2} more'
+                    : '';
 
-            return GestureDetector(
-              onTap: () => context.push('/tourist/bookings/${b.id}'),
-              child: AppCard(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                return GestureDetector(
+                  onTap: () => context.push('/tourist/bookings/${b.id}'),
+                  child: AppCard(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            context.message(b.id).toUpperCase(),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ),
-                        StatusBadge.bookingStatus(b.status),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      context.message('$preview$overflow'),
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      context.message(
-                        b.scheduledAt == null
-                            ? AppFormatters.dateTime(b.createdAt.toLocal())
-                            : MessageCode.pickupValue(
-                                (ServerClock.formatManila(
-                                  b.scheduledAt!,
-                                )).toString(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                context.message(b.id).toUpperCase(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
-                      ),
-                      style: GoogleFonts.poppins(
-                        color: AppColors.textSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const Divider(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            context.l10n.agreedFare,
-                            style: GoogleFonts.poppins(
-                              color: AppColors.textSecondary,
                             ),
+                            StatusBadge.bookingStatus(b.status),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          context.message('$preview$overflow'),
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: AppColors.textPrimary,
                           ),
                         ),
-                        Flexible(
-                          child: Text(
-                            context.message(
-                              '₱${AppFormatters.amount(b.totalFareCents / 100)}',
-                            ),
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (!b.isActive)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Text(
+                        const SizedBox(height: 4),
+                        Text(
                           context.message(
-                            b.trip.reviewRequired
-                                ? MessageCode.paymentOnHoldAdminReview
-                                : MessageCode.finalChargeValue(
-                                    (AppFormatters.amount(
-                                      ((b.trip.finalChargeCents ?? 0) / 100),
+                            b.scheduledAt == null
+                                ? AppFormatters.dateTime(b.createdAt.toLocal())
+                                : MessageCode.pickupValue(
+                                    (ServerClock.formatManila(
+                                      b.scheduledAt!,
                                     )).toString(),
-                                    paymentStatusLabel(
-                                      context,
-                                      b.paymentStatus,
-                                    ),
                                   ),
                           ),
+                          style: GoogleFonts.poppins(
+                            color: AppColors.textSecondary,
+                            fontSize: 12,
+                          ),
                         ),
-                      ),
-                  ],
-                ),
-              ),
-            );
-          },
+                        const Divider(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                context.l10n.agreedFare,
+                                style: GoogleFonts.poppins(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                            Flexible(
+                              child: Text(
+                                context.message(
+                                  '₱${AppFormatters.amount(b.totalFareCents / 100)}',
+                                ),
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (!b.isActive)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Text(
+                              context.message(
+                                b.trip.reviewRequired
+                                    ? MessageCode.paymentOnHoldAdminReview
+                                    : MessageCode.finalChargeValue(
+                                        (AppFormatters.amount(
+                                          ((b.trip.finalChargeCents ?? 0) /
+                                              100),
+                                        )).toString(),
+                                        paymentStatusLabel(
+                                          context,
+                                          b.paymentStatus,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
         );
       },
     );

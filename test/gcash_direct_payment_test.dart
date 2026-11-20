@@ -169,11 +169,13 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
     final thumb = find.byIcon(Icons.arrow_forward_ios);
     final start = tester.getCenter(thumb);
     await tester.drag(thumb, const Offset(85, 0));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(calls, 0);
+    // An early release springs the thumb back to the start.
     expect(tester.getCenter(thumb), start);
 
     // The confirm action is also exposed to screen readers.
@@ -189,7 +191,7 @@ void main() {
     expect(calls, 1);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     first.completeError(StateError('failed'));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('Try again'), findsOneWidget);
     await tester.drag(thumb, const Offset(285, 0));
     await tester.pump();

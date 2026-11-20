@@ -1,6 +1,7 @@
 import 'package:tricgabay_app/core/utils/formatters.dart';
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
+import '../../../core/motion/motion_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
@@ -126,159 +127,167 @@ class _ItineraryBuilderScreenState extends State<ItineraryBuilderScreen> {
               physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
               itemCount: AppSession.allSpots.value.length,
-              itemBuilder: (context, index) {
-                final spot = AppSession.allSpots.value[index];
-                final selected = AppSession.itinerary.value.any(
-                  (item) => item.id == spot.id,
-                );
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Material(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(18),
-                      onTap: spot.isTemporarilyClosed
-                          ? null
-                          : () => setState(
-                              () => AppSession.toggleItinerary(spot),
-                            ),
-                      child: AnimatedContainer(
-                        duration: MediaQuery.disableAnimationsOf(context)
-                            ? Duration.zero
-                            : const Duration(milliseconds: 180),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: selected
-                              ? AppColors.primary.withValues(alpha: .035)
-                              : Colors.white,
-                          border: Border.all(
-                            color: selected
-                                ? AppColors.primary
-                                : const Color(0xFFE4EBF0),
-                            width: selected ? 1.8 : 1,
-                          ),
+              itemBuilder: (context, index) => FadeSlideIn.staggered(
+                index: index,
+                child: Builder(
+                  builder: (context) {
+                    final spot = AppSession.allSpots.value[index];
+                    final selected = AppSession.itinerary.value.any(
+                      (item) => item.id == spot.id,
+                    );
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Material(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        child: InkWell(
                           borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 52,
-                              height: 52,
-                              decoration: BoxDecoration(
-                                color:
-                                    (selected
-                                            ? AppColors.primary
-                                            : AppColors.secondary)
-                                        .withValues(alpha: .12),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: Icon(
-                                _spotIcon(spot.category),
+                          onTap: spot.isTemporarilyClosed
+                              ? null
+                              : () => setState(
+                                  () => AppSession.toggleItinerary(spot),
+                                ),
+                          child: AnimatedContainer(
+                            duration: MediaQuery.disableAnimationsOf(context)
+                                ? Duration.zero
+                                : const Duration(milliseconds: 180),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: selected
+                                  ? AppColors.primary.withValues(alpha: .035)
+                                  : Colors.white,
+                              border: Border.all(
                                 color: selected
                                     ? AppColors.primary
-                                    : AppColors.secondary,
+                                    : const Color(0xFFE4EBF0),
+                                width: selected ? 1.8 : 1,
                               ),
+                              borderRadius: BorderRadius.circular(18),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 52,
+                                  height: 52,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        (selected
+                                                ? AppColors.primary
+                                                : AppColors.secondary)
+                                            .withValues(alpha: .12),
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  child: Icon(
+                                    _spotIcon(spot.category),
+                                    color: selected
+                                        ? AppColors.primary
+                                        : AppColors.secondary,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Container(
-                                        width: 10,
-                                        height: 10,
-                                        decoration: BoxDecoration(
-                                          color:
-                                              categoryColors[spot.category] ??
-                                              Colors.grey,
-                                          shape: BoxShape.circle,
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  categoryColors[spot
+                                                      .category] ??
+                                                  Colors.grey,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Expanded(
+                                            child: Text(
+                                              context.message(spot.name),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: GoogleFonts.poppins(
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        context.l10n.kmAwayValue(
+                                          context.message(
+                                            (spot.categoryLabel).toString(),
+                                          ),
+                                          context.message(
+                                            (spot.distanceFromTown
+                                                    .toStringAsFixed(1))
+                                                .toString(),
+                                          ),
+                                        ),
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 10,
+                                          color: AppColors.textSecondary,
                                         ),
                                       ),
-                                      const SizedBox(width: 6),
-                                      Expanded(
-                                        child: Text(
-                                          context.message(spot.name),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.poppins(
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 13,
-                                          ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        context.message(
+                                          spot.isTemporarilyClosed
+                                              ? MessageCode.temporarilyClosed
+                                              : spot.entranceFee,
+                                        ),
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 10,
+                                          color: spot.isTemporarilyClosed
+                                              ? AppColors.danger
+                                              : Colors.grey.shade600,
                                         ),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 3),
-                                  Text(
-                                    context.l10n.kmAwayValue(
-                                      context.message(
-                                        (spot.categoryLabel).toString(),
-                                      ),
-                                      context.message(
-                                        (spot.distanceFromTown.toStringAsFixed(
-                                          1,
-                                        )).toString(),
-                                      ),
-                                    ),
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 10,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    context.message(
-                                      spot.isTemporarilyClosed
-                                          ? MessageCode.temporarilyClosed
-                                          : spot.entranceFee,
-                                    ),
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 10,
-                                      color: spot.isTemporarilyClosed
-                                          ? AppColors.danger
-                                          : Colors.grey.shade600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            AnimatedContainer(
-                              duration: MediaQuery.disableAnimationsOf(context)
-                                  ? Duration.zero
-                                  : const Duration(milliseconds: 180),
-                              width: 28,
-                              height: 28,
-                              decoration: BoxDecoration(
-                                color: selected
-                                    ? AppColors.primary
-                                    : Colors.transparent,
-                                border: Border.all(
-                                  color: selected
-                                      ? AppColors.primary
-                                      : AppColors.border,
-                                  width: 2,
                                 ),
-                                shape: BoxShape.circle,
-                              ),
-                              child: selected
-                                  ? const Icon(
-                                      Icons.check_rounded,
-                                      color: Colors.white,
-                                      size: 17,
-                                    )
-                                  : null,
+                                const SizedBox(width: 10),
+                                AnimatedContainer(
+                                  duration:
+                                      MediaQuery.disableAnimationsOf(context)
+                                      ? Duration.zero
+                                      : const Duration(milliseconds: 180),
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    color: selected
+                                        ? AppColors.primary
+                                        : Colors.transparent,
+                                    border: Border.all(
+                                      color: selected
+                                          ? AppColors.primary
+                                          : AppColors.border,
+                                      width: 2,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: selected
+                                      ? const Icon(
+                                          Icons.check_rounded,
+                                          color: Colors.white,
+                                          size: 17,
+                                        )
+                                      : null,
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                );
-              },
+                    );
+                  },
+                ),
+              ),
             ),
             Container(
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),

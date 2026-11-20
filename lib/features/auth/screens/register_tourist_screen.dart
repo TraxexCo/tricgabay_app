@@ -186,19 +186,16 @@ class _RegisterTouristScreenState extends ConsumerState<RegisterTouristScreen> {
                 onPressed: _agreed ? _register : null,
               ),
               const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  Flexible(
-                    child: Text(
-                      context.l10n.alreadyHaveAnAccount,
-                      style: GoogleFonts.poppins(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
+                  Text(
+                    context.l10n.alreadyHaveAnAccount,
+                    style: GoogleFonts.poppins(color: AppColors.textSecondary),
                   ),
-                  Flexible(
-                    child: TextButton(
+                  Builder(
+                    builder: (context) => TextButton(
                       onPressed: () => context.go('/login'),
                       child: Text(
                         context.l10n.login,

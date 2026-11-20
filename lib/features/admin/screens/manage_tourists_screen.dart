@@ -2,6 +2,7 @@ import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import '../../../core/widgets/remote_page_controls.dart';
 import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
+import '../../../core/motion/motion_widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/shared_widgets.dart';
@@ -129,110 +130,119 @@ class _ManageTouristsScreenState extends State<ManageTouristsScreen> {
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: tourists.length,
-            itemBuilder: (context, index) {
-              final tourist = tourists[index];
-              final isActive = tourist['status'] == 'active';
-              final pending = _pending.contains(tourist['id']);
+            itemBuilder: (context, index) => FadeSlideIn.staggered(
+              index: index,
+              child: Builder(
+                builder: (context) {
+                  final tourist = tourists[index];
+                  final isActive = tourist['status'] == 'active';
+                  final pending = _pending.contains(tourist['id']);
 
-              return AppCard(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                      child: Text(
-                        context.message(tourist['name'][0]).toUpperCase(),
-                        style: GoogleFonts.poppins(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.message(tourist['name']),
+                  return AppCard(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: AppColors.primary.withValues(
+                            alpha: 0.1,
+                          ),
+                          child: Text(
+                            context.message(tourist['name'][0]).toUpperCase(),
                             style: GoogleFonts.poppins(
+                              color: AppColors.primary,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                              fontSize: 16,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            context.message(tourist['email']),
-                            style: GoogleFonts.poppins(
-                              color: AppColors.textSecondary,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            context.l10n.tripsValue(
-                              context.message((tourist['trips']).toString()),
-                            ),
-                            style: GoogleFonts.poppins(
-                              color: AppColors.textSecondary,
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          StatusBadge(
-                            label: isActive
-                                ? MessageCode.active
-                                : MessageCode.suspended,
-                            color: isActive
-                                ? AppColors.success
-                                : AppColors.danger,
-                            textColor: Colors.white,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Semantics(
-                      label: context.message(
-                        isActive
-                            ? MessageCode.suspendValue(
-                                (tourist['name']).toString(),
-                              )
-                            : MessageCode.activateValue(
-                                (tourist['name']).toString(),
-                              ),
-                      ),
-                      button: true,
-                      enabled: !pending,
-                      child: IconButton(
-                        icon: pending
-                            ? const SizedBox.square(
-                                dimension: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Icon(
-                                isActive
-                                    ? Icons.block
-                                    : Icons.check_circle_outline,
-                                color: isActive
-                                    ? AppColors.danger
-                                    : AppColors.success,
-                              ),
-                        onPressed: pending ? null : () => _toggle(tourist),
-                        tooltip: context.message(
-                          isActive
-                              ? MessageCode.suspendTouristLabel
-                              : MessageCode.activateTourist,
                         ),
-                      ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                context.message(tourist['name']),
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                context.message(tourist['email']),
+                                style: GoogleFonts.poppins(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                context.l10n.tripsValue(
+                                  context.message(
+                                    (tourist['trips']).toString(),
+                                  ),
+                                ),
+                                style: GoogleFonts.poppins(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              StatusBadge(
+                                label: isActive
+                                    ? MessageCode.active
+                                    : MessageCode.suspended,
+                                color: isActive
+                                    ? AppColors.success
+                                    : AppColors.danger,
+                                textColor: Colors.white,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Semantics(
+                          label: context.message(
+                            isActive
+                                ? MessageCode.suspendValue(
+                                    (tourist['name']).toString(),
+                                  )
+                                : MessageCode.activateValue(
+                                    (tourist['name']).toString(),
+                                  ),
+                          ),
+                          button: true,
+                          enabled: !pending,
+                          child: IconButton(
+                            icon: pending
+                                ? const SizedBox.square(
+                                    dimension: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Icon(
+                                    isActive
+                                        ? Icons.block
+                                        : Icons.check_circle_outline,
+                                    color: isActive
+                                        ? AppColors.danger
+                                        : AppColors.success,
+                                  ),
+                            onPressed: pending ? null : () => _toggle(tourist),
+                            tooltip: context.message(
+                              isActive
+                                  ? MessageCode.suspendTouristLabel
+                                  : MessageCode.activateTourist,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              );
-            },
+                  );
+                },
+              ),
+            ),
           );
         },
       ),

@@ -176,11 +176,12 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.onboarding,
-      builder: (context, state) => const OnboardingScreen(),
+      pageBuilder: (context, state) =>
+          _launchFade(state, const OnboardingScreen()),
     ),
     GoRoute(
       path: AppRoutes.login,
-      builder: (context, state) => const LoginScreen(),
+      pageBuilder: (context, state) => _launchFade(state, const LoginScreen()),
     ),
     GoRoute(
       path: AppRoutes.registerRole,
@@ -513,3 +514,17 @@ final appRouter = GoRouter(
     ),
   ],
 );
+
+/// Launch hand-off: a slow cross-fade so the logo can fly (Hero) from the
+/// splash into the sign-in header while the form assembles underneath.
+CustomTransitionPage<void> _launchFade(GoRouterState state, Widget child) =>
+    CustomTransitionPage<void>(
+      key: state.pageKey,
+      child: child,
+      transitionDuration: const Duration(milliseconds: 700),
+      reverseTransitionDuration: const Duration(milliseconds: 300),
+      transitionsBuilder: (context, animation, _, child) => FadeTransition(
+        opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+        child: child,
+      ),
+    );

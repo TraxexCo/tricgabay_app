@@ -679,7 +679,7 @@
   "driverReportedArrivalAwaitingTourist": "Driver reported arrival · awaiting tourist",
   "driverReviewSubmitted": "Driver review submitted.",
   "drivers": "Drivers",
-  "driversActiveValue": "{value} drivers active",
+  "driversActiveValue": "Active drivers: {value}",
   "@driversActiveValue": {
     "description": "Application message: driversActiveValue",
     "placeholders": {

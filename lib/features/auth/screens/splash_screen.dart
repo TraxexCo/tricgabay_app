@@ -2,11 +2,15 @@ import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../../core/motion/motion.dart';
+import '../../../core/motion/motion_widgets.dart';
+import '../../../core/navigation/launch_preferences.dart';
+import '../../../core/widgets/brand_logo_hero.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/config/backend_config.dart';
-import '../../../core/widgets/shared_widgets.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/error_messages.dart';
@@ -20,28 +24,13 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _fadeAnimation;
-
+class _SplashScreenState extends State<SplashScreen> {
+  // The first frame matches the native splash (brand blue, 128dp logo in the
+  // centre), so launch looks like one continuous screen. The logo stays put
+  // while the session restores, then flies into the sign-in header.
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    );
-    _scaleAnimation = Tween<double>(
-      begin: 0.5,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) unawaited(_restoreAndOpen());
     });
@@ -76,81 +65,60 @@ class _SplashScreenState extends State<SplashScreen>
       if (!mounted) return;
       AppSession.storageError.value = ErrorMessages.forError(error);
     }
+    final seenIntro = await LaunchPreferences.onboardingSeen();
     if (!mounted) return;
     context.go(switch (AppSession.authenticatedRole) {
       'admin' => '/admin/dashboard',
       'driver' => '/driver/home',
       'driver_pending' => '/driver/application-pending',
       'tourist' => '/tourist/home',
-      _ => '/onboarding',
+      _ => seenIntro ? '/login' : '/onboarding',
     });
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (MediaQuery.disableAnimationsOf(context)) {
-      _controller.stop();
-      _controller.value = 1;
-    } else if (_controller.value < 1 && !_controller.isAnimating) {
-      _controller.forward();
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppColors.primary, Color(0xFF0F4C81)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Center(
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return Transform.scale(
-                scale: _scaleAnimation.value,
-                child: Opacity(
-                  opacity: _fadeAnimation.value,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const AppLogo(size: 152, showShadow: true),
-                        const SizedBox(height: 24),
-                        Text(
-                          context.l10n.appName(AppBrand.name),
-                          style: GoogleFonts.poppins(
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.surface,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          context.l10n.yourGuideYourRideInBustos,
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            color: AppColors.surface.withValues(alpha: 0.8),
-                          ),
-                        ),
-                      ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        backgroundColor: AppColors.primary,
+        body: Stack(
+          children: [
+            const Center(
+              child: BrandLogoHero(
+                size: BrandLogoHero.launchSize,
+                showShadow: false,
+              ),
+            ),
+            Align(
+              alignment: const Alignment(0, .42),
+              child: FadeSlideIn(
+                delay: Motion.medium,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      context.l10n.appName(AppBrand.name),
+                      style: GoogleFonts.poppins(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.surface,
+                        letterSpacing: .5,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 4),
+                    Text(
+                      context.l10n.yourGuideYourRideInBustos,
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: AppColors.surface.withValues(alpha: 0.82),
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:tricgabay_app/core/utils/formatters.dart';
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
+import '../../../core/motion/motion_widgets.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/session/app_session.dart';
 import '../../../models/booking_model.dart';
@@ -74,8 +75,9 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> {
               onSelectionChanged: (v) => setState(() => _days = v.first),
             ),
             const SizedBox(height: 24),
-            Text(
-              context.message('₱${AppFormatters.amount((received / 100))}'),
+            AnimatedCount(
+              value: received / 100,
+              format: (pesos) => '₱${AppFormatters.amount(pesos)}',
               style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
             ),
             Text(

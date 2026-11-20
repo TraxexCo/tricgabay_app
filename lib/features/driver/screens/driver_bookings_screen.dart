@@ -7,6 +7,8 @@ import '../../../core/services/server_clock.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../../core/motion/motion_widgets.dart';
+import '../../../core/widgets/shared_widgets.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/session/app_session.dart';
 import '../../../models/booking_model.dart';
@@ -120,16 +122,11 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
                           .toList(),
                       request: true,
                     )
-                  : Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24),
-                        child: Text(
-                          context
-                              .l10n
-                              .goOnlineWithAnApprovedAccountAndFinishYourCurrentTripToAccept,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
+                  : EmptyStateWidget(
+                      icon: Icons.wifi_tethering_off_rounded,
+                      title: context
+                          .l10n
+                          .goOnlineWithAnApprovedAccountAndFinishYourCurrentTripToAccept,
                     ),
               _list(context, own.where((b) => b.isActive).toList()),
               _list(context, own.where((b) => !b.isActive).toList()),
@@ -150,45 +147,52 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
       itemCount: bookings.length,
-      itemBuilder: (context, index) {
-        final b = bookings[index];
-        return Card(
-          child: ListTile(
-            title: Text(
-              context.message(
-                b.trip.packageName ??
-                    MessageCode.stopCustomTourValue(
-                      (b.stops.length).toString(),
+      itemBuilder: (context, index) => FadeSlideIn.staggered(
+        index: index,
+        child: Builder(
+          builder: (context) {
+            final b = bookings[index];
+            return Card(
+              child: ListTile(
+                title: Text(
+                  context.message(
+                    b.trip.packageName ??
+                        MessageCode.stopCustomTourValue(
+                          (b.stops.length).toString(),
+                        ),
+                  ),
+                ),
+                subtitle: Text(
+                  context.l10n.threeLineSummary(
+                    context.message((b.touristName).toString()),
+                    context.message(bookingStatusLabel(context, b.status)),
+                    context.message(
+                      (b.trip.reviewRequired
+                              ? context.l10n.paymentReviewPending
+                              : b.pickupAddress)
+                          .toString(),
                     ),
-              ),
-            ),
-            subtitle: Text(
-              context.l10n.threeLineSummary(
-                context.message((b.touristName).toString()),
-                context.message(bookingStatusLabel(context, b.status)),
-                context.message(
-                  (b.trip.reviewRequired
-                          ? context.l10n.paymentReviewPending
-                          : b.pickupAddress)
-                      .toString(),
+                  ),
+                ),
+                isThreeLine: true,
+                trailing: Text(
+                  context.l10n.agreedValue(
+                    context.message(
+                      (AppFormatters.amount(b.totalFareCents / 100)).toString(),
+                    ),
+                  ),
+                  textAlign: TextAlign.end,
+                ),
+                onTap: () => context.push(
+                  request
+                      ? '/driver/incoming/${b.id}'
+                      : '/driver/bookings/${b.id}',
                 ),
               ),
-            ),
-            isThreeLine: true,
-            trailing: Text(
-              context.l10n.agreedValue(
-                context.message(
-                  (AppFormatters.amount(b.totalFareCents / 100)).toString(),
-                ),
-              ),
-              textAlign: TextAlign.end,
-            ),
-            onTap: () => context.push(
-              request ? '/driver/incoming/${b.id}' : '/driver/bookings/${b.id}',
-            ),
-          ),
-        );
-      },
+            );
+          },
+        ),
+      ),
     );
   }
 }

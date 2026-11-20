@@ -1442,7 +1442,7 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String driversActiveValue(String value) {
-    return '$value drayber ang aktibo';
+    return 'Aktibong drayber: $value';
   }
 
   @override

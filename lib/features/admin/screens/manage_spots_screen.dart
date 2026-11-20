@@ -2,6 +2,7 @@ import 'package:tricgabay_app/core/utils/formatters.dart';
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
+import '../../../core/motion/motion_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -245,210 +246,225 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
                     mainAxisSpacing: 16,
                   ),
                   itemCount: filteredSpots.length,
-                  itemBuilder: (context, index) {
-                    final spot = filteredSpots[index];
-                    final pending = _pendingSpotIds.contains(spot.id);
-                    return AppCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Stack(
-                              children: [
-                                Container(
-                                  width: double.infinity,
-                                  decoration: const BoxDecoration(
-                                    borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(16),
-                                    ),
-                                  ),
-                                  clipBehavior: Clip.antiAlias,
-                                  child: SafeAppImage(
-                                    path: spot.imageUrls.isNotEmpty
-                                        ? spot.imageUrls.first
-                                        : '',
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                if (!spot.isActive)
-                                  Positioned(
-                                    top: 8,
-                                    left: 8,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black54,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        context.l10n.hidden,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                if (spot.isTemporarilyClosed)
-                                  Positioned(
-                                    bottom: 8,
-                                    left: 8,
-                                    right: 8,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.danger,
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        context.l10n.temporarilyClosed,
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  context.message(spot.name),
-                                  style: GoogleFonts.poppins(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  context.message(spot.categoryLabel),
-                                  style: GoogleFonts.poppins(
-                                    color: AppColors.secondary,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                  itemBuilder: (context, index) => FadeSlideIn.staggered(
+                    index: index,
+                    child: Builder(
+                      builder: (context) {
+                        final spot = filteredSpots[index];
+                        final pending = _pendingSpotIds.contains(spot.id);
+                        return AppCard(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Stack(
                                   children: [
-                                    Semantics(
-                                      label: context.l10n
-                                          .touristVisibilityValue(
-                                            context.message(
-                                              (spot.name).toString(),
-                                            ),
-                                          ),
-                                      value: context.message(
-                                        spot.isActive
-                                            ? MessageCode.visible
-                                            : MessageCode.hidden,
+                                    Container(
+                                      width: double.infinity,
+                                      decoration: const BoxDecoration(
+                                        borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(16),
+                                        ),
                                       ),
-                                      enabled: !pending,
-                                      child: pending
-                                          ? const SizedBox.square(
-                                              dimension: 24,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                              ),
-                                            )
-                                          : Switch(
-                                              value: spot.isActive,
-                                              onChanged: (value) => _runSpotMutation(
-                                                spot,
-                                                () =>
-                                                    BackendRepository.setSpotActive(
-                                                      spot.id,
-                                                      value,
-                                                    ),
-                                                value
-                                                    ? MessageCode.isNowVisibleValue(
-                                                        (spot.name).toString(),
-                                                      )
-                                                    : MessageCode.isNowHiddenValue(
-                                                        (spot.name).toString(),
-                                                      ),
-                                              ),
-                                              activeThumbColor:
-                                                  AppColors.success,
-                                            ),
+                                      clipBehavior: Clip.antiAlias,
+                                      child: SafeAppImage(
+                                        path: spot.imageUrls.isNotEmpty
+                                            ? spot.imageUrls.first
+                                            : '',
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
-                                    PopupMenuButton<String>(
-                                      enabled: !pending,
-                                      onSelected: (value) async {
-                                        if (value == 'edit') {
-                                          context.push(
-                                            '/admin/spots/form',
-                                            extra: spot,
-                                          );
-                                        } else if (value == 'delete') {
-                                          await _runSpotMutation(
-                                            spot,
-                                            () =>
-                                                AppSession.deleteSpot(spot.id),
-                                            MessageCode.deletedValue(
-                                              (spot.name).toString(),
+                                    if (!spot.isActive)
+                                      Positioned(
+                                        top: 8,
+                                        left: 8,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black54,
+                                            borderRadius: BorderRadius.circular(
+                                              4,
                                             ),
-                                          );
-                                        } else if (value == 'availability') {
-                                          await _changeAvailability(spot);
-                                        }
-                                      },
-                                      itemBuilder: (context) => [
-                                        PopupMenuItem(
-                                          value: 'availability',
+                                          ),
                                           child: Text(
-                                            context.message(
-                                              spot.isTemporarilyClosed
-                                                  ? MessageCode.reopenAttraction
-                                                  : MessageCode
-                                                        .closeTemporarily,
+                                            context.l10n.hidden,
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ),
-                                        PopupMenuItem(
-                                          value: 'edit',
-                                          child: Text(context.l10n.edit),
-                                        ),
-                                        PopupMenuItem(
-                                          value: 'delete',
-                                          child: Text(
-                                            context.l10n.delete,
-                                            style: TextStyle(
-                                              color: AppColors.danger,
+                                      ),
+                                    if (spot.isTemporarilyClosed)
+                                      Positioned(
+                                        bottom: 8,
+                                        left: 8,
+                                        right: 8,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.danger,
+                                            borderRadius: BorderRadius.circular(
+                                              6,
                                             ),
+                                          ),
+                                          child: Text(
+                                            context.l10n.temporarilyClosed,
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      context.message(spot.name),
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      context.message(spot.categoryLabel),
+                                      style: GoogleFonts.poppins(
+                                        color: AppColors.secondary,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Semantics(
+                                          label: context.l10n
+                                              .touristVisibilityValue(
+                                                context.message(
+                                                  (spot.name).toString(),
+                                                ),
+                                              ),
+                                          value: context.message(
+                                            spot.isActive
+                                                ? MessageCode.visible
+                                                : MessageCode.hidden,
+                                          ),
+                                          enabled: !pending,
+                                          child: pending
+                                              ? const SizedBox.square(
+                                                  dimension: 24,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                      ),
+                                                )
+                                              : Switch(
+                                                  value: spot.isActive,
+                                                  onChanged: (value) => _runSpotMutation(
+                                                    spot,
+                                                    () =>
+                                                        BackendRepository.setSpotActive(
+                                                          spot.id,
+                                                          value,
+                                                        ),
+                                                    value
+                                                        ? MessageCode.isNowVisibleValue(
+                                                            (spot.name)
+                                                                .toString(),
+                                                          )
+                                                        : MessageCode.isNowHiddenValue(
+                                                            (spot.name)
+                                                                .toString(),
+                                                          ),
+                                                  ),
+                                                  activeThumbColor:
+                                                      AppColors.success,
+                                                ),
+                                        ),
+                                        PopupMenuButton<String>(
+                                          enabled: !pending,
+                                          onSelected: (value) async {
+                                            if (value == 'edit') {
+                                              context.push(
+                                                '/admin/spots/form',
+                                                extra: spot,
+                                              );
+                                            } else if (value == 'delete') {
+                                              await _runSpotMutation(
+                                                spot,
+                                                () => AppSession.deleteSpot(
+                                                  spot.id,
+                                                ),
+                                                MessageCode.deletedValue(
+                                                  (spot.name).toString(),
+                                                ),
+                                              );
+                                            } else if (value ==
+                                                'availability') {
+                                              await _changeAvailability(spot);
+                                            }
+                                          },
+                                          itemBuilder: (context) => [
+                                            PopupMenuItem(
+                                              value: 'availability',
+                                              child: Text(
+                                                context.message(
+                                                  spot.isTemporarilyClosed
+                                                      ? MessageCode
+                                                            .reopenAttraction
+                                                      : MessageCode
+                                                            .closeTemporarily,
+                                                ),
+                                              ),
+                                            ),
+                                            PopupMenuItem(
+                                              value: 'edit',
+                                              child: Text(context.l10n.edit),
+                                            ),
+                                            PopupMenuItem(
+                                              value: 'delete',
+                                              child: Text(
+                                                context.l10n.delete,
+                                                style: TextStyle(
+                                                  color: AppColors.danger,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                          icon: const Icon(
+                                            Icons.more_vert,
+                                            size: 20,
                                           ),
                                         ),
                                       ],
-                                      icon: const Icon(
-                                        Icons.more_vert,
-                                        size: 20,
-                                      ),
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    );
-                  },
+                        );
+                      },
+                    ),
+                  ),
                 );
               },
             ),

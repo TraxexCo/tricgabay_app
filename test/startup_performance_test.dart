@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tricgabay_app/core/session/app_session.dart';
 import 'package:tricgabay_app/core/services/auth_service.dart';
 import 'package:tricgabay_app/core/services/realtime_refresh_policy.dart';
@@ -12,7 +13,11 @@ import 'package:tricgabay_app/features/auth/screens/splash_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/tourist_bookings_screen.dart';
 
 void main() {
-  setUp(() => GoogleFonts.config.allowRuntimeFetching = false);
+  setUp(() {
+    GoogleFonts.config.allowRuntimeFetching = false;
+    // The splash reads whether this device has seen the intro.
+    SharedPreferences.setMockInitialValues({});
+  });
 
   testWidgets(
     'startup can render while sign-in state is loading and opens as soon as it resolves',

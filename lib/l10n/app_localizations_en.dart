@@ -1421,7 +1421,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String driversActiveValue(String value) {
-    return '$value drivers active';
+    return 'Active drivers: $value';
   }
 
   @override

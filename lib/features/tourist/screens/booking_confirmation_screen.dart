@@ -2,6 +2,7 @@ import 'package:tricgabay_app/core/utils/formatters.dart';
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import '../../../core/services/server_clock.dart';
 import 'package:flutter/material.dart';
+import '../../../core/motion/motion_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
@@ -37,18 +38,16 @@ class BookingConfirmationScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Center(
+                  // Pops in and draws the check: the request really went through.
                   child: Container(
                     width: 120,
                     height: 120,
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.green.shade50,
+                      color: AppColors.successLight,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.check_circle_rounded,
-                      color: Colors.green,
-                      size: 80,
-                    ),
+                    child: const AnimatedCheck(size: 80),
                   ),
                 ),
                 const SizedBox(height: 20),

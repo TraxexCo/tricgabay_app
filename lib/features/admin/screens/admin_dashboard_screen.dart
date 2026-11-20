@@ -2,6 +2,7 @@ import '../../../core/widgets/language_selection.dart';
 import 'package:tricgabay_app/core/utils/formatters.dart';
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
+import '../../../core/motion/motion_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -240,9 +241,11 @@ class AdminDashboardScreen extends StatelessWidget {
                               crossAxisCount;
                           final aspectRatio =
                               itemWidth /
-                              (110 +
+                              (64 +
+                                  MediaQuery.textScalerOf(context).scale(20) *
+                                      1.5 +
                                   MediaQuery.textScalerOf(context).scale(12) *
-                                      5);
+                                      3);
 
                           return GridView.count(
                             crossAxisCount: crossAxisCount,
@@ -252,34 +255,37 @@ class AdminDashboardScreen extends StatelessWidget {
                             mainAxisSpacing: 12,
                             childAspectRatio: aspectRatio,
                             children: [
-                              _Metric(
-                                value: todayBookings.toString(),
-                                label: MessageCode.bookingsToday,
-                                icon: Icons.receipt_long_outlined,
-                                color: AppColors.primary,
-                              ),
-                              _Metric(
-                                value: verifications.toString(),
-                                label: MessageCode.driverVerifications,
-                                icon: Icons.verified_user_outlined,
-                                color: AppColors.warning,
-                              ),
-                              _Metric(
-                                value: NumberFormat.compact(
-                                  locale: AppFormatters.resolvedLocale(null),
-                                ).format(totalAccounts),
-                                label: MessageCode.touristAccounts,
-                                icon: Icons.people_outline_rounded,
-                                color: AppColors.success,
-                              ),
-                              _Metric(
-                                value: AppFormatters.currency(totalRevenue),
-                                label: includesDirectGcash
-                                    ? context.l10n.gcashConfirmedFares
-                                    : MessageCode.confirmedCash,
-                                icon: Icons.payments_outlined,
-                                color: const Color(0xFF8E44AD),
-                              ),
+                              for (final (i, metric) in <Widget>[
+                                _Metric(
+                                  value: todayBookings.toString(),
+                                  label: MessageCode.bookingsToday,
+                                  icon: Icons.receipt_long_outlined,
+                                  color: AppColors.primary,
+                                ),
+                                _Metric(
+                                  value: verifications.toString(),
+                                  label: MessageCode.driverVerifications,
+                                  icon: Icons.verified_user_outlined,
+                                  color: AppColors.warning,
+                                ),
+                                _Metric(
+                                  value: NumberFormat.compact(
+                                    locale: AppFormatters.resolvedLocale(null),
+                                  ).format(totalAccounts),
+                                  label: MessageCode.touristAccounts,
+                                  icon: Icons.people_outline_rounded,
+                                  color: AppColors.success,
+                                ),
+                                _Metric(
+                                  value: AppFormatters.currency(totalRevenue),
+                                  label: includesDirectGcash
+                                      ? context.l10n.gcashConfirmedFares
+                                      : MessageCode.confirmedCash,
+                                  icon: Icons.payments_outlined,
+                                  color: const Color(0xFF8E44AD),
+                                ),
+                              ].indexed)
+                                FadeSlideIn.staggered(index: i, child: metric),
                             ],
                           );
                         },
@@ -602,13 +608,22 @@ class _Metric extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(13),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE6EDF2)),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: .06),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
@@ -618,38 +633,32 @@ class _Metric extends StatelessWidget {
             ),
             child: Icon(icon, size: 18, color: color),
           ),
-          const SizedBox(width: 9),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    context.message(value),
-                    style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  context.message(value),
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    context.message(label),
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
-                    ),
-                    maxLines: 1,
-                  ),
+              ),
+              Text(
+                context.message(label),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),

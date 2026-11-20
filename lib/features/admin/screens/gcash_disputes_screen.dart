@@ -5,6 +5,9 @@ import '../../../core/l10n/app_l10n.dart';
 import '../../../core/services/error_messages.dart';
 import '../../../core/services/gcash_repository.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/motion/motion_widgets.dart';
+import '../../../core/widgets/shared_widgets.dart';
 import '../../payment/note_dialog.dart';
 import '../../tourist/screens/gcash_trip_payment.dart' show showGcashImage;
 
@@ -59,9 +62,9 @@ class _GcashDisputesScreenState extends State<GcashDisputesScreen> {
                 children: [ListTile(title: Text(l10n.adminGcashDisputesEmpty))],
               );
             }
-            return ListView.separated(
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
               itemCount: disputes.length,
-              separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final d = disputes[index];
                 final status = d.unsettledNotPaid
@@ -69,24 +72,84 @@ class _GcashDisputesScreenState extends State<GcashDisputesScreen> {
                     : d.escalated
                     ? l10n.adminDisputeEscalated
                     : l10n.adminDisputeWaiting;
-                return ListTile(
-                  leading: Icon(
-                    d.escalated || d.unsettledNotPaid
-                        ? Icons.priority_high_rounded
-                        : Icons.hourglass_top_rounded,
+                final urgent = d.escalated || d.unsettledNotPaid;
+                final tone = urgent ? AppColors.danger : AppColors.warning;
+                final text = Theme.of(context).textTheme;
+                return FadeSlideIn.staggered(
+                  index: index,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: PressableScale(
+                      child: Card(
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () async {
+                            await context.push(
+                              '/admin/gcash-disputes/${d.bookingId}',
+                            );
+                            if (mounted) await _refresh();
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: tone.withValues(alpha: .12),
+                                  child: Icon(
+                                    urgent
+                                        ? Icons.priority_high_rounded
+                                        : Icons.hourglass_top_rounded,
+                                    color: tone,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        d.touristName,
+                                        style: text.titleMedium,
+                                      ),
+                                      Text(
+                                        '${d.driverName} · ${d.referenceLabel}',
+                                        style: text.bodySmall,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      StatusBadge(
+                                        label: status,
+                                        color: tone.withValues(alpha: .12),
+                                        textColor: tone,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      AppFormatters.currency(d.fareCents / 100),
+                                      style: text.titleMedium,
+                                    ),
+                                    if (d.hasProof)
+                                      const Padding(
+                                        padding: EdgeInsets.only(top: 6),
+                                        child: Icon(
+                                          Icons.receipt_long_outlined,
+                                          size: 18,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                  title: Text('${d.referenceLabel} · ${d.touristName}'),
-                  subtitle: Text(
-                    '${d.driverName} · ${AppFormatters.currency(d.fareCents / 100)}\n$status',
-                  ),
-                  isThreeLine: true,
-                  trailing: d.hasProof
-                      ? const Icon(Icons.receipt_long_outlined)
-                      : null,
-                  onTap: () async {
-                    await context.push('/admin/gcash-disputes/${d.bookingId}');
-                    if (mounted) await _refresh();
-                  },
                 );
               },
             );
@@ -191,18 +254,38 @@ class _GcashDisputeDetailScreenState extends State<GcashDisputeDetailScreen> {
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              Text(
-                AppFormatters.currency(d.fareCents / 100),
-                style: Theme.of(context).textTheme.headlineSmall,
+              FadeSlideIn(
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppFormatters.currency(d.fareCents / 100),
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const Divider(height: 24),
+                        _Fact(l10n.gcashReferenceLabel, d.referenceNo ?? '—'),
+                        _Fact(l10n.adminDriverNote, d.disputeNote ?? '—'),
+                        _Fact(
+                          l10n.adminEscalationNote,
+                          d.escalationNote ?? '—',
+                        ),
+                        _Fact(l10n.adminDisputeEscalated, time(d.escalatedAt)),
+                      ],
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: 12),
-              _Fact(l10n.gcashReferenceLabel, d.referenceNo ?? '—'),
-              _Fact(l10n.adminDriverNote, d.disputeNote ?? '—'),
-              _Fact(l10n.adminEscalationNote, d.escalationNote ?? '—'),
-              _Fact(l10n.adminDisputeEscalated, time(d.escalatedAt)),
-              const SizedBox(height: 12),
               if (receipt == null)
-                Text(l10n.adminNoReceipt)
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.receipt_long_outlined),
+                    title: Text(l10n.adminNoReceipt),
+                  ),
+                )
               else
                 OutlinedButton.icon(
                   onPressed: () => showGcashImage(

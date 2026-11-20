@@ -6,6 +6,7 @@ import 'dart:async';
 import '../../../core/services/backend_repository.dart';
 
 import 'package:flutter/material.dart';
+import '../../../core/motion/motion.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/services/trip_rules.dart';
@@ -485,7 +486,24 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           )
         : FilledButton(
             onPressed: _busy ? null : action,
-            child: Text(context.message(_busy ? MessageCode.saving : text)),
+            // The pressed button itself shows the work in progress.
+            child: AnimatedSwitcher(
+              duration: Motion.of(context, Motion.medium),
+              child: _busy
+                  ? Row(
+                      key: const ValueKey('busy'),
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox.square(
+                          dimension: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(context.message(MessageCode.saving)),
+                      ],
+                    )
+                  : Text(context.message(text), key: ValueKey(text)),
+            ),
           ),
   );
   String _paymentLabel(BookingModel booking) => switch (booking.paymentStatus) {

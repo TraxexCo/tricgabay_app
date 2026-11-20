@@ -1,5 +1,11 @@
 [
   {
+    "file": "lib/core/widgets/brand_logo_hero.dart",
+    "value": "brand-logo",
+    "kind": "protocol",
+    "reason": "Hero tag linking the launch and sign-in logos; never shown in the interface."
+  },
+  {
     "file": "lib/core/services/gcash_repository.dart",
     "value": "gcash-receipts",
     "kind": "protocol",

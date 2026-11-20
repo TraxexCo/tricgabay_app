@@ -1,6 +1,7 @@
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../core/motion/motion_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
@@ -152,86 +153,94 @@ class _TouristSearchScreenState extends State<TouristSearchScreen> {
                 : ListView.builder(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 118),
                     itemCount: _results.length,
-                    itemBuilder: (context, index) {
-                      final spot = _results[index];
-                      return AppCard(
-                        onTap: () => context.push('/tourist/spot/${spot.id}'),
-                        margin: const EdgeInsets.only(bottom: 16),
-                        padding: EdgeInsets.zero,
-                        child: Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: const BorderRadius.horizontal(
-                                left: Radius.circular(16),
-                              ),
-                              child: SafeAppImage(
-                                path: spot.imageUrls.isNotEmpty
-                                    ? spot.imageUrls.first
-                                    : '',
-                                width: 100,
-                                height: 100,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      context.message(spot.name),
-                                      style: GoogleFonts.poppins(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      context.message(
-                                        spot.category == SpotCategory.other
-                                            ? MessageCode.resortCaf
-                                            : spot.categoryLabel,
-                                      ),
-                                      style: GoogleFonts.poppins(
-                                        color: AppColors.primary,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Row(
+                    itemBuilder: (context, index) => FadeSlideIn.staggered(
+                      index: index,
+                      child: Builder(
+                        builder: (context) {
+                          final spot = _results[index];
+                          return AppCard(
+                            onTap: () =>
+                                context.push('/tourist/spot/${spot.id}'),
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: EdgeInsets.zero,
+                            child: Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.horizontal(
+                                    left: Radius.circular(16),
+                                  ),
+                                  child: SafeAppImage(
+                                    path: spot.imageUrls.isNotEmpty
+                                        ? spot.imageUrls.first
+                                        : '',
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        const Icon(
-                                          Icons.location_on,
-                                          size: 14,
-                                          color: AppColors.textSecondary,
+                                        Text(
+                                          context.message(spot.name),
+                                          style: GoogleFonts.poppins(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: AppColors.textPrimary,
+                                          ),
                                         ),
-                                        const SizedBox(width: 4),
-                                        Flexible(
-                                          child: Text(
-                                            context.l10n.kmAwayValueLabel(
-                                              context.message(
-                                                (spot.distanceFromTown)
-                                                    .toString(),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          context.message(
+                                            spot.category == SpotCategory.other
+                                                ? MessageCode.resortCaf
+                                                : spot.categoryLabel,
+                                          ),
+                                          style: GoogleFonts.poppins(
+                                            color: AppColors.primary,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.location_on,
+                                              size: 14,
+                                              color: AppColors.textSecondary,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Flexible(
+                                              child: Text(
+                                                context.l10n.kmAwayValueLabel(
+                                                  context.message(
+                                                    (spot.distanceFromTown)
+                                                        .toString(),
+                                                  ),
+                                                ),
+                                                style: GoogleFonts.poppins(
+                                                  color:
+                                                      AppColors.textSecondary,
+                                                  fontSize: 12,
+                                                ),
                                               ),
                                             ),
-                                            style: GoogleFonts.poppins(
-                                              color: AppColors.textSecondary,
-                                              fontSize: 12,
-                                            ),
-                                          ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                  ],
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
-                      );
-                    },
+                          );
+                        },
+                      ),
+                    ),
                   ),
           ),
         ],

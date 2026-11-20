@@ -679,7 +679,7 @@
   "driverReportedArrivalAwaitingTourist": "Dumating na ang drayber · hinihintay ang turista",
   "driverReviewSubmitted": "Naisumite ang review ng drayber.",
   "drivers": "Mga drayber",
-  "driversActiveValue": "{value} drayber ang aktibo",
+  "driversActiveValue": "Aktibong drayber: {value}",
   "@driversActiveValue": {
     "description": "Application message: driversActiveValue",
     "placeholders": {

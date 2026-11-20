@@ -2565,7 +2565,7 @@ abstract class AppLocalizations {
   /// Application message: driversActiveValue
   ///
   /// In en, this message translates to:
-  /// **'{value} drivers active'**
+  /// **'Active drivers: {value}'**
   String driversActiveValue(String value);
 
   /// No description provided for @driverSearchRetriedForAnother10Minutes.

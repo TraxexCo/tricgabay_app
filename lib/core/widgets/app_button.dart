@@ -1,6 +1,8 @@
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
+import '../motion/motion.dart';
+import '../motion/motion_widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 enum AppButtonType { primary, secondary, outline, danger, ghost }
@@ -46,7 +48,9 @@ class AppButton extends StatelessWidget {
           width: isFullWidth ? double.infinity : null,
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: _height),
-            child: _buildButton(context),
+            child: enabled
+                ? PressableScale(child: _buildButton(context))
+                : _buildButton(context),
           ),
         ),
       ),
@@ -93,7 +97,26 @@ class AppButton extends StatelessWidget {
     };
   }
 
-  Widget _content(BuildContext context) {
+  /// Cross-fades between the label and the spinner so loading reads as a
+  /// change of state on the same button.
+  Widget _content(BuildContext context) => AnimatedSwitcher(
+    duration: Motion.of(context, Motion.medium),
+    switchInCurve: Motion.enter,
+    switchOutCurve: Motion.exit,
+    transitionBuilder: (child, animation) => FadeTransition(
+      opacity: animation,
+      child: ScaleTransition(
+        scale: Tween<double>(begin: .85, end: 1).animate(animation),
+        child: child,
+      ),
+    ),
+    child: KeyedSubtree(
+      key: ValueKey(isLoading),
+      child: _contentFor(context),
+    ),
+  );
+
+  Widget _contentFor(BuildContext context) {
     if (isLoading) {
       return SizedBox(
         width: 20,

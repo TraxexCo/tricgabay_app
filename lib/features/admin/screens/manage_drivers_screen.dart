@@ -2,6 +2,7 @@ import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'dart:async';
 import '../../../core/widgets/remote_page_controls.dart';
 import 'package:flutter/material.dart';
+import '../../../core/motion/motion_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -134,80 +135,89 @@ class _ManageDriversScreenState extends ConsumerState<ManageDriversScreen> {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 104),
       itemCount: drivers.length,
-      itemBuilder: (context, index) {
-        final driver = drivers[index];
-        final reliability =
-            (driver['reliabilityScore'] as num?)?.toDouble() ?? 100;
-        final blocked = _isBlocked(driver);
-        return AppCard(
-          margin: const EdgeInsets.only(bottom: 12),
-          onTap: () => context.push('/admin/drivers/${driver['id']}'),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor:
-                      (blocked ? AppColors.danger : AppColors.primary)
-                          .withValues(alpha: .10),
-                  child: Text(
-                    context.message(
-                      driver['name'].toString().isEmpty
-                          ? '?'
-                          : driver['name'].toString()[0],
+      itemBuilder: (context, index) => FadeSlideIn.staggered(
+        index: index,
+        child: Builder(
+          builder: (context) {
+            final driver = drivers[index];
+            final reliability =
+                (driver['reliabilityScore'] as num?)?.toDouble() ?? 100;
+            final blocked = _isBlocked(driver);
+            return AppCard(
+              margin: const EdgeInsets.only(bottom: 12),
+              onTap: () => context.push('/admin/drivers/${driver['id']}'),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor:
+                          (blocked ? AppColors.danger : AppColors.primary)
+                              .withValues(alpha: .10),
+                      child: Text(
+                        context.message(
+                          driver['name'].toString().isEmpty
+                              ? '?'
+                              : driver['name'].toString()[0],
+                        ),
+                        style: TextStyle(
+                          color: blocked ? AppColors.danger : AppColors.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
-                    style: TextStyle(
-                      color: blocked ? AppColors.danger : AppColors.primary,
-                      fontWeight: FontWeight.w700,
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.message('${driver['name']}'),
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          Text(
+                            context.l10n.twoPartDetails(
+                              context.message(
+                                (driver['plate'] ?? '').toString(),
+                              ),
+                              context.message(
+                                (driver['serviceAreaName'] ??
+                                        MessageCode.areaUnverified)
+                                    .toString(),
+                              ),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            context.l10n.reliabilitySeatsValue(
+                              context.message(
+                                (reliability.toStringAsFixed(0)).toString(),
+                              ),
+                              context.message(
+                                (driver['passengerCapacity'] ?? 3).toString(),
+                              ),
+                            ),
+                            style: const TextStyle(fontSize: 11),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                    const Icon(Icons.chevron_right_rounded),
+                  ],
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.message('${driver['name']}'),
-                        style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
-                      ),
-                      Text(
-                        context.l10n.twoPartDetails(
-                          context.message((driver['plate'] ?? '').toString()),
-                          context.message(
-                            (driver['serviceAreaName'] ??
-                                    MessageCode.areaUnverified)
-                                .toString(),
-                          ),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        context.l10n.reliabilitySeatsValue(
-                          context.message(
-                            (reliability.toStringAsFixed(0)).toString(),
-                          ),
-                          context.message(
-                            (driver['passengerCapacity'] ?? 3).toString(),
-                          ),
-                        ),
-                        style: const TextStyle(fontSize: 11),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.chevron_right_rounded),
-              ],
-            ),
-          ),
-        );
-      },
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }
