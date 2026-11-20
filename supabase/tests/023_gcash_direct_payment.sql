@@ -123,10 +123,11 @@ select throws_ok($$ select public.tourist_mark_gcash_sent('b6170000-0000-4000-80
  'P0001','GCash payment is no longer due','paid fare cannot be reported again');
 select throws_ok($$ select public.open_dispute('b6170000-0000-4000-8000-000000000002','Legacy review request') $$,
  'P0001','Confirmed GCash payment cannot be changed','legacy review cannot reopen a confirmed GCash fare');
-select lives_ok($$ select public.tourist_mark_gcash_sent('b6170000-0000-4000-8000-000000000001','NEXT1234') $$,
- 'tourist may report again from disputed');
+-- 202611200001: once disputed, the tourist answers with proof (see 024).
+select throws_ok($$ select public.tourist_mark_gcash_sent('b6170000-0000-4000-8000-000000000001','NEXT1234') $$,
+ 'P0001','GCASH_PROOF_REQUIRED','a disputed fare needs proof rather than another report');
 select is((select payment_status::text from public.bookings where id='b6170000-0000-4000-8000-000000000001'),
- 'gcash_awaiting_confirmation','report after dispute returns to awaiting driver');
+ 'disputed','the fare stays disputed');
 
 select set_config('request.jwt.claim.sub','b6150000-0000-4000-8000-000000000003',true);
 select lives_ok($$ select public.driver_flag_gcash_not_received('b6170000-0000-4000-8000-000000000001') $$,'driver may dispute again');
@@ -145,8 +146,8 @@ select is((select count(*)::int from public.disputes where booking_id='b6170000-
  'rejected review rolls back the inserted dispute');
 select is((select payment_status::text from public.bookings where id='b6170000-0000-4000-8000-000000000001'),'cash_paid',
  'two cash confirmations still complete the payment');
-select is((select count(*)::int from public.gcash_payment_confirmations where booking_id='b6170000-0000-4000-8000-000000000001'),0,
- 'cash fallback clears direct GCash confirmation and dispute data');
+select isnt((select switched_to_cash_at from public.gcash_payment_confirmations where booking_id='b6170000-0000-4000-8000-000000000001'),null,
+ 'cash fallback keeps the GCash record as evidence and marks the switch');
 select is((select count(*)::int from public.payments where booking_id='b6170000-0000-4000-8000-000000000002'),1,
  'confirmation retry creates exactly one payment row');
 select is((select amount_centavos from public.payments where booking_id='b6170000-0000-4000-8000-000000000002'
