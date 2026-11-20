@@ -1,17 +1,12 @@
 import 'booking_draft.dart';
-import 'package:tricgabay_app/core/utils/formatters.dart';
 import 'package:tricgabay_app/core/l10n/message_codes.g.dart';
-import '../services/server_clock.dart';
 import '../l10n/locale_controller.dart';
 import '../services/error_messages.dart';
 import '../services/section_refresh.dart';
 import 'dart:async';
-import 'dart:convert';
 import 'dart:developer';
-import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
 import '../../models/trip_record.dart';
 import '../services/fare_policy.dart';
 import '../services/cancellation_policy.dart';
@@ -157,20 +152,18 @@ class AppSession {
 
   static String get currentTouristId => authenticatedUserId ?? '';
   static final storageError = AppFeatureControllers.auth.storageError;
-  static SharedPreferences? _preferences;
   static Future<void> _queue = Future.value();
   static Future<void>? _syncInFlight;
   static final _pendingSections = <RemoteSection>{};
   static int _sessionGeneration = 0;
   static String? _subscribedUserId;
-  static const _storageKey = 'tric_gabay_transactions_v1';
+  static const _legacyStorageKey = 'tric_gabay_transactions_v1';
   static bool _languagePersistenceAttached = false;
   static bool _syncingLanguage = false;
 
   static Future<void> initialize() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      _preferences = prefs;
       await LocaleController.initialize(prefs);
       _syncingLanguage = true;
       isFilipino.value = LocaleController.effectiveLocale.languageCode == 'fil';
@@ -203,25 +196,12 @@ class AppSession {
         storageError.value = null;
         return;
       }
-      final raw = prefs.getString(_storageKey);
-      if (raw != null) {
-        final saved = jsonDecode(raw) as Map<String, dynamic>;
-        final restored = (saved['bookings'] as List)
-            .map(
-              (b) =>
-                  BookingModel.fromMap(Map<String, dynamic>.from(b), b['id']),
-            )
-            .toList();
-        final restoredPolicy = FarePolicy.fromMap(
-          Map<String, dynamic>.from(saved['fares']),
-        );
-        bookings.value = restored;
-        farePolicy.value = restoredPolicy;
-      }
+      // Older builds kept a simulated booking ledger on the device; it is no
+      // longer used, so drop it.
+      unawaited(prefs.remove(_legacyStorageKey));
       _restoreActiveIds();
       storageError.value = null;
     } catch (_) {
-      _preferences = null;
       storageError.value = MessageCode
           .savedTripDataCouldNotBeReadBookingChangesArePausedToProtect;
     }
@@ -632,32 +612,6 @@ class AppSession {
     return result;
   }
 
-  static Future<void> _persist(
-    List<BookingModel> next,
-    FarePolicy policy,
-  ) async {
-    final prefs = _preferences;
-    TripRules.require(
-      prefs != null,
-      MessageCode.storageIsUnavailableRetryStorageBeforeMakingChanges,
-    );
-    final encoded = jsonEncode({
-      'fares': policy.toMap(),
-      'bookings': next.map((b) => {'id': b.id, ...b.toMap()}).toList(),
-    });
-    try {
-      final saved = await prefs!.setString(_storageKey, encoded);
-      if (!saved) throw StateError(MessageCode.saveFailed);
-      storageError.value = null;
-    } catch (_) {
-      storageError.value = MessageCode
-          .couldNotSaveThisChangePleaseRetryThePreviousTripStateHasBeen;
-      throw const TripRuleException(
-        MessageCode.couldNotSaveNoBookingOrPaymentStateWasChanged,
-      );
-    }
-  }
-
   static Future<void> saveFares({
     required int customCents,
     required Map<String, int> packages,
@@ -677,26 +631,13 @@ class AppSession {
           tourPackages.value.every((p) => packages.containsKey(p.id)),
       MessageCode.enterValidFixedFaresForEveryRoute,
     );
-    final next = FarePolicy(
-      revision: old.revision + 1,
-      customFareCents: customCents,
-      packageFares: Map.unmodifiable(packages),
-      history: [
-        ...old.history,
-        '${ServerClock.now().toIso8601String()} • Admin • ${reason.trim()} • v${old.revision + 1}: custom ₱${AppFormatters.amount((customCents / 100))}; ${packages.entries.map((e) => "${e.key} ₱${AppFormatters.amount((e.value / 100))}").join(", ")}',
-      ],
+    _requireServer();
+    await BackendRepository.saveFares(
+      customCents: customCents,
+      packageFares: packages,
+      reason: reason.trim(),
     );
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.saveFares(
-        customCents: customCents,
-        packageFares: packages,
-        reason: reason.trim(),
-      );
-      await syncRemoteState();
-      return;
-    }
-    await _persist(bookings.value, next);
-    farePolicy.value = next;
+    await syncRemoteState();
   });
 
   static Future<void> saveCancellationPolicy({
@@ -733,19 +674,13 @@ class AppSession {
     required int expectedFareRevision,
   }) => _serial(() async {
     TripRules.require(
-      paymentMethod == PaymentMethod.cash || BackendConfig.isConfigured,
-      MessageCode.onlinePaymentRequiresTheConfiguredServer,
+      paymentMethod == PaymentMethod.cash ||
+          paymentMethod == PaymentMethod.gcashDirect,
+      MessageCode.onlinePaymentUnavailable,
     );
     TripRules.require(
       !bookings.value.any((b) => b.touristId == currentTouristId && b.isActive),
       MessageCode.youAlreadyHaveAnActiveBookingOpenTripsToContinueOrCancelIt,
-    );
-    TripRules.require(
-      BackendConfig.isConfigured ||
-          adminTourists.value.any(
-            (u) => u['id'] == currentTouristId && u['status'] == 'active',
-          ),
-      MessageCode.thisTouristAccountCannotBookRightNowContactTheAdministrator,
     );
     TripRules.require(
       farePolicy.value.revision == expectedFareRevision,
@@ -789,80 +724,27 @@ class AppSession {
         MessageCode.packageStopsChangedSelectThePackageAgain,
       );
     }
-    final cents = farePolicy.value.quote(activePackageId);
-    if (BackendConfig.isConfigured) {
-      final serviceArea = await BackendRepository.loadPickupServiceArea();
-      TripRules.require(
-        serviceArea.contains(lat!, lng!),
-        MessageCode.thePickupPinIsOutsideTheServiceAreaChooseANearbyPickupPoint,
-      );
-      final created = await BackendRepository.createBooking(
-        packageId: activePackageId,
-        paymentMethod: paymentMethod,
-        pickupAddress:
-            draft.pickupAddress.value ?? MessageCode.currentGpsPickup,
-        pickupLatitude: lat,
-        pickupLongitude: lng,
-        stops: spots,
-        passengerCount: draft.passengerCount,
-        luggageNotes: draft.luggageNotes,
-        accessibilityNeeds: draft.accessibilityNeeds,
-        scheduledAt: draft.scheduledAt,
-      );
-      await syncRemoteState();
-      activeBookingId = created.booking.id;
-      return created.booking;
-    }
-    var booking = BookingModel(
-      id: 'TRIC-${const Uuid().v4().substring(0, 8).toUpperCase()}',
-      touristId: currentTouristId,
-      touristName: currentUserName.value,
-      stops: List.unmodifiable(
-        spots.map(
-          (s) => BookingStop(
-            spotId: s.id,
-            spotName: s.name,
-            latitude: s.latitude,
-            longitude: s.longitude,
-            fareCents: 0,
-          ),
-        ),
-      ),
-      pickupLat: lat!,
-      pickupLng: lng!,
+    _requireServer();
+    final serviceArea = await BackendRepository.loadPickupServiceArea();
+    TripRules.require(
+      serviceArea.contains(lat!, lng!),
+      MessageCode.thePickupPinIsOutsideTheServiceAreaChooseANearbyPickupPoint,
+    );
+    final created = await BackendRepository.createBooking(
+      packageId: activePackageId,
+      paymentMethod: paymentMethod,
       pickupAddress: draft.pickupAddress.value ?? MessageCode.currentGpsPickup,
+      pickupLatitude: lat,
+      pickupLongitude: lng,
+      stops: spots,
       passengerCount: draft.passengerCount,
       luggageNotes: draft.luggageNotes,
       accessibilityNeeds: draft.accessibilityNeeds,
-      baseFareCents: cents,
-      totalFareCents: cents,
-      paymentMethod: PaymentMethod.cash,
-      createdAt: ServerClock.now(),
       scheduledAt: draft.scheduledAt,
-      status: draft.scheduledAt == null
-          ? BookingStatus.pending
-          : BookingStatus.scheduled,
-      dispatchExpiresAt: draft.scheduledAt == null
-          ? ServerClock.now().add(const Duration(minutes: 10))
-          : draft.scheduledAt!.subtract(const Duration(minutes: 20)),
-      trip: TripRecord(
-        fareRevision: farePolicy.value.revision,
-        packageId: activePackageId,
-        packageName: pkg?.name,
-        pickupCode: (1000 + Random.secure().nextInt(9000)).toString(),
-      ),
     );
-    booking = TripRules.record(
-      booking,
-      TripActor.tourist,
-      MessageCode.fixedFareAcceptedCancellationPaymentPolicyV1AcceptedValue(
-        (AppFormatters.amount(booking.totalFareCents / 100)).toString(),
-      ),
-    );
-    await _persist([booking, ...bookings.value], farePolicy.value);
-    bookings.value = [booking, ...bookings.value];
-    activeBookingId = booking.id;
-    return booking;
+    await syncRemoteState();
+    activeBookingId = created.booking.id;
+    return created.booking;
   });
 
   static BookingModel bookingById(String id) {
@@ -875,77 +757,33 @@ class AppSession {
       authenticatedRole == 'driver' ? authenticatedUserId : null;
   static bool ownsDriverBooking(BookingModel b) =>
       currentDriverId != null && b.driverId == currentDriverId;
-  static void _requireParticipant(BookingModel b, TripActor actor) {
-    if (actor == TripActor.tourist) {
-      TripRules.require(
-        b.touristId == currentTouristId,
-        MessageCode.thisBookingBelongsToAnotherTourist,
-      );
-    }
-    if (actor == TripActor.driver) {
-      TripRules.require(
-        ownsDriverBooking(b),
-        MessageCode.thisBookingIsAssignedToAnotherDriver,
-      );
-    }
-    TripRules.require(
-      actor != TripActor.system,
-      MessageCode.systemActionsAreUnavailableHere,
-    );
-  }
 
-  static Future<BookingModel> _change(
-    String id,
-    TripActor actor,
-    BookingModel Function(BookingModel) action,
-  ) => _serial(() async {
-    final old = bookingById(id);
-    _requireParticipant(old, actor);
-    final updated = action(old);
-    final next = bookings.value.map((b) => b.id == id ? updated : b).toList();
-    await _persist(next, farePolicy.value);
-    bookings.value = next;
-    _restoreActiveIds();
-    return updated;
-  });
+  /// Every trip and admin action is decided by the server; there is no
+  /// offline simulation of booking rules in the app.
+  static void _requireServer() => TripRules.require(
+    BackendConfig.isConfigured,
+    MessageCode.serverConnectionRequired,
+  );
 
   static Future<BookingModel> cancelBooking(
     String id, {
     required TripActor actor,
     required String reason,
   }) async {
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.rpc('cancel_booking', {
-        'p_booking_id': id,
-        'p_reason': reason,
-      });
-      await syncRemoteState();
-      return bookingById(id);
-    }
-    return _change(id, actor, (b) => TripRules.cancel(b, actor, reason));
+    _requireServer();
+    await BackendRepository.rpc('cancel_booking', {
+      'p_booking_id': id,
+      'p_reason': reason,
+    });
+    await syncRemoteState();
+    return bookingById(id);
   }
 
   static Future<BookingModel> retryDriverSearch(String id) async {
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.rpc('retry_booking_dispatch', {
-        'p_booking_id': id,
-      });
-      await syncRemoteState();
-      return bookingById(id);
-    }
-    return _change(id, TripActor.tourist, (booking) {
-      TripRules.require(
-        booking.status == BookingStatus.pending && booking.isDispatchExpired,
-        MessageCode.thisBookingRequestIsNotReadyToRetry,
-      );
-      return TripRules.record(
-        booking.copyWith(
-          dispatchExpiresAt: ServerClock.now().add(const Duration(minutes: 10)),
-        ),
-        TripActor.tourist,
-        MessageCode.driverSearchRetriedForAnother10Minutes,
-      );
-    });
+    _requireServer();
+    await BackendRepository.rpc('retry_booking_dispatch', {'p_booking_id': id});
+    await syncRemoteState();
+    return bookingById(id);
   }
 
   static Future<void> declineDriverOffer(String id) async {
@@ -990,69 +828,50 @@ class AppSession {
   }
 
   static Future<BookingModel> reportPickupArrival(String id) async {
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.rpc('report_pickup_arrival', {
-        'p_booking_id': id,
-      });
-      await syncRemoteState();
-      return bookingById(id);
-    }
-    return _change(
-      id,
-      TripActor.driver,
-      (booking) => TripRules.reportPickupArrival(
-        booking,
-        waitTime: Duration(minutes: booking.driverWaitMinutes),
-      ),
-    );
+    _requireServer();
+    await BackendRepository.rpc('report_pickup_arrival', {'p_booking_id': id});
+    await syncRemoteState();
+    return bookingById(id);
   }
 
   static Future<BookingModel> declareTouristNoShow(String id) async {
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.rpc('declare_tourist_no_show', {
-        'p_booking_id': id,
-      });
-      await syncRemoteState();
-      return bookingById(id);
-    }
-    return _change(id, TripActor.driver, TripRules.declareTouristNoShow);
+    _requireServer();
+    await BackendRepository.rpc('declare_tourist_no_show', {
+      'p_booking_id': id,
+    });
+    await syncRemoteState();
+    return bookingById(id);
   }
 
   static Future<BookingModel> startTrip(String id, String code) async {
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.rpc('start_trip', {
-        'p_booking_id': id,
-        'p_pickup_code': code,
-      });
-      await syncRemoteState();
-      final booking = bookingById(id);
-      if (booking.status != BookingStatus.ongoing) {
-        throw StateError(
-          MessageCode
-              .thatPickupCodeIsIncorrectOrTemporarilyLockedAfterRepeatedAttempts,
-        );
-      }
-      return booking;
+    _requireServer();
+    await BackendRepository.rpc('start_trip', {
+      'p_booking_id': id,
+      'p_pickup_code': code,
+    });
+    await syncRemoteState();
+    final booking = bookingById(id);
+    if (booking.status != BookingStatus.ongoing) {
+      throw StateError(
+        MessageCode
+            .thatPickupCodeIsIncorrectOrTemporarilyLockedAfterRepeatedAttempts,
+      );
     }
-    return _change(id, TripActor.driver, (b) => TripRules.start(b, code));
+    return booking;
   }
 
   static Future<BookingModel> reportArrival(String id) async {
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.rpc('report_stop_arrival', {'p_booking_id': id});
-      await syncRemoteState();
-      return bookingById(id);
-    }
-    return _change(id, TripActor.driver, TripRules.proposeArrival);
+    _requireServer();
+    await BackendRepository.rpc('report_stop_arrival', {'p_booking_id': id});
+    await syncRemoteState();
+    return bookingById(id);
   }
 
   static Future<BookingModel> confirmArrival(String id) async {
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.rpc('confirm_stop_arrival', {'p_booking_id': id});
-      await syncRemoteState();
-      return bookingById(id);
-    }
-    return _change(id, TripActor.tourist, TripRules.confirmArrival);
+    _requireServer();
+    await BackendRepository.rpc('confirm_stop_arrival', {'p_booking_id': id});
+    await syncRemoteState();
+    return bookingById(id);
   }
 
   static Future<BookingModel> proposeRouteChange(
@@ -1132,12 +951,10 @@ class AppSession {
   }
 
   static Future<BookingModel> completeTrip(String id) async {
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.rpc('complete_trip', {'p_booking_id': id});
-      await syncRemoteState();
-      return bookingById(id);
-    }
-    return _change(id, TripActor.driver, TripRules.complete);
+    _requireServer();
+    await BackendRepository.rpc('complete_trip', {'p_booking_id': id});
+    await syncRemoteState();
+    return bookingById(id);
   }
 
   static Future<BookingModel> disputeBooking(
@@ -1145,15 +962,13 @@ class AppSession {
     TripActor actor,
     String reason,
   ) async {
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.rpc('open_dispute', {
-        'p_booking_id': id,
-        'p_reason': reason,
-      });
-      await syncRemoteState();
-      return bookingById(id);
-    }
-    return _change(id, actor, (b) => TripRules.dispute(b, actor, reason));
+    _requireServer();
+    await BackendRepository.rpc('open_dispute', {
+      'p_booking_id': id,
+      'p_reason': reason,
+    });
+    await syncRemoteState();
+    return bookingById(id);
   }
 
   static Future<BookingModel> addCaseStatement(
@@ -1161,15 +976,13 @@ class AppSession {
     TripActor actor,
     String text,
   ) async {
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.rpc('add_dispute_statement', {
-        'p_booking_id': id,
-        'p_statement': text,
-      });
-      await syncRemoteState();
-      return bookingById(id);
-    }
-    return _change(id, actor, (b) => TripRules.statement(b, actor, text));
+    _requireServer();
+    await BackendRepository.rpc('add_dispute_statement', {
+      'p_booking_id': id,
+      'p_statement': text,
+    });
+    await syncRemoteState();
+    return bookingById(id);
   }
 
   static Future<BookingModel> resolveSettlement(
@@ -1177,20 +990,14 @@ class AppSession {
     int cents,
     String reason,
   ) async {
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.rpc('resolve_booking_charge', {
-        'p_booking_id': id,
-        'p_charge_centavos': cents,
-        'p_reason': reason,
-      });
-      await syncRemoteState();
-      return bookingById(id);
-    }
-    return _change(
-      id,
-      TripActor.admin,
-      (b) => TripRules.resolve(b, cents, reason),
-    );
+    _requireServer();
+    await BackendRepository.rpc('resolve_booking_charge', {
+      'p_booking_id': id,
+      'p_charge_centavos': cents,
+      'p_reason': reason,
+    });
+    await syncRemoteState();
+    return bookingById(id);
   }
 
   static Future<BookingModel> confirmCash(
@@ -1198,19 +1005,13 @@ class AppSession {
     TripActor actor, {
     bool refund = false,
   }) async {
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.rpc('confirm_cash', {
-        'p_booking_id': id,
-        'p_direction': refund ? 'refund' : 'payment',
-      });
-      await syncRemoteState();
-      return bookingById(id);
-    }
-    return _change(
-      id,
-      actor,
-      (b) => TripRules.confirmCash(b, actor, refund: refund),
-    );
+    _requireServer();
+    await BackendRepository.rpc('confirm_cash', {
+      'p_booking_id': id,
+      'p_direction': refund ? 'refund' : 'payment',
+    });
+    await syncRemoteState();
+    return bookingById(id);
   }
 
   static Future<List<Map<String, dynamic>>> financialLedger(String id) {
@@ -1226,30 +1027,14 @@ class AppSession {
     double rating, {
     String review = '',
   }) async {
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.rpc('submit_driver_review', {
-        'p_booking_id': id,
-        'p_rating': rating.round(),
-        'p_review': review,
-      });
-      await syncRemoteState();
-      return bookingById(id);
-    }
-    return _change(id, TripActor.tourist, (b) {
-      TripRules.require(
-        b.status == BookingStatus.completed && b.driverRating == null,
-        MessageCode.onlyACompletedUnratedTripCanBeReviewed,
-      );
-      TripRules.require(
-        rating.isFinite && rating >= 1 && rating <= 5,
-        MessageCode.selectARatingBetween1And5,
-      );
-      return TripRules.record(
-        b.copyWith(driverRating: rating, driverReview: review.trim()),
-        TripActor.tourist,
-        MessageCode.driverReviewSubmitted,
-      );
+    _requireServer();
+    await BackendRepository.rpc('submit_driver_review', {
+      'p_booking_id': id,
+      'p_rating': rating.round(),
+      'p_review': review,
     });
+    await syncRemoteState();
+    return bookingById(id);
   }
 
   static final isDriverOnline = AppFeatureControllers.driver.isOnline;
@@ -1269,55 +1054,11 @@ class AppSession {
       .length;
 
   static Future<BookingModel> acceptBooking(String id) {
-    final acceptingDriverId = currentDriverId;
     return _serial(() async {
-      if (BackendConfig.isConfigured) {
-        await BackendRepository.rpc('accept_booking', {'p_booking_id': id});
-        await syncRemoteState();
-        return bookingById(id);
-      }
-      final b = bookingById(id);
-      final driver = adminDrivers.value
-          .where((d) => d['id'] == acceptingDriverId)
-          .firstOrNull;
-      TripRules.require(
-        driver != null && driver['status'] == 'active' && isDriverOnline.value,
-        MessageCode.goOnlineWithAnApprovedDriverAccountFirst,
-      );
-      TripRules.require(
-        b.status == BookingStatus.pending,
-        MessageCode.thisRequestIsNoLongerAvailable,
-      );
-      TripRules.require(
-        adminTourists.value.any(
-          (u) => u['id'] == b.touristId && u['status'] == 'active',
-        ),
-        MessageCode.thisTouristAccountIsCurrentlyUnavailable,
-      );
-      TripRules.require(
-        !bookings.value.any(
-          (other) => other.driverId == acceptingDriverId && other.isActive,
-        ),
-        MessageCode.finishYourCurrentTripBeforeAcceptingAnother,
-      );
-      final updated = TripRules.record(
-        b.copyWith(
-          status: BookingStatus.accepted,
-          driverId: acceptingDriverId,
-          driverName: driver!['name'],
-          driverPlate: driver['plate'],
-          acceptedAt: ServerClock.now(),
-        ),
-        TripActor.driver,
-        MessageCode.driverAcceptedTheFixedFareAndPickup,
-      );
-      final next = bookings.value
-          .map((item) => item.id == id ? updated : item)
-          .toList();
-      await _persist(next, farePolicy.value);
-      bookings.value = next;
-      _restoreActiveIds();
-      return updated;
+      _requireServer();
+      await BackendRepository.rpc('accept_booking', {'p_booking_id': id});
+      await syncRemoteState();
+      return bookingById(id);
     });
   }
 
@@ -1398,10 +1139,6 @@ class AppSession {
 
   static int get unreadNotificationCount =>
       notifications.value.where((n) => !n.isRead).length;
-
-  static void _addNotification(NotificationItem item) {
-    notifications.value = [item, ...notifications.value];
-  }
 
   // ── User Profile ──────────────────────────────────────────────────────────
 
@@ -1626,22 +1363,15 @@ class AppSession {
       reason.trim().length >= 5,
       MessageCode.enterAReasonOfAtLeastFiveCharacters,
     );
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.setDriverApproval(
-        id,
-        status,
-        reason: reason,
-        blockedUntil: blockedUntil,
-      );
-      await syncRemoteState();
-      return;
-    }
-    adminDrivers.value = adminDrivers.value.map((d) {
-      if (d['id'] == id) {
-        return {...d, 'status': status};
-      }
-      return d;
-    }).toList();
+    _requireServer();
+    await BackendRepository.setDriverApproval(
+      id,
+      status,
+      reason: reason,
+      blockedUntil: blockedUntil,
+    );
+    await syncRemoteState();
+    return;
   }
 
   static Future<void> addSystemAnnouncement(
@@ -1650,25 +1380,15 @@ class AppSession {
     required String audience,
     required String requestId,
   }) async {
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.sendAnnouncement(
-        title,
-        message,
-        audience: audience,
-        requestId: requestId,
-      );
-      await syncRemoteState();
-      return;
-    }
-    _addNotification(
-      NotificationItem(
-        id: 'a${ServerClock.now().millisecondsSinceEpoch}',
-        title: title,
-        subtitle: message,
-        time: ServerClock.now(),
-        type: NotificationType.system,
-      ),
+    _requireServer();
+    await BackendRepository.sendAnnouncement(
+      title,
+      message,
+      audience: audience,
+      requestId: requestId,
     );
+    await syncRemoteState();
+    return;
   }
 
   static Future<void> toggleTouristStatus(
@@ -1679,26 +1399,14 @@ class AppSession {
       reason.trim().length >= 5,
       MessageCode.enterAReasonOfAtLeastFiveCharacters,
     );
-    if (BackendConfig.isConfigured) {
-      final current = adminTourists.value
-          .where((u) => u['id'] == id)
-          .firstOrNull;
-      if (current != null) {
-        final status = current['status'] == 'active' ? 'suspended' : 'active';
-        await BackendRepository.setTouristStatus(id, status, reason: reason);
-        await syncRemoteState();
-      }
-      return;
+    _requireServer();
+    final current = adminTourists.value.where((u) => u['id'] == id).firstOrNull;
+    if (current != null) {
+      final status = current['status'] == 'active' ? 'suspended' : 'active';
+      await BackendRepository.setTouristStatus(id, status, reason: reason);
+      await syncRemoteState();
     }
-    adminTourists.value = adminTourists.value.map((u) {
-      if (u['id'] == id) {
-        return {
-          ...u,
-          'status': u['status'] == 'active' ? 'suspended' : 'active',
-        };
-      }
-      return u;
-    }).toList();
+    return;
   }
 
   static Future<void> deleteSpot(String spotId) async {
@@ -1712,10 +1420,8 @@ class AppSession {
       ),
       MessageCode.thisAttractionIsInAnActiveBookingHideItForNewTripsInstead,
     );
-    if (BackendConfig.isConfigured) {
-      await BackendRepository.deleteSpot(spotId);
-      return;
-    }
-    allSpots.value = allSpots.value.where((s) => s.id != spotId).toList();
+    _requireServer();
+    await BackendRepository.deleteSpot(spotId);
+    return;
   }
 }

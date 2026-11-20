@@ -98,6 +98,12 @@ abstract class AppLocalizations {
     Locale('fil'),
   ];
 
+  /// No description provided for @serverConnectionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This action needs a connection to the server. Check your internet and sign in again.'**
+  String get serverConnectionRequired;
+
   /// No description provided for @adminGcashDisputesOpen.
   ///
   /// In en, this message translates to:

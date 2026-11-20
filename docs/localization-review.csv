@@ -1123,6 +1123,7 @@ Pananatilihin ng mga kasalukuyang reserbasyon ang orihinal na patakaran.","Needs
 "sendRefundToPaymongo","Send refund to PayMongo?","Ipadala ang refund sa PayMongo?","Needs native-speaker review"
 "sendResetLink","Send reset link","Ipadala ang Reset Link","Needs native-speaker review"
 "sep","Sep","Set","Needs native-speaker review"
+"serverConnectionRequired","This action needs a connection to the server. Check your internet and sign in again.","Kailangan ng koneksyon sa server para rito. Suriin ang internet at mag-sign in muli.","Needs native-speaker review"
 "serverSetupIsIncomplete","Server setup is incomplete.","Hindi pa kumpleto ang pagkakakonekta sa server.","Needs native-speaker review"
 "serverSetupIsIncompleteAddTheSupabaseBuildConfigurationBeforeSigningIn","Server setup is incomplete. Add the Supabase build configuration before signing in.","Hindi kumpleto ang pag-setup ng server. Idagdag ang configuration ng Supabase bago mag-sign in.","Needs native-speaker review"
 "serverSetupIsIncompleteFeedbackWasNotSent","Server setup is incomplete. Feedback was not sent.","Hindi kumpleto ang pag-setup ng server. Hindi naipadala ang feedback.","Needs native-speaker review"

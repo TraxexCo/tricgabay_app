@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tricgabay_app/core/session/app_session.dart';
-import 'package:tricgabay_app/core/services/trip_rules.dart';
 import 'package:tricgabay_app/features/admin/screens/fare_settings_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/booking_detail_screen.dart';
 import 'package:tricgabay_app/models/trip_record.dart';
+import 'package:tricgabay_app/models/booking_model.dart';
 import 'trip_rules_test.dart' show accepted;
 
 void main() {
@@ -63,10 +63,12 @@ void main() {
   testWidgets(
     'admin review displays payment hold and reachable decision control on a small screen',
     (tester) async {
-      final b = TripRules.cancel(
-        TripRules.start(accepted(), '1234'),
-        TripActor.driver,
-        'Vehicle breakdown',
+      // A trip the driver ended after pickup: the server holds payment for
+      // an admin review.
+      final started = accepted();
+      final b = started.copyWith(
+        status: BookingStatus.cancelled,
+        trip: started.trip.copyWith(reviewRequired: true),
       );
       AppSession.bookings.value = [b];
       await showSmall(

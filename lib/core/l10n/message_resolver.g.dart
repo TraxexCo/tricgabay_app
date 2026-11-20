@@ -1110,6 +1110,7 @@ return switch(key){
 'sendRefundToPaymongo'=>l.sendRefundToPaymongo,
 'sendResetLink'=>l.sendResetLink,
 'sep'=>l.sep,
+'serverConnectionRequired'=>l.serverConnectionRequired,
 'serverSetupIsIncomplete'=>l.serverSetupIsIncomplete,
 'serverSetupIsIncompleteAddTheSupabaseBuildConfigurationBeforeSigningIn'=>l.serverSetupIsIncompleteAddTheSupabaseBuildConfigurationBeforeSigningIn,
 'serverSetupIsIncompleteFeedbackWasNotSent'=>l.serverSetupIsIncompleteFeedbackWasNotSent,

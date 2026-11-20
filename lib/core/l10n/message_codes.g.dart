@@ -1106,6 +1106,7 @@ static const sendRefundRequestToPaymongo='@l10n/sendRefundRequestToPaymongo';
 static const sendRefundToPaymongo='@l10n/sendRefundToPaymongo';
 static const sendResetLink='@l10n/sendResetLink';
 static const sep='@l10n/sep';
+static const serverConnectionRequired='@l10n/serverConnectionRequired';
 static const serverSetupIsIncomplete='@l10n/serverSetupIsIncomplete';
 static const serverSetupIsIncompleteAddTheSupabaseBuildConfigurationBeforeSigningIn='@l10n/serverSetupIsIncompleteAddTheSupabaseBuildConfigurationBeforeSigningIn';
 static const serverSetupIsIncompleteFeedbackWasNotSent='@l10n/serverSetupIsIncompleteFeedbackWasNotSent';

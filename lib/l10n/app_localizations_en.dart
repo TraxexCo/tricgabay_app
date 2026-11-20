@@ -9,6 +9,10 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get serverConnectionRequired =>
+      'This action needs a connection to the server. Check your internet and sign in again.';
+
+  @override
   String adminGcashDisputesOpen(int count) {
     return '$count disputed GCash fares';
   }

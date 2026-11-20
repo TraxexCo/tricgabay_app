@@ -1,4 +1,5 @@
 {
+  "serverConnectionRequired": "Kailangan ng koneksyon sa server para rito. Suriin ang internet at mag-sign in muli.",
   "adminGcashDisputesOpen": "{count} pinagtatalunang pamasahe sa GCash",
   "@adminGcashDisputesOpen": {"placeholders": {"count": {"type": "int"}}},
   "outstandingFareBlocked": "May hindi pa nababayarang pamasahe ka mula sa naunang biyahe. Bayaran muna ang drayber o kausapin ang suporta bago muling magpareserba.",

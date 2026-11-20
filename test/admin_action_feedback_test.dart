@@ -20,7 +20,22 @@ void main() {
       },
     ];
 
-    await tester.pumpWidget(const MaterialApp(home: ManageTouristsScreen()));
+    // Stand-in for the server: flip the status the way the RPC + refresh would.
+    Future<void> toggle(String id, {required String reason}) async {
+      AppSession.adminTourists.value = [
+        for (final u in AppSession.adminTourists.value)
+          u['id'] == id
+              ? {
+                  ...u,
+                  'status': u['status'] == 'active' ? 'suspended' : 'active',
+                }
+              : u,
+      ];
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(home: ManageTouristsScreen(onToggleStatus: toggle)),
+    );
 
     expect(
       find.bySemanticsLabel(RegExp('Suspend Maria Clara')),

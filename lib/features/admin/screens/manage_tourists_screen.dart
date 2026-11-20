@@ -8,7 +8,12 @@ import '../../../core/widgets/shared_widgets.dart';
 import '../../../core/session/app_session.dart';
 
 class ManageTouristsScreen extends StatefulWidget {
-  const ManageTouristsScreen({super.key});
+  const ManageTouristsScreen({super.key, this.onToggleStatus});
+
+  /// Suspends or reactivates a tourist. Defaults to the server action;
+  /// tests pass their own.
+  final Future<void> Function(String id, {required String reason})?
+  onToggleStatus;
 
   @override
   State<ManageTouristsScreen> createState() => _ManageTouristsScreenState();
@@ -60,7 +65,10 @@ class _ManageTouristsScreenState extends State<ManageTouristsScreen> {
     if (reason == null || !mounted) return;
     setState(() => _pending.add(id));
     try {
-      await AppSession.toggleTouristStatus(id, reason: reason);
+      await (widget.onToggleStatus ?? AppSession.toggleTouristStatus)(
+        id,
+        reason: reason,
+      );
       if (!mounted) return;
       final activated = tourist['status'] != 'active';
       ScaffoldMessenger.of(context).showSnackBar(

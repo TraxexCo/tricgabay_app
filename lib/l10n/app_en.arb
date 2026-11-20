@@ -1,4 +1,5 @@
 {
+  "serverConnectionRequired": "This action needs a connection to the server. Check your internet and sign in again.",
   "adminGcashDisputesOpen": "{count} disputed GCash fares",
   "@adminGcashDisputesOpen": {"placeholders": {"count": {"type": "int"}}},
   "outstandingFareBlocked": "You have an unpaid fare from an earlier trip. Pay your driver, or ask support, before booking again.",

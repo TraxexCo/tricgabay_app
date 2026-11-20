@@ -9,6 +9,10 @@ class AppLocalizationsFil extends AppLocalizations {
   AppLocalizationsFil([String locale = 'fil']) : super(locale);
 
   @override
+  String get serverConnectionRequired =>
+      'Kailangan ng koneksyon sa server para rito. Suriin ang internet at mag-sign in muli.';
+
+  @override
   String adminGcashDisputesOpen(int count) {
     return '$count pinagtatalunang pamasahe sa GCash';
   }
