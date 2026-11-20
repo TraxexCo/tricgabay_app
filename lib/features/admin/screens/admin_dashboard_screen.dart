@@ -335,6 +335,25 @@ class AdminDashboardScreen extends StatelessWidget {
                           AppColors.secondary,
                         ),
                       ],
+                      if (PrototypeSession.hasAdminCapability('finance') ||
+                          PrototypeSession.hasAdminCapability('operations'))
+                        _action(
+                          context,
+                          Icons.gavel_rounded,
+                          MessageCode.adminGcashDisputes,
+                          MessageCode.adminGcashDisputesOpen(
+                            bookings
+                                .where(
+                                  (b) =>
+                                      b.paymentMethod ==
+                                          PaymentMethod.gcashDirect &&
+                                      b.paymentStatus == PaymentStatus.disputed,
+                                )
+                                .length,
+                          ),
+                          '/admin/gcash-disputes',
+                          AppColors.danger,
+                        ),
                       if (PrototypeSession.hasAdminCapability('operations'))
                         _action(
                           context,

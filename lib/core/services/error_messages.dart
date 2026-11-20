@@ -13,11 +13,6 @@ class ErrorMessages {
       return switch (error.failure) {
         ClientFailure.routeUnavailable =>
           MessageCode.roadRouteUnavailableCheckYourConnectionAndTryAgain,
-        ClientFailure.checkoutLaunch =>
-          MessageCode.couldNotOpenCheckoutResumePaymentFromThisBooking,
-        ClientFailure.checkoutUntrusted =>
-          MessageCode
-              .theCheckoutAddressCouldNotBeVerifiedRefreshThisBookingBeforePaying,
         ClientFailure.pendingBooking =>
           MessageCode
               .aPreviousBookingRequestIsAwaitingConfirmationReconnectAndOpenTripsBeforeChanging,
@@ -39,6 +34,18 @@ class ErrorMessages {
           .accountAccessCouldNotBeCompletedCheckYourDetailsAndTryAgain;
     }
     if (error is PostgrestException) {
+      if (error.message.contains('OUTSTANDING_FARE')) {
+        return MessageCode.outstandingFareBlocked;
+      }
+      if (error.message.contains('GCASH_REFERENCE_USED')) {
+        return MessageCode.gcashReferenceUsed;
+      }
+      if (error.message.contains('GCASH_PROOF_REQUIRED')) {
+        return MessageCode.gcashProofRequired;
+      }
+      if (error.message.contains('ONLINE_PAYMENT_UNAVAILABLE')) {
+        return MessageCode.onlinePaymentUnavailable;
+      }
       if (error.code == '42501') {
         return MessageCode
             .yourAccountCannotPerformThisActionRefreshYourAccountOrContactSupport;
@@ -65,12 +72,7 @@ class ErrorMessages {
   }
 }
 
-enum ClientFailure {
-  routeUnavailable,
-  checkoutLaunch,
-  checkoutUntrusted,
-  pendingBooking,
-}
+enum ClientFailure { routeUnavailable, pendingBooking }
 
 class ClientOperationException implements Exception {
   final ClientFailure failure;

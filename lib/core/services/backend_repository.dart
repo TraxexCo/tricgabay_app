@@ -1074,50 +1074,6 @@ class BackendRepository {
     _ => PaymentStatus.unknown,
   };
 
-  static Future<String> processPayMongoRefund({
-    required String bookingId,
-    required int amountCents,
-    required String reason,
-  }) async {
-    final response = await _client.functions.invoke(
-      'process-paymongo-refund',
-      body: {
-        'booking_id': bookingId,
-        'amount_centavos': amountCents,
-        'reason': reason,
-      },
-    );
-    if (response.status < 200 || response.status >= 300) {
-      final data = response.data is Map ? response.data as Map : null;
-      final detail = data?['error'] ?? response.data;
-      final note = data?['note'];
-      throw StateError(
-        [detail, note]
-            .where((part) => part != null && part.toString().trim().isNotEmpty)
-            .join('\n'),
-      );
-    }
-    final data = Map<String, dynamic>.from(response.data as Map);
-    return data['message']?.toString() ?? MessageCode.refundDecisionRecorded;
-  }
-
-  static Future<String> reconcilePayMongoPayment(String bookingId) async {
-    final response = await _client.functions.invoke(
-      'reconcile-paymongo-payment',
-      body: {'booking_id': bookingId},
-    );
-    if (response.status < 200 || response.status >= 300) {
-      final detail = response.data is Map
-          ? (response.data as Map)['error']
-          : response.data;
-      throw StateError(
-        detail?.toString() ?? MessageCode.paymentStatusCouldNotBeRefreshed,
-      );
-    }
-    final data = Map<String, dynamic>.from(response.data as Map);
-    return data['message']?.toString() ?? MessageCode.paymentStatusRefreshed;
-  }
-
   static Future<List<Map<String, dynamic>>> loadFinancialLedger(
     String bookingId,
   ) async {
@@ -1309,7 +1265,7 @@ class BackendRepository {
   static Future<Map<String, dynamic>?> driverGcashDetails(String driverId) =>
       _client
           .from('driver_gcash_details')
-          .select('gcash_account_name,gcash_number,is_active')
+          .select('gcash_account_name,gcash_number,is_active,qr_object_path')
           .eq('driver_id', driverId)
           .maybeSingle();
 
@@ -1327,11 +1283,6 @@ class BackendRepository {
       'is_active': active,
     });
   }
-
-  static Future<Map<String, dynamic>?> bookingDriverGcash(String bookingId) =>
-      _client
-          .rpc('get_booking_driver_gcash', params: {'p_booking_id': bookingId})
-          .maybeSingle();
 
   static Future<String?> bookingGcashReference(String bookingId) async =>
       await _client.rpc(
@@ -1378,39 +1329,6 @@ class BackendRepository {
     for (final key in removals) {
       await _secureStorage.delete(key: key);
     }
-  }
-
-  static Future<String> completePayMongoTestRefund({
-    required String bookingId,
-    required int amountCents,
-    required String reason,
-  }) async {
-    final result = Map<String, dynamic>.from(
-      await _client.rpc(
-        'complete_paymongo_test_refund',
-        params: {
-          'p_booking_id': bookingId,
-          'p_amount_centavos': amountCents,
-          'p_reason': reason,
-        },
-      ),
-    );
-    return result['status'] == 'succeeded'
-        ? MessageCode.refundCompletedInPaymongoTestMode
-        : MessageCode.refundUpdateRecorded;
-  }
-
-  static Future<String> createCheckout(String bookingId) async {
-    final response = await _client.functions.invoke(
-      'create-paymongo-checkout',
-      body: {'booking_id': bookingId},
-    );
-    if (response.status < 200 || response.status >= 300) {
-      throw StateError(
-        response.data?['error'] ?? MessageCode.checkoutCouldNotBeCreated,
-      );
-    }
-    return response.data['checkout_url'] as String;
   }
 
   static final _locationUploadGate = LocationUploadGate();

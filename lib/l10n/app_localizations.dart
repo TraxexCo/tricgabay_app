@@ -98,6 +98,276 @@ abstract class AppLocalizations {
     Locale('fil'),
   ];
 
+  /// No description provided for @adminGcashDisputesOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} disputed GCash fares'**
+  String adminGcashDisputesOpen(int count);
+
+  /// No description provided for @outstandingFareBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'You have an unpaid fare from an earlier trip. Pay your driver, or ask support, before booking again.'**
+  String get outstandingFareBlocked;
+
+  /// No description provided for @outstandingFareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid fare'**
+  String get outstandingFareTitle;
+
+  /// No description provided for @outstandingFareAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open unpaid trip'**
+  String get outstandingFareAction;
+
+  /// No description provided for @gcashReferenceUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'This GCash reference number was already used for another trip.'**
+  String get gcashReferenceUsed;
+
+  /// No description provided for @gcashProofRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your driver reported the payment as not received. Send your receipt and reference number instead.'**
+  String get gcashProofRequired;
+
+  /// No description provided for @onlinePaymentUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Online card payment is no longer available. Choose cash or GCash.'**
+  String get onlinePaymentUnavailable;
+
+  /// No description provided for @gcashQrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver\'s GCash QR'**
+  String get gcashQrTitle;
+
+  /// No description provided for @gcashSaveQr.
+  ///
+  /// In en, this message translates to:
+  /// **'Share or save QR'**
+  String get gcashSaveQr;
+
+  /// No description provided for @gcashQrHint.
+  ///
+  /// In en, this message translates to:
+  /// **'In GCash, tap Scan QR, then Upload QR, and choose this image. You can also scan the QR on the tricycle.'**
+  String get gcashQrHint;
+
+  /// No description provided for @gcashQrMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'This driver hasn\'t uploaded a QR code. Use the number below.'**
+  String get gcashQrMissing;
+
+  /// No description provided for @gcashUploadQr.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload GCash QR'**
+  String get gcashUploadQr;
+
+  /// No description provided for @gcashReplaceQr.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace QR'**
+  String get gcashReplaceQr;
+
+  /// No description provided for @gcashQrSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'QR code saved'**
+  String get gcashQrSaved;
+
+  /// No description provided for @gcashQrDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Tourists see your QR only when paying you for a completed trip.'**
+  String get gcashQrDescription;
+
+  /// No description provided for @gcashProofTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send payment proof'**
+  String get gcashProofTitle;
+
+  /// No description provided for @gcashProofBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your driver hasn\'t received the payment yet. Attach your GCash receipt screenshot and the reference number.'**
+  String get gcashProofBody;
+
+  /// No description provided for @gcashChooseReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose receipt screenshot'**
+  String get gcashChooseReceipt;
+
+  /// No description provided for @gcashReceiptChosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt selected'**
+  String get gcashReceiptChosen;
+
+  /// No description provided for @gcashReferenceRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'GCash reference number'**
+  String get gcashReferenceRequired;
+
+  /// No description provided for @gcashSubmitProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Send proof'**
+  String get gcashSubmitProof;
+
+  /// No description provided for @gcashProofSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Proof sent to your driver'**
+  String get gcashProofSent;
+
+  /// No description provided for @gcashViewReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'View receipt'**
+  String get gcashViewReceipt;
+
+  /// No description provided for @gcashAskAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask admin to decide'**
+  String get gcashAskAdmin;
+
+  /// No description provided for @gcashAskAdminBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this only if you can\'t settle it together. An admin will check the receipt and decide.'**
+  String get gcashAskAdminBody;
+
+  /// No description provided for @gcashAdminNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note for the admin (optional)'**
+  String get gcashAdminNote;
+
+  /// No description provided for @gcashSentToAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent to admin review'**
+  String get gcashSentToAdmin;
+
+  /// No description provided for @gcashEscalatedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'An admin is reviewing this payment. You can still settle it together.'**
+  String get gcashEscalatedNotice;
+
+  /// No description provided for @gcashRulingPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin decision: paid'**
+  String get gcashRulingPaid;
+
+  /// No description provided for @gcashRulingNotPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin decision: not paid'**
+  String get gcashRulingNotPaid;
+
+  /// No description provided for @gcashRulingWaived.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin decision: fare waived'**
+  String get gcashRulingWaived;
+
+  /// No description provided for @gcashReferenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'GCash reference'**
+  String get gcashReferenceLabel;
+
+  /// No description provided for @adminGcashDisputes.
+  ///
+  /// In en, this message translates to:
+  /// **'GCash disputes'**
+  String get adminGcashDisputes;
+
+  /// No description provided for @adminGcashDisputesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No open GCash disputes.'**
+  String get adminGcashDisputesEmpty;
+
+  /// No description provided for @adminDisputeEscalated.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a decision'**
+  String get adminDisputeEscalated;
+
+  /// No description provided for @adminDisputeWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for tourist and driver'**
+  String get adminDisputeWaiting;
+
+  /// No description provided for @adminDisputeUnsettled.
+  ///
+  /// In en, this message translates to:
+  /// **'Ruled not paid · unsettled'**
+  String get adminDisputeUnsettled;
+
+  /// No description provided for @adminRulePaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule paid'**
+  String get adminRulePaid;
+
+  /// No description provided for @adminRuleNotPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule not paid'**
+  String get adminRuleNotPaid;
+
+  /// No description provided for @adminWaiveFare.
+  ///
+  /// In en, this message translates to:
+  /// **'Waive fare'**
+  String get adminWaiveFare;
+
+  /// No description provided for @adminRulingReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for your decision'**
+  String get adminRulingReason;
+
+  /// No description provided for @adminNoReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'No receipt submitted yet.'**
+  String get adminNoReceipt;
+
+  /// No description provided for @adminDriverNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver\'s note'**
+  String get adminDriverNote;
+
+  /// No description provided for @adminEscalationNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalation note'**
+  String get adminEscalationNote;
+
+  /// No description provided for @adminDecisionSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision saved'**
+  String get adminDecisionSaved;
+
   /// No description provided for @gcashSendToDriver.
   ///
   /// In en, this message translates to:

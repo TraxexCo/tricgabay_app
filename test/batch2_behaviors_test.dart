@@ -5,7 +5,6 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tricgabay_app/core/services/booking_request_material.dart';
-import 'package:tricgabay_app/core/services/booking_payment_flow.dart';
 import 'package:tricgabay_app/core/services/error_messages.dart';
 import 'package:tricgabay_app/core/services/pickup_service_area.dart';
 import 'package:tricgabay_app/core/services/route_geometry.dart';
@@ -137,63 +136,6 @@ void main() {
       ),
       throwsStateError,
     );
-  });
-  test('checkout creation failure does not launch a browser', () async {
-    var launched = false;
-    await expectLater(
-      openBookingPayment(
-        bookingId: 'one',
-        createCheckout: (id) async => throw StateError('offline'),
-        launch: (uri) async {
-          launched = true;
-          return true;
-        },
-      ),
-      throwsStateError,
-    );
-    expect(launched, isFalse);
-  });
-  test(
-    'browser launch failure leaves the same booking available for retry',
-    () async {
-      final ids = <String>[];
-      Future<String> checkout(String id) async {
-        ids.add(id);
-        return 'https://checkout.paymongo.com/cs_test';
-      }
-
-      await expectLater(
-        openBookingPayment(
-          bookingId: 'one',
-          createCheckout: checkout,
-          launch: (uri) async => false,
-        ),
-        throwsA(isA<ClientOperationException>()),
-      );
-      await openBookingPayment(
-        bookingId: 'one',
-        createCheckout: checkout,
-        launch: (uri) async => true,
-      );
-      expect(ids, ['one', 'one']);
-    },
-  );
-  test('untrusted checkout origins never launch', () async {
-    for (final url in [
-      'http://checkout.paymongo.com/x',
-      'https://checkout.paymongo.com.attacker.test/x',
-      'https://person@checkout.paymongo.com/x',
-      'https://checkout.paymongo.com:444/x',
-    ]) {
-      await expectLater(
-        openBookingPayment(
-          bookingId: 'one',
-          createCheckout: (id) async => url,
-          launch: (uri) async => fail('untrusted launch'),
-        ),
-        throwsA(isA<ClientOperationException>()),
-      );
-    }
   });
   test(
     'pickup circle includes its centre and rejects distant/invalid pins',

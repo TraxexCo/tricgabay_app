@@ -9,6 +9,7 @@ import '../../../core/services/trip_rules.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../models/booking_model.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../payment/outstanding_fare_banner.dart';
 
 class FareSummaryScreen extends StatefulWidget {
   const FareSummaryScreen({super.key});
@@ -107,6 +108,7 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
         body: ListView(
           padding: const EdgeInsets.all(20),
           children: [
+            const OutstandingFareBanner(),
             Text(
               context.message(package?.name ?? MessageCode.customTour),
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -304,18 +306,6 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                   label: Text(context.l10n.gcashSendToDriver),
                   enabled: BackendConfig.isConfigured,
                 ),
-                ButtonSegment(
-                  value: PaymentMethod.online,
-                  icon: const Icon(Icons.account_balance_wallet_outlined),
-                  label: Text(
-                    context.message(
-                      BackendConfig.isConfigured
-                          ? MessageCode.paymongo
-                          : MessageCode.paymongoUnavailable,
-                    ),
-                  ),
-                  enabled: BackendConfig.isConfigured,
-                ),
               ],
               selected: {_paymentMethod},
               onSelectionChanged: _busy
@@ -327,9 +317,6 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
             Text(
               context.message(switch (_paymentMethod) {
                 PaymentMethod.gcashDirect => context.l10n.gcashAfterTrip,
-                PaymentMethod.online =>
-                  MessageCode
-                      .youWillBeSentToPaymongoTestCheckoutPaymentIsConfirmedOnlyAfter,
                 _ =>
                   MessageCode
                       .payTheFinalAmountAfterTheTripTouristAndDriverMustBothConfirm,
@@ -387,18 +374,10 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                         PrototypeSession.accessibilityNeeds =
                             _accessibilityNeeds.text.trim();
                         PrototypeSession.scheduledAt = _scheduledAt;
-                        final booking = await PrototypeSession.createBooking(
+                        await PrototypeSession.createBooking(
                           paymentMethod: _paymentMethod,
                           expectedFareRevision: revision,
                         );
-                        if (_paymentMethod == PaymentMethod.online) {
-                          if (context.mounted) {
-                            context.pushReplacement(
-                              '/tourist/bookings/${booking.id}',
-                            );
-                          }
-                          return;
-                        }
                         if (context.mounted) {
                           context.pushReplacement(
                             '/tourist/booking-confirmation',

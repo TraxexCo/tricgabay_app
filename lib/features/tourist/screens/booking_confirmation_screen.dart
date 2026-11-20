@@ -28,19 +28,6 @@ class BookingConfirmationScreen extends StatelessWidget {
       );
     }
 
-    if (booking.status == BookingStatus.paymentPending ||
-        (booking.paymentMethod == PaymentMethod.online &&
-            booking.paymentStatus != PaymentStatus.paid)) {
-      return Scaffold(
-        appBar: AppBar(title: Text(context.l10n.paymentPending)),
-        body: Center(
-          child: FilledButton(
-            onPressed: () => context.push('/tourist/bookings/${booking.id}'),
-            child: Text(context.l10n.resumePayment),
-          ),
-        ),
-      );
-    }
     return Scaffold(
       body: SafeArea(
         child: Padding(

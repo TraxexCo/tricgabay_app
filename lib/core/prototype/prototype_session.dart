@@ -1217,56 +1217,6 @@ class PrototypeSession {
     );
   }
 
-  static Future<String> processPayMongoRefund(
-    String id,
-    int amountCents,
-    String reason,
-  ) async {
-    TripRules.require(
-      BackendConfig.isConfigured &&
-          authenticatedRole == 'admin' &&
-          hasAdminCapability('finance'),
-      MessageCode.financeAdministratorAccessIsRequired,
-    );
-    final message = await BackendRepository.processPayMongoRefund(
-      bookingId: id,
-      amountCents: amountCents,
-      reason: reason,
-    );
-    await syncRemoteState();
-    return message;
-  }
-
-  static Future<String> reconcilePayMongoPayment(String id) async {
-    TripRules.require(
-      BackendConfig.isConfigured,
-      MessageCode.paymentVerificationRequiresTheConfiguredServer,
-    );
-    final result = await BackendRepository.reconcilePayMongoPayment(id);
-    await syncRemoteState();
-    return result;
-  }
-
-  static Future<String> completePayMongoTestRefund(
-    String id,
-    int amountCents,
-    String reason,
-  ) async {
-    TripRules.require(
-      BackendConfig.isConfigured &&
-          authenticatedRole == 'admin' &&
-          hasAdminCapability('finance'),
-      MessageCode.financeAdministratorAccessIsRequired,
-    );
-    final result = await BackendRepository.completePayMongoTestRefund(
-      bookingId: id,
-      amountCents: amountCents,
-      reason: reason,
-    );
-    await syncRemoteState();
-    return result;
-  }
-
   static Future<List<Map<String, dynamic>>> financialLedger(String id) {
     TripRules.require(
       BackendConfig.isConfigured,

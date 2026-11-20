@@ -71,6 +71,7 @@ import 'features/admin/screens/ratings_feedback_screen.dart';
 import 'features/admin/screens/send_announcement_screen.dart';
 import 'features/admin/screens/admin_reports_screen.dart';
 import 'features/admin/screens/admin_live_map_screen.dart';
+import 'features/admin/screens/gcash_disputes_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _touristNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'tourist');
@@ -139,6 +140,10 @@ final appRouter = GoRouter(
                   value.startsWith('/admin/data-requests') =>
             ['support'],
           final value when value.startsWith('/admin/booking') => [
+            'operations',
+            'finance',
+          ],
+          final value when value.startsWith('/admin/gcash-disputes') => [
             'operations',
             'finance',
           ],
@@ -495,6 +500,16 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/admin/live-map',
       builder: (context, state) => const AdminLiveMapScreen(),
+    ),
+    GoRoute(
+      path: '/admin/gcash-disputes',
+      builder: (context, state) => const GcashDisputesScreen(),
+    ),
+    GoRoute(
+      path: '/admin/gcash-disputes/:bookingId',
+      builder: (context, state) => GcashDisputeDetailScreen(
+        bookingId: state.pathParameters['bookingId']!,
+      ),
     ),
   ],
 );

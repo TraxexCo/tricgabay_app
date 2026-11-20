@@ -9,6 +9,154 @@ class AppLocalizationsFil extends AppLocalizations {
   AppLocalizationsFil([String locale = 'fil']) : super(locale);
 
   @override
+  String adminGcashDisputesOpen(int count) {
+    return '$count pinagtatalunang pamasahe sa GCash';
+  }
+
+  @override
+  String get outstandingFareBlocked =>
+      'May hindi pa nababayarang pamasahe ka mula sa naunang biyahe. Bayaran muna ang drayber o kausapin ang suporta bago muling magpareserba.';
+
+  @override
+  String get outstandingFareTitle => 'Hindi pa bayad na pamasahe';
+
+  @override
+  String get outstandingFareAction => 'Buksan ang biyaheng hindi pa bayad';
+
+  @override
+  String get gcashReferenceUsed =>
+      'Nagamit na ang GCash reference number na ito sa ibang biyahe.';
+
+  @override
+  String get gcashProofRequired =>
+      'Sinabi ng drayber na hindi pa niya natatanggap ang bayad. Ipadala na lang ang resibo at reference number.';
+
+  @override
+  String get onlinePaymentUnavailable =>
+      'Hindi na available ang online card payment. Pumili ng cash o GCash.';
+
+  @override
+  String get gcashQrTitle => 'GCash QR ng drayber';
+
+  @override
+  String get gcashSaveQr => 'I-share o i-save ang QR';
+
+  @override
+  String get gcashQrHint =>
+      'Sa GCash, pindutin ang Scan QR, tapos Upload QR, at piliin ang larawang ito. Puwede ring i-scan ang QR sa traysikel.';
+
+  @override
+  String get gcashQrMissing =>
+      'Wala pang QR code ang drayber na ito. Gamitin ang numero sa ibaba.';
+
+  @override
+  String get gcashUploadQr => 'I-upload ang GCash QR';
+
+  @override
+  String get gcashReplaceQr => 'Palitan ang QR';
+
+  @override
+  String get gcashQrSaved => 'Nai-save ang QR code';
+
+  @override
+  String get gcashQrDescription =>
+      'Makikita lang ng turista ang QR mo kapag binabayaran ka para sa natapos na biyahe.';
+
+  @override
+  String get gcashProofTitle => 'Magpadala ng patunay ng bayad';
+
+  @override
+  String get gcashProofBody =>
+      'Hindi pa natatanggap ng drayber ang bayad. Ilakip ang screenshot ng resibo sa GCash at ang reference number.';
+
+  @override
+  String get gcashChooseReceipt => 'Pumili ng screenshot ng resibo';
+
+  @override
+  String get gcashReceiptChosen => 'Napili na ang resibo';
+
+  @override
+  String get gcashReferenceRequired => 'GCash reference number';
+
+  @override
+  String get gcashSubmitProof => 'Ipadala ang patunay';
+
+  @override
+  String get gcashProofSent => 'Naipadala ang patunay sa drayber';
+
+  @override
+  String get gcashViewReceipt => 'Tingnan ang resibo';
+
+  @override
+  String get gcashAskAdmin => 'Ipaubaya sa admin';
+
+  @override
+  String get gcashAskAdminBody =>
+      'Gamitin lang ito kung hindi ninyo maaayos nang magkasama. Titingnan ng admin ang resibo at magpapasya.';
+
+  @override
+  String get gcashAdminNote => 'Tala para sa admin (opsyonal)';
+
+  @override
+  String get gcashSentToAdmin => 'Ipinadala sa admin para suriin';
+
+  @override
+  String get gcashEscalatedNotice =>
+      'Sinusuri ng admin ang bayad na ito. Puwede pa rin ninyong ayusin nang magkasama.';
+
+  @override
+  String get gcashRulingPaid => 'Pasya ng admin: bayad na';
+
+  @override
+  String get gcashRulingNotPaid => 'Pasya ng admin: hindi bayad';
+
+  @override
+  String get gcashRulingWaived => 'Pasya ng admin: hindi na sisingilin';
+
+  @override
+  String get gcashReferenceLabel => 'GCash reference';
+
+  @override
+  String get adminGcashDisputes => 'Mga pagtutol sa GCash';
+
+  @override
+  String get adminGcashDisputesEmpty => 'Walang bukas na pagtutol sa GCash.';
+
+  @override
+  String get adminDisputeEscalated => 'Kailangan ng pasya';
+
+  @override
+  String get adminDisputeWaiting => 'Hinihintay ang turista at drayber';
+
+  @override
+  String get adminDisputeUnsettled =>
+      'Hindi bayad ang pasya · hindi pa naaayos';
+
+  @override
+  String get adminRulePaid => 'Ipasyang bayad';
+
+  @override
+  String get adminRuleNotPaid => 'Ipasyang hindi bayad';
+
+  @override
+  String get adminWaiveFare => 'Huwag nang singilin';
+
+  @override
+  String get adminRulingReason => 'Dahilan ng iyong pasya';
+
+  @override
+  String get adminNoReceipt => 'Wala pang naipadalang resibo.';
+
+  @override
+  String get adminDriverNote => 'Tala ng drayber';
+
+  @override
+  String get adminEscalationNote => 'Tala sa pag-akyat sa admin';
+
+  @override
+  String get adminDecisionSaved => 'Nai-save ang pasya';
+
+  @override
   String get gcashSendToDriver => 'GCash (ipadala sa drayber)';
 
   @override

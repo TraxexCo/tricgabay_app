@@ -1,5 +1,35 @@
 [
   {
+    "file": "lib/core/services/gcash_repository.dart",
+    "value": "gcash-receipts",
+    "kind": "protocol",
+    "reason": "Private Supabase Storage bucket id for GCash receipt screenshots; never shown in the interface."
+  },
+  {
+    "file": "lib/core/services/gcash_repository.dart",
+    "value": "driver-gcash-qr",
+    "kind": "protocol",
+    "reason": "Private Supabase Storage bucket id for driver GCash QR images; never shown in the interface."
+  },
+  {
+    "file": "lib/features/payment/gcash_dispute_panel.dart",
+    "value": "gcash-proof-reference",
+    "kind": "protocol",
+    "reason": "Widget key used by tests to find the reference field; never shown in the interface."
+  },
+  {
+    "file": "lib/features/tourist/screens/gcash_trip_payment.dart",
+    "value": "gcash-qr.png",
+    "kind": "protocol",
+    "reason": "File name given to the shared QR image so GCash's Upload QR can open it."
+  },
+  {
+    "file": "lib/features/tourist/screens/gcash_trip_payment.dart",
+    "value": "gcash-qr.jpg",
+    "kind": "protocol",
+    "reason": "File name given to the shared QR image so GCash's Upload QR can open it."
+  },
+  {
     "file": "lib/core/constants/app_brand.dart",
     "value": "Tric Gabay",
     "kind": "brand",

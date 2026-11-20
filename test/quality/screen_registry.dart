@@ -54,6 +54,8 @@ import 'package:tricgabay_app/features/admin/screens/spot_form_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/send_announcement_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/ratings_feedback_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/operations_health_screen.dart';
+import 'package:tricgabay_app/features/admin/screens/gcash_disputes_screen.dart';
+import 'package:tricgabay_app/core/services/gcash_repository.dart';
 import 'package:tricgabay_app/features/admin/screens/monitor_bookings_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/manage_tourists_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/manage_spots_screen.dart';
@@ -229,6 +231,38 @@ final screenCases = <ScreenCase>[
     'EmergencyContactsAdminScreen',
     'admin',
     () => EmergencyContactsAdminScreen(loader: () => emergencyContactFixtures),
+  ),
+  ScreenCase(
+    'GcashDisputesScreen',
+    'admin',
+    () => GcashDisputesScreen(
+      loader: () async => [
+        GcashDispute(
+          bookingId: 'b1',
+          referenceLabel: 'TRIC-0F3A9C21B7D4E8F1',
+          touristName: 'Maria Clara Santos',
+          driverName: 'Alejandro dela Cruz',
+          fareCents: 25000,
+          disputedAt: DateTime(2026, 11, 19, 15),
+          escalatedAt: DateTime(2026, 11, 20, 15),
+          hasProof: true,
+          ruling: null,
+        ),
+      ],
+    ),
+  ),
+  ScreenCase(
+    'GcashDisputeDetailScreen',
+    'admin',
+    () => GcashDisputeDetailScreen(
+      bookingId: 'b1',
+      loader: (_) async => const GcashDisputeDetail(
+        fareCents: 25000,
+        referenceNo: '1009876543210',
+        disputeNote: 'Not in my GCash history yet',
+        escalationNote: 'I sent it right after the tour.',
+      ),
+    ),
   ),
   ScreenCase(
     'DriverDetailAdminScreen',

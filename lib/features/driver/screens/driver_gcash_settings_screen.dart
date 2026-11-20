@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../../core/l10n/app_l10n.dart';
 import '../../../core/services/backend_repository.dart';
+import '../../../core/services/error_messages.dart';
+import '../../../core/services/gcash_repository.dart';
 import '../../../core/utils/gcash_payment.dart';
+import '../../tourist/screens/gcash_trip_payment.dart'
+    show GcashQrView, pickGcashImage;
 
 class DriverGcashSettingsScreen extends StatefulWidget {
   const DriverGcashSettingsScreen({
@@ -27,6 +31,33 @@ class _DriverGcashSettingsState extends State<DriverGcashSettingsScreen> {
   bool _saving = false;
   bool _loading = true;
   bool _loadFailed = false;
+  bool _hasSavedDetails = false;
+  String? _qrPath;
+
+  Future<void> _uploadQr() async {
+    final bytes = await pickGcashImage();
+    if (bytes == null || !mounted) return;
+    setState(() => _saving = true);
+    try {
+      await GcashRepository.uploadDriverQr(bytes);
+      final path = await GcashRepository.driverQrPath();
+      if (!mounted) return;
+      setState(() => _qrPath = path);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.gcashQrSaved)));
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.message(ErrorMessages.forError(error))),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
 
   @override
   void initState() {
@@ -48,6 +79,8 @@ class _DriverGcashSettingsState extends State<DriverGcashSettingsScreen> {
       _number.text = details?['gcash_number'] as String? ?? '';
       _name.text = details?['gcash_account_name'] as String? ?? '';
       _active = details?['is_active'] == true;
+      _hasSavedDetails = details != null;
+      _qrPath = details?['qr_object_path'] as String?;
     } catch (_) {
       _loadFailed = true;
     } finally {
@@ -156,6 +189,27 @@ class _DriverGcashSettingsState extends State<DriverGcashSettingsScreen> {
                     onPressed: _saving ? null : _save,
                     child: Text(l10n.saveChanges),
                   ),
+                  // The QR needs saved details: the server attaches it to them.
+                  if (_hasSavedDetails) ...[
+                    const Divider(height: 40),
+                    Text(
+                      l10n.gcashQrTitle,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Text(l10n.gcashQrDescription),
+                    const SizedBox(height: 12),
+                    if (_qrPath != null)
+                      GcashQrView(key: ValueKey(_qrPath), path: _qrPath!),
+                    OutlinedButton.icon(
+                      onPressed: _saving ? null : _uploadQr,
+                      icon: const Icon(Icons.qr_code_2_rounded),
+                      label: Text(
+                        _qrPath == null
+                            ? l10n.gcashUploadQr
+                            : l10n.gcashReplaceQr,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

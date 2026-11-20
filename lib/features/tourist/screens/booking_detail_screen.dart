@@ -3,9 +3,7 @@ import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import '../../../core/services/server_clock.dart';
 import '../../../core/services/error_messages.dart';
 import 'dart:async';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../core/services/backend_repository.dart';
-import '../../../core/services/booking_payment_flow.dart';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -509,89 +507,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     }
   }
 
-  Future<void> _requestPayMongoRefund(BookingModel b) async {
-    final reason = await _input(
-      MessageCode.sendRefundToPaymongo,
-      MessageCode
-          .thisSendsTheExactAmountToPaymongoAndRecordsOnlyTheProviderResult,
-    );
-    if (reason == null || reason.trim().length < 5 || !mounted) return;
-    await _run(() async {
-      final message = await PrototypeSession.processPayMongoRefund(
-        b.id,
-        b.refundDueCents,
-        reason,
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(context.message(message))));
-      }
-      return;
-    });
-  }
-
-  Future<void> _completePayMongoTestRefund(BookingModel booking) async {
-    final reason = await _input(
-      MessageCode.completeTestModeRefund,
-      MessageCode
-          .thisCompletesTheRefundWorkflowForThePaymongoTestTransactionRecordsTheResult,
-    );
-    if (reason == null || reason.trim().length < 5 || !mounted) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        icon: const Icon(Icons.science_outlined),
-        title: Text(context.l10n.confirmRefund),
-        content: Text(
-          context.l10n.willBeCompletedInThePaymongoTestEnvironmentValue(
-            context.message((money(booking.refundDueCents)).toString()),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(context.l10n.goBack),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(context.l10n.completeRefund),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
-    await _run(() async {
-      final result = await PrototypeSession.completePayMongoTestRefund(
-        booking.id,
-        booking.refundDueCents,
-        reason,
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.message(result)),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-      return;
-    });
-  }
-
-  Future<void> _reconcilePayment(BookingModel booking) => _run(() async {
-    final result = await PrototypeSession.reconcilePayMongoPayment(booking.id);
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.message(result)),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-    return;
-  });
-
   Future<void> _showFinancialRecord(BookingModel booking) async {
     await _run(() async {
       final entries = await PrototypeSession.financialLedger(booking.id);
@@ -779,59 +694,16 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     ),
                     _row(MessageCode.priceVersion, 'v${t.fareRevision}'),
                     _row(MessageCode.payment, _paymentLabel(booking)),
-                    if (!admin &&
-                        !driver &&
-                        booking.status == BookingStatus.paymentPending) ...[
-                      Text(
-                        context
-                            .l10n
-                            .paymentIsPendingADriverWillOnlyBeRequestedAfterPaymentIsConfirmed,
-                      ),
-                      FilledButton(
+                    // Historical PayMongo bookings stay readable for finance.
+                    if (admin &&
+                        booking.paymentMethod == PaymentMethod.online) ...[
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
                         onPressed: _busy
                             ? null
-                            : () => _run(() async {
-                                await openBookingPayment(
-                                  bookingId: booking.id,
-                                  createCheckout:
-                                      BackendRepository.createCheckout,
-                                  launch: (uri) => launchUrl(
-                                    uri,
-                                    mode: LaunchMode.externalApplication,
-                                  ),
-                                );
-                              }),
-                        child: Text(context.l10n.resumePayment),
-                      ),
-                    ],
-                    if (booking.paymentMethod == PaymentMethod.online) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        context
-                            .l10n
-                            .paymongoTestModeStatusIsConfirmedByWebhookOrADirectProviderCheck,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          OutlinedButton.icon(
-                            onPressed: _busy
-                                ? null
-                                : () => _reconcilePayment(booking),
-                            icon: const Icon(Icons.sync_rounded),
-                            label: Text(context.l10n.refreshPaymentStatus),
-                          ),
-                          OutlinedButton.icon(
-                            onPressed: _busy
-                                ? null
-                                : () => _showFinancialRecord(booking),
-                            icon: const Icon(Icons.receipt_long_outlined),
-                            label: Text(context.l10n.financialRecord),
-                          ),
-                        ],
+                            : () => _showFinancialRecord(booking),
+                        icon: const Icon(Icons.receipt_long_outlined),
+                        label: Text(context.l10n.financialRecord),
                       ),
                     ],
                     if (t.reviewRequired)
@@ -1336,6 +1208,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 booking: booking,
                 driver: driver,
               ),
+            if (admin &&
+                booking.paymentMethod == PaymentMethod.gcashDirect &&
+                booking.paymentStatus == PaymentStatus.disputed)
+              _button(
+                MessageCode.adminGcashDisputes,
+                () async => context.push('/admin/gcash-disputes/${booking.id}'),
+              ),
             if (!admin &&
                 !booking.isActive &&
                 !t.reviewRequired &&
@@ -1376,27 +1255,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 }
               }, outlined: true),
             ],
-            if (admin &&
-                PrototypeSession.hasAdminCapability('finance') &&
-                !booking.isActive &&
-                !t.reviewRequired &&
-                booking.refundDueCents > 0 &&
-                booking.paymentMethod == PaymentMethod.online)
-              _button(
-                MessageCode.sendRefundRequestToPaymongo,
-                () => _requestPayMongoRefund(booking),
-              ),
-            if (admin &&
-                PrototypeSession.hasAdminCapability('finance') &&
-                !booking.isActive &&
-                !t.reviewRequired &&
-                booking.refundDueCents > 0 &&
-                booking.paymentMethod == PaymentMethod.online)
-              _button(
-                MessageCode.completeTestModeRefundLabel,
-                () => _completePayMongoTestRefund(booking),
-                outlined: true,
-              ),
             if (t.reviewRequired) ...[
               _button(MessageCode.addAStatementToThisCase, () async {
                 final text = await _input(

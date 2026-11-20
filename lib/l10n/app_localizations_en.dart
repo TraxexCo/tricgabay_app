@@ -9,6 +9,153 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String adminGcashDisputesOpen(int count) {
+    return '$count disputed GCash fares';
+  }
+
+  @override
+  String get outstandingFareBlocked =>
+      'You have an unpaid fare from an earlier trip. Pay your driver, or ask support, before booking again.';
+
+  @override
+  String get outstandingFareTitle => 'Unpaid fare';
+
+  @override
+  String get outstandingFareAction => 'Open unpaid trip';
+
+  @override
+  String get gcashReferenceUsed =>
+      'This GCash reference number was already used for another trip.';
+
+  @override
+  String get gcashProofRequired =>
+      'Your driver reported the payment as not received. Send your receipt and reference number instead.';
+
+  @override
+  String get onlinePaymentUnavailable =>
+      'Online card payment is no longer available. Choose cash or GCash.';
+
+  @override
+  String get gcashQrTitle => 'Driver\'s GCash QR';
+
+  @override
+  String get gcashSaveQr => 'Share or save QR';
+
+  @override
+  String get gcashQrHint =>
+      'In GCash, tap Scan QR, then Upload QR, and choose this image. You can also scan the QR on the tricycle.';
+
+  @override
+  String get gcashQrMissing =>
+      'This driver hasn\'t uploaded a QR code. Use the number below.';
+
+  @override
+  String get gcashUploadQr => 'Upload GCash QR';
+
+  @override
+  String get gcashReplaceQr => 'Replace QR';
+
+  @override
+  String get gcashQrSaved => 'QR code saved';
+
+  @override
+  String get gcashQrDescription =>
+      'Tourists see your QR only when paying you for a completed trip.';
+
+  @override
+  String get gcashProofTitle => 'Send payment proof';
+
+  @override
+  String get gcashProofBody =>
+      'Your driver hasn\'t received the payment yet. Attach your GCash receipt screenshot and the reference number.';
+
+  @override
+  String get gcashChooseReceipt => 'Choose receipt screenshot';
+
+  @override
+  String get gcashReceiptChosen => 'Receipt selected';
+
+  @override
+  String get gcashReferenceRequired => 'GCash reference number';
+
+  @override
+  String get gcashSubmitProof => 'Send proof';
+
+  @override
+  String get gcashProofSent => 'Proof sent to your driver';
+
+  @override
+  String get gcashViewReceipt => 'View receipt';
+
+  @override
+  String get gcashAskAdmin => 'Ask admin to decide';
+
+  @override
+  String get gcashAskAdminBody =>
+      'Use this only if you can\'t settle it together. An admin will check the receipt and decide.';
+
+  @override
+  String get gcashAdminNote => 'Note for the admin (optional)';
+
+  @override
+  String get gcashSentToAdmin => 'Sent to admin review';
+
+  @override
+  String get gcashEscalatedNotice =>
+      'An admin is reviewing this payment. You can still settle it together.';
+
+  @override
+  String get gcashRulingPaid => 'Admin decision: paid';
+
+  @override
+  String get gcashRulingNotPaid => 'Admin decision: not paid';
+
+  @override
+  String get gcashRulingWaived => 'Admin decision: fare waived';
+
+  @override
+  String get gcashReferenceLabel => 'GCash reference';
+
+  @override
+  String get adminGcashDisputes => 'GCash disputes';
+
+  @override
+  String get adminGcashDisputesEmpty => 'No open GCash disputes.';
+
+  @override
+  String get adminDisputeEscalated => 'Needs a decision';
+
+  @override
+  String get adminDisputeWaiting => 'Waiting for tourist and driver';
+
+  @override
+  String get adminDisputeUnsettled => 'Ruled not paid · unsettled';
+
+  @override
+  String get adminRulePaid => 'Rule paid';
+
+  @override
+  String get adminRuleNotPaid => 'Rule not paid';
+
+  @override
+  String get adminWaiveFare => 'Waive fare';
+
+  @override
+  String get adminRulingReason => 'Reason for your decision';
+
+  @override
+  String get adminNoReceipt => 'No receipt submitted yet.';
+
+  @override
+  String get adminDriverNote => 'Driver\'s note';
+
+  @override
+  String get adminEscalationNote => 'Escalation note';
+
+  @override
+  String get adminDecisionSaved => 'Decision saved';
+
+  @override
   String get gcashSendToDriver => 'GCash (send to driver)';
 
   @override
