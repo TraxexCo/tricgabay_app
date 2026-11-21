@@ -7,6 +7,7 @@ import '../../../core/services/backend_repository.dart';
 
 import 'package:flutter/material.dart';
 import '../../../core/motion/motion.dart';
+import '../../../core/constants/app_colors.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/services/trip_rules.dart';
@@ -147,15 +148,20 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           children: [
             Text(
               context.message(
-                booking.trip.packageName ?? MessageCode.customTour,
+                booking.trip.packageName ??
+                    AppSession.packageNameFor(booking.trip.packageId) ??
+                    MessageCode.customTour,
               ),
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
+            // A short reference is enough to quote to support; the full
+            // database id was a long unreadable string.
             Text(
-              context.message(booking.id),
+              context.message('#${booking.id.split('-').first.toUpperCase()}'),
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A2E),
+                color: AppColors.textPrimary,
+                letterSpacing: .5,
               ),
             ),
             const SizedBox(height: 16),
@@ -461,12 +467,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: Text(context.message(label))),
+        // A fixed two-column table: values used to jump between left and
+        // right alignment depending on whether they wrapped.
+        Expanded(flex: 2, child: Text(context.message(label))),
         const SizedBox(width: 12),
-        Flexible(
+        Expanded(
+          flex: 3,
           child: Text(
             context.message(value),
-            textAlign: TextAlign.end,
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
         ),

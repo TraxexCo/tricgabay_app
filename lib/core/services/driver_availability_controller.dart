@@ -171,7 +171,7 @@ class DriverAvailabilityController {
           .positionStream(settings: streamSettings)
           .listen(_handleSample, onError: (_) {});
       return const DriverAvailabilityResult.success();
-    } catch (_) {
+    } catch (error) {
       await _cancelStream();
       if (markedOnline) {
         try {
@@ -179,6 +179,14 @@ class DriverAvailabilityController {
         } catch (_) {
           // The UI refreshes authoritative state after reporting this failure.
         }
+      }
+      // The server refuses drivers whose documents are missing, expired or
+      // unverified; say so instead of a generic failure.
+      if (error.toString().contains('Cannot go online')) {
+        return const DriverAvailabilityResult.failure(
+          DriverAvailabilityFailure.serverRejected,
+          MessageCode.driverDocumentsBlockOnline,
+        );
       }
       return const DriverAvailabilityResult.failure(
         DriverAvailabilityFailure.serverRejected,

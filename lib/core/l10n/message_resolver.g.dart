@@ -419,6 +419,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'driverComplianceRecordsWillAppearHere' =>
       l.driverComplianceRecordsWillAppearHere,
     'driverConcern' => l.driverConcern,
+    'driverDocumentsBlockOnline' => l.driverDocumentsBlockOnline,
     'driverDocumentsMustBeJpegImages5MbMaximumEach' =>
       l.driverDocumentsMustBeJpegImages5MbMaximumEach,
     'driverHasArrived' => l.driverHasArrived,
@@ -711,6 +712,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'goodEvening' => l.goodEvening,
     'goodMorning' => l.goodMorning,
     'goodMorningValue' => l.goodMorningValue(text(0)),
+    'gpsAccuracyTooLow' => l.gpsAccuracyTooLow,
     'greatRideVeryKnowledgeableAboutBustos' =>
       l.greatRideVeryKnowledgeableAboutBustos,
     'headingTo' => l.headingTo,
@@ -870,6 +872,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'mon' => l.mon,
     'moveTheMapPinOrUseYourCurrentLocationBeforeSaving' =>
       l.moveTheMapPinOrUseYourCurrentLocationBeforeSaving,
+    'moveWithin150mOfPickup' => l.moveWithin150mOfPickup,
     'municipality' => l.municipality,
     'mustBeAtLeastCharactersValue' => l.mustBeAtLeastCharactersValue(
       text(0),
@@ -1533,6 +1536,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'threeLineSummary' => l.threeLineSummary(text(0), text(1), text(2)),
     'threePassengers' => l.threePassengers,
     'thu' => l.thu,
+    'tickTheAgreementToBook' => l.tickTheAgreementToBook,
     'tipsReminders' => l.tipsReminders,
     'title' => l.title,
     'today' => l.today,

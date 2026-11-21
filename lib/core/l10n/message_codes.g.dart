@@ -477,6 +477,7 @@ abstract final class MessageCode {
   static const driverComplianceRecordsWillAppearHere =
       '@l10n/driverComplianceRecordsWillAppearHere';
   static const driverConcern = '@l10n/driverConcern';
+  static const driverDocumentsBlockOnline = '@l10n/driverDocumentsBlockOnline';
   static const driverDocumentsMustBeJpegImages5MbMaximumEach =
       '@l10n/driverDocumentsMustBeJpegImages5MbMaximumEach';
   static const driverHasArrived = '@l10n/driverHasArrived';
@@ -797,6 +798,7 @@ abstract final class MessageCode {
   static const goodMorning = '@l10n/goodMorning';
   static String goodMorningValue(String value) =>
       encodeMessage('goodMorningValue', [value]);
+  static const gpsAccuracyTooLow = '@l10n/gpsAccuracyTooLow';
   static const greatRideVeryKnowledgeableAboutBustos =
       '@l10n/greatRideVeryKnowledgeableAboutBustos';
   static const headingTo = '@l10n/headingTo';
@@ -984,6 +986,7 @@ abstract final class MessageCode {
   static const mon = '@l10n/mon';
   static const moveTheMapPinOrUseYourCurrentLocationBeforeSaving =
       '@l10n/moveTheMapPinOrUseYourCurrentLocationBeforeSaving';
+  static const moveWithin150mOfPickup = '@l10n/moveWithin150mOfPickup';
   static const municipality = '@l10n/municipality';
   static String mustBeAtLeastCharactersValue(
     String value,
@@ -1722,6 +1725,7 @@ abstract final class MessageCode {
   ) => encodeMessage('threeLineSummary', [value, secondValue, thirdValue]);
   static const threePassengers = '@l10n/threePassengers';
   static const thu = '@l10n/thu';
+  static const tickTheAgreementToBook = '@l10n/tickTheAgreementToBook';
   static const tipsReminders = '@l10n/tipsReminders';
   static const title = '@l10n/title';
   static const today = '@l10n/today';

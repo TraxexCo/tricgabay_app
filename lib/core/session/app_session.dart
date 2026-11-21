@@ -82,6 +82,16 @@ class AppSession {
     BackendConfig.isConfigured ? const [] : TourPackageModel.catalog,
   );
 
+  /// The package's display name for a booking, or null for a custom tour.
+  /// Server booking rows carry only the package id.
+  static String? packageNameFor(String? packageId) {
+    if (packageId == null) return null;
+    for (final package in tourPackages.value) {
+      if (package.id == packageId) return package.name;
+    }
+    return null;
+  }
+
   static TourPackageModel? get activePackage {
     final id = activePackageId;
     if (id == null) return null;

@@ -39,6 +39,17 @@ class TourPackageDetailScreen extends StatelessWidget {
             SliverAppBar(
               expandedHeight: 250,
               pinned: true,
+              // A white disc keeps the back arrow visible over any photo.
+              leading: Padding(
+                padding: const EdgeInsets.all(8),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: .92),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const BackButton(color: AppColors.textPrimary),
+                ),
+              ),
               flexibleSpace: FlexibleSpaceBar(
                 background: Stack(
                   fit: StackFit.expand,
@@ -76,39 +87,38 @@ class TourPackageDetailScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        if (pkg.duration.isNotEmpty)
+                    Text(
+                      context.message(
+                        '₱${AppFormatters.integer(AppSession.packageFare(pkg))}',
+                      ),
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    if (pkg.duration.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
                           const Icon(
                             Icons.timer,
                             color: AppColors.textSecondary,
                             size: 16,
                           ),
-                        if (pkg.duration.isNotEmpty) const SizedBox(width: 4),
-                        if (pkg.duration.isNotEmpty)
-                          Flexible(
-                            child: Text(
-                              context.message(pkg.duration),
-                              style: GoogleFonts.poppins(
-                                color: AppColors.textSecondary,
+                          if (pkg.duration.isNotEmpty) const SizedBox(width: 4),
+                          if (pkg.duration.isNotEmpty)
+                            Flexible(
+                              child: Text(
+                                context.message(pkg.duration),
+                                style: GoogleFonts.poppins(
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                             ),
-                          ),
-                        const Spacer(),
-                        Flexible(
-                          child: Text(
-                            context.message(
-                              '₱${AppFormatters.integer(AppSession.packageFare(pkg))}',
-                            ),
-                            style: GoogleFonts.poppins(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     Container(
                       padding: const EdgeInsets.all(14),

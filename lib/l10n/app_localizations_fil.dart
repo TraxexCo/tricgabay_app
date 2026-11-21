@@ -3396,7 +3396,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get retrying => 'Sinusubukang muli…';
 
   @override
-  String get retryStorage => 'Subukan muli ang storage';
+  String get retryStorage => 'Subukan muli';
 
   @override
   String get retypePassword => 'I-type muli ang password';
@@ -4998,4 +4998,20 @@ class AppLocalizationsFil extends AppLocalizations {
   String privacyVersionLabel(String version) {
     return 'Bersiyon ng paunawa: $version';
   }
+
+  @override
+  String get tickTheAgreementToBook =>
+      'Lagyan ng tsek ang kasunduan sa itaas para makapagpareserba.';
+
+  @override
+  String get driverDocumentsBlockOnline =>
+      'May kulang, expired, o hindi pa beripikadong dokumento ng drayber. Tingnan ang iyong profile o makipag-ugnayan sa admin.';
+
+  @override
+  String get moveWithin150mOfPickup =>
+      'Lumapit sa loob ng 150 metro mula sa sunduan at subukan muli.';
+
+  @override
+  String get gpsAccuracyTooLow =>
+      'Mahina ang GPS signal. Lumipat sa bukas na lugar at subukan muli.';
 }

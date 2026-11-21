@@ -1732,7 +1732,7 @@
   "retry": "Retry",
   "retryConnection": "Retry connection",
   "retrying": "Retrying…",
-  "retryStorage": "Retry storage",
+  "retryStorage": "Try again",
   "retypePassword": "Retype password",
   "revenueOverTime": "Revenue over time",
   "review": "Review",
@@ -2593,5 +2593,9 @@
   "privacyRequiredHelp": "Accept the notice to continue. Diagnostics are your choice.",
   "privacyLoadingLabel": "Checking your privacy preferences",
   "privacyVersionLabel": "Notice version {version}",
-  "@privacyVersionLabel": {"placeholders": {"version": {"type": "String"}}}
+  "@privacyVersionLabel": {"placeholders": {"version": {"type": "String"}}},
+  "tickTheAgreementToBook": "Tick the agreement above the button to book.",
+  "driverDocumentsBlockOnline": "Your driver documents are missing, expired or not yet verified. Check your profile or contact the admin.",
+  "moveWithin150mOfPickup": "Move within 150 metres of the pickup point and try again.",
+  "gpsAccuracyTooLow": "Your GPS signal is too weak. Move to an open area and try again."
 }

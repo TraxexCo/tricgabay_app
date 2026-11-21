@@ -247,6 +247,7 @@ class BackendRepository {
     tourist_wait_confirmed_at,last_route_deviation_at,cancellation_reason,driver_arrived_at,
     pickup_wait_expires_at,confirmed_stop_count,arrival_pending,client_request_id,
     tourist:profiles!bookings_tourist_id_fkey(full_name),
+    package:tour_packages!bookings_package_id_fkey(name),
     driver:profiles!bookings_driver_id_fkey(full_name,driver_profiles!driver_profiles_profile_id_fkey(plate_number)),
     fare_revisions(revision),
     cancellation_policies(free_cancellation_minutes,accepted_trip_fee_percent,driver_wait_minutes,no_show_fee_percent),
@@ -491,6 +492,10 @@ class BackendRepository {
               trip: TripRecord(
                 fareRevision: fare?['revision'] as int? ?? 1,
                 packageId: row['package_id'],
+                // Without this every package booking showed as "Custom tour".
+                packageName:
+                    (row['package'] as Map<String, dynamic>?)?['name']
+                        as String?,
                 pickupCode: pickupCode ?? '',
                 pickupArrivedAt: _date(row['driver_arrived_at']),
                 pickupWaitExpiresAt: _date(row['pickup_wait_expires_at']),

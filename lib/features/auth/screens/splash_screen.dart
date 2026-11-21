@@ -81,7 +81,22 @@ class _SplashScreenState extends State<SplashScreen> {
         widget.restoreProfile ??
         (BackendConfig.isConfigured ? AuthService.restoreSession : null);
     try {
-      final profile = await load?.call();
+      // A saved sign-in is kept on the phone. If checking it fails on a
+      // weak connection, try again before falling back to the sign-in
+      // screen, so a brief signal drop doesn't look like being logged out.
+      SignedInProfile? profile;
+      for (var attempt = 0; ; attempt++) {
+        try {
+          profile = await load?.call();
+          break;
+        } catch (_) {
+          if (attempt >= 2 || !mounted) rethrow;
+          await Future<void>.delayed(
+            Duration(milliseconds: 1500 * (attempt + 1)),
+          );
+          if (!mounted) return;
+        }
+      }
       if (!mounted) return;
       if (profile != null &&
           (!BackendConfig.isConfigured ||

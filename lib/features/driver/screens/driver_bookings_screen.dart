@@ -157,6 +157,7 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
                 title: Text(
                   context.message(
                     b.trip.packageName ??
+                        AppSession.packageNameFor(b.trip.packageId) ??
                         MessageCode.stopCustomTourValue(
                           (b.stops.length).toString(),
                         ),

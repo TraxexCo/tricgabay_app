@@ -1732,7 +1732,7 @@
   "retry": "Subukan muli",
   "retryConnection": "Subukang kumonekta muli",
   "retrying": "Sinusubukang muli…",
-  "retryStorage": "Subukan muli ang storage",
+  "retryStorage": "Subukan muli",
   "retypePassword": "I-type muli ang password",
   "revenueOverTime": "Kita sa Paglipas ng Panahon",
   "review": "Suriin",
@@ -2593,5 +2593,9 @@
   "privacyRequiredHelp": "Tanggapin ang paunawa para magpatuloy. Ikaw ang pipili kung magpapadala ng mga ulat.",
   "privacyLoadingLabel": "Sinusuri ang iyong mga kagustuhan sa pagkapribado",
   "privacyVersionLabel": "Bersiyon ng paunawa: {version}",
-  "@privacyVersionLabel": {"placeholders": {"version": {"type": "String"}}}
+  "@privacyVersionLabel": {"placeholders": {"version": {"type": "String"}}},
+  "tickTheAgreementToBook": "Lagyan ng tsek ang kasunduan sa itaas para makapagpareserba.",
+  "driverDocumentsBlockOnline": "May kulang, expired, o hindi pa beripikadong dokumento ng drayber. Tingnan ang iyong profile o makipag-ugnayan sa admin.",
+  "moveWithin150mOfPickup": "Lumapit sa loob ng 150 metro mula sa sunduan at subukan muli.",
+  "gpsAccuracyTooLow": "Mahina ang GPS signal. Lumipat sa bukas na lugar at subukan muli."
 }

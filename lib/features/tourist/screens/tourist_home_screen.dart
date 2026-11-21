@@ -52,6 +52,36 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
   List<TouristSpotModel>? _pendingPins;
   bool _updatingPins = false;
 
+  static const _labelZoom = 15.0;
+  bool _showPinLabels = false;
+
+  void _onCameraChanged(CameraChangedEventData event) {
+    final show = event.cameraState.zoom >= _labelZoom;
+    if (show == _showPinLabels) return;
+    _showPinLabels = show;
+    unawaited(_recreatePins(_filteredSpots));
+  }
+
+  // How far the Explore sheet is pulled up (fraction of the space above
+  // the menu bar). Map buttons and the legend ride just above it.
+  final _sheetExtent = ValueNotifier<double>(_sheetInitialExtent);
+  static const _sheetInitialExtent = 0.36;
+
+  Widget _aboveSheet(Widget Function(double bottom) overlay) {
+    final inset = MediaQuery.paddingOf(context).bottom;
+    return ValueListenableBuilder<double>(
+      valueListenable: _sheetExtent,
+      builder: (context, extent, _) => LayoutBuilder(
+        builder: (context, constraints) {
+          // Out of the way while the sheet covers most of the map.
+          if (extent > 0.55) return const SizedBox.shrink();
+          final space = constraints.maxHeight - inset;
+          return Stack(children: [overlay(inset + space * extent + 16)]);
+        },
+      ),
+    );
+  }
+
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   @override
@@ -65,6 +95,7 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
 
   @override
   void dispose() {
+    _sheetExtent.dispose();
     AppSession.allSpots.removeListener(_catalogChanged);
     AppSession.focusedSpotId.removeListener(_onFocusedSpotChanged);
     _annotationManager?.deleteAll();
@@ -187,6 +218,7 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
                                 builder: (context) => MapWidget(
                                   styleUri: MapboxConfig.mapStyle,
                                   onMapCreated: _onMapCreated,
+                                  onCameraChangeListener: _onCameraChanged,
                                   viewport: CameraViewportState(
                                     center: Point(
                                       coordinates: Position(
@@ -203,13 +235,27 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
                     _topBar(),
 
                     // ── Left-side Map Legend ──────────────────────────────────────
-                    _mapLegend(),
+                    _aboveSheet(_mapLegend),
 
                     // ── Right-side map controls ───────────────────────────────────
-                    _mapControls(),
+                    _aboveSheet(_mapControls),
 
                     // ── Bottom draggable sheet ────────────────────────────────────
-                    _exploreSheet(),
+                    // The sheet ends at the top of the floating menu bar, so
+                    // its cards are never hidden behind it.
+                    Padding(
+                      padding: EdgeInsets.only(
+                        bottom: MediaQuery.paddingOf(context).bottom,
+                      ),
+                      child:
+                          NotificationListener<DraggableScrollableNotification>(
+                            onNotification: (n) {
+                              _sheetExtent.value = n.extent;
+                              return false;
+                            },
+                            child: _exploreSheet(),
+                          ),
+                    ),
                   ],
                 ),
               ),
@@ -416,7 +462,9 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
               ),
               iconSize: 1.0,
               iconAnchor: IconAnchor.BOTTOM,
-              textField: spot.name,
+              // Names only when zoomed in: at town level 29 labels pile
+              // into an unreadable cluster in the centre.
+              textField: _showPinLabels ? spot.name : null,
               textOffset: [0.0, 0.5],
               textColor: AppColors.textPrimary.toARGB32(),
               textHaloColor: Colors.white.toARGB32(),

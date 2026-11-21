@@ -3344,7 +3344,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retrying => 'Retrying…';
 
   @override
-  String get retryStorage => 'Retry storage';
+  String get retryStorage => 'Try again';
 
   @override
   String get retypePassword => 'Retype password';
@@ -4921,4 +4921,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String privacyVersionLabel(String version) {
     return 'Notice version $version';
   }
+
+  @override
+  String get tickTheAgreementToBook =>
+      'Tick the agreement above the button to book.';
+
+  @override
+  String get driverDocumentsBlockOnline =>
+      'Your driver documents are missing, expired or not yet verified. Check your profile or contact the admin.';
+
+  @override
+  String get moveWithin150mOfPickup =>
+      'Move within 150 metres of the pickup point and try again.';
+
+  @override
+  String get gpsAccuracyTooLow =>
+      'Your GPS signal is too weak. Move to an open area and try again.';
 }

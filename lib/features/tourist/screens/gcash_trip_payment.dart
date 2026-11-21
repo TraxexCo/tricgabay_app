@@ -243,11 +243,13 @@ class _GcashTripPaymentState extends State<GcashTripPayment> {
             enabled: !_busy,
             onConfirmAsync: () => _run('driver_confirm_gcash_received'),
           ),
-          if (!_disputed)
+          if (!_disputed) ...[
+            const SizedBox(height: 12),
             OutlinedButton(
               onPressed: _busy ? null : _dispute,
               child: Text(l10n.gcashNotReceived),
             ),
+          ],
         ],
       );
     }

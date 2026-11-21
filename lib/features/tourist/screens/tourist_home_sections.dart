@@ -143,9 +143,9 @@ extension _TouristHomeSections on _TouristHomeScreenState {
     ),
   );
 
-  Widget _mapLegend() => Positioned(
+  Widget _mapLegend(double bottom) => Positioned(
     left: 16,
-    bottom: 300,
+    bottom: bottom,
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
@@ -187,9 +187,9 @@ extension _TouristHomeSections on _TouristHomeScreenState {
     ),
   );
 
-  Widget _mapControls() => Positioned(
+  Widget _mapControls(double bottom) => Positioned(
     right: 16,
-    bottom: 300,
+    bottom: bottom,
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -224,7 +224,7 @@ extension _TouristHomeSections on _TouristHomeScreenState {
   );
 
   Widget _exploreSheet() => DraggableScrollableSheet(
-    initialChildSize: 0.36,
+    initialChildSize: _TouristHomeScreenState._sheetInitialExtent,
     minChildSize: 0.22,
     maxChildSize: 0.86,
     builder: (ctx, ctrl) => Container(

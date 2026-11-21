@@ -5886,7 +5886,7 @@ abstract class AppLocalizations {
   /// No description provided for @retryStorage.
   ///
   /// In en, this message translates to:
-  /// **'Retry storage'**
+  /// **'Try again'**
   String get retryStorage;
 
   /// No description provided for @retypePassword.
@@ -8532,6 +8532,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notice version {version}'**
   String privacyVersionLabel(String version);
+
+  /// No description provided for @tickTheAgreementToBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick the agreement above the button to book.'**
+  String get tickTheAgreementToBook;
+
+  /// No description provided for @driverDocumentsBlockOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Your driver documents are missing, expired or not yet verified. Check your profile or contact the admin.'**
+  String get driverDocumentsBlockOnline;
+
+  /// No description provided for @moveWithin150mOfPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Move within 150 metres of the pickup point and try again.'**
+  String get moveWithin150mOfPickup;
+
+  /// No description provided for @gpsAccuracyTooLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Your GPS signal is too weak. Move to an open area and try again.'**
+  String get gpsAccuracyTooLow;
 }
 
 class _AppLocalizationsDelegate

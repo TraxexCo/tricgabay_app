@@ -58,6 +58,19 @@ class ErrorMessages {
         return MessageCode
             .thePickupPinIsOutsideTheServiceAreaChooseAnotherPickupPoint;
       }
+      // Trip-step refusals: say what to do instead of a generic failure.
+      if (error.message.contains('within 150 meters of the pickup')) {
+        return MessageCode.moveWithin150mOfPickup;
+      }
+      if (error.message.contains('GPS accuracy is too low')) {
+        return MessageCode.gpsAccuracyTooLow;
+      }
+      if (error.message.contains('fresh driver location is required')) {
+        return MessageCode.theGpsPositionIsStaleOrInvalidWaitForAFreshSignalAnd;
+      }
+      if (error.message.contains('Cannot go online')) {
+        return MessageCode.driverDocumentsBlockOnline;
+      }
       if (error.message.contains('Wait before requesting')) {
         return MessageCode
             .pleaseWaitFiveMinutesBeforeRequestingAnotherPickupCode;

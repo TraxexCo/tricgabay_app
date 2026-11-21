@@ -181,6 +181,9 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
       if (!result.success || !mounted) {
         if (mounted && result.message != null) {
           setState(() => _locationMessage = result.message);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.message(result.message!))),
+          );
         }
         return;
       }
@@ -381,13 +384,30 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                                   ),
                                   clipBehavior: Clip.antiAlias,
                                   child: !isOnline
-                                      ? _locationPlaceholder(
-                                          icon: Icons.location_off_outlined,
-                                          title:
-                                              MessageCode.locationSharingIsOff,
-                                          subtitle: MessageCode
-                                              .goOnlineToActivateTheDriverMap,
-                                        )
+                                      ? _isChangingAvailability
+                                            // Getting a GPS fix can take
+                                            // several seconds; show it.
+                                            ? _locationPlaceholder(
+                                                icon: Icons.my_location_rounded,
+                                                title: MessageCode
+                                                    .findingYourLocation,
+                                                subtitle: MessageCode
+                                                    .checkingGpsAndPermission,
+                                                loading: true,
+                                              )
+                                            : _locationPlaceholder(
+                                                icon:
+                                                    Icons.location_off_outlined,
+                                                title: MessageCode
+                                                    .locationSharingIsOff,
+                                                subtitle:
+                                                    // Say why going online failed;
+                                                    // otherwise the switch just
+                                                    // seems to ignore the tap.
+                                                    _locationMessage ??
+                                                    MessageCode
+                                                        .goOnlineToActivateTheDriverMap,
+                                              )
                                       : lat == null
                                       ? InkWell(
                                           onTap: _isLocating

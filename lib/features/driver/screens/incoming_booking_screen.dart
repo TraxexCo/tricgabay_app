@@ -57,7 +57,10 @@ class IncomingBookingScreen extends ConsumerWidget {
 
         return Scaffold(
           backgroundColor: const Color(0xFF102A43),
+          // Fill the screen; sized to the card, the map stopped two-thirds
+          // of the way down on tall phones.
           body: Stack(
+            fit: StackFit.expand,
             children: [
               Positioned.fill(
                 child: kIsWeb
@@ -69,6 +72,10 @@ class IncomingBookingScreen extends ConsumerWidget {
                     : MapSurface(
                         builder: (context) => MapWidget(
                           styleUri: MapboxConfig.mapStyle,
+                          // The scale bar drew over the status bar.
+                          onMapCreated: (map) => map.scaleBar.updateSettings(
+                            ScaleBarSettings(enabled: false),
+                          ),
                           viewport: CameraViewportState(
                             center: Point(
                               coordinates: Position(
@@ -179,8 +186,13 @@ class IncomingBookingScreen extends ConsumerWidget {
                                       ),
                                       borderRadius: BorderRadius.circular(16),
                                     ),
+                                    // Was always "Cash"; the driver needs to
+                                    // know whether to expect cash or GCash.
                                     child: Text(
-                                      context.l10n.cash,
+                                      booking.paymentMethod ==
+                                              PaymentMethod.gcashDirect
+                                          ? context.l10n.gcashSendToDriver
+                                          : context.l10n.cash,
                                       style: GoogleFonts.poppins(
                                         color: AppColors.success,
                                         fontWeight: FontWeight.bold,
@@ -288,18 +300,21 @@ class IncomingBookingScreen extends ConsumerWidget {
                               child: AppButton(
                                 label: context.l10n.accept,
                                 onPressed: () async {
+                                  // Accepting updates the booking list, which
+                                  // rebuilds this screen without this button;
+                                  // keep the navigator from before the await.
+                                  final router = GoRouter.of(context);
+                                  final messenger = ScaffoldMessenger.of(
+                                    context,
+                                  );
                                   try {
                                     await AppSession.acceptBooking(booking.id);
-                                    if (context.mounted) {
-                                      context.pushReplacement(
-                                        '/driver/trip/${booking.id}',
-                                      );
-                                    }
+                                    router.pushReplacement(
+                                      '/driver/trip/${booking.id}',
+                                    );
                                   } catch (e) {
                                     if (context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
+                                      messenger.showSnackBar(
                                         SnackBar(
                                           content: Text(
                                             context.message(

@@ -432,7 +432,14 @@ class AdminDashboardScreen extends StatelessWidget {
                             .map(
                               (b) => _booking(
                                 context,
-                                b.id.toUpperCase(),
+                                // Tour name and a short reference instead of
+                                // the full database id.
+                                b.trip.packageName ??
+                                    AppSession.packageNameFor(
+                                      b.trip.packageId,
+                                    ) ??
+                                    MessageCode.customTour,
+                                '#${b.id.split('-').first.toUpperCase()} · ${b.touristName}',
                                 bookingStatusLabel(context, b.status),
                                 _getStatusColor(b.status),
                               ),
@@ -527,7 +534,13 @@ class AdminDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _booking(BuildContext context, String id, String state, Color color) {
+  Widget _booking(
+    BuildContext context,
+    String id,
+    String subtitle,
+    String state,
+    Color color,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
@@ -563,7 +576,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  context.l10n.tricycleBooking,
+                  context.message(subtitle),
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,

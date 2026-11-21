@@ -334,9 +334,12 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                 padding: const EdgeInsets.all(12),
                 child: Text(
                   context.message(TripRules.policyText),
+                  // Bold keeps it readable on the tinted box (the
+                  // accessibility contrast check failed at regular weight).
                   style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                    height: 1.4,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -359,51 +362,70 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
         bottomNavigationBar: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: FilledButton(
-              onPressed: _busy || !_agreed || spots.isEmpty
-                  ? null
-                  : () async {
-                      setState(() => _busy = true);
-                      try {
-                        AppSession.draft.passengerCount = _passengerCount;
-                        AppSession.draft.luggageNotes = _luggageNotes.text
-                            .trim();
-                        AppSession.draft.accessibilityNeeds =
-                            _accessibilityNeeds.text.trim();
-                        AppSession.draft.scheduledAt = _scheduledAt;
-                        await AppSession.createBooking(
-                          paymentMethod: _paymentMethod,
-                          expectedFareRevision: revision,
-                        );
-                        if (context.mounted) {
-                          context.pushReplacement(
-                            '/tourist/booking-confirmation',
-                          );
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          setState(() => _agreed = false);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                context.message(ErrorMessages.forError(e)),
-                              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // The agreement box is at the end of a long page; say why
+                // the button is disabled instead of leaving it grey.
+                if (!_agreed && !_busy) ...[
+                  Text(
+                    context.l10n.tickTheAgreementToBook,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                FilledButton(
+                  onPressed: _busy || !_agreed || spots.isEmpty
+                      ? null
+                      : () async {
+                          setState(() => _busy = true);
+                          try {
+                            AppSession.draft.passengerCount = _passengerCount;
+                            AppSession.draft.luggageNotes = _luggageNotes.text
+                                .trim();
+                            AppSession.draft.accessibilityNeeds =
+                                _accessibilityNeeds.text.trim();
+                            AppSession.draft.scheduledAt = _scheduledAt;
+                            await AppSession.createBooking(
+                              paymentMethod: _paymentMethod,
+                              expectedFareRevision: revision,
+                            );
+                            if (context.mounted) {
+                              context.pushReplacement(
+                                '/tourist/booking-confirmation',
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              setState(() => _agreed = false);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    context.message(ErrorMessages.forError(e)),
+                                  ),
+                                ),
+                              );
+                            }
+                          } finally {
+                            if (mounted) setState(() => _busy = false);
+                          }
+                        },
+                  child: Text(
+                    context.message(
+                      _busy
+                          ? MessageCode.savingBooking
+                          : MessageCode.bookForValue(
+                              (AppFormatters.amount(fare)).toString(),
                             ),
-                          );
-                        }
-                      } finally {
-                        if (mounted) setState(() => _busy = false);
-                      }
-                    },
-              child: Text(
-                context.message(
-                  _busy
-                      ? MessageCode.savingBooking
-                      : MessageCode.bookForValue(
-                          (AppFormatters.amount(fare)).toString(),
-                        ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
         ),
