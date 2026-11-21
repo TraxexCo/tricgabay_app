@@ -1,5 +1,6 @@
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/role_navigation_bar.dart';
 import '../../../core/session/app_session.dart';
@@ -63,34 +64,38 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) _handleBack();
       },
-      child: Scaffold(
-        body: widget.navigationShell,
-        extendBody: true,
-        bottomNavigationBar: RoleNavigationBar(
-          currentIndex: widget.navigationShell.currentIndex,
-          onSelected: _selectTab,
-          destinations: [
-            RoleNavigationDestination(
-              icon: Icons.space_dashboard_outlined,
-              selectedIcon: Icons.space_dashboard,
-              label: context.l10n.overview,
-            ),
-            RoleNavigationDestination(
-              icon: Icons.verified_user_outlined,
-              selectedIcon: Icons.verified_user,
-              label: context.l10n.drivers,
-            ),
-            RoleNavigationDestination(
-              icon: Icons.map_outlined,
-              selectedIcon: Icons.map,
-              label: context.l10n.places,
-            ),
-            RoleNavigationDestination(
-              icon: Icons.bar_chart_outlined,
-              selectedIcon: Icons.bar_chart,
-              label: context.l10n.reports,
-            ),
-          ],
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        // Home tabs have light tops; keep the status-bar icons dark.
+        value: SystemUiOverlayStyle.dark,
+        child: Scaffold(
+          body: widget.navigationShell,
+          extendBody: true,
+          bottomNavigationBar: RoleNavigationBar(
+            currentIndex: widget.navigationShell.currentIndex,
+            onSelected: _selectTab,
+            destinations: [
+              RoleNavigationDestination(
+                icon: Icons.space_dashboard_outlined,
+                selectedIcon: Icons.space_dashboard,
+                label: context.l10n.overview,
+              ),
+              RoleNavigationDestination(
+                icon: Icons.verified_user_outlined,
+                selectedIcon: Icons.verified_user,
+                label: context.l10n.drivers,
+              ),
+              RoleNavigationDestination(
+                icon: Icons.map_outlined,
+                selectedIcon: Icons.map,
+                label: context.l10n.places,
+              ),
+              RoleNavigationDestination(
+                icon: Icons.bar_chart_outlined,
+                selectedIcon: Icons.bar_chart,
+                label: context.l10n.reports,
+              ),
+            ],
+          ),
         ),
       ),
     );

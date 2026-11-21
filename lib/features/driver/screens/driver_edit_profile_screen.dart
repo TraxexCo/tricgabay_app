@@ -213,7 +213,6 @@ class _DriverEditProfileScreenState
                 decoration: InputDecoration(
                   labelText: context.l10n.safePassengerCapacity,
                   prefixIcon: Icon(Icons.groups_2_outlined),
-                  border: OutlineInputBorder(),
                 ),
                 items: [
                   DropdownMenuItem(

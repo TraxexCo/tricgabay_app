@@ -1,5 +1,6 @@
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/role_navigation_bar.dart';
 
@@ -47,34 +48,38 @@ class _TouristShellScreenState extends State<TouristShellScreen> {
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) _handleBack();
       },
-      child: Scaffold(
-        body: widget.navigationShell,
-        extendBody: true,
-        bottomNavigationBar: RoleNavigationBar(
-          currentIndex: widget.navigationShell.currentIndex,
-          onSelected: _selectTab,
-          destinations: [
-            RoleNavigationDestination(
-              icon: Icons.explore_outlined,
-              selectedIcon: Icons.explore,
-              label: context.l10n.explore,
-            ),
-            RoleNavigationDestination(
-              icon: Icons.search_outlined,
-              selectedIcon: Icons.search,
-              label: context.l10n.discover,
-            ),
-            RoleNavigationDestination(
-              icon: Icons.luggage_outlined,
-              selectedIcon: Icons.luggage,
-              label: context.l10n.trips,
-            ),
-            RoleNavigationDestination(
-              icon: Icons.person_outline,
-              selectedIcon: Icons.person,
-              label: context.l10n.account,
-            ),
-          ],
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        // Home tabs have light tops; keep the status-bar icons dark.
+        value: SystemUiOverlayStyle.dark,
+        child: Scaffold(
+          body: widget.navigationShell,
+          extendBody: true,
+          bottomNavigationBar: RoleNavigationBar(
+            currentIndex: widget.navigationShell.currentIndex,
+            onSelected: _selectTab,
+            destinations: [
+              RoleNavigationDestination(
+                icon: Icons.explore_outlined,
+                selectedIcon: Icons.explore,
+                label: context.l10n.explore,
+              ),
+              RoleNavigationDestination(
+                icon: Icons.search_outlined,
+                selectedIcon: Icons.search,
+                label: context.l10n.discover,
+              ),
+              RoleNavigationDestination(
+                icon: Icons.luggage_outlined,
+                selectedIcon: Icons.luggage,
+                label: context.l10n.trips,
+              ),
+              RoleNavigationDestination(
+                icon: Icons.person_outline,
+                selectedIcon: Icons.person,
+                label: context.l10n.account,
+              ),
+            ],
+          ),
         ),
       ),
     );

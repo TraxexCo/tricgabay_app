@@ -1,5 +1,6 @@
 import 'package:tricgabay_app/core/l10n/record_labels.dart';
 import 'package:flutter/material.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../core/services/error_messages.dart';
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
@@ -94,36 +95,68 @@ class _DataRequestsAdminScreenState extends State<DataRequestsAdminScreen> {
               ),
               for (final row in snapshot.data!)
                 Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(context.message(row['id'] as String)),
-                      const SizedBox(height: 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
                         children: [
-                          Text(
-                            exportStatusLabel(context, row['status'] as String),
+                          Icon(
+                            row['status'] == 'pending'
+                                ? Icons.hourglass_top_rounded
+                                : Icons.download_done_rounded,
+                            color: AppColors.primary,
                           ),
-                          Text(
-                            context.l10n.twoPartSummary(
-                              recordDateTime(row['requested_at'].toString()),
-                              row['notice_language'] == 'fil'
-                                  ? context.l10n.filipino
-                                  : context.l10n.english,
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  exportStatusLabel(
+                                    context,
+                                    row['status'] as String,
+                                  ),
+                                  style: Theme.of(context).textTheme.titleSmall,
+                                ),
+                                Text(
+                                  context.l10n.twoPartSummary(
+                                    recordDateTime(
+                                      row['requested_at'].toString(),
+                                    ),
+                                    row['notice_language'] == 'fil'
+                                        ? context.l10n.filipino
+                                        : context.l10n.english,
+                                  ),
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                                Text(
+                                  context.message(row['id'] as String),
+                                  style: Theme.of(context).textTheme.labelSmall
+                                      ?.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                // Below the text, not beside it, so large
+                                // font sizes never squeeze the details.
+                                if (row['status'] == 'pending')
+                                  Align(
+                                    alignment: AlignmentDirectional.centerEnd,
+                                    child: TextButton(
+                                      onPressed: _busy == null
+                                          ? () => _fulfil(row['id'] as String)
+                                          : null,
+                                      child: Text(context.l10n.prepareExport),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                      if (row['status'] == 'pending')
-                        TextButton(
-                          onPressed: _busy == null
-                              ? () => _fulfil(row['id'] as String)
-                              : null,
-                          child: Text(context.l10n.prepareExport),
-                        ),
-                    ],
+                    ),
                   ),
                 ),
               if (_hasMore)

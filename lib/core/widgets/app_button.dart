@@ -110,10 +110,7 @@ class AppButton extends StatelessWidget {
         child: child,
       ),
     ),
-    child: KeyedSubtree(
-      key: ValueKey(isLoading),
-      child: _contentFor(context),
-    ),
+    child: KeyedSubtree(key: ValueKey(isLoading), child: _contentFor(context)),
   );
 
   Widget _contentFor(BuildContext context) {

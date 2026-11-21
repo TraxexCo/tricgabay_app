@@ -318,7 +318,6 @@ class _RegisterDriverScreenState extends ConsumerState<RegisterDriverScreen> {
                     initialValue: _passengerCapacity,
                     decoration: InputDecoration(
                       labelText: context.l10n.safePassengerCapacity,
-                      border: OutlineInputBorder(),
                     ),
                     items: [
                       DropdownMenuItem(

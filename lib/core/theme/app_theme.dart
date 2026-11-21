@@ -1,3 +1,4 @@
+import 'filled_field_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:google_fonts/google_fonts.dart';
@@ -234,24 +235,35 @@ class AppTheme {
         color: AppColors.textSecondary,
       ),
       errorStyle: GoogleFonts.poppins(fontSize: 12, color: AppColors.danger),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      border: OutlineInputBorder(
+      contentPadding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      floatingLabelStyle: WidgetStateTextStyle.resolveWith(
+        (states) => GoogleFonts.poppins(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: states.contains(WidgetState.error)
+              ? AppColors.danger
+              : states.contains(WidgetState.focused)
+              ? AppColors.primary
+              : AppColors.textSecondary,
+        ),
+      ),
+      border: FilledFieldBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.border),
       ),
-      enabledBorder: OutlineInputBorder(
+      enabledBorder: FilledFieldBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.border),
       ),
-      focusedBorder: OutlineInputBorder(
+      focusedBorder: FilledFieldBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.primary, width: 2),
       ),
-      errorBorder: OutlineInputBorder(
+      errorBorder: FilledFieldBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.danger),
       ),
-      focusedErrorBorder: OutlineInputBorder(
+      focusedErrorBorder: FilledFieldBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.danger, width: 2),
       ),

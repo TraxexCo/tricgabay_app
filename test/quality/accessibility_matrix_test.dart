@@ -122,14 +122,24 @@ void main() {
                 FlutterError.onError = (details) =>
                     errors.add(details.toString());
                 await revealFixtureEnd(tester);
-                if (screen.name == 'RegisterTouristScreen') {
+                if (screen.name == 'RegisterTouristScreen' ||
+                    screen.name == 'FeedbackScreen' ||
+                    screen.name == 'SendAnnouncementScreen') {
                   // Keep the first visible field whole at the footer sample.
                   // Flutter can report a clipped editable/suffix as a small
                   // target even though the full control meets the guideline.
                   final viewport = tester.getRect(
                     find.byType(SingleChildScrollView).first,
                   );
-                  for (final field in find.byType(AppTextField).evaluate()) {
+                  for (final field
+                      in find
+                          .byWidgetPredicate(
+                            (w) =>
+                                w is AppTextField ||
+                                w is ChoiceChip ||
+                                w is DropdownButtonFormField,
+                          )
+                          .evaluate()) {
                     final finder = find.byElementPredicate((e) => e == field);
                     final rect = tester.getRect(finder);
                     if (rect.top < viewport.top && rect.bottom > viewport.top) {

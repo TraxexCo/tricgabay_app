@@ -148,26 +148,14 @@ class TouristSpotInfoScreen extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
-                        Icons.access_time,
-                        color: AppColors.textSecondary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
+                      // The badge already shows the hours with a clock icon.
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              context.message(spot.openingHours),
-                              style: GoogleFonts.poppins(
-                                color: AppColors.textSecondary,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            _buildOpenStatusBadge(context, spot.openingHours),
-                          ],
+                        child: Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: _buildOpenStatusBadge(
+                            context,
+                            spot.openingHours,
+                          ),
                         ),
                       ),
                       const Icon(
@@ -415,7 +403,10 @@ class TouristSpotInfoScreen extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.directions_rounded),
-                  label: Text(context.l10n.directions),
+                  label: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(context.l10n.directions, maxLines: 1),
+                  ),
                   onPressed: () async {
                     final uri = Uri.parse(
                       'geo:${spot.latitude},${spot.longitude}?q=${spot.latitude},${spot.longitude}(${Uri.encodeComponent(spot.name)})',

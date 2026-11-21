@@ -273,7 +273,6 @@ class _DriverDetailAdminScreenState
           decoration: InputDecoration(
             labelText: context.l10n.reason,
             hintText: context.l10n.explainTheDecisionClearly,
-            border: OutlineInputBorder(),
           ),
           onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
           scrollPadding: const EdgeInsets.all(96),

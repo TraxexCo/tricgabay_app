@@ -21,9 +21,8 @@ class BrandLogoHero extends StatelessWidget {
     // Keep the circle crisp while it scales between the two sizes.
     // Scale one fixed-size logo during the flight; resizing AppLogo itself
     // would re-decode the image every frame.
-    flightShuttleBuilder: (_, _, _, _, _) => const FittedBox(
-      child: AppLogo(size: launchSize, showShadow: true),
-    ),
+    flightShuttleBuilder: (_, _, _, _, _) =>
+        const FittedBox(child: AppLogo(size: launchSize, showShadow: true)),
     child: AppLogo(size: size, showShadow: showShadow),
   );
 }

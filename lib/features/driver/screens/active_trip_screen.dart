@@ -786,33 +786,25 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
                                 ],
                               ),
                               const SizedBox(height: 24),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: 1,
-                                    child: AppButton(
-                                      label: context.l10n.navigate,
-                                      onPressed: booking.interruptedAt == null
-                                          ? () => _openNavigation(booking)
-                                          : null,
-                                      type: AppButtonType.outline,
-                                      prefixIcon: Icons.navigation,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    flex: 2,
-                                    child: AppButton(
-                                      label: isAccepted
-                                          ? MessageCode.verifyPickup
-                                          : MessageCode.tripControls,
-                                      prefixIcon: Icons.fact_check_outlined,
-                                      onPressed: () => context.push(
-                                        '/driver/bookings/${booking.id}',
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                              // Stacked, full width: side by side, "Navigate"
+                              // broke mid-word on narrow phones.
+                              AppButton(
+                                label: isAccepted
+                                    ? MessageCode.verifyPickup
+                                    : MessageCode.tripControls,
+                                prefixIcon: Icons.fact_check_outlined,
+                                onPressed: () => context.push(
+                                  '/driver/bookings/${booking.id}',
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              AppButton(
+                                label: context.l10n.navigate,
+                                onPressed: booking.interruptedAt == null
+                                    ? () => _openNavigation(booking)
+                                    : null,
+                                type: AppButtonType.outline,
+                                prefixIcon: Icons.navigation,
                               ),
                             ],
                           ),

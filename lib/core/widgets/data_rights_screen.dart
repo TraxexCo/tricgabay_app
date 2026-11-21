@@ -107,14 +107,17 @@ class _DataRightsScreenState extends State<DataRightsScreen> {
               .l10n
               .requestACopyOfYourAccountAndTripDataSupportPreparesTheExport,
         ),
+        const SizedBox(height: 16),
         FilledButton(
           onPressed: _busy || !BackendConfig.isConfigured ? null : _request,
           child: Text(context.l10n.requestDataExport),
         ),
+        const SizedBox(height: 4),
         TextButton(
           onPressed: () => setState(() => _requests = _load()),
           child: Text(context.l10n.refresh),
         ),
+        const SizedBox(height: 8),
         FutureBuilder<List<Map<String, dynamic>>>(
           future: _requests,
           builder: (context, snapshot) {
@@ -133,24 +136,43 @@ class _DataRightsScreenState extends State<DataRightsScreen> {
               children: [
                 for (final request in snapshot.data!)
                   Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          exportStatusLabel(
-                            context,
-                            request['status'] as String,
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Card(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          ListTile(
+                            leading: Icon(
+                              request['status'] == 'fulfilled'
+                                  ? Icons.download_done_rounded
+                                  : Icons.hourglass_top_rounded,
+                            ),
+                            title: Text(
+                              exportStatusLabel(
+                                context,
+                                request['status'] as String,
+                              ),
+                            ),
+                            subtitle: Text(
+                              recordDateTime(request['requested_at'] as String),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(recordDateTime(request['requested_at'] as String)),
-                        if (request['status'] == 'fulfilled')
-                          TextButton(
-                            onPressed: () => _download(request['id'] as String),
-                            child: Text(context.l10n.downloadExport),
-                          ),
-                      ],
+                          // Below the details so large text never squeezes
+                          // the date into a sliver.
+                          if (request['status'] == 'fulfilled')
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                              child: Align(
+                                alignment: AlignmentDirectional.centerEnd,
+                                child: TextButton(
+                                  onPressed: () =>
+                                      _download(request['id'] as String),
+                                  child: Text(context.l10n.downloadExport),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
               ],

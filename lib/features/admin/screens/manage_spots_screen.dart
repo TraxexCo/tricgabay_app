@@ -88,7 +88,6 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
                   maxLines: 3,
                   decoration: InputDecoration(
                     labelText: context.l10n.closureReason,
-                    border: OutlineInputBorder(),
                   ),
                   onTapOutside: (_) =>
                       FocusManager.instance.primaryFocus?.unfocus(),

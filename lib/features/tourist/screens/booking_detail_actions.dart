@@ -30,7 +30,6 @@ extension _BookingDetailActions on _BookingDetailScreenState {
                   labelText: context.message(
                     code ? MessageCode.pickupCode : MessageCode.reasonDetails,
                   ),
-                  border: const OutlineInputBorder(),
                 ),
                 onTapOutside: (_) =>
                     FocusManager.instance.primaryFocus?.unfocus(),
@@ -230,7 +229,6 @@ extension _BookingDetailActions on _BookingDetailScreenState {
                   maxLength: 500,
                   decoration: InputDecoration(
                     labelText: context.l10n.reasonForChangingTheOrder,
-                    border: OutlineInputBorder(),
                   ),
                   onTapOutside: (_) =>
                       FocusManager.instance.primaryFocus?.unfocus(),
@@ -320,7 +318,6 @@ extension _BookingDetailActions on _BookingDetailScreenState {
                 ),
                 decoration: InputDecoration(
                   labelText: context.l10n.finalCharge,
-                  border: OutlineInputBorder(),
                 ),
                 onTapOutside: (_) =>
                     FocusManager.instance.primaryFocus?.unfocus(),
@@ -333,7 +330,6 @@ extension _BookingDetailActions on _BookingDetailScreenState {
                 maxLines: 3,
                 decoration: InputDecoration(
                   labelText: context.l10n.decisionAndReasoning,
-                  border: OutlineInputBorder(),
                 ),
                 onTapOutside: (_) =>
                     FocusManager.instance.primaryFocus?.unfocus(),

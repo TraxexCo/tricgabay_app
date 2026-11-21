@@ -654,6 +654,26 @@ class BackendRepository {
         });
       }
     }
+    if (tourists.isNotEmpty) {
+      try {
+        final done = await _client
+            .from('bookings')
+            .select('tourist_id')
+            .eq('status', 'completed')
+            .inFilter('tourist_id', [for (final t in tourists) t['id']])
+            .timeout(_readDeadline);
+        final counts = <String, int>{};
+        for (final row in done) {
+          final id = row['tourist_id'] as String;
+          counts[id] = (counts[id] ?? 0) + 1;
+        }
+        for (final t in tourists) {
+          t['trips'] = counts[t['id']] ?? 0;
+        }
+      } catch (_) {
+        // The count is informational; keep the list usable without it.
+      }
+    }
     return (
       drivers: drivers,
       tourists: tourists,

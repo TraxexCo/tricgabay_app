@@ -232,7 +232,6 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                 helperText: context
                     .l10n
                     .maximumCapacityIsCheckedBeforeOfferingTheBooking,
-                border: OutlineInputBorder(),
               ),
               items: [
                 DropdownMenuItem(
@@ -261,7 +260,6 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
               decoration: InputDecoration(
                 labelText: context.l10n.luggageOrBulkyItems,
                 hintText: context.l10n.exampleTwoBackpacksAndOneFoldingStroller,
-                border: OutlineInputBorder(),
               ),
               onTapOutside: (_) =>
                   FocusManager.instance.primaryFocus?.unfocus(),
@@ -277,7 +275,6 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                 labelText: context.l10n.accessibilityOrAssistanceNeeds,
                 hintText:
                     context.l10n.exampleSeniorPassengerNeedsExtraBoardingTime,
-                border: OutlineInputBorder(),
               ),
               onTapOutside: (_) =>
                   FocusManager.instance.primaryFocus?.unfocus(),

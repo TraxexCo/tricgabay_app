@@ -179,9 +179,7 @@ class _ManageTouristsScreenState extends State<ManageTouristsScreen> {
                               const SizedBox(height: 4),
                               Text(
                                 context.l10n.tripsValue(
-                                  context.message(
-                                    (tourist['trips']).toString(),
-                                  ),
+                                  context.message('${tourist['trips'] ?? 0}'),
                                 ),
                                 style: GoogleFonts.poppins(
                                   color: AppColors.textSecondary,

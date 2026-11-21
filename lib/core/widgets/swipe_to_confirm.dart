@@ -49,9 +49,9 @@ class _SwipeToConfirmState extends State<SwipeToConfirm>
   // Springs the thumb back to the start after an early release or failure.
   late final AnimationController _spring =
       AnimationController(vsync: this, duration: Motion.medium)
-    ..addListener(() {
-      setState(() => _dragPosition = _springFrom * (1 - _spring.value));
-    });
+        ..addListener(() {
+          setState(() => _dragPosition = _springFrom * (1 - _spring.value));
+        });
   double _springFrom = 0;
 
   // Sheen across the label; a short, finite hint rather than a loop.

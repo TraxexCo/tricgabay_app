@@ -94,87 +94,69 @@ class TourPackagesScreen extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                  Text(
+                                    context.message(pkg.name),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  // Tags sit under the title so long ones like
+                                  // "Flexible schedule" never break mid-word.
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 6,
                                     children: [
-                                      Expanded(
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary.withValues(
+                                            alpha: 0.1,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
                                         child: Text(
-                                          context.message(pkg.name),
+                                          context.l10n.stopsValue(
+                                            context.message(
+                                              (pkg.spotIds.length).toString(),
+                                            ),
+                                          ),
                                           style: GoogleFonts.poppins(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.textPrimary,
+                                            color: AppColors.primary,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
                                       ),
-                                      Flexible(
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Flexible(
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 4,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color: AppColors.primary
-                                                      .withValues(alpha: 0.1),
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                child: Text(
-                                                  context.l10n.stopsValue(
-                                                    context.message(
-                                                      (pkg.spotIds.length)
-                                                          .toString(),
-                                                    ),
-                                                  ),
-                                                  style: TextStyle(
-                                                    color: AppColors.primary,
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ),
+                                      if (pkg.duration.isNotEmpty)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.secondary
+                                                .withValues(alpha: 0.2),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
                                             ),
-                                            if (pkg.duration.isNotEmpty)
-                                              const SizedBox(width: 8),
-                                            if (pkg.duration.isNotEmpty)
-                                              Flexible(
-                                                child: Container(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 8,
-                                                        vertical: 4,
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                    color: AppColors.secondary
-                                                        .withValues(alpha: 0.2),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          8,
-                                                        ),
-                                                  ),
-                                                  child: Text(
-                                                    context.message(
-                                                      pkg.duration,
-                                                    ),
-                                                    style: GoogleFonts.poppins(
-                                                      color:
-                                                          AppColors.secondary,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 12,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                          ],
+                                          ),
+                                          child: Text(
+                                            context.message(pkg.duration),
+                                            style: GoogleFonts.poppins(
+                                              color: AppColors.textPrimary,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 11,
+                                            ),
+                                          ),
                                         ),
-                                      ),
                                     ],
                                   ),
                                   const SizedBox(height: 8),

@@ -210,13 +210,16 @@ class _DriverApplicationPendingScreenState
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
+            const SizedBox(height: 8),
             Text(
               context
                   .l10n
                   .yourAccountCanUploadApplicationDocumentsAndCheckApprovalGoingOnlineAndAccepting,
             ),
+            const SizedBox(height: 24),
             if (submitted && !_editing) ...[
               Text(context.l10n.yourDocumentsAreUnderReview),
+              const SizedBox(height: 12),
               OutlinedButton(
                 onPressed: () => setState(() => _editing = true),
                 child: Text(context.l10n.updateApplication),
@@ -226,6 +229,7 @@ class _DriverApplicationPendingScreenState
                 key: _form,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: 12,
                   children: [
                     TextFormField(
                       controller: _plate,
@@ -253,9 +257,10 @@ class _DriverApplicationPendingScreenState
                           FocusManager.instance.primaryFocus?.unfocus(),
                       scrollPadding: const EdgeInsets.all(96),
                     ),
-                    TextButton(
+                    OutlinedButton.icon(
                       onPressed: _busy ? null : () => _date(true),
-                      child: Text(
+                      icon: const Icon(Icons.event_outlined),
+                      label: Text(
                         context.message(
                           _licenseExpiry == null
                               ? MessageCode.chooseLicenseExpiry
@@ -263,9 +268,10 @@ class _DriverApplicationPendingScreenState
                         ),
                       ),
                     ),
-                    TextButton(
+                    OutlinedButton.icon(
                       onPressed: _busy ? null : () => _date(false),
-                      child: Text(
+                      icon: const Icon(Icons.event_outlined),
+                      label: Text(
                         context.message(
                           _franchiseExpiry == null
                               ? MessageCode.chooseFranchiseExpiry
@@ -288,6 +294,7 @@ class _DriverApplicationPendingScreenState
                       onChanged: (value) => setState(() => _capacity = value!),
                     ),
                     CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
                       value: _accessible,
                       onChanged: (value) =>
                           setState(() => _accessible = value ?? false),
@@ -328,6 +335,7 @@ class _DriverApplicationPendingScreenState
                   ],
                 ),
               ),
+            const SizedBox(height: 24),
             TextButton(
               onPressed: () => context.push('/driver/data-rights'),
               child: Text(context.l10n.myData),

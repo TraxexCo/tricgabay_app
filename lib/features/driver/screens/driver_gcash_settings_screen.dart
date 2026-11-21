@@ -141,6 +141,7 @@ class _DriverGcashSettingsState extends State<DriverGcashSettingsScreen> {
                 padding: const EdgeInsets.all(20),
                 children: [
                   Text(l10n.gcashVisibility),
+                  const SizedBox(height: 16),
                   TextFormField(
                     enabled: !_saving,
                     controller: _number,
@@ -151,6 +152,7 @@ class _DriverGcashSettingsState extends State<DriverGcashSettingsScreen> {
                         ? l10n.gcashInvalidNumber
                         : null,
                   ),
+                  const SizedBox(height: 12),
                   TextFormField(
                     enabled: !_saving,
                     controller: _repeat,
@@ -166,6 +168,7 @@ class _DriverGcashSettingsState extends State<DriverGcashSettingsScreen> {
                           : l10n.gcashNumberMismatch;
                     },
                   ),
+                  const SizedBox(height: 12),
                   TextFormField(
                     enabled: !_saving,
                     controller: _name,
@@ -177,6 +180,7 @@ class _DriverGcashSettingsState extends State<DriverGcashSettingsScreen> {
                         ? l10n.gcashInvalidName
                         : null,
                   ),
+                  const SizedBox(height: 4),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(l10n.gcashActive),
@@ -185,6 +189,7 @@ class _DriverGcashSettingsState extends State<DriverGcashSettingsScreen> {
                         ? null
                         : (active) => setState(() => _active = active),
                   ),
+                  const SizedBox(height: 8),
                   FilledButton(
                     onPressed: _saving ? null : _save,
                     child: Text(l10n.saveChanges),
@@ -196,6 +201,7 @@ class _DriverGcashSettingsState extends State<DriverGcashSettingsScreen> {
                       l10n.gcashQrTitle,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
+                    const SizedBox(height: 4),
                     Text(l10n.gcashQrDescription),
                     const SizedBox(height: 12),
                     if (_qrPath != null)

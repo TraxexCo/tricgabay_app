@@ -81,7 +81,7 @@ class PushNotificationService {
           if (route != null) onOpenRoute(route);
         },
       );
-      await _messaging.requestPermission(alert: true, badge: true, sound: true);
+      await _askPermissionOnceSignedIn();
       _foregroundSubscription = FirebaseMessaging.onMessage.listen((message) {
         final notification = message.notification;
         if (notification == null) return;
@@ -139,6 +139,20 @@ class PushNotificationService {
       debugPrint(ErrorMessages.forError(error));
       _active = false;
     }
+  }
+
+  static bool _permissionAsked = false;
+
+  // Ask only once someone has signed in: a prompt on the very first screen,
+  // before the person knows what the app is, is usually declined.
+  static Future<void> _askPermissionOnceSignedIn() async {
+    if (_permissionAsked ||
+        !BackendConfig.isConfigured ||
+        BackendConfig.client.auth.currentUser == null) {
+      return;
+    }
+    _permissionAsked = true;
+    await _messaging.requestPermission(alert: true, badge: true, sound: true);
   }
 
   static Future<void> _register(String token) async {
@@ -206,6 +220,7 @@ class PushNotificationService {
       }
       await initializeCore();
       if (!_coreReady) return;
+      await _askPermissionOnceSignedIn();
       _token ??= await _messaging.getToken();
       if (_token != null) await _register(_token!);
     } catch (error) {

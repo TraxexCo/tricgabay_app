@@ -259,7 +259,6 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
             decoration: InputDecoration(
               labelText: context.l10n.reasonForPriceChange,
               hintText: context.l10n.exampleUpdatedOperatingCostApprovedByAdmin,
-              border: OutlineInputBorder(),
             ),
             validator: localizeValidator(
               context,
@@ -339,7 +338,6 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
             maxLines: 4,
             decoration: InputDecoration(
               labelText: context.l10n.touristAndDriverPolicyTerms,
-              border: OutlineInputBorder(),
             ),
             onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
             scrollPadding: const EdgeInsets.all(96),
@@ -352,7 +350,6 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
             maxLines: 2,
             decoration: InputDecoration(
               labelText: context.l10n.reasonForPolicyChange,
-              border: OutlineInputBorder(),
             ),
             onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
             scrollPadding: const EdgeInsets.all(96),
@@ -400,7 +397,6 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),
-        border: const OutlineInputBorder(),
       ),
       validator: localizeValidator(context, (value) {
         try {
@@ -435,7 +431,6 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),
-        border: const OutlineInputBorder(),
       ),
       onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
       scrollPadding: const EdgeInsets.all(96),

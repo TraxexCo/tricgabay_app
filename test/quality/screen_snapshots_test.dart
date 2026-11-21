@@ -78,49 +78,54 @@ void main() {
   for (final screen in screenCases.where(
     (s) => screenFilter.isEmpty || s.name.contains(screenFilter),
   )) {
-    testWidgets('snapshot ${screen.name}', skip: !enabled, timeout: const Timeout(Duration(seconds: 90)), (tester) async {
-      tester.view.physicalSize = const Size(390 * 2, 844 * 2);
-      tester.view.devicePixelRatio = 2;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      Intl.defaultLocale = 'en_PH';
-      seedScreen(screen.role, screen.name);
-      AppSession.isFilipino.value = false;
-      final boundary = GlobalKey();
-      final router = fixtureRouter(screen);
-      addTearDown(router.dispose);
-      await tester.pumpWidget(
-        RepaintBoundary(
-          key: boundary,
-          child: ProviderScope(
-            child: MaterialApp.router(
-              debugShowCheckedModeBanner: false,
-              routerConfig: router,
-              locale: const Locale('en'),
-              supportedLocales: AppLocalizations.supportedLocales,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              theme: AppTheme.lightTheme,
+    testWidgets(
+      'snapshot ${screen.name}',
+      skip: !enabled,
+      timeout: const Timeout(Duration(seconds: 90)),
+      (tester) async {
+        tester.view.physicalSize = const Size(390 * 2, 844 * 2);
+        tester.view.devicePixelRatio = 2;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        Intl.defaultLocale = 'en_PH';
+        seedScreen(screen.role, screen.name);
+        AppSession.isFilipino.value = false;
+        final boundary = GlobalKey();
+        final router = fixtureRouter(screen);
+        addTearDown(router.dispose);
+        await tester.pumpWidget(
+          RepaintBoundary(
+            key: boundary,
+            child: ProviderScope(
+              child: MaterialApp.router(
+                debugShowCheckedModeBanner: false,
+                routerConfig: router,
+                locale: const Locale('en'),
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                theme: AppTheme.lightTheme,
+              ),
             ),
           ),
-        ),
-      );
-      // Let entrance animations finish and images decode.
-      for (var i = 0; i < 12; i++) {
-        await tester.pump(const Duration(milliseconds: 100));
-      }
-      await tester.runAsync(() async {
-        for (final element in find.byType(Image).evaluate()) {
-          final image = (element.widget as Image).image;
-          await precacheImage(image, element);
+        );
+        // Let entrance animations finish and images decode.
+        for (var i = 0; i < 12; i++) {
+          await tester.pump(const Duration(milliseconds: 100));
         }
-      });
-      await tester.pump(const Duration(milliseconds: 100));
-      await expectLater(
-        find.byKey(boundary),
-        matchesGoldenFile('../../build/screens/${screen.name}.png'),
-      );
-      while (tester.takeException() != null) {}
-      await tester.pumpWidget(const SizedBox.shrink());
-    });
+        await tester.runAsync(() async {
+          for (final element in find.byType(Image).evaluate()) {
+            final image = (element.widget as Image).image;
+            await precacheImage(image, element);
+          }
+        });
+        await tester.pump(const Duration(milliseconds: 100));
+        await expectLater(
+          find.byKey(boundary),
+          matchesGoldenFile('../../build/screens/${screen.name}.png'),
+        );
+        while (tester.takeException() != null) {}
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
   }
 }
