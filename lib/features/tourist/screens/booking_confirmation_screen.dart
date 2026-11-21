@@ -73,7 +73,8 @@ class BookingConfirmationScreen extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    fontSize: 13,
+                    fontSize: 14,
+                    height: 1.4,
                     color: AppColors.textSecondary,
                   ),
                 ),
@@ -111,7 +112,8 @@ class BookingConfirmationScreen extends StatelessWidget {
                           Expanded(
                             child: Text(
                               context.l10n.bookingValue(
-                                context.message((booking.id).toString()),
+                                // A short reference is enough to quote.
+                                '#${booking.id.split('-').first.toUpperCase()}',
                               ),
                               style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.w700,
@@ -244,14 +246,15 @@ class BookingConfirmationScreen extends StatelessWidget {
             Text(
               context.message(label),
               style: GoogleFonts.poppins(
-                fontSize: 10,
+                fontSize: 12,
                 color: AppColors.textSecondary,
               ),
             ),
             Text(
               context.message(detail),
               style: GoogleFonts.poppins(
-                fontSize: 12,
+                fontSize: 14,
+                height: 1.35,
                 fontWeight: FontWeight.w600,
               ),
             ),

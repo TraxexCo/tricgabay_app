@@ -91,6 +91,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'all' => l.all,
     'allStopsAreConfirmedOpenTripControlsToFinish' =>
       l.allStopsAreConfirmedOpenTripControlsToFinish,
+    'allowLocation' => l.allowLocation,
     'allowLocationAccessInAndroidSettings' =>
       l.allowLocationAccessInAndroidSettings,
     'allowMatchingForTouristsWithMobilityOrBoardingNeeds' =>
@@ -423,6 +424,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'driverDocumentsMustBeJpegImages5MbMaximumEach' =>
       l.driverDocumentsMustBeJpegImages5MbMaximumEach,
     'driverHasArrived' => l.driverHasArrived,
+    'driverInServiceArea' => l.driverInServiceArea,
     'driverIsMoving' => l.driverIsMoving,
     'driverIsStopped' => l.driverIsStopped,
     'driverLicense' => l.driverLicense,
@@ -431,6 +433,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'driverMatchingBegins30MinutesBeforePickup' =>
       l.driverMatchingBegins30MinutesBeforePickup,
     'driverNotFound' => l.driverNotFound,
+    'driverOutsideServiceArea' => l.driverOutsideServiceArea(text(0)),
     'driverPerformance' => l.driverPerformance,
     'driverRegistration' => l.driverRegistration,
     'driverReplacementRequested' => l.driverReplacementRequested,
@@ -715,6 +718,8 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'gpsAccuracyTooLow' => l.gpsAccuracyTooLow,
     'greatRideVeryKnowledgeableAboutBustos' =>
       l.greatRideVeryKnowledgeableAboutBustos,
+    'groupOfFourOrMore' => l.groupOfFourOrMore,
+    'groupOfFourOrMoreBody' => l.groupOfFourOrMoreBody,
     'headingTo' => l.headingTo,
     'headingToPickup' => l.headingToPickup,
     'help' => l.help,
@@ -738,6 +743,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'ifPlansChange' => l.ifPlansChange,
     'imageContentMimeTypeAndFileExtensionMustMatch' =>
       l.imageContentMimeTypeAndFileExtensionMustMatch,
+    'inYourTrip' => l.inYourTrip,
     'includeWhatHappenedWhereTheTripStoppedAndAnyCashAlreadyExchangedStatements' =>
       l.includeWhatHappenedWhereTheTripStoppedAndAnyCashAlreadyExchangedStatements,
     'includedStops' => l.includedStops,
@@ -778,6 +784,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'keepWaiting' => l.keepWaiting,
     'kmAwayValue' => l.kmAwayValue(text(0), text(1)),
     'kmAwayValueLabel' => l.kmAwayValueLabel(text(0)),
+    'kmFromTown' => l.kmFromTown(text(0)),
     'kmValue' => l.kmValue(text(0)),
     'language' => l.language,
     'lastLocationIsMoreThanAMinuteOld' => l.lastLocationIsMoreThanAMinuteOld,
@@ -813,6 +820,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'localHistory' => l.localHistory,
     'localRoadsArePreferredFollowRoadSignsAndYourApprovedTodaOrLgu' =>
       l.localRoadsArePreferredFollowRoadSignsAndYourApprovedTodaOrLgu,
+    'locationExplainerTitle' => l.locationExplainerTitle,
     'locationIsUnavailableRightNowCheckYourSettingsAndTryAgain' =>
       l.locationIsUnavailableRightNowCheckYourSettingsAndTryAgain,
     'locationPermissionDeniedEnableItInSettings' =>
@@ -821,6 +829,9 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
       l.locationPermissionIsNeededToReceiveRides,
     'locationPermissionIsNeededToUseYourCurrentPosition' =>
       l.locationPermissionIsNeededToUseYourCurrentPosition,
+    'locationReasonMap' => l.locationReasonMap,
+    'locationReasonPickup' => l.locationReasonPickup,
+    'locationReasonPrivacy' => l.locationReasonPrivacy,
     'locationServicesAreDisabledPleaseEnableGps' =>
       l.locationServicesAreDisabledPleaseEnableGps,
     'locationSharingIsAlreadyStopped' => l.locationSharingIsAlreadyStopped,
@@ -919,6 +930,8 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
       l.noDriverAcceptedDuringThisSearchWindowRetryToOpenAFreshRequest,
     'noDriverYet' => l.noDriverYet,
     'noDriversAwaitingReview' => l.noDriversAwaitingReview,
+    'noDriversOnlineBody' => l.noDriversOnlineBody,
+    'noDriversOnlineRightNow' => l.noDriversOnlineRightNow,
     'noEligibleActiveDrivers' => l.noEligibleActiveDrivers,
     'noEndedTripsInThisPeriod' => l.noEndedTripsInThisPeriod,
     'noExportRequestsYet' => l.noExportRequestsYet,
@@ -936,6 +949,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'noTouristsFound' => l.noTouristsFound,
     'noVerifiedContactNumberIsAvailableForThisTourist' =>
       l.noVerifiedContactNumberIsAvailableForThisTourist,
+    'notNow' => l.notNow,
     'notRated' => l.notRated,
     'notVerified' => l.notVerified,
     'notYet' => l.notYet,
@@ -1308,6 +1322,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
       l.savedTripDataCouldNotBeReadBookingChangesArePausedToProtect,
     'saving' => l.saving,
     'savingBooking' => l.savingBooking,
+    'scheduleForLater' => l.scheduleForLater,
     'schedulePickupAtLeast1HourFromNow' => l.schedulePickupAtLeast1HourFromNow,
     'scheduled' => l.scheduled,
     'scheduledFor' => l.scheduledFor,

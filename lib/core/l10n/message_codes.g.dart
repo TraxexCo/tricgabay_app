@@ -97,6 +97,7 @@ abstract final class MessageCode {
   static const all = '@l10n/all';
   static const allStopsAreConfirmedOpenTripControlsToFinish =
       '@l10n/allStopsAreConfirmedOpenTripControlsToFinish';
+  static const allowLocation = '@l10n/allowLocation';
   static const allowLocationAccessInAndroidSettings =
       '@l10n/allowLocationAccessInAndroidSettings';
   static const allowMatchingForTouristsWithMobilityOrBoardingNeeds =
@@ -481,6 +482,7 @@ abstract final class MessageCode {
   static const driverDocumentsMustBeJpegImages5MbMaximumEach =
       '@l10n/driverDocumentsMustBeJpegImages5MbMaximumEach';
   static const driverHasArrived = '@l10n/driverHasArrived';
+  static const driverInServiceArea = '@l10n/driverInServiceArea';
   static const driverIsMoving = '@l10n/driverIsMoving';
   static const driverIsStopped = '@l10n/driverIsStopped';
   static const driverLicense = '@l10n/driverLicense';
@@ -490,6 +492,8 @@ abstract final class MessageCode {
   static const driverMatchingBegins30MinutesBeforePickup =
       '@l10n/driverMatchingBegins30MinutesBeforePickup';
   static const driverNotFound = '@l10n/driverNotFound';
+  static String driverOutsideServiceArea(String km) =>
+      encodeMessage('driverOutsideServiceArea', [km]);
   static const driverPerformance = '@l10n/driverPerformance';
   static const driverRegistration = '@l10n/driverRegistration';
   static const driverReplacementRequested = '@l10n/driverReplacementRequested';
@@ -801,6 +805,8 @@ abstract final class MessageCode {
   static const gpsAccuracyTooLow = '@l10n/gpsAccuracyTooLow';
   static const greatRideVeryKnowledgeableAboutBustos =
       '@l10n/greatRideVeryKnowledgeableAboutBustos';
+  static const groupOfFourOrMore = '@l10n/groupOfFourOrMore';
+  static const groupOfFourOrMoreBody = '@l10n/groupOfFourOrMoreBody';
   static const headingTo = '@l10n/headingTo';
   static const headingToPickup = '@l10n/headingToPickup';
   static const help = '@l10n/help';
@@ -831,6 +837,7 @@ abstract final class MessageCode {
   static const ifPlansChange = '@l10n/ifPlansChange';
   static const imageContentMimeTypeAndFileExtensionMustMatch =
       '@l10n/imageContentMimeTypeAndFileExtensionMustMatch';
+  static const inYourTrip = '@l10n/inYourTrip';
   static const includeWhatHappenedWhereTheTripStoppedAndAnyCashAlreadyExchangedStatements =
       '@l10n/includeWhatHappenedWhereTheTripStoppedAndAnyCashAlreadyExchangedStatements';
   static const includedStops = '@l10n/includedStops';
@@ -879,6 +886,7 @@ abstract final class MessageCode {
       encodeMessage('kmAwayValue', [value, secondValue]);
   static String kmAwayValueLabel(String value) =>
       encodeMessage('kmAwayValueLabel', [value]);
+  static String kmFromTown(String km) => encodeMessage('kmFromTown', [km]);
   static String kmValue(String value) => encodeMessage('kmValue', [value]);
   static const language = '@l10n/language';
   static const lastLocationIsMoreThanAMinuteOld =
@@ -916,6 +924,7 @@ abstract final class MessageCode {
   static const localHistory = '@l10n/localHistory';
   static const localRoadsArePreferredFollowRoadSignsAndYourApprovedTodaOrLgu =
       '@l10n/localRoadsArePreferredFollowRoadSignsAndYourApprovedTodaOrLgu';
+  static const locationExplainerTitle = '@l10n/locationExplainerTitle';
   static const locationIsUnavailableRightNowCheckYourSettingsAndTryAgain =
       '@l10n/locationIsUnavailableRightNowCheckYourSettingsAndTryAgain';
   static const locationPermissionDeniedEnableItInSettings =
@@ -924,6 +933,9 @@ abstract final class MessageCode {
       '@l10n/locationPermissionIsNeededToReceiveRides';
   static const locationPermissionIsNeededToUseYourCurrentPosition =
       '@l10n/locationPermissionIsNeededToUseYourCurrentPosition';
+  static const locationReasonMap = '@l10n/locationReasonMap';
+  static const locationReasonPickup = '@l10n/locationReasonPickup';
+  static const locationReasonPrivacy = '@l10n/locationReasonPrivacy';
   static const locationServicesAreDisabledPleaseEnableGps =
       '@l10n/locationServicesAreDisabledPleaseEnableGps';
   static const locationSharingIsAlreadyStopped =
@@ -1036,6 +1048,8 @@ abstract final class MessageCode {
       '@l10n/noDriverAcceptedDuringThisSearchWindowRetryToOpenAFreshRequest';
   static const noDriverYet = '@l10n/noDriverYet';
   static const noDriversAwaitingReview = '@l10n/noDriversAwaitingReview';
+  static const noDriversOnlineBody = '@l10n/noDriversOnlineBody';
+  static const noDriversOnlineRightNow = '@l10n/noDriversOnlineRightNow';
   static const noEligibleActiveDrivers = '@l10n/noEligibleActiveDrivers';
   static const noEndedTripsInThisPeriod = '@l10n/noEndedTripsInThisPeriod';
   static const noExportRequestsYet = '@l10n/noExportRequestsYet';
@@ -1054,6 +1068,7 @@ abstract final class MessageCode {
   static const noTouristsFound = '@l10n/noTouristsFound';
   static const noVerifiedContactNumberIsAvailableForThisTourist =
       '@l10n/noVerifiedContactNumberIsAvailableForThisTourist';
+  static const notNow = '@l10n/notNow';
   static const notRated = '@l10n/notRated';
   static const notVerified = '@l10n/notVerified';
   static const notYet = '@l10n/notYet';
@@ -1467,6 +1482,7 @@ abstract final class MessageCode {
       '@l10n/savedTripDataCouldNotBeReadBookingChangesArePausedToProtect';
   static const saving = '@l10n/saving';
   static const savingBooking = '@l10n/savingBooking';
+  static const scheduleForLater = '@l10n/scheduleForLater';
   static const schedulePickupAtLeast1HourFromNow =
       '@l10n/schedulePickupAtLeast1HourFromNow';
   static const scheduled = '@l10n/scheduled';

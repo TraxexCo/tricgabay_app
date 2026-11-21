@@ -22,4 +22,25 @@ abstract final class LaunchPreferences {
       // Showing the intro again is harmless.
     }
   }
+
+  static const _locationExplainedKey = 'location_explained_v1';
+
+  /// Whether the tourist map has already explained why it wants location.
+  static Future<bool> locationExplained() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool(_locationExplainedKey) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<void> markLocationExplained() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_locationExplainedKey, true);
+    } catch (_) {
+      // Explaining again is harmless.
+    }
+  }
 }

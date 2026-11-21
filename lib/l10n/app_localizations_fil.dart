@@ -322,7 +322,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get about => 'Tungkol dito';
 
   @override
-  String get accept => 'TANGGAPIN';
+  String get accept => 'Tanggapin';
 
   @override
   String get acceptAndContinue => 'Tanggapin at magpatuloy';
@@ -1203,7 +1203,7 @@ class AppLocalizationsFil extends AppLocalizations {
       'Makikita rin ang mga kritikal na kondisyon sa mga alerto sa operasyon. Siyasatin muna bago alisin ang alerto.';
 
   @override
-  String get curatedExperience => 'PINILING KARANASAN';
+  String get curatedExperience => 'Piniling karanasan';
 
   @override
   String get currentGpsLocation => 'Kasalukuyang lokasyon sa GPS';
@@ -1245,7 +1245,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get decisionAndReasoning => 'Pasiya at paliwanag';
 
   @override
-  String get decline => 'TANGGIHAN';
+  String get decline => 'Tanggihan';
 
   @override
   String get decliningMatchedOffersRequiresTheConfiguredServer =>
@@ -1283,7 +1283,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get destination => 'Patutunguhan';
 
   @override
-  String get destinations => 'mga destinasyon';
+  String get destinations => 'Mga destinasyon';
 
   @override
   String get destinationsYouLove => 'Mga destinasyon na gusto mo';
@@ -1986,7 +1986,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get heritage => 'Pamana';
 
   @override
-  String get hidden => 'NAKATAGO';
+  String get hidden => 'Nakatago';
 
   @override
   String hideValue(String value) {
@@ -2725,7 +2725,7 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
-  String get openDialer => 'BUKSAN ANG DIALER';
+  String get openDialer => 'Buksan ang dialer';
 
   @override
   String get openDriverSearch => 'Buksan ang paghahanap ng drayber';
@@ -3296,7 +3296,7 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
-  String get replacementNeeded => 'KAILANGAN NG KAPALIT';
+  String get replacementNeeded => 'Kailangan ng kapalit';
 
   @override
   String get replacementpending => 'Naghihintay ng kapalit';
@@ -3657,7 +3657,7 @@ class AppLocalizationsFil extends AppLocalizations {
       'Ibigay lamang ang code na ito kapag nakasakay ka na';
 
   @override
-  String get sharingLocation => 'IBINABAHAGI ANG LOKASYON';
+  String get sharingLocation => 'Ibinabahagi ang lokasyon';
 
   @override
   String showValue(String value) {
@@ -3832,7 +3832,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get temporarilyCloseAttraction => 'Pansamantalang isara ang pasyalan';
 
   @override
-  String get temporarilyClosed => 'PANSAMANTALANG SARADO';
+  String get temporarilyClosed => 'Pansamantalang sarado';
 
   @override
   String temporarilyClosedValue(String value) {
@@ -4406,7 +4406,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get verificationStatus => 'Katayuan ng beripikasyon';
 
   @override
-  String get verified => 'BERIPIKADO';
+  String get verified => 'Beripikado';
 
   @override
   String verifiedAppDriver(String brandName) {
@@ -5014,4 +5014,58 @@ class AppLocalizationsFil extends AppLocalizations {
   @override
   String get gpsAccuracyTooLow =>
       'Mahina ang GPS signal. Lumipat sa bukas na lugar at subukan muli.';
+
+  @override
+  String kmFromTown(String km) {
+    return '$km km mula sa bayan';
+  }
+
+  @override
+  String get driverInServiceArea => 'Nasa loob ng serbisyo sa Bustos';
+
+  @override
+  String driverOutsideServiceArea(String km) {
+    return '$km km mula sa Bustos';
+  }
+
+  @override
+  String get noDriversOnlineRightNow => 'Walang drayber na online ngayon';
+
+  @override
+  String get noDriversOnlineBody =>
+      'Maaari mo pa ring ipadala ang kahilingan, pero baka mag-expire ito bago may tumanggap. Kung iiskedyul mo sa ibang oras, may panahon ang mga drayber na makita ito.';
+
+  @override
+  String get scheduleForLater => 'Iiskedyul sa ibang oras';
+
+  @override
+  String get groupOfFourOrMore => 'Apat o higit pa kayo?';
+
+  @override
+  String get groupOfFourOrMoreBody =>
+      'Hanggang 3 pasahero ang kasya sa isang traysikel. Magpareserba para sa 3, tapos hilingin sa isa pang kasama na magpareserba ng pangalawang traysikel sa sarili niyang phone para sa parehong tour.';
+
+  @override
+  String get locationExplainerTitle => 'Ipakita kung nasaan ka sa mapa';
+
+  @override
+  String get locationReasonMap =>
+      'Makita kung gaano kalayo sa iyo ang bawat lugar.';
+
+  @override
+  String get locationReasonPickup =>
+      'Gamitin ang kinaroroonan mo bilang sunduan para madali kang mahanap ng drayber.';
+
+  @override
+  String get locationReasonPrivacy =>
+      'Ginagamit lang habang bukas ang app. Sunduan mo lang ang nakikita ng drayber, hindi ang live na lokasyon mo.';
+
+  @override
+  String get allowLocation => 'Payagan ang lokasyon';
+
+  @override
+  String get notNow => 'Mamaya na lang';
+
+  @override
+  String get inYourTrip => 'Nasa biyahe mo na';
 }

@@ -116,8 +116,7 @@ class IncomingBookingScreen extends ConsumerWidget {
                             fontSize: 13,
                           ),
                         ),
-                        const SizedBox(height: 24),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 32),
                         AppCard(
                           padding: const EdgeInsets.all(24),
                           child: Column(
@@ -235,15 +234,15 @@ class IncomingBookingScreen extends ConsumerWidget {
                                   AppColors.success,
                                 ),
                               ],
-                              if (booking.stops.isNotEmpty) ...[
-                                const SizedBox(height: 16),
-                                _buildLocationRow(
-                                  context,
-                                  Icons.location_on,
-                                  booking.stops.last.spotName,
-                                  AppColors.danger,
-                                ),
-                              ],
+                              const SizedBox(height: 16),
+                              // Which tour, so the driver knows the route
+                              // before accepting.
+                              _buildLocationRow(
+                                context,
+                                Icons.route_rounded,
+                                AppSession.bookingTitle(booking),
+                                AppColors.danger,
+                              ),
                               const SizedBox(height: 24),
                               Text(
                                 context.message(

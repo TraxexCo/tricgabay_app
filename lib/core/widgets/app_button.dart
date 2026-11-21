@@ -194,6 +194,8 @@ class AppButton extends StatelessWidget {
     return OutlinedButton(
       onPressed: isLoading ? null : onPressed,
       style: OutlinedButton.styleFrom(
+        // Filled white so it stays readable over maps and dark scrims.
+        backgroundColor: AppColors.surface,
         foregroundColor: type == AppButtonType.danger
             ? AppColors.danger
             : AppColors.primary,

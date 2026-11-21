@@ -434,11 +434,7 @@ class AdminDashboardScreen extends StatelessWidget {
                                 context,
                                 // Tour name and a short reference instead of
                                 // the full database id.
-                                b.trip.packageName ??
-                                    AppSession.packageNameFor(
-                                      b.trip.packageId,
-                                    ) ??
-                                    MessageCode.customTour,
+                                AppSession.bookingTitle(b),
                                 '#${b.id.split('-').first.toUpperCase()} · ${b.touristName}',
                                 bookingStatusLabel(context, b.status),
                                 _getStatusColor(b.status),

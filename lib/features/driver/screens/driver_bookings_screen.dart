@@ -154,15 +154,7 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
             final b = bookings[index];
             return Card(
               child: ListTile(
-                title: Text(
-                  context.message(
-                    b.trip.packageName ??
-                        AppSession.packageNameFor(b.trip.packageId) ??
-                        MessageCode.stopCustomTourValue(
-                          (b.stops.length).toString(),
-                        ),
-                  ),
-                ),
+                title: Text(context.message(AppSession.bookingTitle(b))),
                 subtitle: Text(
                   context.l10n.threeLineSummary(
                     context.message((b.touristName).toString()),

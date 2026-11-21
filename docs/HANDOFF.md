@@ -58,16 +58,44 @@ Branch `feature/gcash-payment-and-cleanup` (local only: no git remote yet; base 
 - Hosted Supabase project: `xcsrjuqzwequmeqzedzd`.
 - Walkthrough results: the full tour lifecycle passed on the phone (book, push, accept, pickup code, 5 stops, complete, GCash slide-to-confirm, earnings, admin dashboard and disputes). Test bookings were cancelled except one completed ₱700 GCash tour.
 
+## Session 2026-11-22: UI fixes and pre-launch code items
+
+- **Tourist home:**
+  - The Explore sheet runs behind the menu bar again, and its list is padded so the last section clears the bar.
+  - Its resting height shows one full row of spot cards. Fully open, it stops under the greeting.
+  - Spot cards are compact: the category is a pill on the photo, plus "0.2 km from town".
+  - The "Plan your trip" shortcuts are three even tiles, or stacked rows with large text.
+  - The duplicate "List view" pill is gone; the search bar opens the same list.
+  - On short screens, the map buttons switch to a row.
+- **Location explainer:** before Android's location prompt, a sheet says why the map wants location. "Not now" is remembered; the my-location button can still ask.
+- **Driver home:**
+  - Online with a GPS fix, the map is 200 to 300 px tall.
+  - The label is worked out from GPS: "In the Bustos service area" or "N km from Bustos". The old label always said "Bustos town centre".
+  - The activity cards are equal height, and "View booking requests" is full width.
+- **Booking titles:** `AppSession.bookingTitle` shows the package name, then "Tour package" while the name loads, then "N stop custom tour". It is used by the driver bookings list, the incoming request card, booking detail and the admin dashboard.
+- **Wording:**
+  - Status words are capitalised (Accepted, Ongoing and the rest).
+  - All-caps labels are now sentence case (Accept, Decline, Sharing location and others).
+  - Filipino uses the glossary terms (drayber, traysikel, sunduan, magpareserba).
+- **No drivers online:** new RPC `count_online_drivers()` (migration `20261122040000`). It returns a count only and is open to signed-in users. The booking review shows a warning with "Schedule for later" when the count is 0 for a book-now trip. If the RPC fails, nothing is shown.
+- **Groups of 4 or more (decided: simplest option):** the booking review explains that a tricycle seats 3, and that someone else in the group books a second tricycle from their own phone. One account can hold only one active booking, so the same person can't book two.
+- **Privacy notice:**
+  - Migration `20261122040100` replaces only the PayMongo clause, in English and Filipino, with GCash direct payment wording.
+  - It moves the version to `2026-11-22`, so each user accepts the notice again once.
+  - The test fixture is updated to match.
+- **Other polish:**
+  - Booking review leads with a fare card.
+  - Spot page: the fake "4.8 (128 reviews)" rating is removed. The bottom bar now has map and directions icons and an "Add to trip" / "In your trip" button.
+  - Outline buttons are white-filled, so they stay readable on dark backgrounds.
+  - The booking confirmation uses a short `#ABCD1234` reference and larger text.
+  - The admin spot list's category is no longer yellow on white.
+- **Not applied yet:** the two new migrations must be pushed to the hosted project (`supabase db push`).
+- **Tests:** `flutter analyze` is clean. In the cloud workspace, 2,561 tests pass. Two fail there: DriverHome and DriverShell accessibility at text 1.0. They also failed on the untouched code there, so they are environment-specific, but rerun `flutter test` locally.
+
 ## Left to do
 
-1. **Recheck on the phone:** the newest labels, and a booking made through the tourist app's own Book button with GPS on.
-2. **Driver "Active" card:** the status word is still lowercase ("accepted"), and the request card still says "N stop custom tour" for packages when names aren't loaded.
-3. **Before real riders** (see `docs/real-world-scenarios.md`):
-   - The owner enters verified Bustos emergency numbers (only 911 is real today).
-   - The custom-tour fare is ₱70, versus ₱700–₱1,000 for packages; fix it in Admin → Fixed fares.
-   - Decide how groups over 3 passengers should book.
-   - Warn the tourist when no drivers are online.
-   - Explain why location is needed before the tourist map asks for it.
-4. **Privacy notice text:** still mentions PayMongo; update the notice content and version.
-5. **Two-phone test** with real people standing together. Arrival requires being within 150 m of the pickup.
-6. **Push the branch** to a private GitHub repo, then merge into `master`.
+1. **Apply the two new migrations** on the hosted project, then rebuild and install on the phone. Check the tourist home sheet, the location explainer (fresh install, or clear the app's storage), the driver map label, and the no-drivers warning.
+2. **Before real riders:** owner enters verified Bustos emergency numbers; fix the ₱70 custom-tour fare in Admin → Fixed fares.
+3. **Two-phone test** with real people standing together. Arrival requires being within 150 m of the pickup.
+4. **Push the branch** to a private GitHub repo, then merge into `master`.
+5. **Line endings:** this VM's git shows many files as modified when only CRLF/LF differs. Those aren't real changes, so don't commit them. Consider a `.gitattributes` with `* text=auto`.

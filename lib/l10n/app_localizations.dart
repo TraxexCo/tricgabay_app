@@ -665,7 +665,7 @@ abstract class AppLocalizations {
   /// No description provided for @accept.
   ///
   /// In en, this message translates to:
-  /// **'ACCEPT'**
+  /// **'Accept'**
   String get accept;
 
   /// No description provided for @acceptAndContinue.
@@ -683,7 +683,7 @@ abstract class AppLocalizations {
   /// No description provided for @accepted.
   ///
   /// In en, this message translates to:
-  /// **'accepted'**
+  /// **'Accepted'**
   String get accepted;
 
   /// No description provided for @acceptTheCurrentPrivacyNoticeBeforeSubmitting.
@@ -815,7 +815,7 @@ abstract class AppLocalizations {
   /// No description provided for @addToTripLabel.
   ///
   /// In en, this message translates to:
-  /// **'Add to Trip'**
+  /// **'Add to trip'**
   String get addToTripLabel;
 
   /// No description provided for @addTouristSpot.
@@ -1494,7 +1494,7 @@ abstract class AppLocalizations {
   /// No description provided for @cancelled.
   ///
   /// In en, this message translates to:
-  /// **'cancelled'**
+  /// **'Cancelled'**
   String get cancelled;
 
   /// No description provided for @cancelledAfterTheGracePeriodPublishedCancellationFeeApplied.
@@ -1825,7 +1825,7 @@ abstract class AppLocalizations {
   /// No description provided for @completed.
   ///
   /// In en, this message translates to:
-  /// **'completed'**
+  /// **'Completed'**
   String get completed;
 
   /// No description provided for @completedAndActiveBookings.
@@ -2152,7 +2152,7 @@ abstract class AppLocalizations {
   /// No description provided for @curatedExperience.
   ///
   /// In en, this message translates to:
-  /// **'CURATED EXPERIENCE'**
+  /// **'Curated experience'**
   String get curatedExperience;
 
   /// No description provided for @currentGpsLocation.
@@ -2222,7 +2222,7 @@ abstract class AppLocalizations {
   /// No description provided for @decline.
   ///
   /// In en, this message translates to:
-  /// **'DECLINE'**
+  /// **'Decline'**
   String get decline;
 
   /// No description provided for @decliningMatchedOffersRequiresTheConfiguredServer.
@@ -2289,7 +2289,7 @@ abstract class AppLocalizations {
   /// No description provided for @destinations.
   ///
   /// In en, this message translates to:
-  /// **'destinations'**
+  /// **'Destinations'**
   String get destinations;
 
   /// No description provided for @destinationsYouLove.
@@ -3495,7 +3495,7 @@ abstract class AppLocalizations {
   /// No description provided for @hidden.
   ///
   /// In en, this message translates to:
-  /// **'HIDDEN'**
+  /// **'Hidden'**
   String get hidden;
 
   /// Application message: hideValue
@@ -4606,7 +4606,7 @@ abstract class AppLocalizations {
   /// No description provided for @ongoing.
   ///
   /// In en, this message translates to:
-  /// **'ongoing'**
+  /// **'Ongoing'**
   String get ongoing;
 
   /// No description provided for @online.
@@ -4739,7 +4739,7 @@ abstract class AppLocalizations {
   /// No description provided for @openDialer.
   ///
   /// In en, this message translates to:
-  /// **'OPEN DIALER'**
+  /// **'Open dialer'**
   String get openDialer;
 
   /// No description provided for @openDriverSearch.
@@ -4823,7 +4823,7 @@ abstract class AppLocalizations {
   /// No description provided for @paid.
   ///
   /// In en, this message translates to:
-  /// **'paid'**
+  /// **'Paid'**
   String get paid;
 
   /// No description provided for @paidOnline.
@@ -4991,7 +4991,7 @@ abstract class AppLocalizations {
   /// No description provided for @paymentReview.
   ///
   /// In en, this message translates to:
-  /// **'payment review'**
+  /// **'Payment review'**
   String get paymentReview;
 
   /// No description provided for @paymentReviewPending.
@@ -5586,7 +5586,7 @@ abstract class AppLocalizations {
   /// No description provided for @refunded.
   ///
   /// In en, this message translates to:
-  /// **'refunded'**
+  /// **'Refunded'**
   String get refunded;
 
   /// No description provided for @refundRequired.
@@ -5700,7 +5700,7 @@ abstract class AppLocalizations {
   /// No description provided for @replacementNeeded.
   ///
   /// In en, this message translates to:
-  /// **'REPLACEMENT NEEDED'**
+  /// **'Replacement needed'**
   String get replacementNeeded;
 
   /// No description provided for @replacementpending.
@@ -6120,7 +6120,7 @@ abstract class AppLocalizations {
   /// No description provided for @scheduled.
   ///
   /// In en, this message translates to:
-  /// **'scheduled'**
+  /// **'Scheduled'**
   String get scheduled;
 
   /// No description provided for @scheduledFor.
@@ -6355,7 +6355,7 @@ abstract class AppLocalizations {
   /// No description provided for @sharingLocation.
   ///
   /// In en, this message translates to:
-  /// **'SHARING LOCATION'**
+  /// **'Sharing location'**
   String get sharingLocation;
 
   /// Application message: showValue
@@ -6651,7 +6651,7 @@ abstract class AppLocalizations {
   /// No description provided for @temporarilyClosed.
   ///
   /// In en, this message translates to:
-  /// **'TEMPORARILY CLOSED'**
+  /// **'Temporarily closed'**
   String get temporarilyClosed;
 
   /// Application message: temporarilyClosedValue
@@ -7395,7 +7395,7 @@ abstract class AppLocalizations {
   /// No description provided for @unpaid.
   ///
   /// In en, this message translates to:
-  /// **'unpaid'**
+  /// **'Unpaid'**
   String get unpaid;
 
   /// No description provided for @unsettledCash.
@@ -7571,7 +7571,7 @@ abstract class AppLocalizations {
   /// No description provided for @verified.
   ///
   /// In en, this message translates to:
-  /// **'VERIFIED'**
+  /// **'Verified'**
   String get verified;
 
   /// Application message: verifiedAppDriver
@@ -7757,7 +7757,7 @@ abstract class AppLocalizations {
   /// No description provided for @waived.
   ///
   /// In en, this message translates to:
-  /// **'waived'**
+  /// **'Waived'**
   String get waived;
 
   /// No description provided for @wed.
@@ -8556,6 +8556,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your GPS signal is too weak. Move to an open area and try again.'**
   String get gpsAccuracyTooLow;
+
+  /// No description provided for @kmFromTown.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km from town'**
+  String kmFromTown(String km);
+
+  /// No description provided for @driverInServiceArea.
+  ///
+  /// In en, this message translates to:
+  /// **'In the Bustos service area'**
+  String get driverInServiceArea;
+
+  /// No description provided for @driverOutsideServiceArea.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km from Bustos'**
+  String driverOutsideServiceArea(String km);
+
+  /// No description provided for @noDriversOnlineRightNow.
+  ///
+  /// In en, this message translates to:
+  /// **'No drivers are online right now'**
+  String get noDriversOnlineRightNow;
+
+  /// No description provided for @noDriversOnlineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can still send the request, but it may expire before anyone accepts. Scheduling for later gives drivers time to see it.'**
+  String get noDriversOnlineBody;
+
+  /// No description provided for @scheduleForLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule for later'**
+  String get scheduleForLater;
+
+  /// No description provided for @groupOfFourOrMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Group of 4 or more?'**
+  String get groupOfFourOrMore;
+
+  /// No description provided for @groupOfFourOrMoreBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A tricycle seats up to 3. Book this one for 3, then ask someone else in your group to book a second tricycle from their own phone for the same tour.'**
+  String get groupOfFourOrMoreBody;
+
+  /// No description provided for @locationExplainerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show where you are on the map'**
+  String get locationExplainerTitle;
+
+  /// No description provided for @locationReasonMap.
+  ///
+  /// In en, this message translates to:
+  /// **'See how far each spot is from you.'**
+  String get locationReasonMap;
+
+  /// No description provided for @locationReasonPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your current spot as the pickup point, so your driver finds you.'**
+  String get locationReasonPickup;
+
+  /// No description provided for @locationReasonPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Only used while the app is open. Drivers see your pickup point, not your live location.'**
+  String get locationReasonPrivacy;
+
+  /// No description provided for @allowLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location'**
+  String get allowLocation;
+
+  /// No description provided for @notNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get notNow;
+
+  /// No description provided for @inYourTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'In your trip'**
+  String get inYourTrip;
 }
 
 class _AppLocalizationsDelegate

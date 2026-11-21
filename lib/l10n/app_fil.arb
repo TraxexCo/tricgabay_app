@@ -95,7 +95,7 @@
   "abc1234": "ABC 1234",
   "abc1234AccreditedDriver": "ABC 1234 • Akreditadong drayber",
   "about": "Tungkol dito",
-  "accept": "TANGGAPIN",
+  "accept": "Tanggapin",
   "acceptAndContinue": "Tanggapin at magpatuloy",
   "acceptAssistanceRequests": "Tumanggap ng mga kahilingan para sa tulong",
   "accepted": "Tinanggap",
@@ -560,7 +560,7 @@
   "createANewPassword": "Gumawa ng bagong password",
   "createTouristAccount": "Gumawa ng Account ng Turista",
   "criticalConditionsAlsoAppearInOperationalAlertsInvestigateBeforeClearingAnAlert": "Makikita rin ang mga kritikal na kondisyon sa mga alerto sa operasyon. Siyasatin muna bago alisin ang alerto.",
-  "curatedExperience": "PINILING KARANASAN",
+  "curatedExperience": "Piniling karanasan",
   "currentGpsLocation": "Kasalukuyang lokasyon sa GPS",
   "currentGpsPickup": "Kasalukuyang sunduan mula sa GPS",
   "currentLocation": "Kasalukuyang lokasyon",
@@ -590,7 +590,7 @@
   },
   "dec": "Dis",
   "decisionAndReasoning": "Pasiya at paliwanag",
-  "decline": "TANGGIHAN",
+  "decline": "Tanggihan",
   "decliningMatchedOffersRequiresTheConfiguredServer": "Kailangan ang naka-configure na server upang tanggihan ang itinugmang alok.",
   "delete": "Burahin",
   "deleteAccount": "Burahin ang account?",
@@ -609,7 +609,7 @@
   "describeTheDisagreementCollectionAndRefundConfirmationsWillPauseUntilAnAdminReviews": "Ilarawan ang hindi pagkakasundo. Ihihinto muna ang mga kumpirmasyon sa paniningil at refund hanggang masuri ito ng admin.",
   "description": "Paglalarawan",
   "destination": "Patutunguhan",
-  "destinations": "mga destinasyon",
+  "destinations": "Mga destinasyon",
   "destinationsYouLove": "Mga destinasyon na gusto mo",
   "directions": "Mga direksiyon",
   "directionsRequireBetween2And25Coordinates": "Kailangan ng 2 hanggang 25 coordinate para sa direksiyon.",
@@ -975,7 +975,7 @@
   "help": "Tulong",
   "helpSupport": "Tulong at suporta",
   "heritage": "Pamana",
-  "hidden": "NAKATAGO",
+  "hidden": "Nakatago",
   "hideValue": "Itago ang {value}",
   "@hideValue": {
     "description": "Application message: hideValue",
@@ -1394,7 +1394,7 @@
       }
     }
   },
-  "openDialer": "BUKSAN ANG DIALER",
+  "openDialer": "Buksan ang dialer",
   "openDriverSearch": "Buksan ang paghahanap ng drayber",
   "openingHours": "Mga Oras ng Pagbubukas",
   "openReviewsValue": "Mga bukas na pagsusuri: {value}",
@@ -1693,7 +1693,7 @@
       }
     }
   },
-  "replacementNeeded": "KAILANGAN NG KAPALIT",
+  "replacementNeeded": "Kailangan ng kapalit",
   "replacementpending": "Naghihintay ng kapalit",
   "replacementPending": "Naghihintay ng kapalit",
   "reportArrivalAtNextStop": "Iulat ang pagdating sa susunod na hintuan",
@@ -1840,7 +1840,7 @@
   "setAFlatCustomTourFareAndAFixedFareForEachPackage": "Magtakda ng isang pamasahe para sa pasadyang tour at bawat package. Walang awtomatikong dagdag para sa hintuan, distansiya, paghihintay o dagsa ng pasahero. Hiwalay ang bayad sa pagpasok.",
   "shareAnUpdateWithDriversOrTourists": "Magbahagi ng update sa mga drayber o turista",
   "shareThisCodeOnlyWhenYouAreOnBoard": "Ibigay lamang ang code na ito kapag nakasakay ka na",
-  "sharingLocation": "IBINABAHAGI ANG LOKASYON",
+  "sharingLocation": "Ibinabahagi ang lokasyon",
   "showValue": "Ipakita ang {value}",
   "@showValue": {
     "description": "Application message: showValue",
@@ -1948,7 +1948,7 @@
   "tapTheHeartOnAnyTouristSpotToKeepItHere": "I-tap ang puso sa pasyalan upang itabi ito rito.",
   "tellUsWhatToImprove": "Sabihin kung ano ang dapat pagandahin",
   "temporarilyCloseAttraction": "Pansamantalang isara ang pasyalan",
-  "temporarilyClosed": "PANSAMANTALANG SARADO",
+  "temporarilyClosed": "Pansamantalang sarado",
   "temporarilyClosedValue": "Pansamantalang isinara ang {value}",
   "@temporarilyClosedValue": {
     "description": "Application message: temporarilyClosedValue",
@@ -2216,7 +2216,7 @@
   "vehicleProblem": "problema sa sasakyan",
   "vehicleProblemPauseTripSafely": "Problema sa sasakyan · ligtas na huminto",
   "verificationStatus": "Katayuan ng beripikasyon",
-  "verified": "BERIPIKADO",
+  "verified": "Beripikado",
   "verifiedAppDriver": "Beripikadong drayber ng {brandName}",
   "@verifiedAppDriver": {
     "description": "Application message: verifiedAppDriver",
@@ -2597,5 +2597,22 @@
   "tickTheAgreementToBook": "Lagyan ng tsek ang kasunduan sa itaas para makapagpareserba.",
   "driverDocumentsBlockOnline": "May kulang, expired, o hindi pa beripikadong dokumento ng drayber. Tingnan ang iyong profile o makipag-ugnayan sa admin.",
   "moveWithin150mOfPickup": "Lumapit sa loob ng 150 metro mula sa sunduan at subukan muli.",
-  "gpsAccuracyTooLow": "Mahina ang GPS signal. Lumipat sa bukas na lugar at subukan muli."
+  "gpsAccuracyTooLow": "Mahina ang GPS signal. Lumipat sa bukas na lugar at subukan muli.",
+  "kmFromTown": "{km} km mula sa bayan",
+  "@kmFromTown": {"placeholders": {"km": {"type": "String"}}},
+  "driverInServiceArea": "Nasa loob ng serbisyo sa Bustos",
+  "driverOutsideServiceArea": "{km} km mula sa Bustos",
+  "@driverOutsideServiceArea": {"placeholders": {"km": {"type": "String"}}},
+  "noDriversOnlineRightNow": "Walang drayber na online ngayon",
+  "noDriversOnlineBody": "Maaari mo pa ring ipadala ang kahilingan, pero baka mag-expire ito bago may tumanggap. Kung iiskedyul mo sa ibang oras, may panahon ang mga drayber na makita ito.",
+  "scheduleForLater": "Iiskedyul sa ibang oras",
+  "groupOfFourOrMore": "Apat o higit pa kayo?",
+  "groupOfFourOrMoreBody": "Hanggang 3 pasahero ang kasya sa isang traysikel. Magpareserba para sa 3, tapos hilingin sa isa pang kasama na magpareserba ng pangalawang traysikel sa sarili niyang phone para sa parehong tour.",
+  "locationExplainerTitle": "Ipakita kung nasaan ka sa mapa",
+  "locationReasonMap": "Makita kung gaano kalayo sa iyo ang bawat lugar.",
+  "locationReasonPickup": "Gamitin ang kinaroroonan mo bilang sunduan para madali kang mahanap ng drayber.",
+  "locationReasonPrivacy": "Ginagamit lang habang bukas ang app. Sunduan mo lang ang nakikita ng drayber, hindi ang live na lokasyon mo.",
+  "allowLocation": "Payagan ang lokasyon",
+  "notNow": "Mamaya na lang",
+  "inYourTrip": "Nasa biyahe mo na"
 }

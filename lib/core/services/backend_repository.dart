@@ -1283,6 +1283,10 @@ class BackendRepository {
     throw StateError(MessageCode.pickupRecoveryFailed);
   }
 
+  /// Approved, compliant drivers online right now (a count only).
+  static Future<int> countOnlineDrivers() async =>
+      ((await _client.rpc('count_online_drivers')) as num).toInt();
+
   static Future<void> rpc(String name, Map<String, dynamic> parameters) async {
     await _client.rpc(name, params: parameters);
   }

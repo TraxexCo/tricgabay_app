@@ -92,6 +92,15 @@ class AppSession {
     return null;
   }
 
+  /// The name to show for a booking: its package's name, or "Tour package"
+  /// when the name hasn't loaded yet; custom tours say how many stops.
+  static String bookingTitle(BookingModel booking) =>
+      booking.trip.packageName ??
+      packageNameFor(booking.trip.packageId) ??
+      (booking.trip.packageId != null
+          ? MessageCode.tourPackage
+          : MessageCode.stopCustomTourValue(booking.stops.length.toString()));
+
   static TourPackageModel? get activePackage {
     final id = activePackageId;
     if (id == null) return null;

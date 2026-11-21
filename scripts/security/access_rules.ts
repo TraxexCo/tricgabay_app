@@ -275,6 +275,7 @@ export const rpcGroups: Record<string, string[]> = {
     "owns_booking_as_tourist",
     "has_active_booking_offer",
     "notification_booking_id",
+    "count_online_drivers",
   ],
   tourist: [
     "create_booking",

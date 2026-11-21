@@ -1,4 +1,5 @@
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import 'package:tricgabay_app/core/utils/formatters.dart';
 import 'package:tricgabay_app/core/widgets/map_surface.dart';
 import '../../../core/services/error_messages.dart';
 import 'dart:ui' as ui;
@@ -16,6 +17,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/session/app_session.dart';
 import '../../../models/tourist_spot_model.dart';
 
+import '../../../core/navigation/launch_preferences.dart';
 import '../../../core/widgets/shared_widgets.dart';
 import '../../../core/widgets/web_map_fallback.dart';
 import '../spot_filters.dart';
@@ -62,21 +64,51 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
     unawaited(_recreatePins(_filteredSpots));
   }
 
-  // How far the Explore sheet is pulled up (fraction of the space above
-  // the menu bar). Map buttons and the legend ride just above it.
-  final _sheetExtent = ValueNotifier<double>(_sheetInitialExtent);
-  static const _sheetInitialExtent = 0.36;
+  // How far the Explore sheet is pulled up, as a fraction of the screen.
+  // Null until the tourist drags it; the resting height is used then.
+  // Map buttons and the legend ride just above it.
+  final _sheetExtent = ValueNotifier<double?>(null);
+  double _sheetMinExtent = 0.3;
+  double _sheetInitialExtent = 0.46;
+  double _sheetMaxExtent = 0.85;
 
-  Widget _aboveSheet(Widget Function(double bottom) overlay) {
-    final inset = MediaQuery.paddingOf(context).bottom;
-    return ValueListenableBuilder<double>(
+  /// The sheet runs behind the floating menu bar to the bottom of the
+  /// screen. Its resting height shows the header, the filters and one full
+  /// row of spot cards; collapsed, it still shows the header and filters
+  /// above the menu bar.
+  void _measureSheet(double height) {
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+    final menuBar = MediaQuery.paddingOf(context).bottom;
+    final header = 104 + 44 * scale;
+    final collapsed = (menuBar + header) / height;
+    final resting = (menuBar + header + _spotRowHeight(context) + 8) / height;
+    // Fully open, the sheet stops just under the greeting row.
+    final greeting = MediaQuery.paddingOf(context).top + 28 + 58 * scale;
+    _sheetMaxExtent = ((height - greeting) / height).clamp(0.65, 0.92);
+    _sheetMinExtent = collapsed.clamp(0.18, 0.5);
+    _sheetInitialExtent = resting.clamp(_sheetMinExtent, 0.55);
+  }
+
+  /// Places [overlay] just above the sheet. `compact` is true when the map
+  /// strip between the search bar and the sheet is too short for the
+  /// stacked map buttons.
+  Widget _aboveSheet(Widget Function(double bottom, bool compact) overlay) {
+    return ValueListenableBuilder<double?>(
       valueListenable: _sheetExtent,
-      builder: (context, extent, _) => LayoutBuilder(
+      builder: (context, dragged, _) => LayoutBuilder(
         builder: (context, constraints) {
+          final extent = dragged ?? _sheetInitialExtent;
           // Out of the way while the sheet covers most of the map.
-          if (extent > 0.55) return const SizedBox.shrink();
-          final space = constraints.maxHeight - inset;
-          return Stack(children: [overlay(inset + space * extent + 16)]);
+          if (extent > _sheetInitialExtent + 0.08) {
+            return const SizedBox.shrink();
+          }
+          final bottom = constraints.maxHeight * extent + 14;
+          final topBar =
+              MediaQuery.paddingOf(context).top +
+              84 +
+              84 * MediaQuery.textScalerOf(context).scale(1);
+          final compact = constraints.maxHeight - bottom - topBar < 180;
+          return Stack(children: [overlay(bottom, compact)]);
         },
       ),
     );
@@ -205,6 +237,7 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
                     double.infinity,
                   )
                 : constraints.maxHeight;
+            _measureSheet(canvasHeight);
             return SingleChildScrollView(
               child: SizedBox(
                 height: canvasHeight,
@@ -241,20 +274,14 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
                     _aboveSheet(_mapControls),
 
                     // ── Bottom draggable sheet ────────────────────────────────────
-                    // The sheet ends at the top of the floating menu bar, so
-                    // its cards are never hidden behind it.
-                    Padding(
-                      padding: EdgeInsets.only(
-                        bottom: MediaQuery.paddingOf(context).bottom,
-                      ),
-                      child:
-                          NotificationListener<DraggableScrollableNotification>(
-                            onNotification: (n) {
-                              _sheetExtent.value = n.extent;
-                              return false;
-                            },
-                            child: _exploreSheet(),
-                          ),
+                    // Runs behind the floating menu bar to the screen edge;
+                    // its list is padded so the last cards clear the bar.
+                    NotificationListener<DraggableScrollableNotification>(
+                      onNotification: (n) {
+                        _sheetExtent.value = n.extent;
+                        return false;
+                      },
+                      child: _exploreSheet(),
                     ),
                   ],
                 ),
@@ -278,8 +305,32 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
         permission == geo.LocationPermission.whileInUse;
   }
 
+  /// Before Android's own prompt, say once why the map wants location. A
+  /// "Not now" is remembered; the my-location button can still ask later.
+  Future<bool> _explainLocationFirst() async {
+    if (!await geo.Geolocator.isLocationServiceEnabled()) return false;
+    final permission = await geo.Geolocator.checkPermission();
+    if (permission == geo.LocationPermission.always ||
+        permission == geo.LocationPermission.whileInUse) {
+      return true;
+    }
+    if (permission == geo.LocationPermission.deniedForever) return false;
+    if (await LaunchPreferences.locationExplained()) return false;
+    // Let the first frame and any sign-in prompts settle first.
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    if (!mounted || !(ModalRoute.of(context)?.isCurrent ?? true)) return false;
+    final allow = await showModalBottomSheet<bool>(
+      context: context,
+      useRootNavigator: true,
+      builder: (context) => const _LocationExplainerSheet(),
+    );
+    await LaunchPreferences.markLocationExplained();
+    return allow == true;
+  }
+
   Future<void> _startLocationTracking() async {
     try {
+      if (!await _explainLocationFirst() || !mounted) return;
       if (!await _ensureLocationPermission() || !mounted) return;
       _positionSubscription =
           geo.Geolocator.getPositionStream(
@@ -315,68 +366,6 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
         tooltip: context.optionalMessage(tooltip),
         icon: Icon(icon, color: foreground),
         splashRadius: 24,
-      ),
-    ),
-  );
-
-  Widget _actionCard(
-    BuildContext context,
-    IconData icon,
-    String title,
-    String subtitle,
-    String route,
-    Color color,
-  ) => SizedBox(
-    width: 152 * MediaQuery.textScalerOf(context).scale(1),
-    child: Padding(
-      padding: const EdgeInsets.only(right: 12),
-      child: GestureDetector(
-        onTap: () => context.push(route),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFFDCE5F2), width: 1.2),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x180D1B2A),
-                blurRadius: 12,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(9),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: .13),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, size: 20, color: color),
-              ),
-              const Spacer(),
-              Text(
-                context.message(title),
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              Text(
-                context.message(subtitle),
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     ),
   );

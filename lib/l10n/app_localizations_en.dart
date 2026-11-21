@@ -318,7 +318,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get about => 'About';
 
   @override
-  String get accept => 'ACCEPT';
+  String get accept => 'Accept';
 
   @override
   String get acceptAndContinue => 'Accept and continue';
@@ -327,7 +327,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get acceptAssistanceRequests => 'Accept assistance requests';
 
   @override
-  String get accepted => 'accepted';
+  String get accepted => 'Accepted';
 
   @override
   String get acceptTheCurrentPrivacyNoticeBeforeSubmitting =>
@@ -400,7 +400,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addToTrip => '+ Add to Trip';
 
   @override
-  String get addToTripLabel => 'Add to Trip';
+  String get addToTripLabel => 'Add to trip';
 
   @override
   String get addTouristSpot => 'Add tourist spot';
@@ -803,7 +803,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancellationAndPaymentPolicy => 'Cancellation and payment policy';
 
   @override
-  String get cancelled => 'cancelled';
+  String get cancelled => 'Cancelled';
 
   @override
   String get cancelledAfterTheGracePeriodPublishedCancellationFeeApplied =>
@@ -992,7 +992,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Complete all document and service-area fields.';
 
   @override
-  String get completed => 'completed';
+  String get completed => 'Completed';
 
   @override
   String get completedAndActiveBookings => 'Completed and active bookings';
@@ -1183,7 +1183,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Critical conditions also appear in operational alerts. Investigate before clearing an alert.';
 
   @override
-  String get curatedExperience => 'CURATED EXPERIENCE';
+  String get curatedExperience => 'Curated experience';
 
   @override
   String get currentGpsLocation => 'Current GPS location';
@@ -1224,7 +1224,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get decisionAndReasoning => 'Decision and reasoning';
 
   @override
-  String get decline => 'DECLINE';
+  String get decline => 'Decline';
 
   @override
   String get decliningMatchedOffersRequiresTheConfiguredServer =>
@@ -1262,7 +1262,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get destination => 'Destination';
 
   @override
-  String get destinations => 'destinations';
+  String get destinations => 'Destinations';
 
   @override
   String get destinationsYouLove => 'Destinations you love';
@@ -1959,7 +1959,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get heritage => 'Heritage';
 
   @override
-  String get hidden => 'HIDDEN';
+  String get hidden => 'Hidden';
 
   @override
   String hideValue(String value) {
@@ -2604,7 +2604,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onePriceForTheBookedRoute => 'One price for the booked route';
 
   @override
-  String get ongoing => 'ongoing';
+  String get ongoing => 'Ongoing';
 
   @override
   String get online => 'Online';
@@ -2686,7 +2686,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get openDialer => 'OPEN DIALER';
+  String get openDialer => 'Open dialer';
 
   @override
   String get openDriverSearch => 'Open driver search';
@@ -2737,7 +2737,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Package stops changed. Select the package again.';
 
   @override
-  String get paid => 'paid';
+  String get paid => 'Paid';
 
   @override
   String get paidOnline => 'Paid online';
@@ -2841,7 +2841,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paymentPendingLabel => 'payment_pending';
 
   @override
-  String get paymentReview => 'payment review';
+  String get paymentReview => 'Payment review';
 
   @override
   String get paymentReviewPending => 'Payment review pending';
@@ -3181,7 +3181,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get refunddue => 'refundDue';
 
   @override
-  String get refunded => 'refunded';
+  String get refunded => 'Refunded';
 
   @override
   String get refundRequired => 'refund_required';
@@ -3247,7 +3247,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get replacementNeeded => 'REPLACEMENT NEEDED';
+  String get replacementNeeded => 'Replacement needed';
 
   @override
   String get replacementpending => 'replacementPending';
@@ -3469,7 +3469,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get savingBooking => 'Saving booking…';
 
   @override
-  String get scheduled => 'scheduled';
+  String get scheduled => 'Scheduled';
 
   @override
   String get scheduledFor => 'Scheduled for';
@@ -3599,7 +3599,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Share this code only when you are on board';
 
   @override
-  String get sharingLocation => 'SHARING LOCATION';
+  String get sharingLocation => 'Sharing location';
 
   @override
   String showValue(String value) {
@@ -3769,7 +3769,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get temporarilyCloseAttraction => 'Temporarily close attraction';
 
   @override
-  String get temporarilyClosed => 'TEMPORARILY CLOSED';
+  String get temporarilyClosed => 'Temporarily closed';
 
   @override
   String temporarilyClosedValue(String value) {
@@ -4232,7 +4232,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Unknown / until manually reopened';
 
   @override
-  String get unpaid => 'unpaid';
+  String get unpaid => 'Unpaid';
 
   @override
   String get unsettledCash => 'Unsettled cash';
@@ -4333,7 +4333,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verificationStatus => 'Verification status';
 
   @override
-  String get verified => 'VERIFIED';
+  String get verified => 'Verified';
 
   @override
   String verifiedAppDriver(String brandName) {
@@ -4440,7 +4440,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get waitingPeriodCompleted => 'Waiting period completed';
 
   @override
-  String get waived => 'waived';
+  String get waived => 'Waived';
 
   @override
   String get wed => 'Wed';
@@ -4937,4 +4937,57 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get gpsAccuracyTooLow =>
       'Your GPS signal is too weak. Move to an open area and try again.';
+
+  @override
+  String kmFromTown(String km) {
+    return '$km km from town';
+  }
+
+  @override
+  String get driverInServiceArea => 'In the Bustos service area';
+
+  @override
+  String driverOutsideServiceArea(String km) {
+    return '$km km from Bustos';
+  }
+
+  @override
+  String get noDriversOnlineRightNow => 'No drivers are online right now';
+
+  @override
+  String get noDriversOnlineBody =>
+      'You can still send the request, but it may expire before anyone accepts. Scheduling for later gives drivers time to see it.';
+
+  @override
+  String get scheduleForLater => 'Schedule for later';
+
+  @override
+  String get groupOfFourOrMore => 'Group of 4 or more?';
+
+  @override
+  String get groupOfFourOrMoreBody =>
+      'A tricycle seats up to 3. Book this one for 3, then ask someone else in your group to book a second tricycle from their own phone for the same tour.';
+
+  @override
+  String get locationExplainerTitle => 'Show where you are on the map';
+
+  @override
+  String get locationReasonMap => 'See how far each spot is from you.';
+
+  @override
+  String get locationReasonPickup =>
+      'Use your current spot as the pickup point, so your driver finds you.';
+
+  @override
+  String get locationReasonPrivacy =>
+      'Only used while the app is open. Drivers see your pickup point, not your live location.';
+
+  @override
+  String get allowLocation => 'Allow location';
+
+  @override
+  String get notNow => 'Not now';
+
+  @override
+  String get inYourTrip => 'In your trip';
 }

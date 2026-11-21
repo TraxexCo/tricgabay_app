@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/services/trip_rules.dart';
 import '../../../core/config/backend_config.dart';
+import '../../../core/services/backend_repository.dart';
 import '../../../models/booking_model.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../payment/outstanding_fare_banner.dart';
@@ -33,6 +34,20 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
       text: AppSession.draft.accessibilityNeeds,
     );
     AppSession.farePolicy.addListener(_priceChanged);
+    _checkOnlineDrivers();
+  }
+
+  /// Null until known, or when the count can't be loaded (then no warning).
+  int? _onlineDrivers;
+
+  Future<void> _checkOnlineDrivers() async {
+    if (!BackendConfig.isConfigured) return;
+    try {
+      final count = await BackendRepository.countOnlineDrivers();
+      if (mounted) setState(() => _onlineDrivers = count);
+    } catch (_) {
+      // Informational only; booking still works without it.
+    }
   }
 
   void _priceChanged() {
@@ -109,27 +124,77 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
           padding: const EdgeInsets.all(20),
           children: [
             const OutstandingFareBanner(),
-            Text(
-              context.message(package?.name ?? MessageCode.customTour),
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.lock_outline),
-                title: Text(context.l10n.fixedFareForThisRoute),
-                subtitle: Text(
-                  context
-                      .l10n
-                      .noDistanceWaitingOrSurgeAdditionsEntranceFeesAndPurchasesAreSeparate,
-                ),
-                trailing: Text(
-                  context.message('₱${AppFormatters.amount(fare)}'),
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+            // The fare is what the tourist is agreeing to; lead with it.
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+              decoration: BoxDecoration(
+                gradient: AppColors.primaryGradient,
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.message(package?.name ?? MessageCode.customTour),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 2,
+                    crossAxisAlignment: WrapCrossAlignment.end,
+                    children: [
+                      Text(
+                        context.message('₱${AppFormatters.amount(fare)}'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
+                          height: 1.1,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 5),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.lock_outline,
+                              size: 15,
+                              color: AppColors.secondary,
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                context.l10n.fixedFareForThisRoute,
+                                style: const TextStyle(
+                                  color: AppColors.secondary,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    context
+                        .l10n
+                        .noDistanceWaitingOrSurgeAdditionsEntranceFeesAndPurchasesAreSeparate,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: .85),
+                      fontSize: 13,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 12),
@@ -200,6 +265,20 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                 ],
               ),
             ),
+            if (_scheduledAt == null && _onlineDrivers == 0) ...[
+              const SizedBox(height: 12),
+              _NoticeBox(
+                icon: Icons.wifi_tethering_off_rounded,
+                color: AppColors.warning,
+                background: AppColors.warningLight,
+                title: context.l10n.noDriversOnlineRightNow,
+                body: context.l10n.noDriversOnlineBody,
+                action: TextButton(
+                  onPressed: _busy ? null : _chooseSchedule,
+                  child: Text(context.l10n.scheduleForLater),
+                ),
+              ),
+            ],
             const SizedBox(height: 20),
             Text(
               context.l10n.includedStops,
@@ -251,7 +330,15 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                   ? null
                   : (value) => setState(() => _passengerCount = value ?? 1),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
+            _NoticeBox(
+              icon: Icons.groups_2_outlined,
+              color: AppColors.primary,
+              background: AppColors.surfaceVariant,
+              title: context.l10n.groupOfFourOrMore,
+              body: context.l10n.groupOfFourOrMoreBody,
+            ),
+            const SizedBox(height: 16),
             TextField(
               controller: _luggageNotes,
               enabled: !_busy,
@@ -431,5 +518,63 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
         ),
       );
     },
+  );
+}
+
+/// A tinted note with an icon, a short title and an explanation.
+class _NoticeBox extends StatelessWidget {
+  const _NoticeBox({
+    required this.icon,
+    required this.color,
+    required this.background,
+    required this.title,
+    required this.body,
+    this.action,
+  });
+
+  final IconData icon;
+  final Color color, background;
+  final String title, body;
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+    decoration: BoxDecoration(
+      color: background,
+      borderRadius: BorderRadius.circular(14),
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: color, size: 22),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                body,
+                style: const TextStyle(
+                  fontSize: 13,
+                  height: 1.4,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              if (action != null)
+                Align(alignment: Alignment.centerLeft, child: action),
+            ],
+          ),
+        ),
+      ],
+    ),
   );
 }

@@ -3,11 +3,11 @@ import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../models/tourist_spot_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/shared_widgets.dart';
-import '../../../core/widgets/app_button.dart';
 import '../../../core/session/app_session.dart';
 
 class TouristSpotInfoScreen extends StatelessWidget {
@@ -252,70 +252,6 @@ class TouristSpotInfoScreen extends StatelessWidget {
                   ...spot.tips.map((tip) => _buildTip(context, tip)),
                   const SizedBox(height: 24),
                   Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          context.l10n.ratingsReviews,
-                          style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.danger,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            context.l10n.informationProvidedByAppAdministrators(
-                              AppBrand.name,
-                            ),
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 24),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          context.message('4.8'),
-                          style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          context.l10n.reviewCountSummary,
-                          style: GoogleFonts.poppins(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Flexible(
@@ -367,7 +303,31 @@ class TouristSpotInfoScreen extends StatelessWidget {
                       },
                     ),
                   ),
-                  const SizedBox(height: 100), // spacing for bottom bar
+                  const SizedBox(height: 20),
+                  // Where this page's details come from; there are no
+                  // tourist reviews of spots yet.
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.verified_outlined,
+                        size: 16,
+                        color: AppColors.textHint,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          context.l10n.informationProvidedByAppAdministrators(
+                            AppBrand.name,
+                          ),
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: AppColors.textHint,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 110), // spacing for bottom bar
                 ],
               ),
             ),
@@ -375,82 +335,82 @@ class TouristSpotInfoScreen extends StatelessWidget {
         ],
       ),
       bottomSheet: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
         decoration: const BoxDecoration(
           color: AppColors.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 8,
-              offset: Offset(0, -2),
-            ),
-          ],
+          border: Border(top: BorderSide(color: AppColors.divider)),
         ),
         child: SafeArea(
+          top: false,
           child: Row(
             children: [
-              Expanded(
-                child: AppButton(
-                  label: context.l10n.viewMap,
-                  type: AppButtonType.outline,
-                  onPressed: () {
-                    AppSession.focusedSpotId.value = spot.id;
-                    context.go('/tourist/home');
-                  },
-                ),
+              IconButton.outlined(
+                tooltip: context.l10n.viewMap,
+                style: _squareButton,
+                icon: const Icon(Icons.map_outlined),
+                onPressed: () {
+                  AppSession.focusedSpotId.value = spot.id;
+                  context.go('/tourist/home');
+                },
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
+              IconButton.outlined(
+                tooltip: context.l10n.directions,
+                style: _squareButton,
+                icon: const Icon(Icons.directions_rounded),
+                onPressed: () => _openDirections(spot),
+              ),
+              const SizedBox(width: 10),
               Expanded(
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.directions_rounded),
-                  label: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(context.l10n.directions, maxLines: 1),
-                  ),
-                  onPressed: () async {
-                    final uri = Uri.parse(
-                      'geo:${spot.latitude},${spot.longitude}?q=${spot.latitude},${spot.longitude}(${Uri.encodeComponent(spot.name)})',
+                child: ValueListenableBuilder<List<TouristSpotModel>>(
+                  valueListenable: AppSession.itinerary,
+                  builder: (context, itinerary, _) {
+                    final added = itinerary.any((item) => item.id == spot.id);
+                    return FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(52),
+                        backgroundColor: added ? AppColors.success : null,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      icon: Icon(
+                        spot.isTemporarilyClosed
+                            ? Icons.block_rounded
+                            : added
+                            ? Icons.check_rounded
+                            : Icons.add_rounded,
+                      ),
+                      label: Text(
+                        context.message(
+                          spot.isTemporarilyClosed
+                              ? MessageCode.closed
+                              : added
+                              ? MessageCode.inYourTrip
+                              : MessageCode.addToTripLabel,
+                        ),
+                      ),
+                      onPressed: spot.isTemporarilyClosed
+                          ? null
+                          : () {
+                              AppSession.toggleItinerary(spot);
+                              ScaffoldMessenger.of(context)
+                                ..hideCurrentSnackBar()
+                                ..showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      context.message(
+                                        added
+                                            ? MessageCode
+                                                  .removedFromYourItinerary
+                                            : MessageCode.addedToYourItinerary,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                            },
                     );
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri);
-                    } else {
-                      // Fallback: open Google Maps in browser
-                      final webUri = Uri.parse(
-                        'https://www.google.com/maps/search/?api=1&query=${spot.latitude},${spot.longitude}',
-                      );
-                      await launchUrl(
-                        webUri,
-                        mode: LaunchMode.externalApplication,
-                      );
-                    }
                   },
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: AppButton(
-                  label: spot.isTemporarilyClosed
-                      ? MessageCode.closed
-                      : MessageCode.itinerary,
-                  onPressed: spot.isTemporarilyClosed
-                      ? null
-                      : () {
-                          final alreadyAdded = AppSession.itinerary.value.any(
-                            (item) => item.id == spot.id,
-                          );
-                          AppSession.toggleItinerary(spot);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                context.message(
-                                  alreadyAdded
-                                      ? MessageCode.removedFromYourItinerary
-                                      : MessageCode.addedToYourItinerary,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
                 ),
               ),
             ],
@@ -458,6 +418,30 @@ class TouristSpotInfoScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  static final _squareButton = IconButton.styleFrom(
+    fixedSize: const Size(52, 52),
+    foregroundColor: AppColors.primary,
+    side: const BorderSide(color: AppColors.border, width: 1.5),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+  );
+
+  Future<void> _openDirections(TouristSpotModel spot) async {
+    final uri = Uri.parse(
+      'geo:${spot.latitude},${spot.longitude}?q=${spot.latitude},${spot.longitude}(${Uri.encodeComponent(spot.name)})',
+    );
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      // Fallback: open Google Maps in the browser.
+      await launchUrl(
+        Uri.parse(
+          'https://www.google.com/maps/search/?api=1&query=${spot.latitude},${spot.longitude}',
+        ),
+        mode: LaunchMode.externalApplication,
+      );
+    }
   }
 
   Widget _buildTip(BuildContext context, String text) {

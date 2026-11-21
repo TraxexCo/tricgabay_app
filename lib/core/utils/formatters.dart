@@ -35,6 +35,10 @@ class AppFormatters {
         symbol: '₱',
         decimalDigits: 0,
       ).format(amount);
+
+  /// Distances: one decimal place, no unit (the message adds "km").
+  static String distanceKm(num km, {String? locale}) =>
+      NumberFormat('#,##0.0', resolvedLocale(locale)).format(km);
   static String integer(num value, {String? locale}) =>
       NumberFormat('#,##0', resolvedLocale(locale)).format(value);
   static String monthShort(DateTime value, {String? locale}) =>

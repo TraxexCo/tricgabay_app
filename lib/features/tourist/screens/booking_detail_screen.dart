@@ -147,11 +147,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           padding: const EdgeInsets.all(20),
           children: [
             Text(
-              context.message(
-                booking.trip.packageName ??
-                    AppSession.packageNameFor(booking.trip.packageId) ??
-                    MessageCode.customTour,
-              ),
+              context.message(AppSession.bookingTitle(booking)),
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             // A short reference is enough to quote to support; the full

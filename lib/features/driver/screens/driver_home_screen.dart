@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as material show Size;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,6 +21,8 @@ import '../../../core/config/backend_config.dart';
 import '../../../core/services/backend_repository.dart';
 import '../../../core/services/driver_availability_controller.dart';
 import '../../../core/services/location_gateway.dart';
+import '../../../core/services/pickup_service_area.dart';
+import '../../../core/config/mapbox_config.dart';
 
 class DriverHomeScreen extends ConsumerStatefulWidget {
   const DriverHomeScreen({super.key});
@@ -33,6 +36,11 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
   bool _isChangingAvailability = false;
   String? _locationMessage;
   late final DriverAvailabilityController _availabilityController;
+  PickupServiceArea _serviceArea = const PickupServiceArea(
+    MapboxConfig.bustosLat,
+    MapboxConfig.bustosLng,
+    8,
+  );
 
   geo.LocationSettings get _onlineLocationSettings {
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
@@ -72,6 +80,16 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
     );
     if (AppSession.isDriverOnline.value) {
       _checkLocationPermission();
+    }
+    if (BackendConfig.isConfigured) unawaited(_loadServiceArea());
+  }
+
+  Future<void> _loadServiceArea() async {
+    try {
+      final area = await BackendRepository.loadPickupServiceArea();
+      if (mounted) setState(() => _serviceArea = area);
+    } catch (_) {
+      // Keep the built-in Bustos centre; the label is only informational.
     }
   }
 
@@ -374,10 +392,19 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                             ValueListenableBuilder<double?>(
                               valueListenable: AppSession.userLatitude,
                               builder: (context, lat, _) {
+                                final scale = MediaQuery.textScalerOf(
+                                  context,
+                                ).scale(1);
+                                final showsMap = isOnline && lat != null;
                                 return Container(
-                                  height:
-                                      108 *
-                                      MediaQuery.textScalerOf(context).scale(1),
+                                  // Online with a fix, the map is the
+                                  // driver's main view; otherwise a slim
+                                  // status panel.
+                                  height: showsMap
+                                      ? (MediaQuery.sizeOf(context).height *
+                                                0.3)
+                                            .clamp(200, 300)
+                                      : 108 * scale,
                                   decoration: BoxDecoration(
                                     color: Colors.white.withValues(alpha: .10),
                                     borderRadius: BorderRadius.circular(18),
@@ -449,66 +476,43 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                                                           ),
                                                     ),
                                             ),
-                                            if (!isOnline)
-                                              Container(
-                                                color: Colors.black.withValues(
-                                                  alpha: 0.3,
-                                                ),
-                                              ),
                                             Positioned(
-                                              left: 14,
+                                              left: 12,
                                               bottom: 12,
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 4,
+                                              right: 12,
+                                              child: Row(
+                                                children: [
+                                                  Flexible(
+                                                    child: _mapChip(
+                                                      icon: Icons.place_rounded,
+                                                      label: _areaLabel(
+                                                        context,
+                                                        lat,
+                                                        AppSession
+                                                            .userLongitude
+                                                            .value,
+                                                      ),
+                                                      background: Colors.white,
+                                                      foreground:
+                                                          AppColors.textPrimary,
                                                     ),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.black54,
-                                                  borderRadius:
-                                                      BorderRadius.circular(12),
-                                                ),
-                                                child: Text(
-                                                  context.l10n.bustosTownCentre,
-                                                  style: GoogleFonts.poppins(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 14,
                                                   ),
-                                                ),
+                                                ],
                                               ),
                                             ),
-                                            if (isOnline)
-                                              Positioned(
-                                                right: 12,
-                                                top: 12,
-                                                child: Container(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 8,
-                                                        vertical: 4,
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                    color: AppColors.success,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          20,
-                                                        ),
-                                                  ),
-                                                  child: Text(
-                                                    context
-                                                        .l10n
-                                                        .sharingLocation,
-                                                    style: GoogleFonts.poppins(
-                                                      color: Colors.white,
-                                                      fontSize: 8,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                    ),
-                                                  ),
-                                                ),
+                                            Positioned(
+                                              right: 12,
+                                              top: 12,
+                                              child: _mapChip(
+                                                icon: Icons
+                                                    .radio_button_checked_rounded,
+                                                label: context
+                                                    .l10n
+                                                    .sharingLocation,
+                                                background: AppColors.success,
+                                                foreground: Colors.white,
                                               ),
+                                            ),
                                           ],
                                         ),
                                 );
@@ -531,31 +535,34 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                         builder: (context, bookings, child) {
                           final earnings = AppSession.driverEarnings;
                           final trips = AppSession.driverTripsCompleted;
-                          return Row(
-                            children: [
-                              _stat(
-                                '₱${AppFormatters.amount(earnings)}',
-                                MessageCode.earnings,
-                                Icons.account_balance_wallet_outlined,
-                                AppColors.primary,
-                              ),
-                              const SizedBox(width: 10),
-                              _stat(
-                                '$trips',
-                                MessageCode.completedTrips,
-                                Icons.route_outlined,
-                                AppColors.secondary,
-                              ),
-                              const SizedBox(width: 10),
-                              _stat(
-                                isOnline
-                                    ? MessageCode.online
-                                    : MessageCode.offline,
-                                MessageCode.availability,
-                                Icons.timer_outlined,
-                                AppColors.success,
-                              ),
-                            ],
+                          return IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _stat(
+                                  '₱${AppFormatters.amount(earnings)}',
+                                  MessageCode.earnings,
+                                  Icons.account_balance_wallet_outlined,
+                                  AppColors.primary,
+                                ),
+                                const SizedBox(width: 10),
+                                _stat(
+                                  '$trips',
+                                  MessageCode.completedTrips,
+                                  Icons.route_outlined,
+                                  AppColors.secondary,
+                                ),
+                                const SizedBox(width: 10),
+                                _stat(
+                                  isOnline
+                                      ? MessageCode.online
+                                      : MessageCode.offline,
+                                  MessageCode.availability,
+                                  Icons.timer_outlined,
+                                  AppColors.success,
+                                ),
+                              ],
+                            ),
                           );
                         },
                       ),
@@ -585,6 +592,9 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                       if (isOnline) ...[
                         const SizedBox(height: 16),
                         FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            minimumSize: const material.Size.fromHeight(52),
+                          ),
                           onPressed: () => context.go('/driver/bookings'),
                           icon: const Icon(Icons.bolt_rounded),
                           label: Text(context.l10n.viewBookingRequests),
@@ -601,6 +611,57 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
     );
   }
 
+  /// Where the driver is relative to the Bustos service area, worked out
+  /// from the GPS fix rather than assumed.
+  String _areaLabel(BuildContext context, double lat, double? lng) {
+    final area = _serviceArea;
+    final km = lng == null ? null : area.distanceKmTo(lat, lng);
+    if (km == null) return context.l10n.locationUnavailable;
+    if (km <= area.radiusKm) return context.l10n.driverInServiceArea;
+    return context.l10n.driverOutsideServiceArea(
+      AppFormatters.integer(km.round()),
+    );
+  }
+
+  Widget _mapChip({
+    required IconData icon,
+    required String label,
+    required Color background,
+    required Color foreground,
+  }) => Container(
+    padding: const EdgeInsets.fromLTRB(8, 5, 10, 5),
+    decoration: BoxDecoration(
+      color: background,
+      borderRadius: BorderRadius.circular(20),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x290D1B2A),
+          blurRadius: 8,
+          offset: Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: foreground),
+        const SizedBox(width: 5),
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.poppins(
+              color: foreground,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
   Widget _stat(String value, String label, IconData icon, Color color) =>
       Expanded(
         child: Container(
@@ -614,19 +675,23 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(icon, size: 19, color: color),
-              const SizedBox(height: 12),
+              const Spacer(),
+              const SizedBox(height: 10),
               Text(
                 context.message(value),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               Text(
                 context.message(label),
                 style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 12.5,
+                  height: 1.3,
+                  fontWeight: FontWeight.w500,
                   color: AppColors.textSecondary,
                 ),
               ),

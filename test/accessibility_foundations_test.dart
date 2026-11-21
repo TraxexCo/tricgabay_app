@@ -35,7 +35,7 @@ void main() {
     );
     expect(
       tester.getSemantics(find.byType(StatusBadge)),
-      matchesSemantics(label: 'ongoing status', isReadOnly: true),
+      matchesSemantics(label: 'Ongoing status', isReadOnly: true),
     );
     semantics.dispose();
   });

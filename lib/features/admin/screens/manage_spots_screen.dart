@@ -345,7 +345,7 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
                                     Text(
                                       context.message(spot.categoryLabel),
                                       style: GoogleFonts.poppins(
-                                        color: AppColors.secondary,
+                                        color: AppColors.textSecondary,
                                         fontSize: 12,
                                       ),
                                     ),
