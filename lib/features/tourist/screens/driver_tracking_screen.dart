@@ -487,7 +487,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
 
             // Live route status
             Positioned(
-              top: 110,
+              top: MediaQuery.paddingOf(context).top + 104,
               right: 16,
               child: Container(
                 padding: const EdgeInsets.symmetric(
@@ -533,7 +533,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
                       ),
                       style: GoogleFonts.poppins(
                         color: Colors.white,
-                        fontSize: 10,
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -648,7 +648,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.poppins(
-                                  fontSize: 11,
+                                  fontSize: 12.5,
                                   color: AppColors.textSecondary,
                                 ),
                               ),

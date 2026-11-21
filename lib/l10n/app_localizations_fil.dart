@@ -137,10 +137,10 @@ class AppLocalizationsFil extends AppLocalizations {
       'Hindi bayad ang pasya · hindi pa naaayos';
 
   @override
-  String get adminRulePaid => 'Ipasyang bayad';
+  String get adminRulePaid => 'Ipasya: nagbayad ang turista';
 
   @override
-  String get adminRuleNotPaid => 'Ipasyang hindi bayad';
+  String get adminRuleNotPaid => 'Ipasya: hindi nagbayad ang turista';
 
   @override
   String get adminWaiveFare => 'Huwag nang singilin';
@@ -799,12 +799,12 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String cancelBookingFeeValue(String value) {
-    return 'Kanselahin ang reserbasyon | $value% singil';
+    return 'Kanselahin ang reserbasyon ($value% singil)';
   }
 
   @override
   String get cancelBookingNoCharge =>
-      'Kanselahin ang reserbasyon | walang singil';
+      'Kanselahin ang reserbasyon (walang singil)';
 
   @override
   String get cancelFree => 'Kanselahin nang walang singil';
@@ -2388,12 +2388,12 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String minValue(String value, String secondValue) {
-    return '$value | $secondValue minuto';
+    return '$value · $secondValue minuto';
   }
 
   @override
   String minValueLabel(String value, String secondValue) {
-    return '$value min | $secondValue';
+    return '$value min · $secondValue';
   }
 
   @override
@@ -5068,4 +5068,10 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get inYourTrip => 'Nasa biyahe mo na';
+
+  @override
+  String get openBookingDetails => 'Buksan ang detalye ng reserbasyon';
+
+  @override
+  String get adminEscalatedOn => 'Ipinasa sa admin';
 }

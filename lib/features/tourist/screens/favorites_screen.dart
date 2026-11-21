@@ -107,23 +107,58 @@ class FavoritesScreen extends StatelessWidget {
                                         ),
                                       ),
                                       const SizedBox(height: 4),
-                                      TextButton(
-                                        style: TextButton.styleFrom(
-                                          padding: EdgeInsets.zero,
-                                          minimumSize: Size.zero,
-                                          alignment: Alignment.centerLeft,
-                                        ),
-                                        onPressed: () {
-                                          AppSession.toggleItinerary(spot);
-                                          AppSnackbar.showSuccess(
-                                            context,
-                                            MessageCode.addedToItinerary,
+                                      // Shows whether the spot is
+                                      // already in the trip, so the tap
+                                      // never silently removes it.
+                                      ValueListenableBuilder(
+                                        valueListenable: AppSession.itinerary,
+                                        builder: (context, itinerary, _) {
+                                          final added = itinerary.any(
+                                            (item) => item.id == spot.id,
+                                          );
+                                          return TextButton.icon(
+                                            style: TextButton.styleFrom(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 4,
+                                                  ),
+                                              minimumSize: const Size(0, 40),
+                                              alignment: Alignment.centerLeft,
+                                              foregroundColor: added
+                                                  ? AppColors.success
+                                                  : AppColors.primary,
+                                            ),
+                                            onPressed: () {
+                                              AppSession.toggleItinerary(spot);
+                                              AppSnackbar.showSuccess(
+                                                context,
+                                                added
+                                                    ? MessageCode
+                                                          .removedFromYourItinerary
+                                                    : MessageCode
+                                                          .addedToItinerary,
+                                              );
+                                            },
+                                            icon: Icon(
+                                              added
+                                                  ? Icons.check_rounded
+                                                  : Icons.add_rounded,
+                                              size: 18,
+                                            ),
+                                            label: Text(
+                                              context.message(
+                                                added
+                                                    ? MessageCode.inYourTrip
+                                                    : MessageCode
+                                                          .addToTripLabel,
+                                              ),
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
                                           );
                                         },
-                                        child: Text(
-                                          context.l10n.addToTrip,
-                                          style: TextStyle(fontSize: 11),
-                                        ),
                                       ),
                                     ],
                                   ),

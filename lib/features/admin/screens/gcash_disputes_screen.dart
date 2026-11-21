@@ -272,7 +272,7 @@ class _GcashDisputeDetailScreenState extends State<GcashDisputeDetailScreen> {
                           l10n.adminEscalationNote,
                           d.escalationNote ?? '—',
                         ),
-                        _Fact(l10n.adminDisputeEscalated, time(d.escalatedAt)),
+                        _Fact(l10n.adminEscalatedOn, time(d.escalatedAt)),
                       ],
                     ),
                   ),
@@ -351,7 +351,7 @@ class _GcashDisputeDetailScreenState extends State<GcashDisputeDetailScreen> {
               TextButton(
                 onPressed: () =>
                     context.push('/admin/booking/${widget.bookingId}'),
-                child: Text(l10n.booking),
+                child: Text(l10n.openBookingDetails),
               ),
             ],
           );

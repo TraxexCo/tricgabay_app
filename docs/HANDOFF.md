@@ -92,6 +92,27 @@ Branch `feature/gcash-payment-and-cleanup` (local only: no git remote yet; base 
 - **Not applied yet:** the two new migrations must be pushed to the hosted project (`supabase db push`).
 - **Tests:** `flutter analyze` is clean. In the cloud workspace, 2,561 tests pass. Two fail there: DriverHome and DriverShell accessibility at text 1.0. They also failed on the untouched code there, so they are environment-specific, but rerun `flutter test` locally.
 
+### Follow-up: every-screen review
+
+All 63 screen renders, plus full-height renders of the long screens, were checked by eye. Fixed:
+
+- **Wording:** about 25 English headings and buttons were in Title Case; they are now sentence case. Pipe separators ("Cancel booking | no charge") are now brackets or middle dots.
+- **Tourist My bookings:** cards showed the raw database id; they now show the tour name.
+- **Booking detail:**
+  - The pickup code is a highlighted card at the top.
+  - "Price version" shows to admins only.
+  - The driver row no longer ends with a stray "·".
+- **Saved places:** "Add to trip" silently removed a spot that was already in the trip but still said "Added". It now shows "In your trip" and says when the spot is removed.
+- **Booking review:** the payment selector used the platform font instead of Poppins, and the passenger helper text no longer gets cut off.
+- **Active trip:** no longer repeats "Bustos, Bulacan" under pickup addresses.
+- **Tracking screen:** the status text is larger.
+- **Admin screens:**
+  - The GCash dispute buttons read "Decide: tourist paid / didn't pay" and "Open booking details".
+  - The spot list shows "Category · Visible/Hidden" next to each switch.
+  - Emergency contacts are cards, with a warning icon on placeholders.
+  - The announcement form has a gap between the audience and title fields.
+  - The reports driver card is full width.
+
 ## Left to do
 
 1. **Apply the two new migrations** on the hosted project, then rebuild and install on the phone. Check the tourist home sheet, the location explainer (fresh install, or clear the app's storage), the driver map label, and the no-drivers warning.

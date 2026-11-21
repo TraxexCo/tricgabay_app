@@ -193,6 +193,7 @@ class _SendAnnouncementScreenState extends State<SendAnnouncementScreen> {
                         _requestId = null;
                       }),
               ),
+              const SizedBox(height: 16),
               AppTextField(
                 controller: _titleController,
                 label: context.l10n.title,

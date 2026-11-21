@@ -38,8 +38,8 @@
   "adminDisputeEscalated": "Kailangan ng pasya",
   "adminDisputeWaiting": "Hinihintay ang turista at drayber",
   "adminDisputeUnsettled": "Hindi bayad ang pasya · hindi pa naaayos",
-  "adminRulePaid": "Ipasyang bayad",
-  "adminRuleNotPaid": "Ipasyang hindi bayad",
+  "adminRulePaid": "Ipasya: nagbayad ang turista",
+  "adminRuleNotPaid": "Ipasya: hindi nagbayad ang turista",
   "adminWaiveFare": "Huwag nang singilin",
   "adminRulingReason": "Dahilan ng iyong pasya",
   "adminNoReceipt": "Wala pang naipadalang resibo.",
@@ -380,7 +380,7 @@
   "callEmergencyServices": "Tumawag sa serbisyong pang-emerhensiya?",
   "cancel": "Kanselahin",
   "cancelBooking": "Kanselahin ang reserbasyon?",
-  "cancelBookingFeeValue": "Kanselahin ang reserbasyon | {value}% singil",
+  "cancelBookingFeeValue": "Kanselahin ang reserbasyon ({value}% singil)",
   "@cancelBookingFeeValue": {
     "description": "Application message: cancelBookingFeeValue",
     "placeholders": {
@@ -389,7 +389,7 @@
       }
     }
   },
-  "cancelBookingNoCharge": "Kanselahin ang reserbasyon | walang singil",
+  "cancelBookingNoCharge": "Kanselahin ang reserbasyon (walang singil)",
   "cancelFree": "Kanselahin nang walang singil",
   "cancelFreeOfCharge": "Kanselahin nang walang bayad",
   "cancellationAndPaymentPolicy": "Patakaran sa pagkansela at pagbabayad",
@@ -1204,7 +1204,7 @@
     }
   },
   "minutes": "minuto",
-  "minValue": "{value} | {secondValue} minuto",
+  "minValue": "{value} · {secondValue} minuto",
   "@minValue": {
     "description": "Application message: minValue",
     "placeholders": {
@@ -1216,7 +1216,7 @@
       }
     }
   },
-  "minValueLabel": "{value} min | {secondValue}",
+  "minValueLabel": "{value} min · {secondValue}",
   "@minValueLabel": {
     "description": "Application message: minValueLabel",
     "placeholders": {
@@ -2614,5 +2614,7 @@
   "locationReasonPrivacy": "Ginagamit lang habang bukas ang app. Sunduan mo lang ang nakikita ng drayber, hindi ang live na lokasyon mo.",
   "allowLocation": "Payagan ang lokasyon",
   "notNow": "Mamaya na lang",
-  "inYourTrip": "Nasa biyahe mo na"
+  "inYourTrip": "Nasa biyahe mo na",
+  "openBookingDetails": "Buksan ang detalye ng reserbasyon",
+  "adminEscalatedOn": "Ipinasa sa admin"
 }

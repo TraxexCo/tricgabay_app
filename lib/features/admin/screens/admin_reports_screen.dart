@@ -403,7 +403,7 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
             AppCard(
               padding: const EdgeInsets.all(16),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
                     context.l10n.driverPerformance,

@@ -329,13 +329,13 @@ abstract class AppLocalizations {
   /// No description provided for @adminRulePaid.
   ///
   /// In en, this message translates to:
-  /// **'Rule paid'**
+  /// **'Decide: tourist paid'**
   String get adminRulePaid;
 
   /// No description provided for @adminRuleNotPaid.
   ///
   /// In en, this message translates to:
-  /// **'Rule not paid'**
+  /// **'Decide: tourist didn\'t pay'**
   String get adminRuleNotPaid;
 
   /// No description provided for @adminWaiveFare.
@@ -809,7 +809,7 @@ abstract class AppLocalizations {
   /// No description provided for @addToTrip.
   ///
   /// In en, this message translates to:
-  /// **'+ Add to Trip'**
+  /// **'+ Add to trip'**
   String get addToTrip;
 
   /// No description provided for @addToTripLabel.
@@ -1224,13 +1224,13 @@ abstract class AppLocalizations {
   /// No description provided for @backToLogin.
   ///
   /// In en, this message translates to:
-  /// **'Back to Login'**
+  /// **'Back to sign in'**
   String get backToLogin;
 
   /// No description provided for @backToUserLogin.
   ///
   /// In en, this message translates to:
-  /// **'Back to User Login'**
+  /// **'Back to user sign-in'**
   String get backToUserLogin;
 
   /// No description provided for @barangay.
@@ -1272,7 +1272,7 @@ abstract class AppLocalizations {
   /// No description provided for @bookATricycle.
   ///
   /// In en, this message translates to:
-  /// **'Book a Tricycle'**
+  /// **'Book a tricycle'**
   String get bookATricycle;
 
   /// Application message: bookForValue
@@ -1380,7 +1380,7 @@ abstract class AppLocalizations {
   /// No description provided for @broadcastAMessage.
   ///
   /// In en, this message translates to:
-  /// **'Broadcast a Message'**
+  /// **'Broadcast a message'**
   String get broadcastAMessage;
 
   /// No description provided for @bugReport.
@@ -1464,13 +1464,13 @@ abstract class AppLocalizations {
   /// Application message: cancelBookingFeeValue
   ///
   /// In en, this message translates to:
-  /// **'Cancel booking | {value}% fee'**
+  /// **'Cancel booking ({value}% fee)'**
   String cancelBookingFeeValue(String value);
 
   /// No description provided for @cancelBookingNoCharge.
   ///
   /// In en, this message translates to:
-  /// **'Cancel booking | no charge'**
+  /// **'Cancel booking (no charge)'**
   String get cancelBookingNoCharge;
 
   /// No description provided for @cancelFree.
@@ -2355,7 +2355,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentsPassword.
   ///
   /// In en, this message translates to:
-  /// **'Documents & Password'**
+  /// **'Documents & password'**
   String get documentsPassword;
 
   /// No description provided for @done.
@@ -2669,7 +2669,7 @@ abstract class AppLocalizations {
   /// No description provided for @eGSystemMaintenance.
   ///
   /// In en, this message translates to:
-  /// **'e.g. System Maintenance'**
+  /// **'e.g. System maintenance'**
   String get eGSystemMaintenance;
 
   /// No description provided for @email.
@@ -2705,7 +2705,7 @@ abstract class AppLocalizations {
   /// No description provided for @emailReadOnly.
   ///
   /// In en, this message translates to:
-  /// **'Email (Read-only)'**
+  /// **'Email (read-only)'**
   String get emailReadOnly;
 
   /// No description provided for @emergency.
@@ -2741,7 +2741,7 @@ abstract class AppLocalizations {
   /// No description provided for @emergencySafety.
   ///
   /// In en, this message translates to:
-  /// **'Emergency & Safety'**
+  /// **'Emergency & safety'**
   String get emergencySafety;
 
   /// No description provided for @endSafelyReviewPayment.
@@ -3083,7 +3083,7 @@ abstract class AppLocalizations {
   /// No description provided for @feedbackSubmittedThankYou.
   ///
   /// In en, this message translates to:
-  /// **'Feedback submitted! Thank you 🙏'**
+  /// **'Feedback sent. Thank you!'**
   String get feedbackSubmittedThankYou;
 
   /// No description provided for @filipino.
@@ -3285,7 +3285,7 @@ abstract class AppLocalizations {
   /// No description provided for @franchiseNumberIsRequired.
   ///
   /// In en, this message translates to:
-  /// **'Franchise Number is required'**
+  /// **'Franchise number is required'**
   String get franchiseNumberIsRequired;
 
   /// No description provided for @franchiseOrCr.
@@ -3471,7 +3471,7 @@ abstract class AppLocalizations {
   /// No description provided for @headingToPickup.
   ///
   /// In en, this message translates to:
-  /// **'Heading to Pickup'**
+  /// **'Heading to pickup'**
   String get headingToPickup;
 
   /// No description provided for @help.
@@ -3531,7 +3531,7 @@ abstract class AppLocalizations {
   /// No description provided for @iAgreeToTheTermsAndConditions.
   ///
   /// In en, this message translates to:
-  /// **'I agree to the Terms and Conditions'**
+  /// **'I agree to the terms and conditions'**
   String get iAgreeToTheTermsAndConditions;
 
   /// No description provided for @iAmA.
@@ -3826,7 +3826,7 @@ abstract class AppLocalizations {
   /// No description provided for @leaveACommentOptional.
   ///
   /// In en, this message translates to:
-  /// **'Leave a comment (Optional)'**
+  /// **'Leave a comment (optional)'**
   String get leaveACommentOptional;
 
   /// No description provided for @leaveTheNumberEmptyToKeepAClearlyMarkedPlaceholder.
@@ -4018,7 +4018,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginAsAdmin.
   ///
   /// In en, this message translates to:
-  /// **'Login as Admin'**
+  /// **'Sign in as admin'**
   String get loginAsAdmin;
 
   /// No description provided for @logOut.
@@ -4180,13 +4180,13 @@ abstract class AppLocalizations {
   /// Application message: minValue
   ///
   /// In en, this message translates to:
-  /// **'{value} | {secondValue} min'**
+  /// **'{value} · {secondValue} min'**
   String minValue(String value, String secondValue);
 
   /// Application message: minValueLabel
   ///
   /// In en, this message translates to:
-  /// **'{value} min | {secondValue}'**
+  /// **'{value} min · {secondValue}'**
   String minValueLabel(String value, String secondValue);
 
   /// Application message: missingValue
@@ -5466,13 +5466,13 @@ abstract class AppLocalizations {
   /// No description provided for @ratingsFeedback.
   ///
   /// In en, this message translates to:
-  /// **'Ratings & Feedback'**
+  /// **'Ratings & feedback'**
   String get ratingsFeedback;
 
   /// No description provided for @ratingsReviews.
   ///
   /// In en, this message translates to:
-  /// **'Ratings & Reviews'**
+  /// **'Ratings & reviews'**
   String get ratingsReviews;
 
   /// No description provided for @readyForApproval.
@@ -5730,7 +5730,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportsAnalytics.
   ///
   /// In en, this message translates to:
-  /// **'Reports & Analytics'**
+  /// **'Reports & analytics'**
   String get reportsAnalytics;
 
   /// No description provided for @reportTouristNoShow.
@@ -6531,13 +6531,13 @@ abstract class AppLocalizations {
   /// No description provided for @streetHouseNo.
   ///
   /// In en, this message translates to:
-  /// **'Street/House No.'**
+  /// **'Street/house no.'**
   String get streetHouseNo;
 
   /// No description provided for @streetNameBuildingHouseNo.
   ///
   /// In en, this message translates to:
-  /// **'Street Name, Building, House No.'**
+  /// **'Street name, building, house no.'**
   String get streetNameBuildingHouseNo;
 
   /// No description provided for @submit.
@@ -7075,7 +7075,7 @@ abstract class AppLocalizations {
   /// No description provided for @tipsReminders.
   ///
   /// In en, this message translates to:
-  /// **'Tips & Reminders'**
+  /// **'Tips & reminders'**
   String get tipsReminders;
 
   /// No description provided for @title.
@@ -7679,7 +7679,7 @@ abstract class AppLocalizations {
   /// No description provided for @visibleToTourists.
   ///
   /// In en, this message translates to:
-  /// **'Visible to Tourists'**
+  /// **'Visible to tourists'**
   String get visibleToTourists;
 
   /// No description provided for @waitForTheMobileMapToLoadBeforeConfirmingAnExactPickupPin.
@@ -7799,7 +7799,7 @@ abstract class AppLocalizations {
   /// No description provided for @whatSIncluded.
   ///
   /// In en, this message translates to:
-  /// **'What\'s Included'**
+  /// **'What\'s included'**
   String get whatSIncluded;
 
   /// No description provided for @whenYouGetNotificationsTheyWillAppearHere.
@@ -7927,13 +7927,13 @@ abstract class AppLocalizations {
   /// No description provided for @yourGuideYourRideInBustos.
   ///
   /// In en, this message translates to:
-  /// **'Your Guide, Your Ride in Bustos'**
+  /// **'Your guide, your ride in Bustos'**
   String get yourGuideYourRideInBustos;
 
   /// No description provided for @yourJourneyYourWay.
   ///
   /// In en, this message translates to:
-  /// **'Your Journey, Your Way'**
+  /// **'Your journey, your way'**
   String get yourJourneyYourWay;
 
   /// No description provided for @yourLocalJourneyStartsHere.
@@ -8646,6 +8646,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'In your trip'**
   String get inYourTrip;
+
+  /// No description provided for @openBookingDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Open booking details'**
+  String get openBookingDetails;
+
+  /// No description provided for @adminEscalatedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalated to admin'**
+  String get adminEscalatedOn;
 }
 
 class _AppLocalizationsDelegate

@@ -136,10 +136,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminDisputeUnsettled => 'Ruled not paid · unsettled';
 
   @override
-  String get adminRulePaid => 'Rule paid';
+  String get adminRulePaid => 'Decide: tourist paid';
 
   @override
-  String get adminRuleNotPaid => 'Rule not paid';
+  String get adminRuleNotPaid => 'Decide: tourist didn\'t pay';
 
   @override
   String get adminWaiveFare => 'Waive fare';
@@ -397,7 +397,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addressMatchesPin => 'Address matches pin';
 
   @override
-  String get addToTrip => '+ Add to Trip';
+  String get addToTrip => '+ Add to trip';
 
   @override
   String get addToTripLabel => 'Add to trip';
@@ -655,10 +655,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backToExplore => 'Back to explore';
 
   @override
-  String get backToLogin => 'Back to Login';
+  String get backToLogin => 'Back to sign in';
 
   @override
-  String get backToUserLogin => 'Back to User Login';
+  String get backToUserLogin => 'Back to user sign-in';
 
   @override
   String get barangay => 'Barangay';
@@ -679,7 +679,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookATourToGetStarted => 'Book a tour to get started!';
 
   @override
-  String get bookATricycle => 'Book a Tricycle';
+  String get bookATricycle => 'Book a tricycle';
 
   @override
   String bookForValue(String value) {
@@ -741,7 +741,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get brandMark => 'T';
 
   @override
-  String get broadcastAMessage => 'Broadcast a Message';
+  String get broadcastAMessage => 'Broadcast a message';
 
   @override
   String get bugReport => 'Bug report';
@@ -787,11 +787,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String cancelBookingFeeValue(String value) {
-    return 'Cancel booking | $value% fee';
+    return 'Cancel booking ($value% fee)';
   }
 
   @override
-  String get cancelBookingNoCharge => 'Cancel booking | no charge';
+  String get cancelBookingNoCharge => 'Cancel booking (no charge)';
 
   @override
   String get cancelFree => 'Cancel free';
@@ -1304,7 +1304,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Documents, dates, service area, and reliability meet the matching rules.';
 
   @override
-  String get documentsPassword => 'Documents & Password';
+  String get documentsPassword => 'Documents & password';
 
   @override
   String get done => 'Done';
@@ -1481,7 +1481,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get eGMinasaFestivalGrounds => 'e.g. Minasa Festival Grounds';
 
   @override
-  String get eGSystemMaintenance => 'e.g. System Maintenance';
+  String get eGSystemMaintenance => 'e.g. System maintenance';
 
   @override
   String get email => 'Email';
@@ -1501,7 +1501,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailIsRequired => 'Email is required';
 
   @override
-  String get emailReadOnly => 'Email (Read-only)';
+  String get emailReadOnly => 'Email (read-only)';
 
   @override
   String get emergency => 'Emergency';
@@ -1519,7 +1519,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emergencyHelp => 'Emergency help';
 
   @override
-  String get emergencySafety => 'Emergency & Safety';
+  String get emergencySafety => 'Emergency & safety';
 
   @override
   String get endSafelyReviewPayment => 'End safely · review payment';
@@ -1716,7 +1716,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feedbackMarkedResolved => 'Feedback marked resolved';
 
   @override
-  String get feedbackSubmittedThankYou => 'Feedback submitted! Thank you 🙏';
+  String get feedbackSubmittedThankYou => 'Feedback sent. Thank you!';
 
   @override
   String get filipino => 'Filipino';
@@ -1833,7 +1833,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get franchiseNumber => 'Franchise number';
 
   @override
-  String get franchiseNumberIsRequired => 'Franchise Number is required';
+  String get franchiseNumberIsRequired => 'Franchise number is required';
 
   @override
   String get franchiseOrCr => 'Franchise / OR-CR';
@@ -1947,7 +1947,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get headingTo => 'Heading to';
 
   @override
-  String get headingToPickup => 'Heading to Pickup';
+  String get headingToPickup => 'Heading to pickup';
 
   @override
   String get help => 'Help';
@@ -1985,7 +1985,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get iAgreeToTheTermsAndConditions =>
-      'I agree to the Terms and Conditions';
+      'I agree to the terms and conditions';
 
   @override
   String get iAmA => 'I am a...';
@@ -2159,7 +2159,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get latitude => 'Latitude';
 
   @override
-  String get leaveACommentOptional => 'Leave a comment (Optional)';
+  String get leaveACommentOptional => 'Leave a comment (optional)';
 
   @override
   String get leaveTheNumberEmptyToKeepAClearlyMarkedPlaceholder =>
@@ -2269,7 +2269,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get login => 'Login';
 
   @override
-  String get loginAsAdmin => 'Login as Admin';
+  String get loginAsAdmin => 'Sign in as admin';
 
   @override
   String get logOut => 'Log out';
@@ -2357,12 +2357,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String minValue(String value, String secondValue) {
-    return '$value | $secondValue min';
+    return '$value · $secondValue min';
   }
 
   @override
   String minValueLabel(String value, String secondValue) {
-    return '$value min | $secondValue';
+    return '$value min · $secondValue';
   }
 
   @override
@@ -3118,10 +3118,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rating => 'Rating';
 
   @override
-  String get ratingsFeedback => 'Ratings & Feedback';
+  String get ratingsFeedback => 'Ratings & feedback';
 
   @override
-  String get ratingsReviews => 'Ratings & Reviews';
+  String get ratingsReviews => 'Ratings & reviews';
 
   @override
   String get readyForApproval => 'Ready for approval';
@@ -3262,7 +3262,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reports => 'Reports';
 
   @override
-  String get reportsAnalytics => 'Reports & Analytics';
+  String get reportsAnalytics => 'Reports & analytics';
 
   @override
   String get reportTouristNoShow => 'Report tourist no-show?';
@@ -3705,10 +3705,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storeUnavailable => 'Store unavailable';
 
   @override
-  String get streetHouseNo => 'Street/House No.';
+  String get streetHouseNo => 'Street/house no.';
 
   @override
-  String get streetNameBuildingHouseNo => 'Street Name, Building, House No.';
+  String get streetNameBuildingHouseNo => 'Street name, building, house no.';
 
   @override
   String get submit => 'Submit';
@@ -4048,7 +4048,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get thu => 'Thu';
 
   @override
-  String get tipsReminders => 'Tips & Reminders';
+  String get tipsReminders => 'Tips & reminders';
 
   @override
   String get title => 'Title';
@@ -4392,7 +4392,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get visible => 'Visible';
 
   @override
-  String get visibleToTourists => 'Visible to Tourists';
+  String get visibleToTourists => 'Visible to tourists';
 
   @override
   String get waitForTheMobileMapToLoadBeforeConfirmingAnExactPickupPin =>
@@ -4464,7 +4464,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get whatDidYouLikeOrDislike => 'What did you like or dislike?';
 
   @override
-  String get whatSIncluded => 'What\'s Included';
+  String get whatSIncluded => 'What\'s included';
 
   @override
   String get whenYouGetNotificationsTheyWillAppearHere =>
@@ -4543,10 +4543,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your fixed fare, route, and payment record stay unchanged. The previous driver is released and a new 10-minute search begins.';
 
   @override
-  String get yourGuideYourRideInBustos => 'Your Guide, Your Ride in Bustos';
+  String get yourGuideYourRideInBustos => 'Your guide, your ride in Bustos';
 
   @override
-  String get yourJourneyYourWay => 'Your Journey, Your Way';
+  String get yourJourneyYourWay => 'Your journey, your way';
 
   @override
   String get yourLocalJourneyStartsHere => 'Your local journey starts here';
@@ -4990,4 +4990,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inYourTrip => 'In your trip';
+
+  @override
+  String get openBookingDetails => 'Open booking details';
+
+  @override
+  String get adminEscalatedOn => 'Escalated to admin';
 }

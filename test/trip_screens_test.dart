@@ -52,7 +52,7 @@ void main() {
       );
       expect(find.text('1234'), findsOneWidget);
       await tester.scrollUntilVisible(
-        find.text('Cancel booking | no charge'),
+        find.text('Cancel booking (no charge)'),
         200,
         scrollable: find.byType(Scrollable).first,
       );

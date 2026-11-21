@@ -161,6 +161,53 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               ),
             ),
             const SizedBox(height: 16),
+            // The pickup code is what the tourist needs at the curb, so it
+            // comes before the details.
+            if (!admin && !driver && booking.status == BookingStatus.accepted)
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.key_rounded,
+                          size: 18,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            context.l10n.shareThisCodeOnlyWhenYouAreOnBoard,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    SelectableText(
+                      t.pickupCode,
+                      style: const TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 10,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             _summaryCard(booking, admin: admin),
             if (booking.status == BookingStatus.replacementPending)
               _replacementCard(booking, driver: driver, admin: admin),
@@ -202,25 +249,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                         await AppSession.syncRemoteState();
                       }),
                 child: Text(context.l10n.lostPickupCodeReissue),
-              ),
-            if (!admin && !driver && booking.status == BookingStatus.accepted)
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Text(context.l10n.shareThisCodeOnlyWhenYouAreOnBoard),
-                      SelectableText(
-                        t.pickupCode,
-                        style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 8,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ),
             const SizedBox(height: 16),
             _routeProgress(booking),

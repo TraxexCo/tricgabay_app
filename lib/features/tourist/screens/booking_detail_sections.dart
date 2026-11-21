@@ -12,7 +12,8 @@ extension _BookingDetailSections on _BookingDetailScreenState {
           children: [
             _row(MessageCode.trip, bookingStatusLabel(context, booking.status)),
             _row(MessageCode.agreedFixedFare, money(booking.quotedCents)),
-            _row(MessageCode.priceVersion, 'v${t.fareRevision}'),
+            // Fare revisions matter to finance, not to riders.
+            if (admin) _row(MessageCode.priceVersion, 'v${t.fareRevision}'),
             _row(MessageCode.payment, _paymentLabel(booking)),
             // Historical PayMongo bookings stay readable for finance.
             if (admin && booking.paymentMethod == PaymentMethod.online) ...[
@@ -52,7 +53,11 @@ extension _BookingDetailSections on _BookingDetailScreenState {
             if (booking.driverName != null)
               _row(
                 MessageCode.driver,
-                '${booking.driverName} · ${booking.driverPlate ?? ""}',
+                [
+                  booking.driverName!,
+                  if ((booking.driverPlate ?? '').isNotEmpty)
+                    booking.driverPlate!,
+                ].join(' · '),
               ),
             _row(MessageCode.pickup, booking.pickupAddress),
             if (booking.scheduledAt != null)

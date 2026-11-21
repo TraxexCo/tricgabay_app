@@ -342,8 +342,34 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    Text(
-                                      context.message(spot.categoryLabel),
+                                    // Category, and what the switch
+                                    // below currently does.
+                                    Text.rich(
+                                      TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: context.message(
+                                              spot.categoryLabel,
+                                            ),
+                                          ),
+                                          const TextSpan(text: ' · '),
+                                          TextSpan(
+                                            text: context.message(
+                                              spot.isActive
+                                                  ? MessageCode.visible
+                                                  : MessageCode.hidden,
+                                            ),
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              color: spot.isActive
+                                                  ? AppColors.success
+                                                  : AppColors.textSecondary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: GoogleFonts.poppins(
                                         color: AppColors.textSecondary,
                                         fontSize: 12,

@@ -61,6 +61,7 @@ abstract final class MessageCode {
   static const adminDisputeWaiting = '@l10n/adminDisputeWaiting';
   static const adminDriverNote = '@l10n/adminDriverNote';
   static const adminEmail = '@l10n/adminEmail';
+  static const adminEscalatedOn = '@l10n/adminEscalatedOn';
   static const adminEscalationNote = '@l10n/adminEscalationNote';
   static const adminGcashDisputes = '@l10n/adminGcashDisputes';
   static const adminGcashDisputesEmpty = '@l10n/adminGcashDisputesEmpty';
@@ -1143,6 +1144,7 @@ abstract final class MessageCode {
   static const openAPaymentReview = '@l10n/openAPaymentReview';
   static const openAppStore = '@l10n/openAppStore';
   static const openAppToViewThisUpdate = '@l10n/openAppToViewThisUpdate';
+  static const openBookingDetails = '@l10n/openBookingDetails';
   static const openDialer = '@l10n/openDialer';
   static const openDriverSearch = '@l10n/openDriverSearch';
   static String openReviewsValue(String value) =>

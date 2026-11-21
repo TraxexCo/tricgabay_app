@@ -3,6 +3,7 @@ import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import '../../../core/services/server_clock.dart';
 import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/services/trip_rules.dart';
@@ -311,6 +312,7 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                 helperText: context
                     .l10n
                     .maximumCapacityIsCheckedBeforeOfferingTheBooking,
+                helperMaxLines: 2,
               ),
               items: [
                 DropdownMenuItem(
@@ -372,10 +374,17 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
               direction: MediaQuery.sizeOf(context).width < 460
                   ? Axis.vertical
                   : Axis.horizontal,
-              style: const ButtonStyle(
-                foregroundColor: WidgetStatePropertyAll(Color(0xFF1A1A2E)),
+              style: ButtonStyle(
+                foregroundColor: const WidgetStatePropertyAll(
+                  Color(0xFF1A1A2E),
+                ),
+                // Poppins like the rest of the app; a bare TextStyle fell
+                // back to the platform font.
                 textStyle: WidgetStatePropertyAll(
-                  TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               segments: [

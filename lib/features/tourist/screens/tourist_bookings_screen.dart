@@ -113,30 +113,33 @@ class _BookingList extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Tour name first; the long database id meant
+                        // nothing to riders.
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
                               child: Text(
-                                context.message(b.id).toUpperCase(),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                context.message(AppSession.bookingTitle(b)),
                                 style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                             ),
+                            const SizedBox(width: 8),
                             StatusBadge.bookingStatus(b.status),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 4),
                         Text(
                           context.message('$preview$overflow'),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: AppColors.textPrimary,
+                            fontSize: 13.5,
+                            color: AppColors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -151,8 +154,8 @@ class _BookingList extends StatelessWidget {
                                   ),
                           ),
                           style: GoogleFonts.poppins(
-                            color: AppColors.textSecondary,
-                            fontSize: 12,
+                            color: AppColors.textHint,
+                            fontSize: 12.5,
                           ),
                         ),
                         const Divider(height: 24),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../core/services/error_messages.dart';
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
@@ -153,27 +154,39 @@ class _EmergencyContactsAdminScreenState
                   .l10n
                   .theOwnerMustVerifyLocalAgencyNumbersBeforeEnablingCalls,
             ),
+            const SizedBox(height: 12),
             for (final row in snapshot.data!)
-              ListTile(
-                title: Text(
-                  context.message(
-                    row[Localizations.localeOf(context).languageCode == 'fil'
-                            ? 'name_fil'
-                            : 'name_en']
-                        as String,
+              Card(
+                margin: const EdgeInsets.only(bottom: 10),
+                child: ListTile(
+                  leading: Icon(
+                    row['is_placeholder'] == true
+                        ? Icons.warning_amber_rounded
+                        : Icons.phone_in_talk_outlined,
+                    color: row['is_placeholder'] == true
+                        ? AppColors.warning
+                        : AppColors.success,
                   ),
-                ),
-                subtitle: row['is_placeholder'] == true
-                    ? Text(
-                        context
-                            .l10n
-                            .placeholderTheOwnerMustVerifyAndEnterANumber,
-                      )
-                    : Text(context.message(row['phone'] as String)),
-                trailing: IconButton(
-                  tooltip: context.l10n.edit,
-                  icon: const Icon(Icons.edit_outlined),
-                  onPressed: () => _edit(row),
+                  title: Text(
+                    context.message(
+                      row[Localizations.localeOf(context).languageCode == 'fil'
+                              ? 'name_fil'
+                              : 'name_en']
+                          as String,
+                    ),
+                  ),
+                  subtitle: row['is_placeholder'] == true
+                      ? Text(
+                          context
+                              .l10n
+                              .placeholderTheOwnerMustVerifyAndEnterANumber,
+                        )
+                      : Text(context.message(row['phone'] as String)),
+                  trailing: IconButton(
+                    tooltip: context.l10n.edit,
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: () => _edit(row),
+                  ),
                 ),
               ),
           ],

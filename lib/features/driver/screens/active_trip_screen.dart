@@ -676,14 +676,17 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
                                             fontSize: 16,
                                           ),
                                         ),
-                                        Text(
-                                          context.l10n.bustosBulacan,
-                                          style: GoogleFonts.poppins(
-                                            color: AppColors.textSecondary,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 14,
+                                        // Pickup addresses already name
+                                        // the town; spot names don't.
+                                        if (!isAccepted)
+                                          Text(
+                                            context.l10n.bustosBulacan,
+                                            style: GoogleFonts.poppins(
+                                              color: AppColors.textSecondary,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 14,
+                                            ),
                                           ),
-                                        ),
                                       ],
                                     ),
                                   ),
