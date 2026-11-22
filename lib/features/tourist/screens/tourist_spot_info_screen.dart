@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../models/tourist_spot_model.dart';
+import '../tours_for_spot.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/constants/app_colors.dart';
@@ -303,6 +304,37 @@ class TouristSpotInfoScreen extends StatelessWidget {
                       },
                     ),
                   ),
+                  // Places are visited only as part of a tour package.
+                  if (AppSession.packagesWithSpot(spot.id).isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    Text(
+                      context.l10n.includedInTheseTours,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final package in AppSession.packagesWithSpot(
+                          spot.id,
+                        ))
+                          ActionChip(
+                            avatar: const Icon(Icons.tour_outlined, size: 18),
+                            label: Text(
+                              '${package.name} · ₱${AppFormatters.integer(AppSession.packageFare(package))}',
+                            ),
+                            onPressed: () => context.push(
+                              '/tourist/tour-packages/${package.id}',
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 20),
                   // Where this page's details come from; there are no
                   // tourist reviews of spots yet.
@@ -362,55 +394,16 @@ class TouristSpotInfoScreen extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: ValueListenableBuilder<List<TouristSpotModel>>(
-                  valueListenable: AppSession.itinerary,
-                  builder: (context, itinerary, _) {
-                    final added = itinerary.any((item) => item.id == spot.id);
-                    return FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(52),
-                        backgroundColor: added ? AppColors.success : null,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      icon: Icon(
-                        spot.isTemporarilyClosed
-                            ? Icons.block_rounded
-                            : added
-                            ? Icons.check_rounded
-                            : Icons.add_rounded,
-                      ),
-                      label: Text(
-                        context.message(
-                          spot.isTemporarilyClosed
-                              ? MessageCode.closed
-                              : added
-                              ? MessageCode.inYourTrip
-                              : MessageCode.addToTripLabel,
-                        ),
-                      ),
-                      onPressed: spot.isTemporarilyClosed
-                          ? null
-                          : () {
-                              AppSession.toggleItinerary(spot);
-                              ScaffoldMessenger.of(context)
-                                ..hideCurrentSnackBar()
-                                ..showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      context.message(
-                                        added
-                                            ? MessageCode
-                                                  .removedFromYourItinerary
-                                            : MessageCode.addedToYourItinerary,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                            },
-                    );
-                  },
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  icon: const Icon(Icons.tour_outlined),
+                  label: Text(context.l10n.seeTours),
+                  onPressed: () => openToursForSpot(context, spot.id),
                 ),
               ),
             ],

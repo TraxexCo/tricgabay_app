@@ -261,19 +261,19 @@ extension _TouristHomeSections on _TouristHomeScreenState {
               ),
             ),
           ),
-          const SizedBox(height: 4),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: _buildDayCard(),
-          ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 8),
+          // Tours are booked only as packages, so they lead the sheet.
           _sectionHeader(
-            context.l10n.planYourTrip,
+            context.l10n.tourPackages,
             trailing: TextButton(
-              onPressed: () => context.go('/tourist/search'),
-              child: Text(context.l10n.explore),
+              onPressed: () => context.push('/tourist/tour-packages'),
+              child: Text(context.l10n.seeAll),
             ),
           ),
+          const SizedBox(height: 4),
+          _packageRow(),
+          const SizedBox(height: 20),
+          _sectionHeader(context.l10n.planYourTrip),
           const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -325,7 +325,7 @@ extension _TouristHomeSections on _TouristHomeScreenState {
     padding: const EdgeInsets.symmetric(horizontal: 20),
     child: Row(
       children: [
-        for (final cat in spotFilters)
+        for (final cat in availableSpotFilters(AppSession.allSpots.value))
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: ChoiceChip(
@@ -359,96 +359,100 @@ extension _TouristHomeSections on _TouristHomeScreenState {
     ),
   );
 
-  Widget _buildDayCard() => Material(
-    color: Colors.transparent,
-    child: Ink(
-      decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.circular(22),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(22),
-        onTap: () {
-          AppSession.startCustomItinerary();
-          context.push('/tourist/itinerary');
-        },
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 14, 16),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: .16),
-                  borderRadius: BorderRadius.circular(14),
+  /// The bookable tours, side by side: photo, name, stops and fixed price.
+  Widget _packageRow() => ValueListenableBuilder<List<TourPackageModel>>(
+    valueListenable: AppSession.tourPackages,
+    builder: (context, packages, _) {
+      final scale = MediaQuery.textScalerOf(context).scale(1);
+      return SizedBox(
+        height: 96 + 66 * scale,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
+          itemCount: packages.length,
+          separatorBuilder: (_, _) => const SizedBox(width: 12),
+          itemBuilder: (context, i) {
+            final package = packages[i];
+            return SizedBox(
+              width: 228 * scale.clamp(1, 1.3),
+              child: Material(
+                color: AppColors.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  side: const BorderSide(color: AppColors.border),
                 ),
-                child: const Icon(Icons.route_rounded, color: Colors.white),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ValueListenableBuilder<List<TouristSpotModel>>(
-                      valueListenable: AppSession.itinerary,
-                      builder: (context, itinerary, child) => Text(
-                        itinerary.isEmpty
-                            ? context.l10n.buildADayYouLlRemember
-                            : context.l10n.buildYourDayWithStops(
-                                itinerary.length,
-                              ),
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () =>
+                      context.push('/tourist/tour-packages/${package.id}'),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: 84,
+                        width: double.infinity,
+                        child: SafeAppImage(
+                          path: AppSession.packageImage(package),
+                          fit: BoxFit.cover,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      context.l10n.choosePlacesSeeYourFareBookARide,
-                      style: GoogleFonts.poppins(
-                        color: Colors.white.withValues(alpha: .86),
-                        fontSize: 13,
-                        height: 1.35,
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              context.message(package.name),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.poppins(
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    context.l10n.stopsValue(
+                                      package.spotIds.length.toString(),
+                                    ),
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12.5,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  '₱${AppFormatters.integer(AppSession.packageFare(package))}',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(width: 10),
-              Container(
-                width: 34,
-                height: 34,
-                decoration: const BoxDecoration(
-                  color: AppColors.secondary,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 20,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         ),
-      ),
-    ),
+      );
+    },
   );
 
-  /// Three equal shortcuts side by side. With large text they stack as
+  /// Equal shortcuts side by side. With large text they stack as
   /// rows so the labels stay readable.
   Widget _planShortcuts() {
     final shortcuts = [
-      (
-        Icons.auto_awesome_outlined,
-        context.l10n.tourPackages,
-        context.l10n.readyMadeTrips,
-        '/tourist/tour-packages',
-        AppColors.secondaryDark,
-      ),
       (
         Icons.favorite_outline_rounded,
         context.l10n.savedPlaces,

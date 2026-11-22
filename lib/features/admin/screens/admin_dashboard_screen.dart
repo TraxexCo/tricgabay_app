@@ -312,6 +312,15 @@ class AdminDashboardScreen extends StatelessWidget {
                           '/admin/drivers',
                           AppColors.warning,
                         ),
+                      if (AppSession.hasAdminCapability('content'))
+                        _action(
+                          context,
+                          Icons.tour_outlined,
+                          MessageCode.tourPackages,
+                          MessageCode.createEditOrDeleteTours,
+                          '/admin/packages',
+                          AppColors.primary,
+                        ),
                       if (AppSession.hasAdminCapability('support')) ...[
                         _action(
                           context,

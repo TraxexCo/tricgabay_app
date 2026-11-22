@@ -14,7 +14,7 @@ void seedScreen(String role, String name) {
   AppSession.currentDriverName.value = 'Alejandro dela Cruz';
   AppSession.isDriverOnline.value = false;
   AppSession.allSpots.value = TouristSpotModel.catalog;
-  AppSession.itinerary.value = TouristSpotModel.catalog.take(3).toList();
+  AppSession.tourPackages.value = TourPackageModel.catalog;
   AppSession.favorites.value = {TouristSpotModel.catalog.first.id};
   AppSession.adminCapabilities.value = {
     'super_admin',
@@ -38,7 +38,8 @@ void seedScreen(String role, String name) {
   AppSession.bookings.value = [b];
   AppSession.activeBookingId = b.id;
   AppSession.activeDriverBookingId = b.id;
-  AppSession.activePackageId = null;
+  // Tours are booked only as packages: the review screen shows TRIC LAKBAY.
+  AppSession.selectPackage(TourPackageModel.catalog.first);
   AppSession.userLatitude.value = 14.9571;
   AppSession.userLongitude.value = 120.9188;
   AppSession.draft.pickupAddress.value = 'Bustos Municipal Hall, Bulacan';

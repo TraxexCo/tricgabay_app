@@ -30,7 +30,6 @@ import 'features/tourist/screens/tourist_bookings_screen.dart';
 import 'features/tourist/screens/tourist_profile_screen.dart';
 import 'features/tourist/screens/tourist_spot_info_screen.dart';
 import 'features/tourist/screens/photo_gallery_screen.dart';
-import 'features/tourist/screens/itinerary_builder_screen.dart';
 import 'features/tourist/screens/fare_summary_screen.dart';
 import 'features/tourist/screens/booking_confirmation_screen.dart';
 import 'features/tourist/screens/find_driver_screen.dart';
@@ -60,6 +59,9 @@ import 'features/driver/screens/driver_emergency_screen.dart';
 
 // Admin screens
 import 'features/admin/screens/admin_shell_screen.dart';
+import 'models/tourist_spot_model.dart';
+import 'features/admin/screens/manage_packages_screen.dart';
+import 'features/admin/screens/package_form_screen.dart';
 import 'features/admin/screens/admin_dashboard_screen.dart';
 import 'features/admin/screens/manage_drivers_screen.dart';
 import 'features/admin/screens/driver_detail_admin_screen.dart';
@@ -141,7 +143,10 @@ final appRouter = GoRouter(
           final value when value.startsWith('/admin/drivers') => [
             'driver_compliance',
           ],
-          final value when value.startsWith('/admin/spots') => ['content'],
+          final value
+              when value.startsWith('/admin/spots') ||
+                  value.startsWith('/admin/packages') =>
+            ['content'],
           final value when value.startsWith('/admin/fare-settings') => [
             'finance',
           ],
@@ -272,9 +277,10 @@ final appRouter = GoRouter(
       builder: (context, state) =>
           PhotoGalleryScreen(spotId: state.pathParameters['spotId']!),
     ),
+    // Custom tours were removed; old links open the package list.
     GoRoute(
       path: AppRoutes.itineraryBuilder,
-      builder: (context, state) => const ItineraryBuilderScreen(),
+      redirect: (context, state) => AppRoutes.tourPackages,
     ),
     GoRoute(
       path: AppRoutes.fareSummary,
@@ -475,6 +481,15 @@ final appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.spotForm,
       builder: (context, state) => SpotFormScreen(spot: state.extra as dynamic),
+    ),
+    GoRoute(
+      path: AppRoutes.managePackages,
+      builder: (context, state) => const ManagePackagesScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.packageForm,
+      builder: (context, state) =>
+          PackageFormScreen(package: state.extra as TourPackageModel?),
     ),
     GoRoute(
       path: AppRoutes.monitorBookings,

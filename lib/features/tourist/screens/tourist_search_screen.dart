@@ -101,9 +101,11 @@ class _TouristSearchScreenState extends State<TouristSearchScreen> {
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: spotFilters.length,
+              itemCount: availableSpotFilters(AppSession.allSpots.value).length,
               itemBuilder: (context, index) {
-                final cat = spotFilters[index];
+                final cat = availableSpotFilters(
+                  AppSession.allSpots.value,
+                )[index];
                 final isSelected = _selectedCategory == cat;
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),

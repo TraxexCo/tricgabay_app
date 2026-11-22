@@ -3,6 +3,8 @@ import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import '../../../core/services/server_clock.dart';
 import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/shared_widgets.dart';
+import '../../../core/constants/app_routes.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/session/app_session.dart';
@@ -119,6 +121,19 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
       final spots = AppSession.itinerary.value;
       final package = AppSession.activePackage;
       final fare = AppSession.estimatedFare;
+      // Only tour packages can be booked.
+      if (package == null) {
+        return Scaffold(
+          appBar: AppBar(title: Text(context.l10n.reviewYourBooking)),
+          body: EmptyStateWidget(
+            icon: Icons.tour_outlined,
+            title: context.l10n.chooseATourPackage,
+            subtitle: context.l10n.chooseATourPackageBody,
+            actionLabel: context.l10n.seeTours,
+            onAction: () => context.go(AppRoutes.tourPackages),
+          ),
+        );
+      }
       return Scaffold(
         appBar: AppBar(title: Text(context.l10n.reviewYourBooking)),
         body: ListView(
@@ -136,7 +151,7 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    context.message(package?.name ?? MessageCode.customTour),
+                    context.message(package.name),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,

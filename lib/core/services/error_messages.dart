@@ -34,6 +34,16 @@ class ErrorMessages {
           .accountAccessCouldNotBeCompletedCheckYourDetailsAndTryAgain;
     }
     if (error is PostgrestException) {
+      // Tour package editor (admin).
+      if (error.message.contains('Another package already uses this name')) {
+        return MessageCode.anotherPackageAlreadyUsesThisName;
+      }
+      if (error.message.contains('This package no longer exists')) {
+        return MessageCode.thisPackageNoLongerExists;
+      }
+      if (error.message.contains('Every stop must be an active tourist spot')) {
+        return MessageCode.everyStopMustBeAnActiveTouristSpot;
+      }
       if (error.message.contains('OUTSTANDING_FARE')) {
         return MessageCode.outstandingFareBlocked;
       }

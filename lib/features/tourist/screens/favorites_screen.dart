@@ -106,60 +106,6 @@ class FavoritesScreen extends StatelessWidget {
                                           fontSize: 12,
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
-                                      // Shows whether the spot is
-                                      // already in the trip, so the tap
-                                      // never silently removes it.
-                                      ValueListenableBuilder(
-                                        valueListenable: AppSession.itinerary,
-                                        builder: (context, itinerary, _) {
-                                          final added = itinerary.any(
-                                            (item) => item.id == spot.id,
-                                          );
-                                          return TextButton.icon(
-                                            style: TextButton.styleFrom(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 4,
-                                                  ),
-                                              minimumSize: const Size(0, 40),
-                                              alignment: Alignment.centerLeft,
-                                              foregroundColor: added
-                                                  ? AppColors.success
-                                                  : AppColors.primary,
-                                            ),
-                                            onPressed: () {
-                                              AppSession.toggleItinerary(spot);
-                                              AppSnackbar.showSuccess(
-                                                context,
-                                                added
-                                                    ? MessageCode
-                                                          .removedFromYourItinerary
-                                                    : MessageCode
-                                                          .addedToItinerary,
-                                              );
-                                            },
-                                            icon: Icon(
-                                              added
-                                                  ? Icons.check_rounded
-                                                  : Icons.add_rounded,
-                                              size: 18,
-                                            ),
-                                            label: Text(
-                                              context.message(
-                                                added
-                                                    ? MessageCode.inYourTrip
-                                                    : MessageCode
-                                                          .addToTripLabel,
-                                              ),
-                                              style: const TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      ),
                                     ],
                                   ),
                                 ),

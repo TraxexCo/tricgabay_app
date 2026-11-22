@@ -165,7 +165,16 @@ class _ManageSpotsScreenState extends ConsumerState<ManageSpotsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8FB),
-      appBar: AppBar(title: Text(context.l10n.touristSpots)),
+      appBar: AppBar(
+        title: Text(context.l10n.touristSpots),
+        actions: [
+          TextButton.icon(
+            onPressed: () => context.push('/admin/packages'),
+            icon: const Icon(Icons.tour_outlined),
+            label: Text(context.l10n.tourPackages),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/admin/spots/form'),
         backgroundColor: AppColors.primary,

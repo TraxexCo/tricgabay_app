@@ -139,20 +139,31 @@ All 63 screen renders, plus full-height renders of the long screens, were checke
 - All 62 phone renders were reviewed. Fixed: the dollar icon on Reports, and a raw `GoException` page (now a friendly `errorBuilder`). The search screen's blank area in the render is the keyboard, not a bug.
 - **Tests:** in the cloud workspace, 2,561 pass. The only failures are DriverHome and DriverShell accessibility at text 1.0, which fail on untouched code there too. Not yet run on the PC.
 
+### Packages only, and admin package editor (professor feedback)
+
+- **Build your day is gone.** Tourists can only book the fixed tour packages. The itinerary builder screen was deleted; the old route redirects to the packages list. The home screen shows a "Tour packages" row instead of the builder card, and a spot's sheet and info page show "See tours" plus an "Included in these tours" list. The fare summary shows "Choose a tour package" if no package is selected.
+- **Only the 11 places on the three package routes remain** (TRIC LAKBAY ₱700, TRIC SAYA ₱850, TRIC TUKLAS ₱1,000), in the app catalogue and in migration `20261122050000_package_only_catalog.sql`. The migration nulls `booking_stops.spot_id` for removed places (the name and coordinate snapshots stay, so old bookings still read correctly), removes their package stops, deletes them, and renames two places to the professor's spelling ("Nuestra Senora Del Perpetuo", "Zenny's Minasa Pasalubong").
+- **Admin package editor:** Admin → Tour packages (also from Manage spots). Admins with the content permission can create, edit (name, price, description, ordered stops, drag to reorder) and delete packages. New RPCs `admin_save_tour_package` and `admin_delete_tour_package` (security definer, content capability). A price change publishes a new fare revision, so existing bookings keep their price. Delete is a soft delete (`is_active = false`). Validation: name 3–60 characters and unique among active packages, price ₱1–₱100,000, 2–12 different active spots.
+- The custom-tour fare field was removed from Fixed fares; the stored value is kept unchanged.
+- The migration and both RPCs were run against a local Postgres 16 with a small stand-in schema, including permission refusal, every validation, create, edit, reorder, price revision and delete. They were not run against the real schema or the SQL test suite.
+- **Not done on purpose:** the server still accepts custom (no-package) bookings, because the SQL tests in `supabase/tests` create them. Blocking them server-side means updating those tests first.
+
 ## Left to do
 
 These need the PC, the hosted project or a person, so they were left for Claude Code on the PC:
 
 1. **Run `flutter analyze` and `flutter test` on the PC.** Confirm whether the two DriverHome and DriverShell accessibility failures happen there. If they do, fix the contrast.
-2. **Push the two new migrations** with `supabase db push` (project `xcsrjuqzwequmeqzedzd`):
+2. **Push the three new migrations** with `supabase db push` (project `xcsrjuqzwequmeqzedzd`). Run `supabase db reset` and the SQL tests locally first if Docker is available:
    - `20261122040000_count_online_drivers.sql`, needed for the "no drivers online" warning.
    - `20261122040100_privacy_notice_gcash.sql`, which replaces the PayMongo text in the privacy notice and sets version 2026-11-22.
+   - `20261122050000_package_only_catalog.sql`, which deletes every tourist spot not on a package route and adds the package editor RPCs. The app's package editor fails until this is pushed. The two RPCs were added to `scripts/security/access_rules.ts`, but `supabase/security/authorization_catalog.json` was not regenerated: run `scripts/test_catalog_access.ts` (see TESTING.md, needs Docker), review the drift and update the snapshot, or CI's catalog check will refuse the new functions.
+   - Optional: block custom bookings in `create_booking` and update the SQL tests that create them.
 3. **Walk through the app on the phone over adb:**
    - Sign in on the shared sign-in screen as `t1`, `d1` and `a1@tric.test`. Admins now use the normal screen; there is no separate admin portal any more.
    - Check the tourist home sheet, the location explainer, the driver map label ("In the Bustos service area" or "N km from Bustos"), the no-drivers warning, the group note, the pickup-code card, and booking through the Book button with GPS on.
 4. **Owner tasks (only the owner can do these):**
    - Enter verified Bustos emergency numbers in Admin → Emergency contacts.
-   - Set a realistic custom-tour fare in Admin → Fixed fares (₱70 today).
+   - Check the package prices and routes in Admin → Tour packages.
 5. **Two-phone test** with real people standing together. Arrival requires being within 150 m of the pickup. Script: `docs/real-world-scenarios.md`.
 6. **Smaller items:**
    - "+2 more" and "remaining" are English-only in Filipino mode.

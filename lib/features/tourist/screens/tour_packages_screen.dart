@@ -32,7 +32,7 @@ class TourPackagesScreen extends StatelessWidget {
                 AppSession.loadingSections.value.contains(RemoteSection.spots)
             ? const ListSkeleton()
             : ListView.builder(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 104),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                 itemCount: packages.isEmpty ? 1 : packages.length,
                 itemBuilder: (context, index) => FadeSlideIn.staggered(
                   index: index,
@@ -57,7 +57,7 @@ class TourPackagesScreen extends StatelessWidget {
                                   fit: StackFit.expand,
                                   children: [
                                     SafeAppImage(
-                                      path: pkg.imageUrl,
+                                      path: AppSession.packageImage(pkg),
                                       fit: BoxFit.cover,
                                     ),
                                     Container(
@@ -214,17 +214,6 @@ class TourPackagesScreen extends StatelessWidget {
                   ),
                 ),
               ),
-        bottomNavigationBar: SafeArea(
-          minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-          child: OutlinedButton.icon(
-            onPressed: () {
-              AppSession.startCustomItinerary();
-              context.push('/tourist/itinerary');
-            },
-            icon: const Icon(Icons.tune_rounded),
-            label: Text(context.l10n.buildYourOwnDay),
-          ),
-        ),
       );
     },
   );

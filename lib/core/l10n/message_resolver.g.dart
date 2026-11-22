@@ -45,6 +45,8 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'activeTripRoute' => l.activeTripRoute,
     'actorSystem' => l.actorSystem,
     'addAStatementToThisCase' => l.addAStatementToThisCase,
+    'addCountValue' => l.addCountValue(number(0)),
+    'addStops' => l.addStops,
     'addToTrip' => l.addToTrip,
     'addToTripLabel' => l.addToTripLabel,
     'addTouristSpot' => l.addTouristSpot,
@@ -100,6 +102,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'announcementSentSuccessfully' => l.announcementSentSuccessfully,
     'anotherAccountIsAlreadySignedInSignOutBeforeRegisteringADriver' =>
       l.anotherAccountIsAlreadySignedInSignOutBeforeRegisteringADriver,
+    'anotherPackageAlreadyUsesThisName' => l.anotherPackageAlreadyUsesThisName,
     'appDriverIsOnline' => l.appDriverIsOnline(AppBrand.name),
     'appManagementSystem' => l.appManagementSystem(AppBrand.name),
     'appName' => l.appName(AppBrand.name),
@@ -243,6 +246,8 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
       l.chooseABarangayAndEnterTheExactAddressBelow,
     'chooseAPickupPointOnTheMapOrEnableLocationFirst' =>
       l.chooseAPickupPointOnTheMapOrEnableLocationFirst,
+    'chooseATourPackage' => l.chooseATourPackage,
+    'chooseATourPackageBody' => l.chooseATourPackageBody,
     'chooseAnExactPickupPointBeforeBooking' =>
       l.chooseAnExactPickupPointBeforeBooking,
     'chooseBothDocumentsAndExpiryDates' => l.chooseBothDocumentsAndExpiryDates,
@@ -256,6 +261,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'choosePlacesSeeYourFareBookARide' => l.choosePlacesSeeYourFareBookARide,
     'chooseThePlacesYouWantToVisitInOneTrip' =>
       l.chooseThePlacesYouWantToVisitInOneTrip,
+    'chooseTwoToTwelveDifferentStops' => l.chooseTwoToTwelveDifferentStops,
     'chooseVehicleRegistrationImage' => l.chooseVehicleRegistrationImage,
     'chooseWhoShouldReceiveThisAnnouncementThenReviewBeforeSending' =>
       l.chooseWhoShouldReceiveThisAnnouncementThenReviewBeforeSending,
@@ -349,6 +355,8 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'couldNotSynchronizeWithTheServerCheckYourConnectionAndRetry' =>
       l.couldNotSynchronizeWithTheServerCheckYourConnectionAndRetry,
     'createANewPassword' => l.createANewPassword,
+    'createEditOrDeleteTours' => l.createEditOrDeleteTours,
+    'createPackage' => l.createPackage,
     'createTouristAccount' => l.createTouristAccount,
     'criticalConditionsAlsoAppearInOperationalAlertsInvestigateBeforeClearingAnAlert' =>
       l.criticalConditionsAlsoAppearInOperationalAlertsInvestigateBeforeClearingAnAlert,
@@ -373,6 +381,9 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'delete' => l.delete,
     'deleteAccount' => l.deleteAccount,
     'deleteMyAccount' => l.deleteMyAccount,
+    'deletePackage' => l.deletePackage,
+    'deletePackageBody' => l.deletePackageBody,
+    'deletePackageValue' => l.deletePackageValue(text(0)),
     'deletedValue' => l.deletedValue(text(0)),
     'deletingAccount' => l.deletingAccount,
     'deletionPending' => l.deletionPending,
@@ -400,6 +411,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'downloadExport' => l.downloadExport,
     'downloadReport' => l.downloadReport,
     'dragTheMapToPinYourExactLocation' => l.dragTheMapToPinYourExactLocation,
+    'dragToReorderStops' => l.dragToReorderStops,
     'drive' => l.drive,
     'driver' => l.driver,
     'driverAcceptedTheFixedFareAndPickup' =>
@@ -462,6 +474,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'earnings' => l.earnings,
     'earningsInsights' => l.earningsInsights,
     'edit' => l.edit,
+    'editPackage' => l.editPackage,
     'editProfile' => l.editProfile,
     'editTouristSpot' => l.editTouristSpot,
     'email' => l.email,
@@ -488,9 +501,12 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'enterAClearReasonForTheAuditHistory' =>
       l.enterAClearReasonForTheAuditHistory,
     'enterAClearReasonForThisChange' => l.enterAClearReasonForThisChange,
+    'enterAPackageNameOf3To60Characters' =>
+      l.enterAPackageNameOf3To60Characters,
     'enterAPhMobileNumberOrInternationalNumberWithCountryCode' =>
       l.enterAPhMobileNumberOrInternationalNumberWithCountryCode,
     'enterAPriceBetween001And100000' => l.enterAPriceBetween001And100000,
+    'enterAPriceBetween1And100000Pesos' => l.enterAPriceBetween1And100000Pesos,
     'enterAReasonOfAtLeastFiveCharacters' =>
       l.enterAReasonOfAtLeastFiveCharacters,
     'enterAValidAmountWithAtMostTwoDecimals' =>
@@ -520,6 +536,9 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'entranceFeesMayApply' => l.entranceFeesMayApply,
     'eta' => l.eta,
     'events' => l.events,
+    'everySpotIsAlreadyInThisPackage' => l.everySpotIsAlreadyInThisPackage,
+    'everyStopMustBeAnActiveTouristSpot' =>
+      l.everyStopMustBeAnActiveTouristSpot,
     'exampleEmailCom' => l.exampleEmailCom,
     'exampleOperatingHours' => l.exampleOperatingHours,
     'exampleSeniorPassengerNeedsExtraBoardingTime' =>
@@ -745,6 +764,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'inYourTrip' => l.inYourTrip,
     'includeWhatHappenedWhereTheTripStoppedAndAnyCashAlreadyExchangedStatements' =>
       l.includeWhatHappenedWhereTheTripStoppedAndAnyCashAlreadyExchangedStatements,
+    'includedInTheseTours' => l.includedInTheseTours,
     'includedStops' => l.includedStops,
     'incomingBooking' => l.incomingBooking,
     'incomingPickup' => l.incomingPickup,
@@ -779,6 +799,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'keepEditing' => l.keepEditing,
     'keepOpen' => l.keepOpen,
     'keepOriginalRoute' => l.keepOriginalRoute,
+    'keepPackage' => l.keepPackage,
     'keepUnderReview' => l.keepUnderReview,
     'keepWaiting' => l.keepWaiting,
     'kmAwayValue' => l.kmAwayValue(text(0), text(1)),
@@ -901,6 +922,8 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'nature' => l.nature,
     'navigate' => l.navigate,
     'needsReview' => l.needsReview,
+    'newBookingsUseTheseFaresValue' => l.newBookingsUseTheseFaresValue(text(0)),
+    'newPackage' => l.newPackage,
     'newPassword' => l.newPassword,
     'newRideRequest' => l.newRideRequest,
     'newTouristRating' => l.newTouristRating,
@@ -940,6 +963,8 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'noShowFee' => l.noShowFee,
     'noSpotsFound' => l.noSpotsFound,
     'noSystemFeedbackFound' => l.noSystemFeedbackFound,
+    'noTourPackagesYet' => l.noTourPackagesYet,
+    'noTourPackagesYetBody' => l.noTourPackagesYetBody,
     'noTouristSpotsFound' => l.noTouristSpotsFound,
     'noTouristsFound' => l.noTouristsFound,
     'noVerifiedContactNumberIsAvailableForThisTourist' =>
@@ -1026,7 +1051,14 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'outstandingFareBlocked' => l.outstandingFareBlocked,
     'outstandingFareTitle' => l.outstandingFareTitle,
     'overview' => l.overview,
+    'packageDeletedValue' => l.packageDeletedValue(text(0)),
+    'packageDescriptionOptional' => l.packageDescriptionOptional,
+    'packageName' => l.packageName,
     'packageNotFound' => l.packageNotFound,
+    'packageOptions' => l.packageOptions,
+    'packagePrice' => l.packagePrice,
+    'packagePriceChangeNote' => l.packagePriceChangeNote,
+    'packageSavedValue' => l.packageSavedValue(text(0)),
     'packageStopsChangedSelectThePackageAgain' =>
       l.packageStopsChangedSelectThePackageAgain,
     'pageNotFoundBody' => l.pageNotFoundBody,
@@ -1233,6 +1265,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'reliableValue' => l.reliableValue(text(0)),
     'removeDuplicateDestinations' => l.removeDuplicateDestinations,
     'removeSavedPlace' => l.removeSavedPlace,
+    'removeStop' => l.removeStop,
     'removedFromYourItinerary' => l.removedFromYourItinerary,
     'reopenAttraction' => l.reopenAttraction,
     'reopenedValue' => l.reopenedValue(text(0)),
@@ -1333,6 +1366,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'searchWindowEnded' => l.searchWindowEnded,
     'secureYourAccount' => l.secureYourAccount,
     'seeAll' => l.seeAll,
+    'seeTours' => l.seeTours,
     'seeYourDailyTripSummary' => l.seeYourDailyTripSummary,
     'selectARatingBetween1And5' => l.selectARatingBetween1And5,
     'selectAddress' => l.selectAddress,
@@ -1365,6 +1399,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'serviceAreaValue' => l.serviceAreaValue(text(0)),
     'serviceHealth' => l.serviceHealth,
     'sessionChanged' => l.sessionChanged,
+    'setAFixedFareForEachTourPackage' => l.setAFixedFareForEachTourPackage,
     'setAFlatCustomTourFareAndAFixedFareForEachPackage' =>
       l.setAFlatCustomTourFareAndAFixedFareForEachPackage,
     'share' => l.share,
@@ -1402,6 +1437,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'stopTemporarilyUnavailable' => l.stopTemporarilyUnavailable,
     'stopValue' => l.stopValue(text(0)),
     'stops' => l.stops,
+    'stopsInOrder' => l.stopsInOrder,
     'stopsIncluded' => l.stopsIncluded,
     'stopsValue' => l.stopsValue(text(0)),
     'stopsValueLabel' => l.stopsValueLabel(text(0), text(1)),
@@ -1523,6 +1559,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'thisPackageHasAFixedRouteTheStopsAreAlreadySelectedForYou' =>
       l.thisPackageHasAFixedRouteTheStopsAreAlreadySelectedForYou,
     'thisPackageHasNoPublishedPrice' => l.thisPackageHasNoPublishedPrice,
+    'thisPackageNoLongerExists' => l.thisPackageNoLongerExists,
     'thisPasswordResetLinkIsInvalidOrExpiredRequestANewOne' =>
       l.thisPasswordResetLinkIsInvalidOrExpiredRequestANewOne,
     'thisPickupPinIsOutsideTheServiceAreaMoveThePinCloserTo' =>

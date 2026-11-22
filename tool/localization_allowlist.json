@@ -535,7 +535,7 @@
   },
   {
     "file": "lib/models/tourist_spot_model.dart",
-    "value": "Nuestra Senora del Perpetuo",
+    "value": "Nuestra Senora Del Perpetuo",
     "kind": "data",
     "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
   },

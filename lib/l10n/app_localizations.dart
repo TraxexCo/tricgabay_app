@@ -8646,6 +8646,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go to start'**
   String get goToStart;
+
+  /// No description provided for @seeTours.
+  ///
+  /// In en, this message translates to:
+  /// **'See tours'**
+  String get seeTours;
+
+  /// No description provided for @includedInTheseTours.
+  ///
+  /// In en, this message translates to:
+  /// **'Included in these tours'**
+  String get includedInTheseTours;
+
+  /// No description provided for @chooseATourPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a tour package'**
+  String get chooseATourPackage;
+
+  /// No description provided for @chooseATourPackageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tours are booked as ready-made packages with a fixed route and price.'**
+  String get chooseATourPackageBody;
+
+  /// No description provided for @setAFixedFareForEachTourPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a fixed fare for each tour package. No per-stop, distance, waiting-time or surge additions. Entrance fees are paid separately.'**
+  String get setAFixedFareForEachTourPackage;
+
+  /// No description provided for @newBookingsUseTheseFaresValue.
+  ///
+  /// In en, this message translates to:
+  /// **'New bookings use these fares. Existing bookings keep their agreed fare.\n\n{value}'**
+  String newBookingsUseTheseFaresValue(String value);
+
+  /// No description provided for @createEditOrDeleteTours.
+  ///
+  /// In en, this message translates to:
+  /// **'Create, edit or delete tours'**
+  String get createEditOrDeleteTours;
+
+  /// No description provided for @newPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'New package'**
+  String get newPackage;
+
+  /// No description provided for @editPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit package'**
+  String get editPackage;
+
+  /// No description provided for @deletePackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete package'**
+  String get deletePackage;
+
+  /// No description provided for @keepPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep package'**
+  String get keepPackage;
+
+  /// No description provided for @packageOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Package options'**
+  String get packageOptions;
+
+  /// No description provided for @deletePackageValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {value}?'**
+  String deletePackageValue(String value);
+
+  /// No description provided for @deletePackageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tourists will no longer see or book this tour. Bookings already made with it keep their route and price.'**
+  String get deletePackageBody;
+
+  /// No description provided for @packageDeletedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} deleted'**
+  String packageDeletedValue(String value);
+
+  /// No description provided for @packageSavedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} saved'**
+  String packageSavedValue(String value);
+
+  /// No description provided for @noTourPackagesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No tour packages yet'**
+  String get noTourPackagesYet;
+
+  /// No description provided for @noTourPackagesYetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a package so tourists have a tour to book.'**
+  String get noTourPackagesYetBody;
+
+  /// No description provided for @packageName.
+  ///
+  /// In en, this message translates to:
+  /// **'Package name'**
+  String get packageName;
+
+  /// No description provided for @packagePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed price (₱)'**
+  String get packagePrice;
+
+  /// No description provided for @packageDescriptionOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get packageDescriptionOptional;
+
+  /// No description provided for @stopsInOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Stops, in order'**
+  String get stopsInOrder;
+
+  /// No description provided for @dragToReorderStops.
+  ///
+  /// In en, this message translates to:
+  /// **'The driver visits them top to bottom. Drag the handle to change the order.'**
+  String get dragToReorderStops;
+
+  /// No description provided for @removeStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove stop'**
+  String get removeStop;
+
+  /// No description provided for @addStops.
+  ///
+  /// In en, this message translates to:
+  /// **'Add stops'**
+  String get addStops;
+
+  /// No description provided for @addCountValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {count}'**
+  String addCountValue(int count);
+
+  /// No description provided for @createPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Create package'**
+  String get createPackage;
+
+  /// No description provided for @packagePriceChangeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A new price applies to new bookings only. Bookings already made keep their agreed fare.'**
+  String get packagePriceChangeNote;
+
+  /// No description provided for @everySpotIsAlreadyInThisPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Every tourist spot is already in this package.'**
+  String get everySpotIsAlreadyInThisPackage;
+
+  /// No description provided for @enterAPackageNameOf3To60Characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a package name of 3 to 60 characters.'**
+  String get enterAPackageNameOf3To60Characters;
+
+  /// No description provided for @enterAPriceBetween1And100000Pesos.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a price between ₱1 and ₱100,000.'**
+  String get enterAPriceBetween1And100000Pesos;
+
+  /// No description provided for @chooseTwoToTwelveDifferentStops.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose 2 to 12 different stops.'**
+  String get chooseTwoToTwelveDifferentStops;
+
+  /// No description provided for @anotherPackageAlreadyUsesThisName.
+  ///
+  /// In en, this message translates to:
+  /// **'Another package already uses this name. Choose a different name.'**
+  String get anotherPackageAlreadyUsesThisName;
+
+  /// No description provided for @thisPackageNoLongerExists.
+  ///
+  /// In en, this message translates to:
+  /// **'This package was deleted. Go back to see the current packages.'**
+  String get thisPackageNoLongerExists;
+
+  /// No description provided for @everyStopMustBeAnActiveTouristSpot.
+  ///
+  /// In en, this message translates to:
+  /// **'A stop is hidden or was removed. Remove it and choose a visible tourist spot.'**
+  String get everyStopMustBeAnActiveTouristSpot;
 }
 
 class _AppLocalizationsDelegate

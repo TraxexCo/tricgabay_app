@@ -31,7 +31,6 @@ const names = {
   'RegisterTouristScreen',
   'RegisterDriverScreen',
   'TouristHomeScreen',
-  'ItineraryBuilderScreen',
   'FareSummaryScreen',
   'BookingDetailScreen',
   'TouristProfileScreen',

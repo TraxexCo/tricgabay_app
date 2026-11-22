@@ -101,6 +101,26 @@ class AppSession {
           ? MessageCode.tourPackage
           : MessageCode.stopCustomTourValue(booking.stops.length.toString()));
 
+  /// The package's own artwork, or the first stop's photo for packages an
+  /// administrator created.
+  static String packageImage(TourPackageModel package) {
+    if (package.imageUrl.isNotEmpty) return package.imageUrl;
+    for (final id in package.spotIds) {
+      for (final spot in allSpots.value) {
+        if (spot.id == id && spot.imageUrls.isNotEmpty) {
+          return spot.imageUrls.first;
+        }
+      }
+    }
+    return '';
+  }
+
+  /// Active packages that stop at [spotId], in catalogue order.
+  static List<TourPackageModel> packagesWithSpot(String spotId) => tourPackages
+      .value
+      .where((package) => package.spotIds.contains(spotId))
+      .toList(growable: false);
+
   static TourPackageModel? get activePackage {
     final id = activePackageId;
     if (id == null) return null;
@@ -111,11 +131,6 @@ class AppSession {
   }
 
   // ── Itinerary ────────────────────────────────────────────────────────────
-
-  static void startCustomItinerary() {
-    activePackageId = null;
-    itinerary.value = [];
-  }
 
   static void selectPackage(TourPackageModel package) {
     final selected = package.spotIds
@@ -136,22 +151,6 @@ class AppSession {
   static void clearTripPlan() {
     activePackageId = null;
     itinerary.value = [];
-  }
-
-  static void toggleItinerary(TouristSpotModel spot) {
-    activePackageId = null;
-    final next = [...itinerary.value];
-    final index = next.indexWhere((item) => item.id == spot.id);
-    if (index == -1) {
-      TripRules.require(
-        !spot.isTemporarilyClosed,
-        MessageCode.isTemporarilyClosedAndCannotBeAddedRightNow(spot.name),
-      );
-      next.add(spot);
-    } else {
-      next.removeAt(index);
-    }
-    itinerary.value = next;
   }
 
   static bool isInItinerary(String spotId) =>
@@ -1426,6 +1425,46 @@ class AppSession {
       await syncRemoteState();
     }
     return;
+  }
+
+  // ── Tour packages (admin) ─────────────────────────────────────────────────
+
+  static Future<void> saveTourPackage({
+    String? packageId,
+    required String name,
+    required String description,
+    required int fareCents,
+    required List<String> spotIds,
+  }) async {
+    TripRules.require(
+      name.trim().length >= 3 && name.trim().length <= 60,
+      MessageCode.enterAPackageNameOf3To60Characters,
+    );
+    TripRules.require(
+      fareCents >= 100 && fareCents <= 10000000,
+      MessageCode.enterAPriceBetween1And100000Pesos,
+    );
+    TripRules.require(
+      spotIds.length >= 2 &&
+          spotIds.length <= 12 &&
+          spotIds.toSet().length == spotIds.length,
+      MessageCode.chooseTwoToTwelveDifferentStops,
+    );
+    _requireServer();
+    await BackendRepository.saveTourPackage(
+      packageId: packageId,
+      name: name.trim(),
+      description: description.trim(),
+      fareCents: fareCents,
+      spotIds: spotIds,
+    );
+    await syncRemoteState();
+  }
+
+  static Future<void> deleteTourPackage(String packageId) async {
+    _requireServer();
+    await BackendRepository.deleteTourPackage(packageId);
+    await syncRemoteState();
   }
 
   static Future<void> deleteSpot(String spotId) async {

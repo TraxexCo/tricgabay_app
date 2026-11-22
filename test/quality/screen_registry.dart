@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:tricgabay_app/models/tourist_spot_model.dart';
 import 'package:tricgabay_app/features/tourist/screens/tour_package_detail_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/tour_packages_screen.dart';
+import 'package:tricgabay_app/features/admin/screens/manage_packages_screen.dart';
+import 'package:tricgabay_app/features/admin/screens/package_form_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/tourist_spot_info_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/tourist_search_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/tourist_profile_screen.dart';
@@ -18,7 +20,6 @@ import 'package:tricgabay_app/features/tourist/screens/tourist_bookings_screen.d
 import 'package:tricgabay_app/features/tourist/screens/rate_review_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/photo_gallery_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/location_picker_screen.dart';
-import 'package:tricgabay_app/features/tourist/screens/itinerary_builder_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/find_driver_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/feedback_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/favorites_screen.dart';
@@ -71,6 +72,12 @@ class ScreenCase {
 }
 
 final screenCases = <ScreenCase>[
+  ScreenCase('ManagePackagesScreen', 'admin', () => ManagePackagesScreen()),
+  ScreenCase(
+    'PackageFormScreen',
+    'admin',
+    () => PackageFormScreen(package: TourPackageModel.catalog.last),
+  ),
   ScreenCase('TouristShellScreen', 'tourist', () => const TouristHomeScreen()),
   ScreenCase('DriverShellScreen', 'driver', () => const DriverHomeScreen()),
   ScreenCase('AdminShellScreen', 'admin', () => const AdminDashboardScreen()),
@@ -120,11 +127,6 @@ final screenCases = <ScreenCase>[
     () => PhotoGalleryScreen(spotId: TouristSpotModel.catalog.first.id),
   ),
   ScreenCase('LocationPickerScreen', 'tourist', () => LocationPickerScreen()),
-  ScreenCase(
-    'ItineraryBuilderScreen',
-    'tourist',
-    () => ItineraryBuilderScreen(),
-  ),
   ScreenCase('FindDriverScreen', 'tourist', () => FindDriverScreen()),
   ScreenCase('FeedbackScreen', 'tourist', () => FeedbackScreen()),
   ScreenCase('FavoritesScreen', 'tourist', () => FavoritesScreen()),

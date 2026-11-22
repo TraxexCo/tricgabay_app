@@ -330,7 +330,11 @@ export const rpcGroups: Record<string, string[]> = {
     "admin_set_driver_status",
     "admin_review_driver_compliance",
   ],
-  content: ["set_spot_availability"],
+  content: [
+    "set_spot_availability",
+    "admin_save_tour_package",
+    "admin_delete_tour_package",
+  ],
   support: [
     "send_announcement",
     "admin_set_tourist_status",
@@ -453,6 +457,14 @@ export function rpcArguments(name: string, actor: Actor): string[] | undefined {
       "auth.uid()::text||'/vehicle-registration.jpg'",
     ],
     publish_fares: ["10000", "'{}'::jsonb", reason],
+    admin_save_tour_package: [
+      "null",
+      "'Matrix tour'",
+      "''",
+      "70000",
+      "array['bustos-heritage-park','sta-cruz-chapel']",
+    ],
+    admin_delete_tour_package: ["'matrix-missing-package'"],
     publish_cancellation_policy: [
       "5",
       "20",

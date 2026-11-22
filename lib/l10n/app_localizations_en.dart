@@ -4989,4 +4989,132 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goToStart => 'Go to start';
+
+  @override
+  String get seeTours => 'See tours';
+
+  @override
+  String get includedInTheseTours => 'Included in these tours';
+
+  @override
+  String get chooseATourPackage => 'Choose a tour package';
+
+  @override
+  String get chooseATourPackageBody =>
+      'Tours are booked as ready-made packages with a fixed route and price.';
+
+  @override
+  String get setAFixedFareForEachTourPackage =>
+      'Set a fixed fare for each tour package. No per-stop, distance, waiting-time or surge additions. Entrance fees are paid separately.';
+
+  @override
+  String newBookingsUseTheseFaresValue(String value) {
+    return 'New bookings use these fares. Existing bookings keep their agreed fare.\n\n$value';
+  }
+
+  @override
+  String get createEditOrDeleteTours => 'Create, edit or delete tours';
+
+  @override
+  String get newPackage => 'New package';
+
+  @override
+  String get editPackage => 'Edit package';
+
+  @override
+  String get deletePackage => 'Delete package';
+
+  @override
+  String get keepPackage => 'Keep package';
+
+  @override
+  String get packageOptions => 'Package options';
+
+  @override
+  String deletePackageValue(String value) {
+    return 'Delete $value?';
+  }
+
+  @override
+  String get deletePackageBody =>
+      'Tourists will no longer see or book this tour. Bookings already made with it keep their route and price.';
+
+  @override
+  String packageDeletedValue(String value) {
+    return '$value deleted';
+  }
+
+  @override
+  String packageSavedValue(String value) {
+    return '$value saved';
+  }
+
+  @override
+  String get noTourPackagesYet => 'No tour packages yet';
+
+  @override
+  String get noTourPackagesYetBody =>
+      'Create a package so tourists have a tour to book.';
+
+  @override
+  String get packageName => 'Package name';
+
+  @override
+  String get packagePrice => 'Fixed price (₱)';
+
+  @override
+  String get packageDescriptionOptional => 'Description (optional)';
+
+  @override
+  String get stopsInOrder => 'Stops, in order';
+
+  @override
+  String get dragToReorderStops =>
+      'The driver visits them top to bottom. Drag the handle to change the order.';
+
+  @override
+  String get removeStop => 'Remove stop';
+
+  @override
+  String get addStops => 'Add stops';
+
+  @override
+  String addCountValue(int count) {
+    return 'Add $count';
+  }
+
+  @override
+  String get createPackage => 'Create package';
+
+  @override
+  String get packagePriceChangeNote =>
+      'A new price applies to new bookings only. Bookings already made keep their agreed fare.';
+
+  @override
+  String get everySpotIsAlreadyInThisPackage =>
+      'Every tourist spot is already in this package.';
+
+  @override
+  String get enterAPackageNameOf3To60Characters =>
+      'Enter a package name of 3 to 60 characters.';
+
+  @override
+  String get enterAPriceBetween1And100000Pesos =>
+      'Enter a price between ₱1 and ₱100,000.';
+
+  @override
+  String get chooseTwoToTwelveDifferentStops =>
+      'Choose 2 to 12 different stops.';
+
+  @override
+  String get anotherPackageAlreadyUsesThisName =>
+      'Another package already uses this name. Choose a different name.';
+
+  @override
+  String get thisPackageNoLongerExists =>
+      'This package was deleted. Go back to see the current packages.';
+
+  @override
+  String get everyStopMustBeAnActiveTouristSpot =>
+      'A stop is hidden or was removed. Remove it and choose a visible tourist spot.';
 }

@@ -28,9 +28,7 @@ List<TouristSpotModel> filterSpots(
           MessageCode.church => spot.category == SpotCategory.church,
           MessageCode.heritage => spot.category == SpotCategory.heritage,
           MessageCode.farmsNature =>
-            spot.category == SpotCategory.nature ||
-                name.contains('farm') ||
-                name.contains('park'),
+            spot.category == SpotCategory.nature || name.contains('farm'),
           MessageCode.market => spot.category == SpotCategory.market,
           MessageCode.resorts => name.contains('resort'),
           MessageCode.foodCafes => name.contains('cafe'),
@@ -43,3 +41,11 @@ List<TouristSpotModel> filterSpots(
       })
       .toList(growable: false);
 }
+
+/// Only the filters that match at least one place, so a chip never leads to
+/// an empty list. "All" is always first.
+List<String> availableSpotFilters(List<TouristSpotModel> spots) => [
+  for (final filter in spotFilters)
+    if (filter == MessageCode.all || filterSpots(spots, filter).isNotEmpty)
+      filter,
+];

@@ -42,9 +42,6 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
     _waitMinutes.text = '${cancellation.driverWaitMinutes}';
     _noShowPercent.text = '${cancellation.noShowFeePercent}';
     _policyTerms.text = cancellation.terms;
-    _prices['custom'] = TextEditingController(
-      text: AppFormatters.decimalInput((policy.customFareCents / 100)),
-    );
     _packages = List.of(AppSession.tourPackages.value);
     for (final p in _packages) {
       final cents = policy.packageFares[p.id];
@@ -165,7 +162,8 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
 
   Future<void> _save() async {
     if (_saving || !_form.currentState!.validate()) return;
-    final custom = FarePolicy.parsePrice(_prices['custom']!.text);
+    // Custom tours were removed; the stored custom rate is kept unchanged.
+    final custom = AppSession.farePolicy.value.customFareCents;
     final packages = {
       ...AppSession.farePolicy.value.packageFares,
       for (final p in _packages)
@@ -176,21 +174,14 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(context.l10n.publishTheseFixedFares),
         content: Text(
-          context.l10n
-              .customTourNewBookingsUseTheseRatesExistingBookingsKeepTheirAgreedFareValue(
-                context.message(
-                  (AppFormatters.amount((custom / 100))).toString(),
-                ),
-                context.message(
-                  (_packages
-                          .map(
-                            (p) =>
-                                "${p.name}: ₱${AppFormatters.amount((packages[p.id]! / 100))}",
-                          )
-                          .join("\n"))
-                      .toString(),
-                ),
-              ),
+          context.l10n.newBookingsUseTheseFaresValue(
+            _packages
+                .map(
+                  (p) =>
+                      "${p.name}: ₱${AppFormatters.amount((packages[p.id]! / 100))}",
+                )
+                .join("\n"),
+          ),
         ),
         actions: [
           TextButton(
@@ -247,9 +238,8 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          Text(context.l10n.setAFlatCustomTourFareAndAFixedFareForEachPackage),
+          Text(context.l10n.setAFixedFareForEachTourPackage),
           const SizedBox(height: 24),
-          _field('custom', MessageCode.customTour112SelectedStops),
           ..._packages.map((p) => _field(p.id, p.name)),
           TextFormField(
             controller: _reason,

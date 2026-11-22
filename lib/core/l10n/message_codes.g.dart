@@ -45,6 +45,9 @@ abstract final class MessageCode {
   static const activeTripRoute = '@l10n/activeTripRoute';
   static const actorSystem = '@l10n/actorSystem';
   static const addAStatementToThisCase = '@l10n/addAStatementToThisCase';
+  static String addCountValue(int count) =>
+      encodeMessage('addCountValue', [count]);
+  static const addStops = '@l10n/addStops';
   static const addToTrip = '@l10n/addToTrip';
   static const addToTripLabel = '@l10n/addToTripLabel';
   static const addTouristSpot = '@l10n/addTouristSpot';
@@ -108,6 +111,8 @@ abstract final class MessageCode {
       '@l10n/announcementSentSuccessfully';
   static const anotherAccountIsAlreadySignedInSignOutBeforeRegisteringADriver =
       '@l10n/anotherAccountIsAlreadySignedInSignOutBeforeRegisteringADriver';
+  static const anotherPackageAlreadyUsesThisName =
+      '@l10n/anotherPackageAlreadyUsesThisName';
   static const appDriverIsOnline = '@l10n/appDriverIsOnline';
   static const appManagementSystem = '@l10n/appManagementSystem';
   static const appName = '@l10n/appName';
@@ -275,6 +280,8 @@ abstract final class MessageCode {
       '@l10n/chooseABarangayAndEnterTheExactAddressBelow';
   static const chooseAPickupPointOnTheMapOrEnableLocationFirst =
       '@l10n/chooseAPickupPointOnTheMapOrEnableLocationFirst';
+  static const chooseATourPackage = '@l10n/chooseATourPackage';
+  static const chooseATourPackageBody = '@l10n/chooseATourPackageBody';
   static const chooseAnExactPickupPointBeforeBooking =
       '@l10n/chooseAnExactPickupPointBeforeBooking';
   static const chooseBothDocumentsAndExpiryDates =
@@ -290,6 +297,8 @@ abstract final class MessageCode {
       '@l10n/choosePlacesSeeYourFareBookARide';
   static const chooseThePlacesYouWantToVisitInOneTrip =
       '@l10n/chooseThePlacesYouWantToVisitInOneTrip';
+  static const chooseTwoToTwelveDifferentStops =
+      '@l10n/chooseTwoToTwelveDifferentStops';
   static const chooseVehicleRegistrationImage =
       '@l10n/chooseVehicleRegistrationImage';
   static const chooseWhoShouldReceiveThisAnnouncementThenReviewBeforeSending =
@@ -397,6 +406,8 @@ abstract final class MessageCode {
   static const couldNotSynchronizeWithTheServerCheckYourConnectionAndRetry =
       '@l10n/couldNotSynchronizeWithTheServerCheckYourConnectionAndRetry';
   static const createANewPassword = '@l10n/createANewPassword';
+  static const createEditOrDeleteTours = '@l10n/createEditOrDeleteTours';
+  static const createPackage = '@l10n/createPackage';
   static const createTouristAccount = '@l10n/createTouristAccount';
   static const criticalConditionsAlsoAppearInOperationalAlertsInvestigateBeforeClearingAnAlert =
       '@l10n/criticalConditionsAlsoAppearInOperationalAlertsInvestigateBeforeClearingAnAlert';
@@ -425,6 +436,10 @@ abstract final class MessageCode {
   static const delete = '@l10n/delete';
   static const deleteAccount = '@l10n/deleteAccount';
   static const deleteMyAccount = '@l10n/deleteMyAccount';
+  static const deletePackage = '@l10n/deletePackage';
+  static const deletePackageBody = '@l10n/deletePackageBody';
+  static String deletePackageValue(String value) =>
+      encodeMessage('deletePackageValue', [value]);
   static String deletedValue(String value) =>
       encodeMessage('deletedValue', [value]);
   static const deletingAccount = '@l10n/deletingAccount';
@@ -457,6 +472,7 @@ abstract final class MessageCode {
   static const downloadReport = '@l10n/downloadReport';
   static const dragTheMapToPinYourExactLocation =
       '@l10n/dragTheMapToPinYourExactLocation';
+  static const dragToReorderStops = '@l10n/dragToReorderStops';
   static const drive = '@l10n/drive';
   static const driver = '@l10n/driver';
   static const driverAcceptedTheFixedFareAndPickup =
@@ -527,6 +543,7 @@ abstract final class MessageCode {
   static const earnings = '@l10n/earnings';
   static const earningsInsights = '@l10n/earningsInsights';
   static const edit = '@l10n/edit';
+  static const editPackage = '@l10n/editPackage';
   static const editProfile = '@l10n/editProfile';
   static const editTouristSpot = '@l10n/editTouristSpot';
   static const email = '@l10n/email';
@@ -554,10 +571,14 @@ abstract final class MessageCode {
       '@l10n/enterAClearReasonForTheAuditHistory';
   static const enterAClearReasonForThisChange =
       '@l10n/enterAClearReasonForThisChange';
+  static const enterAPackageNameOf3To60Characters =
+      '@l10n/enterAPackageNameOf3To60Characters';
   static const enterAPhMobileNumberOrInternationalNumberWithCountryCode =
       '@l10n/enterAPhMobileNumberOrInternationalNumberWithCountryCode';
   static const enterAPriceBetween001And100000 =
       '@l10n/enterAPriceBetween001And100000';
+  static const enterAPriceBetween1And100000Pesos =
+      '@l10n/enterAPriceBetween1And100000Pesos';
   static const enterAReasonOfAtLeastFiveCharacters =
       '@l10n/enterAReasonOfAtLeastFiveCharacters';
   static const enterAValidAmountWithAtMostTwoDecimals =
@@ -589,6 +610,10 @@ abstract final class MessageCode {
   static const entranceFeesMayApply = '@l10n/entranceFeesMayApply';
   static const eta = '@l10n/eta';
   static const events = '@l10n/events';
+  static const everySpotIsAlreadyInThisPackage =
+      '@l10n/everySpotIsAlreadyInThisPackage';
+  static const everyStopMustBeAnActiveTouristSpot =
+      '@l10n/everyStopMustBeAnActiveTouristSpot';
   static const exampleEmailCom = '@l10n/exampleEmailCom';
   static const exampleOperatingHours = '@l10n/exampleOperatingHours';
   static const exampleSeniorPassengerNeedsExtraBoardingTime =
@@ -839,6 +864,7 @@ abstract final class MessageCode {
   static const inYourTrip = '@l10n/inYourTrip';
   static const includeWhatHappenedWhereTheTripStoppedAndAnyCashAlreadyExchangedStatements =
       '@l10n/includeWhatHappenedWhereTheTripStoppedAndAnyCashAlreadyExchangedStatements';
+  static const includedInTheseTours = '@l10n/includedInTheseTours';
   static const includedStops = '@l10n/includedStops';
   static const incomingBooking = '@l10n/incomingBooking';
   static const incomingPickup = '@l10n/incomingPickup';
@@ -879,6 +905,7 @@ abstract final class MessageCode {
   static const keepEditing = '@l10n/keepEditing';
   static const keepOpen = '@l10n/keepOpen';
   static const keepOriginalRoute = '@l10n/keepOriginalRoute';
+  static const keepPackage = '@l10n/keepPackage';
   static const keepUnderReview = '@l10n/keepUnderReview';
   static const keepWaiting = '@l10n/keepWaiting';
   static String kmAwayValue(String value, String secondValue) =>
@@ -1018,6 +1045,9 @@ abstract final class MessageCode {
   static const nature = '@l10n/nature';
   static const navigate = '@l10n/navigate';
   static const needsReview = '@l10n/needsReview';
+  static String newBookingsUseTheseFaresValue(String value) =>
+      encodeMessage('newBookingsUseTheseFaresValue', [value]);
+  static const newPackage = '@l10n/newPackage';
   static const newPassword = '@l10n/newPassword';
   static const newRideRequest = '@l10n/newRideRequest';
   static const newTouristRating = '@l10n/newTouristRating';
@@ -1060,6 +1090,8 @@ abstract final class MessageCode {
   static const noShowFee = '@l10n/noShowFee';
   static const noSpotsFound = '@l10n/noSpotsFound';
   static const noSystemFeedbackFound = '@l10n/noSystemFeedbackFound';
+  static const noTourPackagesYet = '@l10n/noTourPackagesYet';
+  static const noTourPackagesYetBody = '@l10n/noTourPackagesYetBody';
   static const noTouristSpotsFound = '@l10n/noTouristSpotsFound';
   static const noTouristsFound = '@l10n/noTouristsFound';
   static const noVerifiedContactNumberIsAvailableForThisTourist =
@@ -1160,7 +1192,16 @@ abstract final class MessageCode {
   static const outstandingFareBlocked = '@l10n/outstandingFareBlocked';
   static const outstandingFareTitle = '@l10n/outstandingFareTitle';
   static const overview = '@l10n/overview';
+  static String packageDeletedValue(String value) =>
+      encodeMessage('packageDeletedValue', [value]);
+  static const packageDescriptionOptional = '@l10n/packageDescriptionOptional';
+  static const packageName = '@l10n/packageName';
   static const packageNotFound = '@l10n/packageNotFound';
+  static const packageOptions = '@l10n/packageOptions';
+  static const packagePrice = '@l10n/packagePrice';
+  static const packagePriceChangeNote = '@l10n/packagePriceChangeNote';
+  static String packageSavedValue(String value) =>
+      encodeMessage('packageSavedValue', [value]);
   static const packageStopsChangedSelectThePackageAgain =
       '@l10n/packageStopsChangedSelectThePackageAgain';
   static const pageNotFoundBody = '@l10n/pageNotFoundBody';
@@ -1392,6 +1433,7 @@ abstract final class MessageCode {
   static const removeDuplicateDestinations =
       '@l10n/removeDuplicateDestinations';
   static const removeSavedPlace = '@l10n/removeSavedPlace';
+  static const removeStop = '@l10n/removeStop';
   static const removedFromYourItinerary = '@l10n/removedFromYourItinerary';
   static const reopenAttraction = '@l10n/reopenAttraction';
   static String reopenedValue(String value) =>
@@ -1495,6 +1537,7 @@ abstract final class MessageCode {
   static const searchWindowEnded = '@l10n/searchWindowEnded';
   static const secureYourAccount = '@l10n/secureYourAccount';
   static const seeAll = '@l10n/seeAll';
+  static const seeTours = '@l10n/seeTours';
   static const seeYourDailyTripSummary = '@l10n/seeYourDailyTripSummary';
   static const selectARatingBetween1And5 = '@l10n/selectARatingBetween1And5';
   static const selectAddress = '@l10n/selectAddress';
@@ -1533,6 +1576,8 @@ abstract final class MessageCode {
       encodeMessage('serviceAreaValue', [value]);
   static const serviceHealth = '@l10n/serviceHealth';
   static const sessionChanged = '@l10n/sessionChanged';
+  static const setAFixedFareForEachTourPackage =
+      '@l10n/setAFixedFareForEachTourPackage';
   static const setAFlatCustomTourFareAndAFixedFareForEachPackage =
       '@l10n/setAFlatCustomTourFareAndAFixedFareForEachPackage';
   static const share = '@l10n/share';
@@ -1574,6 +1619,7 @@ abstract final class MessageCode {
   static const stopTemporarilyUnavailable = '@l10n/stopTemporarilyUnavailable';
   static String stopValue(String value) => encodeMessage('stopValue', [value]);
   static const stops = '@l10n/stops';
+  static const stopsInOrder = '@l10n/stopsInOrder';
   static const stopsIncluded = '@l10n/stopsIncluded';
   static String stopsValue(String value) =>
       encodeMessage('stopsValue', [value]);
@@ -1709,6 +1755,7 @@ abstract final class MessageCode {
       '@l10n/thisPackageHasAFixedRouteTheStopsAreAlreadySelectedForYou';
   static const thisPackageHasNoPublishedPrice =
       '@l10n/thisPackageHasNoPublishedPrice';
+  static const thisPackageNoLongerExists = '@l10n/thisPackageNoLongerExists';
   static const thisPasswordResetLinkIsInvalidOrExpiredRequestANewOne =
       '@l10n/thisPasswordResetLinkIsInvalidOrExpiredRequestANewOne';
   static const thisPickupPinIsOutsideTheServiceAreaMoveThePinCloserTo =

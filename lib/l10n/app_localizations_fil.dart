@@ -5067,4 +5067,133 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get goToStart => 'Pumunta sa simula';
+
+  @override
+  String get seeTours => 'Tingnan ang mga tour';
+
+  @override
+  String get includedInTheseTours => 'Kasama sa mga tour na ito';
+
+  @override
+  String get chooseATourPackage => 'Pumili ng tour package';
+
+  @override
+  String get chooseATourPackageBody =>
+      'Nirereserba ang mga tour bilang handang package na may takdang ruta at presyo.';
+
+  @override
+  String get setAFixedFareForEachTourPackage =>
+      'Magtakda ng takdang pamasahe para sa bawat tour package. Walang dagdag kada hinto, layo, paghihintay o surge. Hiwalay na binabayaran ang entrance fee.';
+
+  @override
+  String newBookingsUseTheseFaresValue(String value) {
+    return 'Gagamitin ng mga bagong reserbasyon ang mga pamasaheng ito. Mananatili ang napagkasunduang pamasahe ng mga dating reserbasyon.\n\n$value';
+  }
+
+  @override
+  String get createEditOrDeleteTours =>
+      'Gumawa, mag-edit o magbura ng mga tour';
+
+  @override
+  String get newPackage => 'Bagong package';
+
+  @override
+  String get editPackage => 'I-edit ang package';
+
+  @override
+  String get deletePackage => 'Burahin ang package';
+
+  @override
+  String get keepPackage => 'Panatilihin';
+
+  @override
+  String get packageOptions => 'Mga opsyon ng package';
+
+  @override
+  String deletePackageValue(String value) {
+    return 'Burahin ang $value?';
+  }
+
+  @override
+  String get deletePackageBody =>
+      'Hindi na makikita o mareserba ng mga turista ang tour na ito. Mananatili ang ruta at presyo ng mga reserbasyong nagawa na.';
+
+  @override
+  String packageDeletedValue(String value) {
+    return 'Nabura ang $value';
+  }
+
+  @override
+  String packageSavedValue(String value) {
+    return 'Na-save ang $value';
+  }
+
+  @override
+  String get noTourPackagesYet => 'Wala pang tour package';
+
+  @override
+  String get noTourPackagesYetBody =>
+      'Gumawa ng package para may tour na mareserba ang mga turista.';
+
+  @override
+  String get packageName => 'Pangalan ng package';
+
+  @override
+  String get packagePrice => 'Takdang presyo (₱)';
+
+  @override
+  String get packageDescriptionOptional => 'Paglalarawan (opsyonal)';
+
+  @override
+  String get stopsInOrder => 'Mga hinto, sunod-sunod';
+
+  @override
+  String get dragToReorderStops =>
+      'Bibisitahin ito ng drayber mula itaas pababa. I-drag ang hawakan para baguhin ang ayos.';
+
+  @override
+  String get removeStop => 'Alisin ang hinto';
+
+  @override
+  String get addStops => 'Magdagdag ng hinto';
+
+  @override
+  String addCountValue(int count) {
+    return 'Idagdag ($count)';
+  }
+
+  @override
+  String get createPackage => 'Gumawa ng package';
+
+  @override
+  String get packagePriceChangeNote =>
+      'Sa mga bagong reserbasyon lang ang bagong presyo. Mananatili ang napagkasunduang pamasahe ng mga nagawa na.';
+
+  @override
+  String get everySpotIsAlreadyInThisPackage =>
+      'Nasa package na ang lahat ng pasyalan.';
+
+  @override
+  String get enterAPackageNameOf3To60Characters =>
+      'Maglagay ng pangalan ng package na 3 hanggang 60 titik.';
+
+  @override
+  String get enterAPriceBetween1And100000Pesos =>
+      'Maglagay ng presyong mula ₱1 hanggang ₱100,000.';
+
+  @override
+  String get chooseTwoToTwelveDifferentStops =>
+      'Pumili ng 2 hanggang 12 magkakaibang hinto.';
+
+  @override
+  String get anotherPackageAlreadyUsesThisName =>
+      'May ibang package na gumagamit ng pangalang ito. Pumili ng ibang pangalan.';
+
+  @override
+  String get thisPackageNoLongerExists =>
+      'Nabura na ang package na ito. Bumalik para makita ang mga kasalukuyang package.';
+
+  @override
+  String get everyStopMustBeAnActiveTouristSpot =>
+      'Nakatago o naalis na ang isang hinto. Alisin ito at pumili ng nakikitang pasyalan.';
 }

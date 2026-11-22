@@ -54,7 +54,10 @@ class TourPackageDetailScreen extends StatelessWidget {
                 background: Stack(
                   fit: StackFit.expand,
                   children: [
-                    SafeAppImage(path: pkg.imageUrl, fit: BoxFit.cover),
+                    SafeAppImage(
+                      path: AppSession.packageImage(pkg),
+                      fit: BoxFit.cover,
+                    ),
                     DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(

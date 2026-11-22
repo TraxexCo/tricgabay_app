@@ -58,10 +58,7 @@ void main() async {
     }),
     _startService('backend', BackendConfig.initialize),
     _startService('notifications', PushNotificationService.initializeCore),
-    _startService(
-      'launchLogo',
-      () => AppLogo.warmUp(BrandLogoHero.launchSize),
-    ),
+    _startService('launchLogo', () => AppLogo.warmUp(BrandLogoHero.launchSize)),
   ]);
   await Future.wait([
     _startService('session', AppSession.initialize),

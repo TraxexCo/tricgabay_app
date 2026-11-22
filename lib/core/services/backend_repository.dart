@@ -736,6 +736,30 @@ class BackendRepository {
     'p_reason': reason,
   });
 
+  /// Creates (no [packageId]) or updates a tour package and publishes its
+  /// price. Returns the package id.
+  static Future<String> saveTourPackage({
+    String? packageId,
+    required String name,
+    required String description,
+    required int fareCents,
+    required List<String> spotIds,
+  }) async =>
+      (await _client.rpc(
+            'admin_save_tour_package',
+            params: {
+              'p_package_id': packageId,
+              'p_name': name,
+              'p_description': description,
+              'p_fare_centavos': fareCents,
+              'p_spot_ids': spotIds,
+            },
+          ))
+          as String;
+
+  static Future<void> deleteTourPackage(String packageId) =>
+      rpc('admin_delete_tour_package', {'p_package_id': packageId});
+
   static Future<void> saveCancellationPolicy({
     required int expectedVersion,
     required int freeCancellationMinutes,

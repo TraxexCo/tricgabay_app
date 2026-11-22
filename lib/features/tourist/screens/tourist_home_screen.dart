@@ -16,6 +16,7 @@ import '../../../core/config/mapbox_config.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/session/app_session.dart';
 import '../../../models/tourist_spot_model.dart';
+import '../tours_for_spot.dart';
 
 import '../../../core/navigation/launch_preferences.dart';
 import '../../../core/widgets/shared_widgets.dart';

@@ -61,6 +61,8 @@ class AppRoutes {
   static const String manageTourists = '/admin/tourists';
   static const String manageTouristSpots = '/admin/spots';
   static const String spotForm = '/admin/spots/form';
+  static const String managePackages = '/admin/packages';
+  static const String packageForm = '/admin/packages/form';
   static const String monitorBookings = '/admin/bookings';
   static const String fareSettings = '/admin/fare-settings';
   static const String ratingsAndFeedback = '/admin/ratings';

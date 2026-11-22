@@ -351,23 +351,13 @@ class _SpotInfoSheet extends StatelessWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: ElevatedButton.icon(
-                              onPressed: spot.isTemporarilyClosed
-                                  ? null
-                                  : () {
-                                      AppSession.startCustomItinerary();
-                                      AppSession.toggleItinerary(
-                                        spot,
-                                      ); // ADD THE SPOT FIRST
-                                      Navigator.pop(context);
-                                      context.push('/tourist/itinerary');
-                                    },
-                              icon: const Icon(Icons.add_rounded, size: 16),
+                              onPressed: () {
+                                Navigator.pop(context);
+                                openToursForSpot(context, spot.id);
+                              },
+                              icon: const Icon(Icons.tour_outlined, size: 16),
                               label: Text(
-                                context.message(
-                                  spot.isTemporarilyClosed
-                                      ? MessageCode.closed
-                                      : MessageCode.addToTripLabel,
-                                ),
+                                context.l10n.seeTours,
                                 style: GoogleFonts.poppins(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
