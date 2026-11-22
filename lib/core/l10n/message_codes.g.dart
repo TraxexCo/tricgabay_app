@@ -190,6 +190,8 @@ abstract final class MessageCode {
   static const bookThisTour = '@l10n/bookThisTour';
   static const booking = '@l10n/booking';
   static const bookingAndSystemUpdates = '@l10n/bookingAndSystemUpdates';
+  static const bookingCancelledConfirmation =
+      '@l10n/bookingCancelledConfirmation';
   static const bookingDetailsCancel = '@l10n/bookingDetailsCancel';
   static const bookingDriverPaymentAndSafetyUpdates =
       '@l10n/bookingDriverPaymentAndSafetyUpdates';
@@ -1862,6 +1864,7 @@ abstract final class MessageCode {
   static const totalFare = '@l10n/totalFare';
   static const totalRevenue = '@l10n/totalRevenue';
   static const tourDate = '@l10n/tourDate';
+  static const tourEndedConfirmation = '@l10n/tourEndedConfirmation';
   static const tourEndedEarlyPaymentHeldForReview =
       '@l10n/tourEndedEarlyPaymentHeldForReview';
   static const tourHoursNote = '@l10n/tourHoursNote';

@@ -5444,4 +5444,11 @@ class AppLocalizationsFil extends AppLocalizations {
   String someInformationCouldNotRefreshDetailValue(String detail) {
     return 'Hindi na-refresh ang ilang impormasyon. Detalye: $detail';
   }
+
+  @override
+  String get bookingCancelledConfirmation => 'Nakansela ang reserbasyon.';
+
+  @override
+  String get tourEndedConfirmation =>
+      'Natapos ang tour. Susuriin ng admin ang bayad.';
 }

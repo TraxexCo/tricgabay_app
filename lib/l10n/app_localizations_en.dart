@@ -5365,4 +5365,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String someInformationCouldNotRefreshDetailValue(String detail) {
     return 'Some information could not refresh. Details: $detail';
   }
+
+  @override
+  String get bookingCancelledConfirmation => 'Booking cancelled.';
+
+  @override
+  String get tourEndedConfirmation =>
+      'Tour ended. An admin will review the payment.';
 }

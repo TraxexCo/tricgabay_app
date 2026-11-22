@@ -2724,5 +2724,7 @@
   "actionFailedWithDetailValue": "This action could not be completed. Details: {detail}",
   "@actionFailedWithDetailValue": {"placeholders": {"detail": {"type": "String"}}},
   "someInformationCouldNotRefreshDetailValue": "Some information could not refresh. Details: {detail}",
-  "@someInformationCouldNotRefreshDetailValue": {"placeholders": {"detail": {"type": "String"}}}
+  "@someInformationCouldNotRefreshDetailValue": {"placeholders": {"detail": {"type": "String"}}},
+  "bookingCancelledConfirmation": "Booking cancelled.",
+  "tourEndedConfirmation": "Tour ended. An admin will review the payment."
 }

@@ -158,13 +158,24 @@ extension _BookingDetailActions on _BookingDetailScreenState {
   Future<void> _cancel(BookingModel b) async {
     final reason = await _cancelReason(b);
     if (reason != null && mounted) {
-      await _run(
-        () => AppSession.cancelBooking(
+      var cancelled = false;
+      await _run(() async {
+        await AppSession.cancelBooking(
           b.id,
           actor: widget.viewer,
           reason: reason,
-        ),
-      );
+        );
+        cancelled = true;
+      });
+      // Confirm here at once; the phone notification follows separately.
+      if (cancelled && mounted) {
+        AppSnackbar.showSuccess(
+          context,
+          b.status == BookingStatus.ongoing
+              ? MessageCode.tourEndedConfirmation
+              : MessageCode.bookingCancelledConfirmation,
+        );
+      }
     }
   }
 

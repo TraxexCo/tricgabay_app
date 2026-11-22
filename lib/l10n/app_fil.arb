@@ -2724,5 +2724,7 @@
   "actionFailedWithDetailValue": "Hindi natapos ang aksyon. Detalye: {detail}",
   "@actionFailedWithDetailValue": {"placeholders": {"detail": {"type": "String"}}},
   "someInformationCouldNotRefreshDetailValue": "Hindi na-refresh ang ilang impormasyon. Detalye: {detail}",
-  "@someInformationCouldNotRefreshDetailValue": {"placeholders": {"detail": {"type": "String"}}}
+  "@someInformationCouldNotRefreshDetailValue": {"placeholders": {"detail": {"type": "String"}}},
+  "bookingCancelledConfirmation": "Nakansela ang reserbasyon.",
+  "tourEndedConfirmation": "Natapos ang tour. Susuriin ng admin ang bayad."
 }

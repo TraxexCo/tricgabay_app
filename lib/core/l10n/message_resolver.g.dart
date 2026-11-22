@@ -169,6 +169,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'bookThisTour' => l.bookThisTour,
     'booking' => l.booking,
     'bookingAndSystemUpdates' => l.bookingAndSystemUpdates,
+    'bookingCancelledConfirmation' => l.bookingCancelledConfirmation,
     'bookingDetailsCancel' => l.bookingDetailsCancel,
     'bookingDriverPaymentAndSafetyUpdates' =>
       l.bookingDriverPaymentAndSafetyUpdates,
@@ -1650,6 +1651,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'totalFare' => l.totalFare,
     'totalRevenue' => l.totalRevenue,
     'tourDate' => l.tourDate,
+    'tourEndedConfirmation' => l.tourEndedConfirmation,
     'tourEndedEarlyPaymentHeldForReview' =>
       l.tourEndedEarlyPaymentHeldForReview,
     'tourHoursNote' => l.tourHoursNote,

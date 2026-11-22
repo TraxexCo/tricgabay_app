@@ -9264,6 +9264,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Some information could not refresh. Details: {detail}'**
   String someInformationCouldNotRefreshDetailValue(String detail);
+
+  /// No description provided for @bookingCancelledConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking cancelled.'**
+  String get bookingCancelledConfirmation;
+
+  /// No description provided for @tourEndedConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Tour ended. An admin will review the payment.'**
+  String get tourEndedConfirmation;
 }
 
 class _AppLocalizationsDelegate
