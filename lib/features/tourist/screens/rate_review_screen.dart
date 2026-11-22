@@ -19,6 +19,13 @@ class RateReviewScreen extends StatefulWidget {
   State<RateReviewScreen> createState() => _RateReviewScreenState();
 }
 
+const _ratingTags = [
+  MessageCode.friendly,
+  MessageCode.punctual,
+  MessageCode.cleanVehicle,
+  MessageCode.safeDriver,
+];
+
 class _RateReviewScreenState extends State<RateReviewScreen> {
   double _rating = 5.0;
   final _reviewCtrl = TextEditingController();
@@ -142,25 +149,19 @@ class _RateReviewScreenState extends State<RateReviewScreen> {
             const SizedBox(height: 24),
             Wrap(
               spacing: 8,
-              children:
-                  [
-                        MessageCode.friendly,
-                        MessageCode.punctual,
-                        MessageCode.cleanVehicle,
-                        MessageCode.safeDriver,
-                      ]
-                      .map(
-                        (tag) => FilterChip(
-                          label: Text(context.message(tag)),
-                          selected: _selectedTags.contains(tag),
-                          onSelected: (v) => setState(() {
-                            v
-                                ? _selectedTags.add(tag)
-                                : _selectedTags.remove(tag);
-                          }),
-                        ),
-                      )
-                      .toList(),
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: _ratingTags
+                  .map(
+                    (tag) => FilterChip(
+                      label: Text(context.message(tag)),
+                      selected: _selectedTags.contains(tag),
+                      onSelected: (v) => setState(() {
+                        v ? _selectedTags.add(tag) : _selectedTags.remove(tag);
+                      }),
+                    ),
+                  )
+                  .toList(),
             ),
             const SizedBox(height: 24),
             AppTextField(
@@ -177,10 +178,20 @@ class _RateReviewScreenState extends State<RateReviewScreen> {
                 setState(() => _isSubmitting = true);
                 if (!mounted) return;
                 try {
+                  // Chosen tags go in front of the comment, so the driver
+                  // and admins see them with the review.
+                  final tags = [
+                    for (final tag in _ratingTags)
+                      if (_selectedTags.contains(tag)) context.message(tag),
+                  ];
+                  final comment = _reviewCtrl.text.trim();
                   await AppSession.markBookingRated(
                     widget.bookingId,
                     _rating,
-                    review: _reviewCtrl.text,
+                    review: [
+                      if (tags.isNotEmpty) tags.join(', '),
+                      if (comment.isNotEmpty) comment,
+                    ].join('. '),
                   );
                 } catch (e) {
                   if (context.mounted) {

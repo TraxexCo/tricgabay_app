@@ -16,6 +16,9 @@ class AppRoutes {
   static const String touristHome = '/tourist/home';
   static const String touristSearch = '/tourist/search';
   static const String touristBookings = '/tourist/bookings';
+  // Booking history opened from the account screen: same list, pushed above
+  // the tabs so it has a back button.
+  static const String touristBookingHistory = '/tourist/booking-history';
   static const String touristProfile = '/tourist/profile';
 
   // Tourist detail screens (full-screen, not tab)

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../constants/app_colors.dart';
 import 'list_skeleton.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../config/backend_config.dart';
@@ -101,52 +103,161 @@ class _EmergencyContactsViewState extends State<EmergencyContactsView> {
         final rows = snapshot.data ?? fallback;
         final language = Localizations.localeOf(context).languageCode;
         return ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
           children: [
-            Text(
-              context.l10n
-                  .forImmediateDangerCall911AppDoesNotReplaceEmergencyServices(
-                    AppBrand.name,
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.dangerLight,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: AppColors.danger.withValues(alpha: .25),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.sos_rounded,
+                        color: AppColors.danger,
+                        size: 30,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          context.l10n
+                              .forImmediateDangerCall911AppDoesNotReplaceEmergencyServices(
+                                AppBrand.name,
+                              ),
+                          style: GoogleFonts.poppins(
+                            fontSize: 13.5,
+                            height: 1.4,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.danger,
+                      minimumSize: const Size.fromHeight(50),
+                    ),
+                    onPressed: () => _call(fallback.first),
+                    icon: const Icon(Icons.call_rounded),
+                    label: Text(context.l10n.call911Now),
+                  ),
+                ],
+              ),
             ),
             if (snapshot.hasError)
-              Text(
-                context
-                    .l10n
-                    .contactUpdatesAreUnavailableOnlyTheNationalFallbackIsShown,
-              ),
-            const SizedBox(height: 16),
-            for (final row in rows)
-              Card(
-                child: ListTile(
-                  title: Text(
-                    context.message(
-                      row[language == 'fil' ? 'name_fil' : 'name_en'] as String,
-                    ),
-                  ),
-                  subtitle: row['is_placeholder'] == true
-                      ? Text(
-                          context
-                              .l10n
-                              .placeholderTheOwnerMustVerifyAndEnterANumber,
-                        )
-                      : Text(context.message(row['phone'] as String)),
-                  trailing: IconButton(
-                    tooltip: context.l10n.openDialer,
-                    icon: const Icon(Icons.call_outlined),
-                    onPressed: row['is_placeholder'] == true
-                        ? null
-                        : () => _call(row),
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(
+                  context
+                      .l10n
+                      .contactUpdatesAreUnavailableOnlyTheNationalFallbackIsShown,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12.5,
+                    color: AppColors.warning,
                   ),
                 ),
               ),
-            TextButton(
-              onPressed: () => setState(_reload),
-              child: Text(context.l10n.refresh),
+            const SizedBox(height: 22),
+            Text(
+              context.l10n.localContacts,
+              style: GoogleFonts.poppins(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
+            for (final row in rows) _contactCard(row, language),
+            const SizedBox(height: 4),
+            Center(
+              child: TextButton.icon(
+                onPressed: () => setState(_reload),
+                icon: const Icon(Icons.refresh_rounded),
+                label: Text(context.l10n.refresh),
+              ),
             ),
           ],
         );
       },
     ),
   );
+
+  Widget _contactCard(Map<String, dynamic> row, String language) {
+    final placeholder = row['is_placeholder'] == true;
+    final name = row[language == 'fil' ? 'name_fil' : 'name_en'] as String;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: (placeholder ? AppColors.textHint : AppColors.primary)
+                  .withValues(alpha: .1),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              Icons.local_phone_rounded,
+              color: placeholder ? AppColors.textHint : AppColors.primary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.message(name),
+                  style: GoogleFonts.poppins(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  placeholder
+                      ? context
+                            .l10n
+                            .placeholderTheOwnerMustVerifyAndEnterANumber
+                      : context.message(row['phone'] as String),
+                  style: GoogleFonts.poppins(
+                    fontSize: placeholder ? 12.5 : 15,
+                    fontWeight: placeholder ? FontWeight.w400 : FontWeight.w700,
+                    color: placeholder
+                        ? AppColors.textSecondary
+                        : AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton.filled(
+            tooltip: context.l10n.openDialer,
+            style: IconButton.styleFrom(
+              backgroundColor: AppColors.success,
+              disabledBackgroundColor: AppColors.surfaceVariant,
+            ),
+            icon: const Icon(Icons.call_rounded, color: Colors.white),
+            onPressed: placeholder ? null : () => _call(row),
+          ),
+        ],
+      ),
+    );
+  }
 }

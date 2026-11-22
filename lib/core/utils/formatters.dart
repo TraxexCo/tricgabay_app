@@ -45,6 +45,8 @@ class AppFormatters {
       DateFormat.MMM(resolvedLocale(locale)).format(value);
   static String weekdayShort(DateTime value, {String? locale}) =>
       DateFormat.E(resolvedLocale(locale)).format(value);
+  static String monthDayShort(DateTime value, {String? locale}) =>
+      DateFormat.MMMd(resolvedLocale(locale)).format(value);
   static String monthDay(DateTime value, {String? locale}) =>
       DateFormat.Md(resolvedLocale(locale)).format(value);
   static String date(DateTime value, {String? locale}) =>

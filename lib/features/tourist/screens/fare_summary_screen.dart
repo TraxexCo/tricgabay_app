@@ -13,6 +13,8 @@ import '../../../core/config/backend_config.dart';
 import '../../../core/services/backend_repository.dart';
 import '../../../models/booking_model.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/config/tour_schedule.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../payment/outstanding_fare_banner.dart';
 
 class FareSummaryScreen extends StatefulWidget {
@@ -26,7 +28,11 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
   bool _agreed = false;
   PaymentMethod _paymentMethod = PaymentMethod.cash;
   int _passengerCount = AppSession.draft.passengerCount;
-  DateTime? _scheduledAt = AppSession.draft.scheduledAt;
+  // Tours run on a chosen day from the tourism office; the tourist picks the
+  // day and a start time inside office hours (see TourSchedule).
+  late List<DateTime> _days = TourSchedule.bookableDays();
+  DateTime? _day;
+  DateTime? _scheduledAt;
   late final TextEditingController _luggageNotes;
   late final TextEditingController _accessibilityNeeds;
   @override
@@ -37,7 +43,72 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
       text: AppSession.draft.accessibilityNeeds,
     );
     AppSession.farePolicy.addListener(_priceChanged);
+    _restoreSchedule();
     _checkOnlineDrivers();
+  }
+
+  /// Keeps a still-valid earlier choice; otherwise picks the first open
+  /// start time.
+  void _restoreSchedule() {
+    _days = TourSchedule.bookableDays();
+    final previous = AppSession.draft.scheduledAt;
+    if (previous != null) {
+      final local = ServerClock.manila(previous);
+      final day = _days
+          .where(
+            (d) =>
+                d.year == local.year &&
+                d.month == local.month &&
+                d.day == local.day,
+          )
+          .firstOrNull;
+      if (day != null && TourSchedule.startTimes(day).contains(previous)) {
+        _day = day;
+        _scheduledAt = previous;
+        return;
+      }
+    }
+    _day = _days.firstOrNull;
+    _scheduledAt = _day == null
+        ? null
+        : TourSchedule.startTimes(_day!).firstOrNull;
+  }
+
+  void _pickDay(DateTime day) {
+    final times = TourSchedule.startTimes(day);
+    setState(() {
+      _day = day;
+      // Keep the same hour on the new day when it is offered.
+      final hour = _scheduledAt == null
+          ? null
+          : ServerClock.manila(_scheduledAt!).hour;
+      _scheduledAt =
+          times.where((t) => ServerClock.manila(t).hour == hour).firstOrNull ??
+          times.firstOrNull;
+      _agreed = false;
+    });
+  }
+
+  String _dayLabel(BuildContext context, DateTime day) {
+    final today = ServerClock.manila(ServerClock.now());
+    final diff = DateTime(
+      day.year,
+      day.month,
+      day.day,
+    ).difference(DateTime(today.year, today.month, today.day)).inDays;
+    return switch (diff) {
+      0 => context.l10n.today,
+      1 => context.l10n.tomorrow,
+      _ => AppFormatters.weekdayShort(day),
+    };
+  }
+
+  Future<void> _openDirections() async {
+    final uri = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query='
+      '${TourSchedule.meetingPointLat},${TourSchedule.meetingPointLng}',
+    );
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   /// Null until known, or when the count can't be loaded (then no warning).
@@ -57,50 +128,6 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
     if (mounted) setState(() => _agreed = false);
   }
 
-  String _scheduleLabel(BuildContext context) {
-    final value = _scheduledAt;
-    if (value == null) return MessageCode.requestADriverNow;
-    return ServerClock.formatManila(value);
-  }
-
-  Future<void> _chooseSchedule() async {
-    final now = ServerClock.manila(ServerClock.now());
-    final initial = _scheduledAt == null
-        ? now.add(const Duration(hours: 2))
-        : ServerClock.manila(_scheduledAt!);
-    final date = await showDatePicker(
-      context: context,
-      initialDate: initial,
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 30)),
-      helpText: context.l10n.choosePickupDate,
-    );
-    if (date == null || !mounted) return;
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(initial),
-      helpText: context.l10n.choosePickupTime,
-    );
-    if (time == null || !mounted) return;
-    final chosen = ServerClock.fromManila(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-    );
-    if (chosen.isBefore(ServerClock.now().add(const Duration(hours: 1)))) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.schedulePickupAtLeast1HourFromNow)),
-      );
-      return;
-    }
-    setState(() {
-      _scheduledAt = chosen;
-      _agreed = false;
-    });
-  }
-
   @override
   void dispose() {
     AppSession.farePolicy.removeListener(_priceChanged);
@@ -111,11 +138,7 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-    listenable: Listenable.merge([
-      AppSession.farePolicy,
-      AppSession.itinerary,
-      AppSession.draft.pickupAddress,
-    ]),
+    listenable: Listenable.merge([AppSession.farePolicy, AppSession.itinerary]),
     builder: (context, _) {
       final revision = AppSession.farePolicy.value.revision;
       final spots = AppSession.itinerary.value;
@@ -213,86 +236,108 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.location_on_outlined),
-                title: Text(context.l10n.pickupPoint),
-                subtitle: Text(
-                  context.message(
-                    AppSession.draft.pickupAddress.value ??
-                        (AppSession.userLatitude.value == null
-                            ? MessageCode.chooseAnExactPickupPointBeforeBooking
-                            : MessageCode.currentGpsLocation),
-                  ),
-                ),
-                trailing: const Icon(Icons.edit_location_alt_outlined),
-                onTap: () async {
-                  await context.push('/tourist/location-picker');
-                  if (mounted) setState(() {});
-                },
+            const SizedBox(height: 16),
+            _MeetingPointCard(onDirections: _openDirections),
+            const SizedBox(height: 22),
+            Text(
+              context.l10n.chooseYourTourDay,
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 12),
-            Card(
-              child: Column(
+            const SizedBox(height: 2),
+            Text(
+              context.l10n.tourHoursNote,
+              style: GoogleFonts.poppins(
+                fontSize: 12.5,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 10),
+            if (_days.isEmpty)
+              Text(context.l10n.noTourDaysAvailable)
+            else
+              SizedBox(
+                height: 78,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _days.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: 8),
+                  itemBuilder: (context, i) {
+                    final day = _days[i];
+                    final selected = day == _day;
+                    return _DayChip(
+                      label: _dayLabel(context, day),
+                      date: AppFormatters.monthDayShort(day),
+                      selected: selected,
+                      onTap: _busy ? null : () => _pickDay(day),
+                    );
+                  },
+                ),
+              ),
+            if (_day != null) ...[
+              const SizedBox(height: 16),
+              Text(
+                context.l10n.startTime,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
-                  ListTile(
-                    leading: Icon(
-                      _scheduledAt == null
-                          ? Icons.bolt_rounded
-                          : Icons.event_available_outlined,
-                    ),
-                    title: Text(
-                      context.message(
-                        _scheduledAt == null
-                            ? MessageCode.bookNow
-                            : MessageCode.scheduledPickup,
+                  for (final start in TourSchedule.startTimes(_day!))
+                    ChoiceChip(
+                      label: Text(
+                        AppFormatters.time(ServerClock.manila(start)),
                       ),
-                    ),
-                    subtitle: Text(context.message(_scheduleLabel(context))),
-                    trailing: const Icon(Icons.edit_calendar_outlined),
-                    onTap: _busy ? null : _chooseSchedule,
-                  ),
-                  if (_scheduledAt != null)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              context
-                                  .l10n
-                                  .driverMatchingBegins30MinutesBeforePickup,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: _busy
-                                ? null
-                                : () => setState(() {
-                                    _scheduledAt = null;
-                                    _agreed = false;
-                                  }),
-                            child: Text(context.l10n.useNow),
-                          ),
-                        ],
+                      selected: start == _scheduledAt,
+                      showCheckmark: false,
+                      selectedColor: AppColors.primary,
+                      backgroundColor: AppColors.surface,
+                      side: BorderSide(
+                        color: start == _scheduledAt
+                            ? AppColors.primary
+                            : AppColors.border,
                       ),
+                      labelStyle: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        color: start == _scheduledAt
+                            ? Colors.white
+                            : AppColors.textPrimary,
+                      ),
+                      onSelected: _busy
+                          ? null
+                          : (_) => setState(() {
+                              _scheduledAt = start;
+                              _agreed = false;
+                            }),
                     ),
                 ],
               ),
-            ),
-            if (_scheduledAt == null && _onlineDrivers == 0) ...[
+              const SizedBox(height: 10),
+              Text(
+                context.l10n.driverMatchingBegins30MinutesBeforePickup,
+                style: GoogleFonts.poppins(
+                  fontSize: 12.5,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+            if (_day == _days.firstOrNull &&
+                _dayLabel(context, _day ?? DateTime(0)) == context.l10n.today &&
+                _onlineDrivers == 0) ...[
               const SizedBox(height: 12),
               _NoticeBox(
                 icon: Icons.wifi_tethering_off_rounded,
                 color: AppColors.warning,
                 background: AppColors.warningLight,
                 title: context.l10n.noDriversOnlineRightNow,
-                body: context.l10n.noDriversOnlineBody,
-                action: TextButton(
-                  onPressed: _busy ? null : _chooseSchedule,
-                  child: Text(context.l10n.scheduleForLater),
-                ),
+                body: context.l10n.noDriversForTodayBody,
               ),
             ],
             const SizedBox(height: 20),
@@ -491,7 +536,8 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                   const SizedBox(height: 8),
                 ],
                 FilledButton(
-                  onPressed: _busy || !_agreed || spots.isEmpty
+                  onPressed:
+                      _busy || !_agreed || spots.isEmpty || _scheduledAt == null
                       ? null
                       : () async {
                           setState(() => _busy = true);
@@ -553,13 +599,11 @@ class _NoticeBox extends StatelessWidget {
     required this.background,
     required this.title,
     required this.body,
-    this.action,
   });
 
   final IconData icon;
   final Color color, background;
   final String title, body;
-  final Widget? action;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -593,12 +637,174 @@ class _NoticeBox extends StatelessWidget {
                   color: AppColors.textSecondary,
                 ),
               ),
-              if (action != null)
-                Align(alignment: Alignment.centerLeft, child: action),
             ],
           ),
         ),
       ],
+    ),
+  );
+}
+
+/// Where every tour starts and ends: the Bustos tourism office.
+class _MeetingPointCard extends StatelessWidget {
+  const _MeetingPointCard({required this.onDirections});
+  final VoidCallback onDirections;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: AppColors.border),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: .1),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.account_balance_rounded,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.l10n.meetingPoint,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  Text(
+                    context.l10n.bustosTourismOffice,
+                    style: GoogleFonts.poppins(
+                      fontSize: 15.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    context.l10n.bustosTourismOfficeAddress,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12.5,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.loop_rounded,
+                size: 20,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  context.l10n.meetingPointExplainer,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12.5,
+                    height: 1.4,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: TextButton.icon(
+            onPressed: onDirections,
+            icon: const Icon(Icons.directions_rounded),
+            label: Text(context.l10n.getDirections),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// One day in the tour-day picker: "Today" / "Tomorrow" / weekday + date.
+class _DayChip extends StatelessWidget {
+  const _DayChip({
+    required this.label,
+    required this.date,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label, date;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    selected: selected,
+    button: true,
+    child: Material(
+      color: selected ? AppColors.primary : AppColors.surface,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 72),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: selected ? AppColors.primary : AppColors.border,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: selected ? Colors.white : AppColors.textPrimary,
+                ),
+              ),
+              Text(
+                date,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: selected
+                      ? Colors.white.withValues(alpha: .9)
+                      : AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     ),
   );
 }

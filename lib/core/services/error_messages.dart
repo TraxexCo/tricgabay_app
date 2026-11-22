@@ -34,6 +34,15 @@ class ErrorMessages {
           .accountAccessCouldNotBeCompletedCheckYourDetailsAndTryAgain;
     }
     if (error is PostgrestException) {
+      if (error.message.contains('Completed tourist booking required')) {
+        return MessageCode.youCanRateTheDriverAfterTheTripIsCompleted;
+      }
+      if (error.code == '23505' && error.message.contains('booking_reviews')) {
+        return MessageCode.youAlreadyRatedThisTrip;
+      }
+      if (error.message.contains('Export request limit reached')) {
+        return MessageCode.youCanRequestUpTo3ExportsADay;
+      }
       // Tour package editor (admin).
       if (error.message.contains('Another package already uses this name')) {
         return MessageCode.anotherPackageAlreadyUsesThisName;

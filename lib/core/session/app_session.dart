@@ -14,6 +14,7 @@ import '../services/trip_rules.dart';
 import '../services/backend_repository.dart';
 import '../services/realtime_refresh_policy.dart';
 import '../config/backend_config.dart';
+import '../config/tour_schedule.dart';
 import '../services/auth_service.dart';
 import '../services/push_notification_service.dart';
 import '../services/active_trip_tracking_service.dart';
@@ -830,18 +831,12 @@ class AppSession {
       ),
       MessageCode.aDestinationIsNoLongerAvailableUpdateYourItinerary,
     );
-    final lat = draft.pickupLat ?? userLatitude.value;
-    final lng = draft.pickupLng ?? userLongitude.value;
+    // Every tour starts and ends at the Bustos tourism office.
+    const lat = TourSchedule.meetingPointLat;
+    const lng = TourSchedule.meetingPointLng;
     TripRules.require(
-      lat != null &&
-          lng != null &&
-          lat.isFinite &&
-          lng.isFinite &&
-          lat >= -90 &&
-          lat <= 90 &&
-          lng >= -180 &&
-          lng <= 180,
-      MessageCode.chooseAPickupPointOnTheMapOrEnableLocationFirst,
+      draft.scheduledAt != null,
+      MessageCode.chooseATourDayAndStartTime,
     );
     final pkg = activePackage;
     if (pkg != null) {
@@ -853,13 +848,13 @@ class AppSession {
     _requireServer();
     final serviceArea = await BackendRepository.loadPickupServiceArea();
     TripRules.require(
-      serviceArea.contains(lat!, lng!),
+      serviceArea.contains(lat, lng),
       MessageCode.thePickupPinIsOutsideTheServiceAreaChooseANearbyPickupPoint,
     );
     final created = await BackendRepository.createBooking(
       packageId: activePackageId,
       paymentMethod: paymentMethod,
-      pickupAddress: draft.pickupAddress.value ?? MessageCode.currentGpsPickup,
+      pickupAddress: MessageCode.bustosTourismOfficeMeetingPoint,
       pickupLatitude: lat,
       pickupLongitude: lng,
       stops: spots,
@@ -1159,7 +1154,14 @@ class AppSession {
       'p_rating': rating.round(),
       'p_review': review,
     });
-    await syncRemoteState();
+    // The rating is saved. Show it at once and refresh in the background:
+    // a slow refresh must not report the saved rating as a failure (and a
+    // second tap would then hit "already rated").
+    bookings.value = [
+      for (final b in bookings.value)
+        b.id == id ? b.copyWith(driverRating: rating.roundToDouble()) : b,
+    ];
+    unawaited(syncRemoteState().catchError((Object _) {}));
     return bookingById(id);
   }
 

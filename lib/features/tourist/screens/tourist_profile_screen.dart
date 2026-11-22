@@ -24,7 +24,7 @@ class TouristProfileScreen extends StatelessWidget {
           icon: Icons.receipt_long_outlined,
           title: l10n.bookingHistory,
           subtitle: l10n.yourRidesAndReceipts,
-          onTap: () => context.go(AppRoutes.touristBookings),
+          onTap: () => context.push(AppRoutes.touristBookingHistory),
         ),
         AccountMenuTile(
           icon: Icons.favorite_outline_rounded,

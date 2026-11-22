@@ -8,6 +8,8 @@ import '../../../core/services/backend_repository.dart';
 import 'package:flutter/material.dart';
 import '../../../core/motion/motion.dart';
 import '../../../core/constants/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../core/widgets/shared_widgets.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/services/trip_rules.dart';
@@ -143,23 +145,11 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           : t.touristRefundConfirmed;
       return Scaffold(
         appBar: AppBar(title: Text(context.l10n.tripPayment)),
+        backgroundColor: AppColors.background,
         body: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
           children: [
-            Text(
-              context.message(AppSession.bookingTitle(booking)),
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            // A short reference is enough to quote to support; the full
-            // database id was a long unreadable string.
-            Text(
-              context.message('#${booking.id.split('-').first.toUpperCase()}'),
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-                letterSpacing: .5,
-              ),
-            ),
+            _hero(booking),
             const SizedBox(height: 16),
             // The pickup code is what the tourist needs at the curb, so it
             // comes before the details.
@@ -250,7 +240,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       }),
                 child: Text(context.l10n.lostPickupCodeReissue),
               ),
-            const SizedBox(height: 16),
             _routeProgress(booking),
             if (booking.pendingRouteChange != null) _routeChangeCard(booking),
             if (booking.interruptedAt != null)
@@ -472,38 +461,37 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 icon: const Icon(Icons.emergency_outlined),
                 label: Text(context.l10n.emergencyHelp),
               ),
-            const SizedBox(height: 16),
-            ExpansionTile(
-              title: Text(context.l10n.agreedPolicy),
-              childrenPadding: EdgeInsets.all(16),
-              children: [Text(context.message(TripRules.policyText))],
+            Padding(
+              padding: const EdgeInsets.only(top: 14),
+              child: Material(
+                color: AppColors.surface,
+                clipBehavior: Clip.antiAlias,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: const BorderSide(color: AppColors.border),
+                ),
+                child: Theme(
+                  data: Theme.of(
+                    context,
+                  ).copyWith(dividerColor: Colors.transparent),
+                  child: ExpansionTile(
+                    leading: const Icon(
+                      Icons.policy_outlined,
+                      color: AppColors.primary,
+                    ),
+                    title: Text(context.l10n.agreedPolicy),
+                    childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    children: [Text(context.message(TripRules.policyText))],
+                  ),
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
             _history(booking),
             const SizedBox(height: 32),
           ],
         ),
       );
     },
-  );
-  Widget _row(String label, String value) => Padding(
-    padding: const EdgeInsets.only(bottom: 10),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // A fixed two-column table: values used to jump between left and
-        // right alignment depending on whether they wrapped.
-        Expanded(flex: 2, child: Text(context.message(label))),
-        const SizedBox(width: 12),
-        Expanded(
-          flex: 3,
-          child: Text(
-            context.message(value),
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-        ),
-      ],
-    ),
   );
   Widget _button(
     String text,

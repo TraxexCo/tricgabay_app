@@ -5231,4 +5231,159 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get sendSupportMessage => 'Ipadala ang mensahe';
+
+  @override
+  String get youCanRateTheDriverAfterTheTripIsCompleted =>
+      'Maaari mong i-rate ang drayber kapag tapos na ang biyahe.';
+
+  @override
+  String get youAlreadyRatedThisTrip =>
+      'Na-rate mo na ang biyaheng ito. Salamat!';
+
+  @override
+  String get tripDetails => 'Detalye ng biyahe';
+
+  @override
+  String get tourDate => 'Petsa at simula ng tour';
+
+  @override
+  String get meetingPoint => 'Tagpuan at babaan';
+
+  @override
+  String get tourRoute => 'Ruta ng tour';
+
+  @override
+  String plateValue(String plate) {
+    return 'Plaka $plate';
+  }
+
+  @override
+  String stopsDoneValue(String done, String total) {
+    return '$done sa $total tapos';
+  }
+
+  @override
+  String bookingReferenceValue(String ref) {
+    return 'Reserbasyon #$ref';
+  }
+
+  @override
+  String resultsCountValue(String count) {
+    return '$count resulta';
+  }
+
+  @override
+  String get placesOnOurTours => 'Mga lugar sa aming mga tour';
+
+  @override
+  String discoverSubtitle(String places, String tours) {
+    return '$places lugar na makikita sa $tours guided na tour sakay ng traysikel';
+  }
+
+  @override
+  String get removeFromSaved => 'Alisin sa naka-save';
+
+  @override
+  String inToursValue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Kasama sa $count tour',
+      one: 'Kasama sa 1 tour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get call911Now => 'Tumawag sa 911 ngayon';
+
+  @override
+  String get localContacts => 'Mga lokal na contact';
+
+  @override
+  String get youCanRequestUpTo3ExportsADay =>
+      'Hanggang 3 kopya ng data lang ang maaaring hilingin bawat araw. Subukan ulit bukas.';
+
+  @override
+  String requestedOnValue(String date) {
+    return 'Hiniling noong $date';
+  }
+
+  @override
+  String get yourDataYourRight => 'Ang data mo, karapatan mo';
+
+  @override
+  String get dataRightsIntro =>
+      'Ayon sa Data Privacy Act of 2012, maaari kang humingi ng kopya ng personal na data na itinatago ng app tungkol sa iyo: profile, mga reserbasyon, bayad at feedback.';
+
+  @override
+  String get dataStepRequestTitle => 'Humingi ng kopya';
+
+  @override
+  String get dataStepRequestBody =>
+      'Pindutin ang button sa ibaba. Hanggang 3 beses bawat araw.';
+
+  @override
+  String get dataStepPrepareTitle => 'Ihahanda ito ng admin';
+
+  @override
+  String get dataStepPrepareBody =>
+      'Magiging \"Handa na ang kopya\" ang status sa ibaba kapag handa na ang file mo.';
+
+  @override
+  String get dataStepDownloadTitle => 'I-download at itago';
+
+  @override
+  String get dataStepDownloadBody =>
+      'I-save ang file o ibahagi sa email o drive mo.';
+
+  @override
+  String get yourRequests => 'Mga hiling mo';
+
+  @override
+  String get chooseYourTourDay => 'Piliin ang araw ng tour';
+
+  @override
+  String get tourHoursNote =>
+      'Bukas ang tour mula 8:00 AM hanggang 5:00 PM. Ang huling alis ay 1:00 PM.';
+
+  @override
+  String get noTourDaysAvailable =>
+      'Walang bukas na araw ng tour ngayon. Pakisubukan ulit mamaya.';
+
+  @override
+  String get startTime => 'Oras ng simula';
+
+  @override
+  String get tomorrow => 'Bukas';
+
+  @override
+  String get noDriversForTodayBody =>
+      'Wala pang online na drayber para ngayong araw. Mananatiling bukas ang request mo, pero mas may oras ang mga drayber kung pipili ka ng mas huling oras o ibang araw.';
+
+  @override
+  String get bustosTourismOffice => 'Bustos Municipal Tourism Office';
+
+  @override
+  String get bustosTourismOfficeAddress =>
+      'Bustos Municipal Hall, Poblacion, Bustos, Bulacan';
+
+  @override
+  String get meetingPointExplainer =>
+      'Dito nagsisimula ang bawat tour at dito ka rin ibababa pagkatapos. Pakidating 10 minuto bago ang oras ng simula.';
+
+  @override
+  String get getDirections => 'Paano pumunta';
+
+  @override
+  String get chooseATourDayAndStartTime =>
+      'Pumili muna ng araw at oras ng tour.';
+
+  @override
+  String get bustosTourismOfficeMeetingPoint =>
+      'Bustos Municipal Tourism Office (Munisipyo)';
+
+  @override
+  String get tourStartsAndEndsAtOffice =>
+      'Nagsisimula at nagtatapos sa Bustos Municipal Tourism Office (Munisipyo). Piliin ang araw ng tour sa susunod na screen.';
 }

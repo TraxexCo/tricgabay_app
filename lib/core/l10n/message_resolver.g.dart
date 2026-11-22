@@ -173,6 +173,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
       l.bookingDriverPaymentAndSafetyUpdates,
     'bookingHistory' => l.bookingHistory,
     'bookingNotFoundForThisAccount' => l.bookingNotFoundForThisAccount,
+    'bookingReferenceValue' => l.bookingReferenceValue(text(0)),
     'bookingSessionChanged' => l.bookingSessionChanged,
     'bookingValue' => l.bookingValue(text(0)),
     'bookings' => l.bookings,
@@ -194,9 +195,13 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'bulletItem' => l.bulletItem(text(0)),
     'bustosBulacan' => l.bustosBulacan,
     'bustosTourMap' => l.bustosTourMap,
+    'bustosTourismOffice' => l.bustosTourismOffice,
+    'bustosTourismOfficeAddress' => l.bustosTourismOfficeAddress,
+    'bustosTourismOfficeMeetingPoint' => l.bustosTourismOfficeMeetingPoint,
     'bustosTownCentre' => l.bustosTownCentre,
     'calculatingLocalRoadRoute' => l.calculatingLocalRoadRoute,
     'call' => l.call,
+    'call911Now' => l.call911Now,
     'callEmergencyServices' => l.callEmergencyServices,
     'cancel' => l.cancel,
     'cancelBooking' => l.cancelBooking,
@@ -248,6 +253,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
       l.chooseABarangayAndEnterTheExactAddressBelow,
     'chooseAPickupPointOnTheMapOrEnableLocationFirst' =>
       l.chooseAPickupPointOnTheMapOrEnableLocationFirst,
+    'chooseATourDayAndStartTime' => l.chooseATourDayAndStartTime,
     'chooseATourPackage' => l.chooseATourPackage,
     'chooseATourPackageBody' => l.chooseATourPackageBody,
     'chooseAnExactPickupPointBeforeBooking' =>
@@ -267,6 +273,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'chooseVehicleRegistrationImage' => l.chooseVehicleRegistrationImage,
     'chooseWhoShouldReceiveThisAnnouncementThenReviewBeforeSending' =>
       l.chooseWhoShouldReceiveThisAnnouncementThenReviewBeforeSending,
+    'chooseYourTourDay' => l.chooseYourTourDay,
     'chooseYourWorkspaceThenSignInToContinue' =>
       l.chooseYourWorkspaceThenSignInToContinue,
     'church' => l.church,
@@ -374,6 +381,13 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
         text(1),
       ),
     'dataExportRequests' => l.dataExportRequests,
+    'dataRightsIntro' => l.dataRightsIntro,
+    'dataStepDownloadBody' => l.dataStepDownloadBody,
+    'dataStepDownloadTitle' => l.dataStepDownloadTitle,
+    'dataStepPrepareBody' => l.dataStepPrepareBody,
+    'dataStepPrepareTitle' => l.dataStepPrepareTitle,
+    'dataStepRequestBody' => l.dataStepRequestBody,
+    'dataStepRequestTitle' => l.dataStepRequestTitle,
     'daysAgoValue' => l.daysAgoValue(text(0)),
     'dec' => l.dec,
     'decisionAndReasoning' => l.decisionAndReasoning,
@@ -400,6 +414,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
       l.directionsRequireBetween2And25Coordinates,
     'discover' => l.discover,
     'discoverBustos' => l.discoverBustos,
+    'discoverSubtitle' => l.discoverSubtitle(text(0), text(1)),
     'disputePaymentReportAProblem' => l.disputePaymentReportAProblem,
     'distanceKilometers' => l.distanceKilometers(text(0)),
     'distanceMeters' => l.distanceMeters(text(0)),
@@ -720,6 +735,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'gcashVisibility' => l.gcashVisibility,
     'getAroundQuicklyAndSafelyByBookingLocalTricycleDriversInSeconds' =>
       l.getAroundQuicklyAndSafelyByBookingLocalTricycleDriversInSeconds,
+    'getDirections' => l.getDirections,
     'getStarted' => l.getStarted,
     'goBack' => l.goBack,
     'goOnline' => l.goOnline,
@@ -766,6 +782,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'ifPlansChange' => l.ifPlansChange,
     'imageContentMimeTypeAndFileExtensionMustMatch' =>
       l.imageContentMimeTypeAndFileExtensionMustMatch,
+    'inToursValue' => l.inToursValue(number(0)),
     'inYourTrip' => l.inYourTrip,
     'includeWhatHappenedWhereTheTripStoppedAndAnyCashAlreadyExchangedStatements' =>
       l.includeWhatHappenedWhereTheTripStoppedAndAnyCashAlreadyExchangedStatements,
@@ -840,6 +857,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'loadedBookingTotals' => l.loadedBookingTotals,
     'loading' => l.loading,
     'loadingMore' => l.loadingMore,
+    'localContacts' => l.localContacts,
     'localContactsAndSos' => l.localContactsAndSos,
     'localEmergencyNumbers' => l.localEmergencyNumbers,
     'localHistory' => l.localHistory,
@@ -889,6 +907,8 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'maximumCapacityIsCheckedBeforeOfferingTheBooking' =>
       l.maximumCapacityIsCheckedBeforeOfferingTheBooking,
     'may' => l.may,
+    'meetingPoint' => l.meetingPoint,
+    'meetingPointExplainer' => l.meetingPointExplainer,
     'member' => l.member,
     'message' => l.message,
     'min8Characters' => l.min8Characters,
@@ -954,6 +974,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
       l.noDriverAcceptedDuringThisSearchWindowRetryToOpenAFreshRequest,
     'noDriverYet' => l.noDriverYet,
     'noDriversAwaitingReview' => l.noDriversAwaitingReview,
+    'noDriversForTodayBody' => l.noDriversForTodayBody,
     'noDriversOnlineBody' => l.noDriversOnlineBody,
     'noDriversOnlineRightNow' => l.noDriversOnlineRightNow,
     'noEligibleActiveDrivers' => l.noEligibleActiveDrivers,
@@ -969,6 +990,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'noShowFee' => l.noShowFee,
     'noSpotsFound' => l.noSpotsFound,
     'noSystemFeedbackFound' => l.noSystemFeedbackFound,
+    'noTourDaysAvailable' => l.noTourDaysAvailable,
     'noTourPackagesYet' => l.noTourPackagesYet,
     'noTourPackagesYetBody' => l.noTourPackagesYetBody,
     'noTouristSpotsFound' => l.noTouristSpotsFound,
@@ -1157,12 +1179,14 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'placeholderTheOwnerMustVerifyAndEnterANumber' =>
       l.placeholderTheOwnerMustVerifyAndEnterANumber,
     'places' => l.places,
+    'placesOnOurTours' => l.placesOnOurTours,
     'placesYouSaved' => l.placesYouSaved,
     'planYourTrip' => l.planYourTrip,
     'plateNumber' => l.plateNumber,
     'plateNumberIsRequired' => l.plateNumberIsRequired,
     'plateNumberMustNotExceedCharactersValue' =>
       l.plateNumberMustNotExceedCharactersValue(text(0)),
+    'plateValue' => l.plateValue(text(0)),
     'platformFailureValue' => l.platformFailureValue(text(0)),
     'pleaseConfirmYourPassword' => l.pleaseConfirmYourPassword,
     'pleaseDescribeYourConcernOrSuggestionInDetail' =>
@@ -1272,6 +1296,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'reliabilitySeatsValue' => l.reliabilitySeatsValue(text(0), text(1)),
     'reliableValue' => l.reliableValue(text(0)),
     'removeDuplicateDestinations' => l.removeDuplicateDestinations,
+    'removeFromSaved' => l.removeFromSaved,
     'removeSavedPlace' => l.removeSavedPlace,
     'removeStop' => l.removeStop,
     'removedFromYourItinerary' => l.removedFromYourItinerary,
@@ -1298,6 +1323,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'requestSaved' => l.requestSaved,
     'requestToSkipThisStop' => l.requestToSkipThisStop,
     'requestToSkipValue' => l.requestToSkipValue(text(0)),
+    'requestedOnValue' => l.requestedOnValue(text(0)),
     'requests' => l.requests,
     'resetMap' => l.resetMap,
     'resolve' => l.resolve,
@@ -1308,6 +1334,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'respondToCommunityConcerns' => l.respondToCommunityConcerns,
     'restore' => l.restore,
     'restoreTourist' => l.restoreTourist,
+    'resultsCountValue' => l.resultsCountValue(text(0)),
     'resumePayment' => l.resumePayment,
     'retry' => l.retry,
     'retryConnection' => l.retryConnection,
@@ -1433,6 +1460,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'spots' => l.spots,
     'staleOnlineDrivers' => l.staleOnlineDrivers,
     'startNewSearch' => l.startNewSearch,
+    'startTime' => l.startTime,
     'statusBusy' => l.statusBusy,
     'statusValue' => l.statusValue(text(0)),
     'stillToPay' => l.stillToPay,
@@ -1446,6 +1474,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'stopTemporarilyUnavailable' => l.stopTemporarilyUnavailable,
     'stopValue' => l.stopValue(text(0)),
     'stops' => l.stops,
+    'stopsDoneValue' => l.stopsDoneValue(text(0), text(1)),
     'stopsInOrder' => l.stopsInOrder,
     'stopsIncluded' => l.stopsIncluded,
     'stopsValue' => l.stopsValue(text(0)),
@@ -1600,14 +1629,19 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'title' => l.title,
     'today' => l.today,
     'togglePhotoControls' => l.togglePhotoControls,
+    'tomorrow' => l.tomorrow,
     'totalBookings' => l.totalBookings,
     'totalFare' => l.totalFare,
     'totalRevenue' => l.totalRevenue,
+    'tourDate' => l.tourDate,
     'tourEndedEarlyPaymentHeldForReview' =>
       l.tourEndedEarlyPaymentHeldForReview,
+    'tourHoursNote' => l.tourHoursNote,
     'tourPackage' => l.tourPackage,
     'tourPackages' => l.tourPackages,
+    'tourRoute' => l.tourRoute,
     'tourScheduled' => l.tourScheduled,
+    'tourStartsAndEndsAtOffice' => l.tourStartsAndEndsAtOffice,
     'tourist' => l.tourist,
     'touristAccountActivated' => l.touristAccountActivated,
     'touristAccountSuspended' => l.touristAccountSuspended,
@@ -1637,6 +1671,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'tripCompletedFixedFareDueCashNotYetConfirmed' =>
       l.tripCompletedFixedFareDueCashNotYetConfirmed,
     'tripControls' => l.tripControls,
+    'tripDetails' => l.tripDetails,
     'tripHistory' => l.tripHistory,
     'tripOngoing' => l.tripOngoing,
     'tripPausedOpenTripControlsToChooseWhetherToWaitOrEndSafelyValue' =>
@@ -1759,7 +1794,11 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
       l.willBeCompletedInThePaymongoTestEnvironmentValue(text(0)),
     'youAlreadyHaveAnActiveBookingOpenTripsToContinueOrCancelIt' =>
       l.youAlreadyHaveAnActiveBookingOpenTripsToContinueOrCancelIt,
+    'youAlreadyRatedThisTrip' => l.youAlreadyRatedThisTrip,
     'youAreTogether' => l.youAreTogether,
+    'youCanRateTheDriverAfterTheTripIsCompleted' =>
+      l.youCanRateTheDriverAfterTheTripIsCompleted,
+    'youCanRequestUpTo3ExportsADay' => l.youCanRequestUpTo3ExportsADay,
     'youChoseToWaitTheDriverMustConfirmTheVehicleIsSafeBefore' =>
       l.youChoseToWaitTheDriverMustConfirmTheVehicleIsSafeBefore,
     'youReOffline' => l.youReOffline,
@@ -1780,6 +1819,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'yourAssignedTouristCanSeeYourLiveLocation' =>
       l.yourAssignedTouristCanSeeYourLiveLocation,
     'yourCompletedRidesWillAppearHere' => l.yourCompletedRidesWillAppearHere,
+    'yourDataYourRight' => l.yourDataYourRight,
     'yourDocumentsAreUnderReview' => l.yourDocumentsAreUnderReview,
     'yourDriver' => l.yourDriver,
     'yourFeedbackHelpsKeepAppTrusted' => l.yourFeedbackHelpsKeepAppTrusted(
@@ -1792,6 +1832,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'yourLocalJourneyStartsHere' => l.yourLocalJourneyStartsHere,
     'yourPreviousCodeWillStopWorkingShareTheNewCodeOnlyAfterBoarding' =>
       l.yourPreviousCodeWillStopWorkingShareTheNewCodeOnlyAfterBoarding,
+    'yourRequests' => l.yourRequests,
     'yourRidesAndReceipts' => l.yourRidesAndReceipts,
     'yourTourIsReservedDriverMatchingBegins30MinutesBeforePickupAndReminders' =>
       l.yourTourIsReservedDriverMatchingBegins30MinutesBeforePickupAndReminders,

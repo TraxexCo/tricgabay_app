@@ -57,14 +57,61 @@ extension _TouristHomeSections on _TouristHomeScreenState {
               ],
             ),
             const SizedBox(height: 14),
-            // Search bar
-            GestureDetector(
-              onTap: () => context.go('/tourist/search'),
-              child: Container(
-                height: 54,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+            // Search bar: searches the places on this map in place.
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x220D1B2A),
+                    blurRadius: 18,
+                    offset: Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: _mapSearchCtrl,
+                focusNode: _mapSearchFocus,
+                textInputAction: TextInputAction.search,
+                onSubmitted: (_) {
+                  final first = _mapSearchResults.firstOrNull;
+                  if (first != null) _openSpotFromSearch(first);
+                },
+                style: GoogleFonts.poppins(fontSize: 14.5),
+                decoration: InputDecoration(
+                  hintText: context.l10n.whereWouldYouLikeToGo,
+                  hintStyle: GoogleFonts.poppins(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                  ),
+                  prefixIcon: const Icon(
+                    Icons.search_rounded,
+                    color: AppColors.primary,
+                  ),
+                  suffixIcon: _mapSearchCtrl.text.isEmpty
+                      ? null
+                      : IconButton(
+                          tooltip: context.l10n.clearSearch,
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () {
+                            _mapSearchCtrl.clear();
+                            _mapSearchFocus.unfocus();
+                          },
+                        ),
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
+            ),
+            if (_mapSearchCtrl.text.trim().isNotEmpty)
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                constraints: const BoxConstraints(maxHeight: 300),
                 decoration: BoxDecoration(
-                  color: Colors.white,
                   borderRadius: BorderRadius.circular(18),
                   boxShadow: const [
                     BoxShadow(
@@ -74,30 +121,63 @@ extension _TouristHomeSections on _TouristHomeScreenState {
                     ),
                   ],
                 ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.search_rounded, color: AppColors.primary),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        context.l10n.whereWouldYouLikeToGo,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.poppins(
-                          color: AppColors.textSecondary,
-                          fontSize: 14,
+                child: Material(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  clipBehavior: Clip.antiAlias,
+                  child: _mapSearchResults.isEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.all(18),
+                          child: Text(
+                            context.l10n.noSpotsFound,
+                            style: GoogleFonts.poppins(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        )
+                      : ListView(
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          children: [
+                            for (final spot in _mapSearchResults.take(6))
+                              ListTile(
+                                onTap: () => _openSpotFromSearch(spot),
+                                leading: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: SafeAppImage(
+                                    path: spot.imageUrls.isNotEmpty
+                                        ? spot.imageUrls.first
+                                        : '',
+                                    width: 44,
+                                    height: 44,
+                                  ),
+                                ),
+                                title: Text(
+                                  context.message(spot.name),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  context.message(spot.categoryLabel),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12.5,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                trailing: const Icon(
+                                  Icons.near_me_rounded,
+                                  color: AppColors.primary,
+                                  size: 20,
+                                ),
+                              ),
+                          ],
                         ),
-                      ),
-                    ),
-                    const Icon(
-                      Icons.tune_rounded,
-                      color: AppColors.textSecondary,
-                      size: 20,
-                    ),
-                  ],
                 ),
               ),
-            ),
           ],
         ),
       ),

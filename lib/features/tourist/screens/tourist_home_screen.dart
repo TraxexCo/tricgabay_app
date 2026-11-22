@@ -69,6 +69,30 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
   // Null until the tourist drags it; the resting height is used then.
   // Map buttons and the legend ride just above it.
   final _sheetExtent = ValueNotifier<double?>(null);
+  final _mapSearchCtrl = TextEditingController();
+  final _mapSearchFocus = FocusNode();
+
+  List<TouristSpotModel> get _mapSearchResults =>
+      filterSpots(_spots, MessageCode.all, query: _mapSearchCtrl.text);
+
+  void _onMapSearchChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// Picks a search result: flies the map to the place and opens its card.
+  void _openSpotFromSearch(TouristSpotModel spot) {
+    _mapSearchFocus.unfocus();
+    _mapSearchCtrl.clear();
+    _mapboxMap?.easeTo(
+      CameraOptions(
+        center: Point(coordinates: Position(spot.longitude, spot.latitude)),
+        zoom: 16,
+      ),
+      MapAnimationOptions(duration: 700),
+    );
+    _showSpotBottomSheet(spot);
+  }
+
   double _sheetMinExtent = 0.3;
   double _sheetInitialExtent = 0.46;
   double _sheetMaxExtent = 0.85;
@@ -123,12 +147,15 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
     _filteredSpots = _spots;
     AppSession.allSpots.addListener(_catalogChanged);
     AppSession.focusedSpotId.addListener(_onFocusedSpotChanged);
+    _mapSearchCtrl.addListener(_onMapSearchChanged);
     if (widget.mapPlaceholder == null) _startLocationTracking();
   }
 
   @override
   void dispose() {
     _sheetExtent.dispose();
+    _mapSearchCtrl.dispose();
+    _mapSearchFocus.dispose();
     AppSession.allSpots.removeListener(_catalogChanged);
     AppSession.focusedSpotId.removeListener(_onFocusedSpotChanged);
     _annotationManager?.deleteAll();
@@ -397,19 +424,46 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
         }
         return;
       }
-      final pos = await geo.Geolocator.getCurrentPosition(
-        locationSettings: const geo.LocationSettings(
-          accuracy: geo.LocationAccuracy.high,
-        ),
-      );
-      AppSession.userLatitude.value = pos.latitude;
-      AppSession.userLongitude.value = pos.longitude;
-      await _mapboxMap?.setCamera(
+      void flyTo(double lat, double lng) => _mapboxMap?.easeTo(
         CameraOptions(
-          center: Point(coordinates: Position(pos.longitude, pos.latitude)),
+          center: Point(coordinates: Position(lng, lat)),
           zoom: 15.0,
         ),
+        MapAnimationOptions(duration: 500),
       );
+      // Move at once to the position we already have (live tracking or the
+      // phone's last fix); a fresh GPS fix takes 2-3 seconds and only
+      // refines it.
+      var lat = AppSession.userLatitude.value;
+      var lng = AppSession.userLongitude.value;
+      if (lat == null || lng == null) {
+        final last = await geo.Geolocator.getLastKnownPosition();
+        lat = last?.latitude;
+        lng = last?.longitude;
+      }
+      final hadPosition = lat != null && lng != null;
+      if (hadPosition) flyTo(lat, lng);
+      final geo.Position pos;
+      try {
+        pos = await geo.Geolocator.getCurrentPosition(
+          locationSettings: const geo.LocationSettings(
+            accuracy: geo.LocationAccuracy.high,
+            timeLimit: Duration(seconds: 10),
+          ),
+        );
+      } catch (_) {
+        // Already showing the known position; a slow fix isn't an error.
+        if (hadPosition) return;
+        rethrow;
+      }
+      AppSession.userLatitude.value = pos.latitude;
+      AppSession.userLongitude.value = pos.longitude;
+      if (!mounted) return;
+      final moved =
+          !hadPosition ||
+          (pos.latitude - lat).abs() > 0.0005 ||
+          (pos.longitude - lng).abs() > 0.0005;
+      if (moved) flyTo(pos.latitude, pos.longitude);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

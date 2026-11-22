@@ -8922,6 +8922,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send message'**
   String get sendSupportMessage;
+
+  /// No description provided for @youCanRateTheDriverAfterTheTripIsCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'You can rate the driver once the trip is completed.'**
+  String get youCanRateTheDriverAfterTheTripIsCompleted;
+
+  /// No description provided for @youAlreadyRatedThisTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'You already rated this trip. Thank you!'**
+  String get youAlreadyRatedThisTrip;
+
+  /// No description provided for @tripDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip details'**
+  String get tripDetails;
+
+  /// No description provided for @tourDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Tour date and start'**
+  String get tourDate;
+
+  /// No description provided for @meetingPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting and drop-off point'**
+  String get meetingPoint;
+
+  /// No description provided for @tourRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Tour route'**
+  String get tourRoute;
+
+  /// No description provided for @plateValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Plate {plate}'**
+  String plateValue(String plate);
+
+  /// No description provided for @stopsDoneValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} done'**
+  String stopsDoneValue(String done, String total);
+
+  /// No description provided for @bookingReferenceValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking #{ref}'**
+  String bookingReferenceValue(String ref);
+
+  /// No description provided for @resultsCountValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} results'**
+  String resultsCountValue(String count);
+
+  /// No description provided for @placesOnOurTours.
+  ///
+  /// In en, this message translates to:
+  /// **'Places on our tours'**
+  String get placesOnOurTours;
+
+  /// No description provided for @discoverSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{places} places to see on {tours} guided tricycle tours'**
+  String discoverSubtitle(String places, String tours);
+
+  /// No description provided for @removeFromSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from saved places'**
+  String get removeFromSaved;
+
+  /// No description provided for @inToursValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{In 1 tour} other{In {count} tours}}'**
+  String inToursValue(int count);
+
+  /// No description provided for @call911Now.
+  ///
+  /// In en, this message translates to:
+  /// **'Call 911 now'**
+  String get call911Now;
+
+  /// No description provided for @localContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Local contacts'**
+  String get localContacts;
+
+  /// No description provided for @youCanRequestUpTo3ExportsADay.
+  ///
+  /// In en, this message translates to:
+  /// **'You can request up to 3 data copies a day. Try again tomorrow.'**
+  String get youCanRequestUpTo3ExportsADay;
+
+  /// No description provided for @requestedOnValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested {date}'**
+  String requestedOnValue(String date);
+
+  /// No description provided for @yourDataYourRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data, your right'**
+  String get yourDataYourRight;
+
+  /// No description provided for @dataRightsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Under the Data Privacy Act of 2012, you can get a copy of the personal data this app keeps about you: your profile, bookings, payments and feedback.'**
+  String get dataRightsIntro;
+
+  /// No description provided for @dataStepRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request a copy'**
+  String get dataStepRequestTitle;
+
+  /// No description provided for @dataStepRequestBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the button below. You can ask up to 3 times a day.'**
+  String get dataStepRequestBody;
+
+  /// No description provided for @dataStepPrepareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'An admin prepares it'**
+  String get dataStepPrepareTitle;
+
+  /// No description provided for @dataStepPrepareBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The status below changes to \"Export ready\" when your file is prepared.'**
+  String get dataStepPrepareBody;
+
+  /// No description provided for @dataStepDownloadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download and keep it'**
+  String get dataStepDownloadTitle;
+
+  /// No description provided for @dataStepDownloadBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the file or share it to your email or drive.'**
+  String get dataStepDownloadBody;
+
+  /// No description provided for @yourRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Your requests'**
+  String get yourRequests;
+
+  /// No description provided for @chooseYourTourDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your tour day'**
+  String get chooseYourTourDay;
+
+  /// No description provided for @tourHoursNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Tours run 8:00 AM to 5:00 PM. The last tour leaves at 1:00 PM.'**
+  String get tourHoursNote;
+
+  /// No description provided for @noTourDaysAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No tour days are open right now. Please check again later.'**
+  String get noTourDaysAvailable;
+
+  /// No description provided for @startTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Start time'**
+  String get startTime;
+
+  /// No description provided for @tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get tomorrow;
+
+  /// No description provided for @noDriversForTodayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No driver is online yet for today. Your request stays open, but choosing a later start or another day gives drivers more time to accept.'**
+  String get noDriversForTodayBody;
+
+  /// No description provided for @bustosTourismOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'Bustos Municipal Tourism Office'**
+  String get bustosTourismOffice;
+
+  /// No description provided for @bustosTourismOfficeAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Bustos Municipal Hall, Poblacion, Bustos, Bulacan'**
+  String get bustosTourismOfficeAddress;
+
+  /// No description provided for @meetingPointExplainer.
+  ///
+  /// In en, this message translates to:
+  /// **'Every tour starts here and brings you back here at the end. Please arrive 10 minutes before your start time.'**
+  String get meetingPointExplainer;
+
+  /// No description provided for @getDirections.
+  ///
+  /// In en, this message translates to:
+  /// **'Get directions'**
+  String get getDirections;
+
+  /// No description provided for @chooseATourDayAndStartTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a tour day and start time first.'**
+  String get chooseATourDayAndStartTime;
+
+  /// No description provided for @bustosTourismOfficeMeetingPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Bustos Municipal Tourism Office (Municipal Hall)'**
+  String get bustosTourismOfficeMeetingPoint;
+
+  /// No description provided for @tourStartsAndEndsAtOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts and ends at the Bustos Municipal Tourism Office (Municipal Hall). Pick your tour day on the next screen.'**
+  String get tourStartsAndEndsAtOffice;
 }
 
 class _AppLocalizationsDelegate

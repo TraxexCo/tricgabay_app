@@ -264,6 +264,12 @@ final appRouter = GoRouter(
 
     // ─── Tourist Full-Screen Routes ──────────────────────────
     GoRoute(
+      path: AppRoutes.touristBookingHistory,
+      builder: (context, state) => const TouristBookingsScreen(
+        initialTab: TouristBookingsScreen.pastTab,
+      ),
+    ),
+    GoRoute(
       path: '/tourist/location-picker',
       builder: (context, state) => const LocationPickerScreen(),
     ),

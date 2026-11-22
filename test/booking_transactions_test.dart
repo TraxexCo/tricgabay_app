@@ -20,7 +20,10 @@ void main() {
     AppSession.itinerary.value = TouristSpotModel.catalog.take(2).toList();
     AppSession.draft.pickupLat = 14.95;
     AppSession.draft.pickupLng = 120.92;
-    AppSession.draft.scheduledAt = null;
+    // Tours are booked for a chosen day and start time.
+    AppSession.draft.scheduledAt = DateTime.now().toUtc().add(
+      const Duration(days: 1),
+    );
     AppSession.setAuthenticatedUser(
       id: 'u1',
       name: 'Tourist',
@@ -69,17 +72,12 @@ void main() {
       rule(MessageCode.onlinePaymentUnavailable),
     );
   });
-  test('missing pickup, empty itinerary and duplicate stops fail', () async {
-    AppSession.draft.pickupLat = null;
-    AppSession.draft.pickupLng = null;
-    AppSession.userLatitude.value = null;
-    AppSession.userLongitude.value = null;
-    await expectLater(
-      book(),
-      rule(MessageCode.chooseAPickupPointOnTheMapOrEnableLocationFirst),
-    );
-    AppSession.draft.pickupLat = 14.95;
-    AppSession.draft.pickupLng = 120.92;
+  test('missing tour day, empty itinerary and duplicate stops fail', () async {
+    // The meeting point is fixed (tourism office); the day is required.
+    final day = AppSession.draft.scheduledAt;
+    AppSession.draft.scheduledAt = null;
+    await expectLater(book(), rule(MessageCode.chooseATourDayAndStartTime));
+    AppSession.draft.scheduledAt = day;
     AppSession.itinerary.value = [];
     await expectLater(
       book(),

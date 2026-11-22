@@ -5152,4 +5152,159 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sendSupportMessage => 'Send message';
+
+  @override
+  String get youCanRateTheDriverAfterTheTripIsCompleted =>
+      'You can rate the driver once the trip is completed.';
+
+  @override
+  String get youAlreadyRatedThisTrip =>
+      'You already rated this trip. Thank you!';
+
+  @override
+  String get tripDetails => 'Trip details';
+
+  @override
+  String get tourDate => 'Tour date and start';
+
+  @override
+  String get meetingPoint => 'Meeting and drop-off point';
+
+  @override
+  String get tourRoute => 'Tour route';
+
+  @override
+  String plateValue(String plate) {
+    return 'Plate $plate';
+  }
+
+  @override
+  String stopsDoneValue(String done, String total) {
+    return '$done of $total done';
+  }
+
+  @override
+  String bookingReferenceValue(String ref) {
+    return 'Booking #$ref';
+  }
+
+  @override
+  String resultsCountValue(String count) {
+    return '$count results';
+  }
+
+  @override
+  String get placesOnOurTours => 'Places on our tours';
+
+  @override
+  String discoverSubtitle(String places, String tours) {
+    return '$places places to see on $tours guided tricycle tours';
+  }
+
+  @override
+  String get removeFromSaved => 'Remove from saved places';
+
+  @override
+  String inToursValue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'In $count tours',
+      one: 'In 1 tour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get call911Now => 'Call 911 now';
+
+  @override
+  String get localContacts => 'Local contacts';
+
+  @override
+  String get youCanRequestUpTo3ExportsADay =>
+      'You can request up to 3 data copies a day. Try again tomorrow.';
+
+  @override
+  String requestedOnValue(String date) {
+    return 'Requested $date';
+  }
+
+  @override
+  String get yourDataYourRight => 'Your data, your right';
+
+  @override
+  String get dataRightsIntro =>
+      'Under the Data Privacy Act of 2012, you can get a copy of the personal data this app keeps about you: your profile, bookings, payments and feedback.';
+
+  @override
+  String get dataStepRequestTitle => 'Request a copy';
+
+  @override
+  String get dataStepRequestBody =>
+      'Tap the button below. You can ask up to 3 times a day.';
+
+  @override
+  String get dataStepPrepareTitle => 'An admin prepares it';
+
+  @override
+  String get dataStepPrepareBody =>
+      'The status below changes to \"Export ready\" when your file is prepared.';
+
+  @override
+  String get dataStepDownloadTitle => 'Download and keep it';
+
+  @override
+  String get dataStepDownloadBody =>
+      'Save the file or share it to your email or drive.';
+
+  @override
+  String get yourRequests => 'Your requests';
+
+  @override
+  String get chooseYourTourDay => 'Choose your tour day';
+
+  @override
+  String get tourHoursNote =>
+      'Tours run 8:00 AM to 5:00 PM. The last tour leaves at 1:00 PM.';
+
+  @override
+  String get noTourDaysAvailable =>
+      'No tour days are open right now. Please check again later.';
+
+  @override
+  String get startTime => 'Start time';
+
+  @override
+  String get tomorrow => 'Tomorrow';
+
+  @override
+  String get noDriversForTodayBody =>
+      'No driver is online yet for today. Your request stays open, but choosing a later start or another day gives drivers more time to accept.';
+
+  @override
+  String get bustosTourismOffice => 'Bustos Municipal Tourism Office';
+
+  @override
+  String get bustosTourismOfficeAddress =>
+      'Bustos Municipal Hall, Poblacion, Bustos, Bulacan';
+
+  @override
+  String get meetingPointExplainer =>
+      'Every tour starts here and brings you back here at the end. Please arrive 10 minutes before your start time.';
+
+  @override
+  String get getDirections => 'Get directions';
+
+  @override
+  String get chooseATourDayAndStartTime =>
+      'Choose a tour day and start time first.';
+
+  @override
+  String get bustosTourismOfficeMeetingPoint =>
+      'Bustos Municipal Tourism Office (Municipal Hall)';
+
+  @override
+  String get tourStartsAndEndsAtOffice =>
+      'Starts and ends at the Bustos Municipal Tourism Office (Municipal Hall). Pick your tour day on the next screen.';
 }

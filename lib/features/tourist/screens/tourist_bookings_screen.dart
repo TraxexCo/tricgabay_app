@@ -14,12 +14,19 @@ import '../../../core/session/app_session.dart';
 import '../../../core/l10n/record_labels.dart';
 
 class TouristBookingsScreen extends StatelessWidget {
-  const TouristBookingsScreen({super.key});
+  const TouristBookingsScreen({super.key, this.initialTab = 0});
+
+  static const pastTab = 1;
+
+  /// The tab shown first; booking history from the account screen opens on
+  /// Past.
+  final int initialTab;
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
+      initialIndex: initialTab,
       child: Scaffold(
         bottomNavigationBar: const RemotePageControls(directory: false),
         backgroundColor: AppColors.background,

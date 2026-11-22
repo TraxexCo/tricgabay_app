@@ -104,9 +104,15 @@ void main() {
           ),
           findsOneWidget,
         );
-        await tester.tap(find.byIcon(Icons.call_outlined).last);
+        await tester.tap(find.byIcon(Icons.call_rounded).last);
         await tester.pumpAndSettle();
-        await tester.tap(find.byType(FilledButton));
+        // The confirm button in the dialog (the page also has Call 911).
+        await tester.tap(
+          find.descendant(
+            of: find.byType(AlertDialog),
+            matching: find.byType(FilledButton),
+          ),
+        );
         await tester.pumpAndSettle();
         expect(calls, [Uri(scheme: 'tel', path: '911')]);
       },
