@@ -8628,6 +8628,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Escalated to admin'**
   String get adminEscalatedOn;
+
+  /// No description provided for @pageNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This page isn\'t available'**
+  String get pageNotFoundTitle;
+
+  /// No description provided for @pageNotFoundBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The link may be old or incomplete. Go back to the start to continue.'**
+  String get pageNotFoundBody;
+
+  /// No description provided for @goToStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to start'**
+  String get goToStart;
 }
 
 class _AppLocalizationsDelegate

@@ -708,6 +708,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
       l.goOnlineWithAnApprovedAccountAndFinishYourCurrentTripToAccept,
     'goOnlineWithAnApprovedDriverAccountFirst' =>
       l.goOnlineWithAnApprovedDriverAccountFirst,
+    'goToStart' => l.goToStart,
     'good' => l.good,
     'goodAfternoon' => l.goodAfternoon,
     'goodEvening' => l.goodEvening,
@@ -1028,6 +1029,8 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'packageNotFound' => l.packageNotFound,
     'packageStopsChangedSelectThePackageAgain' =>
       l.packageStopsChangedSelectThePackageAgain,
+    'pageNotFoundBody' => l.pageNotFoundBody,
+    'pageNotFoundTitle' => l.pageNotFoundTitle,
     'paid' => l.paid,
     'paidOnline' => l.paidOnline,
     'park' => l.park,

@@ -794,6 +794,7 @@ abstract final class MessageCode {
       '@l10n/goOnlineWithAnApprovedAccountAndFinishYourCurrentTripToAccept';
   static const goOnlineWithAnApprovedDriverAccountFirst =
       '@l10n/goOnlineWithAnApprovedDriverAccountFirst';
+  static const goToStart = '@l10n/goToStart';
   static const good = '@l10n/good';
   static const goodAfternoon = '@l10n/goodAfternoon';
   static const goodEvening = '@l10n/goodEvening';
@@ -1162,6 +1163,8 @@ abstract final class MessageCode {
   static const packageNotFound = '@l10n/packageNotFound';
   static const packageStopsChangedSelectThePackageAgain =
       '@l10n/packageStopsChangedSelectThePackageAgain';
+  static const pageNotFoundBody = '@l10n/pageNotFoundBody';
+  static const pageNotFoundTitle = '@l10n/pageNotFoundTitle';
   static const paid = '@l10n/paid';
   static const paidOnline = '@l10n/paidOnline';
   static const park = '@l10n/park';

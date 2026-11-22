@@ -1,3 +1,5 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import 'core/widgets/shared_widgets.dart';
 import 'core/widgets/data_rights_screen.dart';
 import 'features/admin/screens/data_requests_admin_screen.dart';
 import 'features/admin/screens/emergency_contacts_admin_screen.dart';
@@ -82,6 +84,17 @@ final appRouter = GoRouter(
   initialLocation: AppRoutes.splash,
   debugLogDiagnostics: kDebugMode,
   refreshListenable: AppSession.authRevision,
+  // An old or broken link gets a plain explanation, never a raw router error.
+  errorBuilder: (context, state) => Scaffold(
+    appBar: AppBar(),
+    body: EmptyStateWidget(
+      icon: Icons.link_off_rounded,
+      title: context.l10n.pageNotFoundTitle,
+      subtitle: context.l10n.pageNotFoundBody,
+      actionLabel: context.l10n.goToStart,
+      onAction: () => context.go(AppRoutes.splash),
+    ),
+  ),
   redirect: (context, state) {
     final path = state.uri.path;
     final role = AppSession.authenticatedRole;

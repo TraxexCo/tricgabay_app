@@ -2603,5 +2603,8 @@
   "notNow": "Not now",
   "inYourTrip": "In your trip",
   "openBookingDetails": "Open booking details",
-  "adminEscalatedOn": "Escalated to admin"
+  "adminEscalatedOn": "Escalated to admin",
+  "pageNotFoundTitle": "This page isn't available",
+  "pageNotFoundBody": "The link may be old or incomplete. Go back to the start to continue.",
+  "goToStart": "Go to start"
 }

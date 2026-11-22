@@ -64,6 +64,11 @@ dev_dependencies:
   analyzer: 10.1.0
   flutter_test:
     sdk: flutter
+  # On-device screen renders: integration_test/screens_on_device_test.dart
+  integration_test:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
   flutter_lints: ^6.0.0
   flutter_native_splash: ^2.4.8
   image: ^4.13.1

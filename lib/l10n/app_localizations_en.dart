@@ -4979,4 +4979,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminEscalatedOn => 'Escalated to admin';
+
+  @override
+  String get pageNotFoundTitle => 'This page isn\'t available';
+
+  @override
+  String get pageNotFoundBody =>
+      'The link may be old or incomplete. Go back to the start to continue.';
+
+  @override
+  String get goToStart => 'Go to start';
 }

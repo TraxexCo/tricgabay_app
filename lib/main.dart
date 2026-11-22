@@ -52,14 +52,14 @@ void main() async {
   // ready, no network) can't stop the app from drawing its first screen.
   // Android keeps showing the plain launch screen until that first frame.
   await Future.wait([
-    _startService('date formats', () async {
+    _startService('dateFormats', () async {
       await initializeDateFormatting('en_PH');
       await initializeDateFormatting('fil_PH');
     }),
     _startService('backend', BackendConfig.initialize),
     _startService('notifications', PushNotificationService.initializeCore),
     _startService(
-      'launch logo',
+      'launchLogo',
       () => AppLogo.warmUp(BrandLogoHero.launchSize),
     ),
   ]);

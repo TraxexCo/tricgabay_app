@@ -301,7 +301,7 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
                         ? context.l10n.gcashConfirmedFares
                         : MessageCode.totalRevenue,
                     AppFormatters.currencyShort(totalRevenue),
-                    Icons.attach_money,
+                    Icons.payments_outlined,
                   ),
                 ),
                 const SizedBox(width: 16),

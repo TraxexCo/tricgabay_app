@@ -5057,4 +5057,14 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get adminEscalatedOn => 'Ipinasa sa admin';
+
+  @override
+  String get pageNotFoundTitle => 'Hindi available ang page na ito';
+
+  @override
+  String get pageNotFoundBody =>
+      'Maaaring luma o kulang ang link. Bumalik sa simula para magpatuloy.';
+
+  @override
+  String get goToStart => 'Pumunta sa simula';
 }

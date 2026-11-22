@@ -2603,5 +2603,8 @@
   "notNow": "Mamaya na lang",
   "inYourTrip": "Nasa biyahe mo na",
   "openBookingDetails": "Buksan ang detalye ng reserbasyon",
-  "adminEscalatedOn": "Ipinasa sa admin"
+  "adminEscalatedOn": "Ipinasa sa admin",
+  "pageNotFoundTitle": "Hindi available ang page na ito",
+  "pageNotFoundBody": "Maaaring luma o kulang ang link. Bumalik sa simula para magpatuloy.",
+  "goToStart": "Pumunta sa simula"
 }
