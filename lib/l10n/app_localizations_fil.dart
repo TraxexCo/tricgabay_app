@@ -5196,4 +5196,39 @@ class AppLocalizationsFil extends AppLocalizations {
   @override
   String get everyStopMustBeAnActiveTouristSpot =>
       'Nakatago o naalis na ang isang hinto. Alisin ito at pumili ng nakikitang pasyalan.';
+
+  @override
+  String get centerOnMyLocation => 'Itutok sa lokasyon ko';
+
+  @override
+  String get driverNearBustosCentre => 'Malapit sa sentro ng Bustos';
+
+  @override
+  String get outsideThePickupArea => 'Labas sa lugar ng sunduan';
+
+  @override
+  String get awaitingPayment => 'Hinihintay na bayad';
+
+  @override
+  String get openReviews => 'Bukas na review';
+
+  @override
+  String get tripsInThisPeriod => 'Mga biyahe sa panahong ito';
+
+  @override
+  String get howCanWeHelp => 'Paano kami makakatulong?';
+
+  @override
+  String helpIntroBody(String app) {
+    return 'Sabihin sa $app team ang problema o ideya mo. Binabasa ng admin ang bawat mensahe.';
+  }
+
+  @override
+  String get needHelpRightNow => 'Kailangan ng tulong ngayon?';
+
+  @override
+  String get whatIsItAbout => 'Tungkol saan ito?';
+
+  @override
+  String get sendSupportMessage => 'Ipadala ang mensahe';
 }

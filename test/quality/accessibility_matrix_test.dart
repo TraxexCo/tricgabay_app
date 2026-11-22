@@ -1,3 +1,4 @@
+import 'package:tricgabay_app/core/l10n/feedback_category.dart';
 import 'scroll_fixture.dart';
 import 'package:intl/intl.dart';
 import 'package:tricgabay_app/core/widgets/responsive_app_frame.dart';
@@ -136,6 +137,7 @@ void main() {
                             (w) =>
                                 w is AppTextField ||
                                 w is ChoiceChip ||
+                                w.key is ValueKey<FeedbackCategory> ||
                                 w is DropdownButtonFormField,
                           )
                           .evaluate()) {

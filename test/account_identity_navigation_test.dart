@@ -96,7 +96,7 @@ void main() {
       await tester.scrollUntilVisible(support, 180);
       await tester.tap(support);
       await tester.pumpAndSettle();
-      expect(find.text('Submit feedback'), findsWidgets);
+      expect(find.text('How can we help?'), findsOneWidget);
       await tester.tap(find.byTooltip('Back'));
       await tester.pumpAndSettle();
       expect(
@@ -107,17 +107,16 @@ void main() {
     },
   );
 
-  testWidgets('Back from the Jobs tab opened from Account returns to Account', (
+  testWidgets('Trip history opened from Account has Back to Account', (
     tester,
   ) async {
     await openDriverAccount(tester);
     await tester.tap(find.text('Trip history'));
     await tester.pumpAndSettle();
-    expect(
-      appRouter.routeInformationProvider.value.uri.path,
-      AppRoutes.driverBookings,
-    );
-    await tester.binding.handlePopRoute();
+    // Pushed above the tabs, so it opens on History with a Back button.
+    expect(find.text('Driver bookings'), findsOneWidget);
+    expect(find.byTooltip('Back'), findsOneWidget);
+    await tester.tap(find.byTooltip('Back'));
     await tester.pumpAndSettle();
     expect(
       appRouter.routeInformationProvider.value.uri.path,

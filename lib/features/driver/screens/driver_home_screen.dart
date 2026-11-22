@@ -5,6 +5,7 @@ import '../../../core/services/error_messages.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as material show Size;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,6 +23,7 @@ import '../../../core/services/backend_repository.dart';
 import '../../../core/services/driver_availability_controller.dart';
 import '../../../core/services/location_gateway.dart';
 import '../../../core/services/pickup_service_area.dart';
+import '../../../core/services/place_name_service.dart';
 import '../../../core/config/mapbox_config.dart';
 
 class DriverHomeScreen extends ConsumerStatefulWidget {
@@ -35,6 +37,10 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
   bool _isLocating = false;
   bool _isChangingAvailability = false;
   String? _locationMessage;
+  // The map follows the driver until they pan it; the recenter button
+  // turns following back on.
+  bool _followDriver = true;
+  String? _townName;
   late final DriverAvailabilityController _availabilityController;
   PickupServiceArea _serviceArea = const PickupServiceArea(
     MapboxConfig.bustosLat,
@@ -131,7 +137,20 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
   void _receiveDriverPosition(geo.Position position) {
     AppSession.userLatitude.value = position.latitude;
     AppSession.userLongitude.value = position.longitude;
-    _updateCamera();
+    if (_followDriver) _updateCamera(animate: true);
+    unawaited(_lookUpTown(position.latitude, position.longitude));
+  }
+
+  Future<void> _lookUpTown(double lat, double lng) async {
+    final name = await PlaceNameService.townName(lat, lng);
+    if (mounted && name != null && name != _townName) {
+      setState(() => _townName = name);
+    }
+  }
+
+  void _recenter() {
+    setState(() => _followDriver = true);
+    _updateCamera(animate: true);
   }
 
   Future<void> _publishDriverLocation(geo.Position position) async {
@@ -225,21 +244,32 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
     mapboxMap.location.updateSettings(
       LocationComponentSettings(enabled: true, pulsingEnabled: true),
     );
-    _updateCamera();
+    mapboxMap.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
+    _updateCamera(zoom: 15);
+    final lat = AppSession.userLatitude.value;
+    final lng = AppSession.userLongitude.value;
+    if (lat != null && lng != null) unawaited(_lookUpTown(lat, lng));
   }
 
-  void _updateCamera() {
-    mapboxMap?.setCamera(
-      CameraOptions(
-        center: Point(
-          coordinates: Position(
-            AppSession.userLongitude.value ?? 120.91,
-            AppSession.userLatitude.value ?? 14.95,
-          ),
+  /// Moves the camera to the driver without touching the zoom the driver
+  /// chose, so pinch-zooming isn't undone by the next GPS update.
+  void _updateCamera({bool animate = false, double? zoom}) {
+    final map = mapboxMap;
+    if (map == null) return;
+    final camera = CameraOptions(
+      center: Point(
+        coordinates: Position(
+          AppSession.userLongitude.value ?? MapboxConfig.bustosLng,
+          AppSession.userLatitude.value ?? MapboxConfig.bustosLat,
         ),
-        zoom: 14.0,
       ),
+      zoom: zoom,
     );
+    if (animate) {
+      map.easeTo(camera, MapAnimationOptions(duration: 600));
+    } else {
+      map.setCamera(camera);
+    }
   }
 
   @override
@@ -467,13 +497,32 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                                                       compact: true,
                                                     )
                                                   : MapSurface(
-                                                      builder: (context) =>
-                                                          MapWidget(
-                                                            onMapCreated:
-                                                                _onMapCreated,
-                                                            styleUri: MapboxStyles
-                                                                .MAPBOX_STREETS,
+                                                      builder: (context) => MapWidget(
+                                                        onMapCreated:
+                                                            _onMapCreated,
+                                                        styleUri: MapboxStyles
+                                                            .MAPBOX_STREETS,
+                                                        // The map gets every
+                                                        // drag; without this
+                                                        // the page scrolls.
+                                                        gestureRecognizers: {
+                                                          Factory<
+                                                            OneSequenceGestureRecognizer
+                                                          >(
+                                                            EagerGestureRecognizer
+                                                                .new,
                                                           ),
+                                                        },
+                                                        onScrollListener: (_) {
+                                                          if (_followDriver) {
+                                                            setState(
+                                                              () =>
+                                                                  _followDriver =
+                                                                      false,
+                                                            );
+                                                          }
+                                                        },
+                                                      ),
                                                     ),
                                             ),
                                             Positioned(
@@ -513,6 +562,26 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                                                 foreground: Colors.white,
                                               ),
                                             ),
+                                            if (!_followDriver && !kIsWeb)
+                                              Positioned(
+                                                right: 12,
+                                                top: 50,
+                                                child: Material(
+                                                  color: Colors.white,
+                                                  shape: const CircleBorder(),
+                                                  elevation: 3,
+                                                  child: IconButton(
+                                                    tooltip: context
+                                                        .l10n
+                                                        .centerOnMyLocation,
+                                                    onPressed: _recenter,
+                                                    icon: const Icon(
+                                                      Icons.my_location_rounded,
+                                                      color: AppColors.primary,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
                                           ],
                                         ),
                                 );
@@ -611,16 +680,24 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
     );
   }
 
-  /// Where the driver is relative to the Bustos service area, worked out
-  /// from the GPS fix rather than assumed.
+  /// Where the driver really is: the town from reverse geocoding plus the
+  /// distance to Bustos. The pickup area is a wide circle around Bustos, so
+  /// "inside the area" alone said nothing about the driver's actual town.
   String _areaLabel(BuildContext context, double lat, double? lng) {
     final area = _serviceArea;
     final km = lng == null ? null : area.distanceKmTo(lat, lng);
     if (km == null) return context.l10n.locationUnavailable;
-    if (km <= area.radiusKm) return context.l10n.driverInServiceArea;
-    return context.l10n.driverOutsideServiceArea(
-      AppFormatters.integer(km.round()),
-    );
+    final distance = km < 1
+        ? context.l10n.driverNearBustosCentre
+        : context.l10n.driverOutsideServiceArea(
+            AppFormatters.integer(km.round()),
+          );
+    final parts = [
+      ?_townName,
+      distance,
+      if (km > area.radiusKm) context.l10n.outsideThePickupArea,
+    ];
+    return parts.join('  ·  ');
   }
 
   Widget _mapChip({
@@ -632,7 +709,7 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
     padding: const EdgeInsets.fromLTRB(8, 5, 10, 5),
     decoration: BoxDecoration(
       color: background,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(14),
       boxShadow: const [
         BoxShadow(
           color: Color(0x290D1B2A),
@@ -649,7 +726,7 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
         Flexible(
           child: Text(
             label,
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(
               color: foreground,

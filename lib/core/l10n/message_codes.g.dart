@@ -168,6 +168,7 @@ abstract final class MessageCode {
   static const awaitingBothCashConfirmations =
       '@l10n/awaitingBothCashConfirmations';
   static const awaitingOtherParty = '@l10n/awaitingOtherParty';
+  static const awaitingPayment = '@l10n/awaitingPayment';
   static String awaitingPaymentValue(String value) =>
       encodeMessage('awaitingPaymentValue', [value]);
   static const back = '@l10n/back';
@@ -265,6 +266,7 @@ abstract final class MessageCode {
   static const category = '@l10n/category';
   static const centerLatitude = '@l10n/centerLatitude';
   static const centerLongitude = '@l10n/centerLongitude';
+  static const centerOnMyLocation = '@l10n/centerOnMyLocation';
   static const changePhoto = '@l10n/changePhoto';
   static const changingServiceCapacityRequiresAdministratorApprovalBeforeYouCanGoOnlineAgain =
       '@l10n/changingServiceCapacityRequiresAdministratorApprovalBeforeYouCanGoOnlineAgain';
@@ -505,6 +507,7 @@ abstract final class MessageCode {
   static const driverLicenseExpiry = '@l10n/driverLicenseExpiry';
   static const driverMatchingBegins30MinutesBeforePickup =
       '@l10n/driverMatchingBegins30MinutesBeforePickup';
+  static const driverNearBustosCentre = '@l10n/driverNearBustosCentre';
   static const driverNotFound = '@l10n/driverNotFound';
   static String driverOutsideServiceArea(String km) =>
       encodeMessage('driverOutsideServiceArea', [km]);
@@ -834,6 +837,8 @@ abstract final class MessageCode {
   static const headingTo = '@l10n/headingTo';
   static const headingToPickup = '@l10n/headingToPickup';
   static const help = '@l10n/help';
+  static String helpIntroBody(String app) =>
+      encodeMessage('helpIntroBody', [app]);
   static const helpSupport = '@l10n/helpSupport';
   static const heritage = '@l10n/heritage';
   static const hidden = '@l10n/hidden';
@@ -845,6 +850,7 @@ abstract final class MessageCode {
       encodeMessage('hoursDuration', [count]);
   static String hoursMinutesDuration(int hours, int minutes) =>
       encodeMessage('hoursMinutesDuration', [hours, minutes]);
+  static const howCanWeHelp = '@l10n/howCanWeHelp';
   static String howWasYourRideWithValue(String value) =>
       encodeMessage('howWasYourRideWithValue', [value]);
   static const iAgreeToTheFixedFareAndCancellationPaymentPolicy =
@@ -1044,6 +1050,7 @@ abstract final class MessageCode {
   static const nationalEmergencyHotline = '@l10n/nationalEmergencyHotline';
   static const nature = '@l10n/nature';
   static const navigate = '@l10n/navigate';
+  static const needHelpRightNow = '@l10n/needHelpRightNow';
   static const needsReview = '@l10n/needsReview';
   static String newBookingsUseTheseFaresValue(String value) =>
       encodeMessage('newBookingsUseTheseFaresValue', [value]);
@@ -1174,6 +1181,7 @@ abstract final class MessageCode {
   static const openBookingDetails = '@l10n/openBookingDetails';
   static const openDialer = '@l10n/openDialer';
   static const openDriverSearch = '@l10n/openDriverSearch';
+  static const openReviews = '@l10n/openReviews';
   static String openReviewsValue(String value) =>
       encodeMessage('openReviewsValue', [value]);
   static const openTheMobileAppForTheInteractiveRoute =
@@ -1188,6 +1196,7 @@ abstract final class MessageCode {
       encodeMessage('operationalAlertSNeedReviewValue', [value]);
   static const operationsCentre = '@l10n/operationsCentre';
   static const other = '@l10n/other';
+  static const outsideThePickupArea = '@l10n/outsideThePickupArea';
   static const outstandingFareAction = '@l10n/outstandingFareAction';
   static const outstandingFareBlocked = '@l10n/outstandingFareBlocked';
   static const outstandingFareTitle = '@l10n/outstandingFareTitle';
@@ -1561,6 +1570,7 @@ abstract final class MessageCode {
       '@l10n/sendRefundRequestToPaymongo';
   static const sendRefundToPaymongo = '@l10n/sendRefundToPaymongo';
   static const sendResetLink = '@l10n/sendResetLink';
+  static const sendSupportMessage = '@l10n/sendSupportMessage';
   static const sep = '@l10n/sep';
   static const serverConnectionRequired = '@l10n/serverConnectionRequired';
   static const serverSetupIsIncomplete = '@l10n/serverSetupIsIncomplete';
@@ -1844,6 +1854,7 @@ abstract final class MessageCode {
   static const tripPayment = '@l10n/tripPayment';
   static const tripUpdates = '@l10n/tripUpdates';
   static const trips = '@l10n/trips';
+  static const tripsInThisPeriod = '@l10n/tripsInThisPeriod';
   static String tripsValue(String value) =>
       encodeMessage('tripsValue', [value]);
   static const tryAdjustingYourFiltersOrSearchTerm =
@@ -1962,6 +1973,7 @@ abstract final class MessageCode {
   static const wed = '@l10n/wed';
   static const welcomeBack = '@l10n/welcomeBack';
   static const whatDidYouLikeOrDislike = '@l10n/whatDidYouLikeOrDislike';
+  static const whatIsItAbout = '@l10n/whatIsItAbout';
   static const whatSIncluded = '@l10n/whatSIncluded';
   static const whenYouGetNotificationsTheyWillAppearHere =
       '@l10n/whenYouGetNotificationsTheyWillAppearHere';

@@ -5,7 +5,9 @@ import '../../../core/motion/motion_widgets.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/session/app_session.dart';
 import '../../../models/booking_model.dart';
-import '../../../core/l10n/record_labels.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../core/constants/app_colors.dart';
+import '../widgets/driver_trip_card.dart';
 
 class DriverEarningsScreen extends StatefulWidget {
   const DriverEarningsScreen({super.key});
@@ -50,6 +52,10 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> {
         (sum, b) => sum + b.trip.receivedCents,
       );
       final due = own.fold<int>(0, (sum, b) => sum + b.amountDueCents);
+      final reviews = own.where((b) => b.trip.reviewRequired).length;
+      final receivedById = {
+        for (final b in settled) b.id: b.trip.receivedCents,
+      };
       return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -57,9 +63,10 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> {
           ),
         ),
         body: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
           children: [
             SegmentedButton<int>(
+              showSelectedIcon: false,
               segments: [
                 ButtonSegment(value: 1, label: Text(context.l10n.today)),
                 ButtonSegment(
@@ -74,54 +81,194 @@ class _DriverEarningsScreenState extends State<DriverEarningsScreen> {
               selected: {_days},
               onSelectionChanged: (v) => setState(() => _days = v.first),
             ),
-            const SizedBox(height: 24),
-            AnimatedCount(
-              value: received / 100,
-              format: (pesos) => '₱${AppFormatters.amount(pesos)}',
-              style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              hasDirectGcash
-                  ? context.l10n.gcashEarningsExplanation
-                  : context
-                        .l10n
-                        .cashConfirmedByBothPartiesAfterReturnsFilteredByTripEndDateAmounts,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              context.l10n.awaitingPaymentValue(
-                context.message((AppFormatters.amount((due / 100))).toString()),
-              ),
-            ),
-            Text(
-              context.l10n.openReviewsValue(
-                context.message(
-                  (own.where((b) => b.trip.reviewRequired).length).toString(),
+            const SizedBox(height: 18),
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF102A43), Color(0xFF1B6CA8)],
                 ),
+                borderRadius: BorderRadius.circular(24),
               ),
-            ),
-            const Divider(height: 32),
-            if (own.isEmpty) Text(context.l10n.noEndedTripsInThisPeriod),
-            ...own.map(
-              (b) => Card(
-                child: ListTile(
-                  title: Text(context.message(b.id)),
-                  subtitle: Text(
-                    context.l10n.twoPartSummary(
-                      context.message(bookingStatusLabel(context, b.status)),
-                      context.message(
-                        paymentStatusLabel(context, b.paymentStatus),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: .14),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.account_balance_wallet_outlined,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          switch (_days) {
+                            1 => context.l10n.today,
+                            7 => context.l10n.lastSevenDays,
+                            _ => context.l10n.lastThirtyDays,
+                          },
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  AnimatedCount(
+                    value: received / 100,
+                    format: (pesos) => '₱${AppFormatters.amount(pesos)}',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 34,
+                      fontWeight: FontWeight.w700,
+                      height: 1.1,
                     ),
                   ),
-                  trailing: const Icon(Icons.chevron_right),
+                  const SizedBox(height: 8),
+                  Text(
+                    hasDirectGcash
+                        ? context.l10n.gcashEarningsExplanation
+                        : context
+                              .l10n
+                              .cashConfirmedByBothPartiesAfterReturnsFilteredByTripEndDateAmounts,
+                    style: GoogleFonts.poppins(
+                      color: Colors.white.withValues(alpha: .86),
+                      fontSize: 12.5,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _stat(
+                    Icons.route_outlined,
+                    AppColors.primary,
+                    AppFormatters.integer(own.length),
+                    context.l10n.trips,
+                  ),
+                  const SizedBox(width: 10),
+                  _stat(
+                    Icons.hourglass_bottom_rounded,
+                    AppColors.warning,
+                    '₱${AppFormatters.amount(due / 100)}',
+                    context.l10n.awaitingPayment,
+                  ),
+                  const SizedBox(width: 10),
+                  _stat(
+                    Icons.fact_check_outlined,
+                    reviews > 0 ? AppColors.danger : AppColors.success,
+                    AppFormatters.integer(reviews),
+                    context.l10n.openReviews,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 26),
+            Text(
+              context.l10n.tripsInThisPeriod,
+              style: GoogleFonts.poppins(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (own.isEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 28,
+                  horizontal: 20,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.receipt_long_outlined,
+                      size: 36,
+                      color: AppColors.textHint,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      context.l10n.noEndedTripsInThisPeriod,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            for (final (index, b) in own.indexed)
+              FadeSlideIn.staggered(
+                index: index,
+                child: DriverTripCard(
+                  booking: b,
+                  amountCents: receivedById[b.id],
                   onTap: () => context.push('/driver/bookings/${b.id}'),
                 ),
               ),
-            ),
           ],
         ),
       );
     },
   );
+
+  Widget _stat(IconData icon, Color color, String value, String label) =>
+      Expanded(
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, size: 20, color: color),
+              const SizedBox(height: 10),
+              Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Text(
+                label,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  height: 1.3,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
 }

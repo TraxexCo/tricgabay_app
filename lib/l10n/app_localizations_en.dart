@@ -5117,4 +5117,39 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get everyStopMustBeAnActiveTouristSpot =>
       'A stop is hidden or was removed. Remove it and choose a visible tourist spot.';
+
+  @override
+  String get centerOnMyLocation => 'Center on my location';
+
+  @override
+  String get driverNearBustosCentre => 'Near Bustos town centre';
+
+  @override
+  String get outsideThePickupArea => 'Outside the pickup area';
+
+  @override
+  String get awaitingPayment => 'Awaiting payment';
+
+  @override
+  String get openReviews => 'Open reviews';
+
+  @override
+  String get tripsInThisPeriod => 'Trips in this period';
+
+  @override
+  String get howCanWeHelp => 'How can we help?';
+
+  @override
+  String helpIntroBody(String app) {
+    return 'Tell the $app team about a problem or an idea. An admin reads every message.';
+  }
+
+  @override
+  String get needHelpRightNow => 'Need help right now?';
+
+  @override
+  String get whatIsItAbout => 'What is it about?';
+
+  @override
+  String get sendSupportMessage => 'Send message';
 }

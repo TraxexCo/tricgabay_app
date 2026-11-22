@@ -2646,5 +2646,17 @@
   "chooseTwoToTwelveDifferentStops": "Choose 2 to 12 different stops.",
   "anotherPackageAlreadyUsesThisName": "Another package already uses this name. Choose a different name.",
   "thisPackageNoLongerExists": "This package was deleted. Go back to see the current packages.",
-  "everyStopMustBeAnActiveTouristSpot": "A stop is hidden or was removed. Remove it and choose a visible tourist spot."
+  "everyStopMustBeAnActiveTouristSpot": "A stop is hidden or was removed. Remove it and choose a visible tourist spot.",
+  "centerOnMyLocation": "Center on my location",
+  "driverNearBustosCentre": "Near Bustos town centre",
+  "outsideThePickupArea": "Outside the pickup area",
+  "awaitingPayment": "Awaiting payment",
+  "openReviews": "Open reviews",
+  "tripsInThisPeriod": "Trips in this period",
+  "howCanWeHelp": "How can we help?",
+  "helpIntroBody": "Tell the {app} team about a problem or an idea. An admin reads every message.",
+  "@helpIntroBody": {"placeholders": {"app": {"type": "String"}}},
+  "needHelpRightNow": "Need help right now?",
+  "whatIsItAbout": "What is it about?",
+  "sendSupportMessage": "Send message"
 }

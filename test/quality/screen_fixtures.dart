@@ -35,7 +35,25 @@ void seedScreen(String role, String name) {
         ? BookingStatus.pending
         : BookingStatus.accepted,
   );
-  AppSession.bookings.value = [b];
+  AppSession.bookings.value = [
+    b,
+    // Ended trips, so history and earnings lists show several records.
+    if (name.startsWith('DriverBookings') || name.startsWith('DriverEarnings'))
+      for (final (i, status) in [
+        BookingStatus.completed,
+        BookingStatus.completed,
+        BookingStatus.cancelled,
+      ].indexed)
+        b.copyWith(
+          id: 'ended$i',
+          status: status,
+          paymentStatus: status == BookingStatus.completed
+              ? PaymentStatus.paid
+              : PaymentStatus.unpaid,
+          totalFareCents: 70000 + i * 15000,
+          completedAt: DateTime.now().subtract(Duration(hours: i + 1)),
+        ),
+  ];
   AppSession.activeBookingId = b.id;
   AppSession.activeDriverBookingId = b.id;
   // Tours are booked only as packages: the review screen shows TRIC LAKBAY.

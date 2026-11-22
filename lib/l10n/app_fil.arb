@@ -2646,5 +2646,17 @@
   "chooseTwoToTwelveDifferentStops": "Pumili ng 2 hanggang 12 magkakaibang hinto.",
   "anotherPackageAlreadyUsesThisName": "May ibang package na gumagamit ng pangalang ito. Pumili ng ibang pangalan.",
   "thisPackageNoLongerExists": "Nabura na ang package na ito. Bumalik para makita ang mga kasalukuyang package.",
-  "everyStopMustBeAnActiveTouristSpot": "Nakatago o naalis na ang isang hinto. Alisin ito at pumili ng nakikitang pasyalan."
+  "everyStopMustBeAnActiveTouristSpot": "Nakatago o naalis na ang isang hinto. Alisin ito at pumili ng nakikitang pasyalan.",
+  "centerOnMyLocation": "Itutok sa lokasyon ko",
+  "driverNearBustosCentre": "Malapit sa sentro ng Bustos",
+  "outsideThePickupArea": "Labas sa lugar ng sunduan",
+  "awaitingPayment": "Hinihintay na bayad",
+  "openReviews": "Bukas na review",
+  "tripsInThisPeriod": "Mga biyahe sa panahong ito",
+  "howCanWeHelp": "Paano kami makakatulong?",
+  "helpIntroBody": "Sabihin sa {app} team ang problema o ideya mo. Binabasa ng admin ang bawat mensahe.",
+  "@helpIntroBody": {"placeholders": {"app": {"type": "String"}}},
+  "needHelpRightNow": "Kailangan ng tulong ngayon?",
+  "whatIsItAbout": "Tungkol saan ito?",
+  "sendSupportMessage": "Ipadala ang mensahe"
 }

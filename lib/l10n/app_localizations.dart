@@ -8856,6 +8856,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A stop is hidden or was removed. Remove it and choose a visible tourist spot.'**
   String get everyStopMustBeAnActiveTouristSpot;
+
+  /// No description provided for @centerOnMyLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Center on my location'**
+  String get centerOnMyLocation;
+
+  /// No description provided for @driverNearBustosCentre.
+  ///
+  /// In en, this message translates to:
+  /// **'Near Bustos town centre'**
+  String get driverNearBustosCentre;
+
+  /// No description provided for @outsideThePickupArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Outside the pickup area'**
+  String get outsideThePickupArea;
+
+  /// No description provided for @awaitingPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting payment'**
+  String get awaitingPayment;
+
+  /// No description provided for @openReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Open reviews'**
+  String get openReviews;
+
+  /// No description provided for @tripsInThisPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Trips in this period'**
+  String get tripsInThisPeriod;
+
+  /// No description provided for @howCanWeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'How can we help?'**
+  String get howCanWeHelp;
+
+  /// No description provided for @helpIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell the {app} team about a problem or an idea. An admin reads every message.'**
+  String helpIntroBody(String app);
+
+  /// No description provided for @needHelpRightNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Need help right now?'**
+  String get needHelpRightNow;
+
+  /// No description provided for @whatIsItAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'What is it about?'**
+  String get whatIsItAbout;
+
+  /// No description provided for @sendSupportMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Send message'**
+  String get sendSupportMessage;
 }
 
 class _AppLocalizationsDelegate

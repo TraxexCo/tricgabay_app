@@ -150,6 +150,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'avatarOwnerIsInvalid' => l.avatarOwnerIsInvalid,
     'awaitingBothCashConfirmations' => l.awaitingBothCashConfirmations,
     'awaitingOtherParty' => l.awaitingOtherParty,
+    'awaitingPayment' => l.awaitingPayment,
     'awaitingPaymentValue' => l.awaitingPaymentValue(text(0)),
     'back' => l.back,
     'backToExplore' => l.backToExplore,
@@ -232,6 +233,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'category' => l.category,
     'centerLatitude' => l.centerLatitude,
     'centerLongitude' => l.centerLongitude,
+    'centerOnMyLocation' => l.centerOnMyLocation,
     'changePhoto' => l.changePhoto,
     'changingServiceCapacityRequiresAdministratorApprovalBeforeYouCanGoOnlineAgain' =>
       l.changingServiceCapacityRequiresAdministratorApprovalBeforeYouCanGoOnlineAgain,
@@ -442,6 +444,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'driverLicenseExpiry' => l.driverLicenseExpiry,
     'driverMatchingBegins30MinutesBeforePickup' =>
       l.driverMatchingBegins30MinutesBeforePickup,
+    'driverNearBustosCentre' => l.driverNearBustosCentre,
     'driverNotFound' => l.driverNotFound,
     'driverOutsideServiceArea' => l.driverOutsideServiceArea(text(0)),
     'driverPerformance' => l.driverPerformance,
@@ -741,6 +744,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'headingTo' => l.headingTo,
     'headingToPickup' => l.headingToPickup,
     'help' => l.help,
+    'helpIntroBody' => l.helpIntroBody(text(0)),
     'helpSupport' => l.helpSupport,
     'heritage' => l.heritage,
     'hidden' => l.hidden,
@@ -749,6 +753,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'hoursAgoValue' => l.hoursAgoValue(text(0)),
     'hoursDuration' => l.hoursDuration(number(0)),
     'hoursMinutesDuration' => l.hoursMinutesDuration(number(0), number(1)),
+    'howCanWeHelp' => l.howCanWeHelp,
     'howWasYourRideWithValue' => l.howWasYourRideWithValue(text(0)),
     'iAgreeToTheFixedFareAndCancellationPaymentPolicy' =>
       l.iAgreeToTheFixedFareAndCancellationPaymentPolicy,
@@ -921,6 +926,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'nationalEmergencyHotline' => l.nationalEmergencyHotline,
     'nature' => l.nature,
     'navigate' => l.navigate,
+    'needHelpRightNow' => l.needHelpRightNow,
     'needsReview' => l.needsReview,
     'newBookingsUseTheseFaresValue' => l.newBookingsUseTheseFaresValue(text(0)),
     'newPackage' => l.newPackage,
@@ -1034,6 +1040,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'openBookingDetails' => l.openBookingDetails,
     'openDialer' => l.openDialer,
     'openDriverSearch' => l.openDriverSearch,
+    'openReviews' => l.openReviews,
     'openReviewsValue' => l.openReviewsValue(text(0)),
     'openTheMobileAppForTheInteractiveRoute' =>
       l.openTheMobileAppForTheInteractiveRoute,
@@ -1047,6 +1054,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     ),
     'operationsCentre' => l.operationsCentre,
     'other' => l.other,
+    'outsideThePickupArea' => l.outsideThePickupArea,
     'outstandingFareAction' => l.outstandingFareAction,
     'outstandingFareBlocked' => l.outstandingFareBlocked,
     'outstandingFareTitle' => l.outstandingFareTitle,
@@ -1385,6 +1393,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'sendRefundRequestToPaymongo' => l.sendRefundRequestToPaymongo,
     'sendRefundToPaymongo' => l.sendRefundToPaymongo,
     'sendResetLink' => l.sendResetLink,
+    'sendSupportMessage' => l.sendSupportMessage,
     'sep' => l.sep,
     'serverConnectionRequired' => l.serverConnectionRequired,
     'serverSetupIsIncomplete' => l.serverSetupIsIncomplete,
@@ -1638,6 +1647,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'tripPayment' => l.tripPayment,
     'tripUpdates' => l.tripUpdates,
     'trips' => l.trips,
+    'tripsInThisPeriod' => l.tripsInThisPeriod,
     'tripsValue' => l.tripsValue(text(0)),
     'tryAdjustingYourFiltersOrSearchTerm' =>
       l.tryAdjustingYourFiltersOrSearchTerm,
@@ -1740,6 +1750,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'wed' => l.wed,
     'welcomeBack' => l.welcomeBack,
     'whatDidYouLikeOrDislike' => l.whatDidYouLikeOrDislike,
+    'whatIsItAbout' => l.whatIsItAbout,
     'whatSIncluded' => l.whatSIncluded,
     'whenYouGetNotificationsTheyWillAppearHere' =>
       l.whenYouGetNotificationsTheyWillAppearHere,

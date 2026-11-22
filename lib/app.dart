@@ -383,6 +383,12 @@ final appRouter = GoRouter(
 
     // ─── Driver Full-Screen Routes ────────────────────────────
     GoRoute(
+      path: AppRoutes.driverTripHistory,
+      builder: (context, state) => const DriverBookingsScreen(
+        initialTab: DriverBookingsScreen.historyTab,
+      ),
+    ),
+    GoRoute(
       path: '/driver/bookings/:bookingId',
       builder: (context, state) => BookingDetailScreen(
         bookingId: state.pathParameters['bookingId']!,
@@ -420,7 +426,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.driverFeedback,
-      builder: (context, state) => const FeedbackScreen(),
+      builder: (context, state) => const FeedbackScreen(forDriver: true),
     ),
 
     // ─── Admin ────────────────────────────────────────────────

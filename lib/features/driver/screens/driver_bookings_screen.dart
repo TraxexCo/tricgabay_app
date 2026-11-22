@@ -1,4 +1,3 @@
-import 'package:tricgabay_app/core/utils/formatters.dart';
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import '../../../core/widgets/remote_page_controls.dart';
 import '../../../core/widgets/list_skeleton.dart';
@@ -12,10 +11,16 @@ import '../../../core/widgets/shared_widgets.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/session/app_session.dart';
 import '../../../models/booking_model.dart';
-import '../../../core/l10n/record_labels.dart';
+import '../widgets/driver_trip_card.dart';
 
 class DriverBookingsScreen extends StatefulWidget {
-  const DriverBookingsScreen({super.key});
+  const DriverBookingsScreen({super.key, this.initialTab = 0});
+
+  static const historyTab = 2;
+
+  /// The tab shown first; trip history from the account screen opens on
+  /// History.
+  final int initialTab;
 
   @override
   State<DriverBookingsScreen> createState() => _DriverBookingsScreenState();
@@ -70,6 +75,7 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
   @override
   Widget build(BuildContext context) => DefaultTabController(
     length: 3,
+    initialIndex: widget.initialTab,
     child: Scaffold(
       bottomNavigationBar: const RemotePageControls(directory: false),
       appBar: AppBar(
@@ -142,45 +148,26 @@ class _DriverBookingsScreenState extends State<DriverBookingsScreen> {
     bool request = false,
   }) {
     if (bookings.isEmpty) {
-      return Center(child: Text(context.l10n.noBookingsHereYet));
+      return EmptyStateWidget(
+        icon: Icons.inbox_outlined,
+        title: context.l10n.noBookingsHereYet,
+      );
     }
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 120),
       itemCount: bookings.length,
       itemBuilder: (context, index) => FadeSlideIn.staggered(
         index: index,
         child: Builder(
           builder: (context) {
             final b = bookings[index];
-            return Card(
-              child: ListTile(
-                title: Text(context.message(AppSession.bookingTitle(b))),
-                subtitle: Text(
-                  context.l10n.threeLineSummary(
-                    context.message((b.touristName).toString()),
-                    context.message(bookingStatusLabel(context, b.status)),
-                    context.message(
-                      (b.trip.reviewRequired
-                              ? context.l10n.paymentReviewPending
-                              : b.pickupAddress)
-                          .toString(),
-                    ),
-                  ),
-                ),
-                isThreeLine: true,
-                trailing: Text(
-                  context.l10n.agreedValue(
-                    context.message(
-                      (AppFormatters.amount(b.totalFareCents / 100)).toString(),
-                    ),
-                  ),
-                  textAlign: TextAlign.end,
-                ),
-                onTap: () => context.push(
-                  request
-                      ? '/driver/incoming/${b.id}'
-                      : '/driver/bookings/${b.id}',
-                ),
+            return DriverTripCard(
+              booking: b,
+              showPickup: b.isActive || request,
+              onTap: () => context.push(
+                request
+                    ? '/driver/incoming/${b.id}'
+                    : '/driver/bookings/${b.id}',
               ),
             );
           },

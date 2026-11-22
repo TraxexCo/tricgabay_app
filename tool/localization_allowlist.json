@@ -1426,5 +1426,11 @@
     "value": "Heritage and chapel trail",
     "kind": "data",
     "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/core/services/place_name_service.dart",
+    "value": "place,locality",
+    "kind": "protocol",
+    "reason": "Mapbox reverse-geocoding feature types query parameter; never shown in the interface."
   }
 ]

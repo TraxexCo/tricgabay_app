@@ -36,7 +36,7 @@ class DriverProfileScreen extends StatelessWidget {
           icon: Icons.receipt_long_outlined,
           title: l10n.tripHistory,
           subtitle: l10n.completedAndActiveBookings,
-          onTap: () => context.go(AppRoutes.driverBookings),
+          onTap: () => context.push(AppRoutes.driverTripHistory),
         ),
         if (BackendConfig.isConfigured && driverId != null)
           AccountMenuTile(

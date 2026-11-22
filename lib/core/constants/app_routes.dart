@@ -40,6 +40,9 @@ class AppRoutes {
   static const String driverShell = '/driver';
   static const String driverHome = '/driver/home';
   static const String driverBookings = '/driver/bookings';
+  // Trip history opened from the account screen: same list, pushed above
+  // the tabs so it has a back button.
+  static const String driverTripHistory = '/driver/trip-history';
   static const String driverEarnings = '/driver/earnings';
   static const String driverProfile = '/driver/profile';
 
