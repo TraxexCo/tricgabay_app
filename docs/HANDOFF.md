@@ -1,4 +1,7 @@
-# Handoff: Tric-Gabay, 2026-11-21
+# Handoff: Tric-Gabay, updated 2026-11-22
+
+Branch `feature/gcash-payment-and-cleanup`, last commit `55f6b37` (local only, no remote).
+Start with "Session 2026-11-22" and "Left to do" below; the 2026-11-21 sections are history.
 
 Branch `feature/gcash-payment-and-cleanup` (local only: no git remote yet; base branch is `master`). Working tree clean. Last commit `f4d25cc`.
 
@@ -121,10 +124,39 @@ All 63 screen renders, plus full-height renders of the long screens, were checke
 - `/admin/login` now redirects to `/login` for old links. Signed-out visits to admin pages also go to `/login`.
 - Nothing changed on the server: signing up still can't create an admin account, and every admin action is still checked there.
 
+### Startup freeze and launch animation (`34e3da9`)
+
+- **Freeze:** the app stopped on the logo at every launch. `pubspec.lock` had uncommitted upgrades; `shared_preferences_android` 2.5.5 (with `jni` 1.2.1) threw `channel-error ... SharedPreferencesApi.getAll` on this phone, and that error was fatal in `main()`.
+  - Lock file restored to the committed versions. Don't run `flutter pub upgrade` without testing a cold start on the phone.
+  - `main.dart` now starts each service through `_startService`, so one failure can't block the first frame. `TelemetryService` reads settings inside its `try`.
+- **Launch animation:** the version and privacy checks showed a white spinner (`LaunchBarrier` in `brand_logo_hero.dart` now matches the launch screen). The Android 12+ splash logo was resized to match the app's 128dp logo. The logo is decoded before the first frame (`AppLogo.warmUp`). The window background is brand blue, and `MainActivity.kt` removes the system splash without its fade.
+- Verified on the phone with a release-speed (profile) build: the logo holds still, then flies into the sign-in header at about 3 s, with no blink.
+
+### Phone tooling (`34e3da9`, `55f6b37`)
+
+- **Launch recording:** `scripts/phone_check.cmd` (debug), `phone_check_profile.cmd` (release speed), `phone_clean_check.cmd` and `phone_record_launch.cmd`. Each builds, installs (keeping the sign-in), records a cold start and saves logcat to `build/phone_check/`.
+- **Screen renders:** `scripts/phone_screens.cmd` runs `integration_test/screens_on_device_test.dart`, which renders all 62 screens on the phone with sample data into `build/phone_screens/`, then reinstalls the normal app. It adds `integration_test` and `flutter_driver` as dev dependencies.
+- All 62 phone renders were reviewed. Fixed: the dollar icon on Reports, and a raw `GoException` page (now a friendly `errorBuilder`). The search screen's blank area in the render is the keyboard, not a bug.
+- **Tests:** in the cloud workspace, 2,561 pass. The only failures are DriverHome and DriverShell accessibility at text 1.0, which fail on untouched code there too. Not yet run on the PC.
+
 ## Left to do
 
-1. **Apply the two new migrations** on the hosted project, then rebuild and install on the phone. Check the tourist home sheet, the location explainer (fresh install, or clear the app's storage), the driver map label, and the no-drivers warning.
-2. **Before real riders:** owner enters verified Bustos emergency numbers; fix the ₱70 custom-tour fare in Admin → Fixed fares.
-3. **Two-phone test** with real people standing together. Arrival requires being within 150 m of the pickup.
-4. **Push the branch** to a private GitHub repo, then merge into `master`.
-5. **Line endings:** this VM's git shows many files as modified when only CRLF/LF differs. Those aren't real changes, so don't commit them. Consider a `.gitattributes` with `* text=auto`.
+These need the PC, the hosted project or a person, so they were left for Claude Code on the PC:
+
+1. **Run `flutter analyze` and `flutter test` on the PC.** Confirm whether the two DriverHome and DriverShell accessibility failures happen there. If they do, fix the contrast.
+2. **Push the two new migrations** with `supabase db push` (project `xcsrjuqzwequmeqzedzd`):
+   - `20261122040000_count_online_drivers.sql`, needed for the "no drivers online" warning.
+   - `20261122040100_privacy_notice_gcash.sql`, which replaces the PayMongo text in the privacy notice and sets version 2026-11-22.
+3. **Walk through the app on the phone over adb:**
+   - Sign in on the shared sign-in screen as `t1`, `d1` and `a1@tric.test`. Admins now use the normal screen; there is no separate admin portal any more.
+   - Check the tourist home sheet, the location explainer, the driver map label ("In the Bustos service area" or "N km from Bustos"), the no-drivers warning, the group note, the pickup-code card, and booking through the Book button with GPS on.
+4. **Owner tasks (only the owner can do these):**
+   - Enter verified Bustos emergency numbers in Admin → Emergency contacts.
+   - Set a realistic custom-tour fare in Admin → Fixed fares (₱70 today).
+5. **Two-phone test** with real people standing together. Arrival requires being within 150 m of the pickup. Script: `docs/real-world-scenarios.md`.
+6. **Smaller items:**
+   - "+2 more" and "remaining" are English-only in Filipino mode.
+   - The admin spot cards leave empty space under the photo on wide phones.
+   - Plugins warn about the Kotlin Gradle plugin; plan the upgrade before Flutter enforces it.
+7. **Line endings:** git on Linux shows about 100 files as modified because only CRLF/LF differs. Don't commit those. Consider adding a `.gitattributes` with `* text=auto`.
+8. **Push the branch** to a private GitHub repo, then merge into `master`. Both need the owner's OK.
