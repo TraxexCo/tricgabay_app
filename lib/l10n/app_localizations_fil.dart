@@ -421,17 +421,11 @@ class AppLocalizationsFil extends AppLocalizations {
   String get adjustPin => 'Ayusin ang pin';
 
   @override
-  String get adminEmail => 'Email ng Admin';
-
-  @override
   String get administratorUpdatedFixedFares =>
       'Na-update ng administrador ang mga takdang pamasahe.';
 
   @override
   String get adminPasswordIsRequired => 'Kailangan ang password ng admin';
-
-  @override
-  String get adminPortal => 'Portal ng Admin';
 
   @override
   String get adminReviewPaymentOnHold =>
@@ -666,9 +660,6 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get backToLogin => 'Bumalik sa Pag-login';
-
-  @override
-  String get backToUserLogin => 'Bumalik sa Login ng Gumagamit';
 
   @override
   String get barangay => 'Barangay';
@@ -2299,9 +2290,6 @@ class AppLocalizationsFil extends AppLocalizations {
   String get login => 'Mag-login';
 
   @override
-  String get loginAsAdmin => 'Mag-login bilang Admin';
-
-  @override
   String get logOut => 'Mag-log out';
 
   @override
@@ -2321,11 +2309,6 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get makeItYourOwn => 'Iayon sa iyong gusto';
-
-  @override
-  String manageAppOpenTheAdminPortal(String brandName) {
-    return 'Pamahalaan ang $brandName? Buksan ang admin portal';
-  }
 
   @override
   String get manageTourists => 'Pamahalaan ang mga turista';

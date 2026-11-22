@@ -133,10 +133,8 @@
   "addYourStatement": "Idagdag ang iyong salaysay",
   "aDestinationIsNoLongerAvailableUpdateYourItinerary": "Hindi na available ang isang destinasyon. I-update ang iyong itineraryo.",
   "adjustPin": "Ayusin ang pin",
-  "adminEmail": "Email ng Admin",
   "administratorUpdatedFixedFares": "Na-update ng administrador ang mga takdang pamasahe.",
   "adminPasswordIsRequired": "Kailangan ang password ng admin",
-  "adminPortal": "Portal ng Admin",
   "adminReviewPaymentOnHold": "Sinusuri ng admin · nakahold ang bayad",
   "affectedTouristsAndAssignedDriversWillBeNotifiedExistingBookingsKeepAnAudit": "Aabisuhan ang mga apektadong turista at drayber. Magkakaroon ng tala ng pagsusuri ang mga kasalukuyang reserbasyon.",
   "agreeAndContinue": "Sumang-ayon at magpatuloy",
@@ -317,7 +315,6 @@
   "back": "Bumalik",
   "backToExplore": "Bumalik sa pag-explore",
   "backToLogin": "Bumalik sa Pag-login",
-  "backToUserLogin": "Bumalik sa Login ng Gumagamit",
   "barangay": "Barangay",
   "blocked": "Hinaharang",
   "blockedCheckoutExpiry": "Nakaharang na pag-expire ng checkout",
@@ -1161,7 +1158,6 @@
   "locationSharingWasCancelled": "Kinansela ang pagbabahagi ng lokasyon.",
   "locationUnavailable": "Hindi makuha ang lokasyon",
   "login": "Mag-login",
-  "loginAsAdmin": "Mag-login bilang Admin",
   "logOut": "Mag-log out",
   "logOutLabel": "Mag-log Out?",
   "longitude": "Longitude",
@@ -1169,15 +1165,6 @@
   "lostPickupCodeReissue": "Nawala ang sunduan code? Palitan",
   "luggageOrBulkyItems": "Bagahe o malalaking gamit",
   "makeItYourOwn": "Iayon sa iyong gusto",
-  "manageAppOpenTheAdminPortal": "Pamahalaan ang {brandName}? Buksan ang admin portal",
-  "@manageAppOpenTheAdminPortal": {
-    "description": "Application message: manageAppOpenTheAdminPortal",
-    "placeholders": {
-      "brandName": {
-        "type": "String"
-      }
-    }
-  },
   "manageTourists": "Pamahalaan ang mga turista",
   "mapView": "Tingnan sa mapa",
   "mar": "Mar",

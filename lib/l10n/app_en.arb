@@ -133,10 +133,8 @@
   "addYourStatement": "Add your statement",
   "aDestinationIsNoLongerAvailableUpdateYourItinerary": "A destination is no longer available. Update your itinerary.",
   "adjustPin": "Adjust pin",
-  "adminEmail": "Admin email",
   "administratorUpdatedFixedFares": "Administrator updated fixed fares.",
   "adminPasswordIsRequired": "Admin password is required",
-  "adminPortal": "Admin portal",
   "adminReviewPaymentOnHold": "Admin review · payment on hold",
   "affectedTouristsAndAssignedDriversWillBeNotifiedExistingBookingsKeepAnAudit": "Affected tourists and assigned drivers will be notified. Existing bookings keep an audit record.",
   "agreeAndContinue": "Agree and continue",
@@ -317,7 +315,6 @@
   "back": "Back",
   "backToExplore": "Back to explore",
   "backToLogin": "Back to sign in",
-  "backToUserLogin": "Back to user sign-in",
   "barangay": "Barangay",
   "blocked": "Blocked",
   "blockedCheckoutExpiry": "Blocked checkout expiry",
@@ -1161,7 +1158,6 @@
   "locationSharingWasCancelled": "Location sharing was cancelled.",
   "locationUnavailable": "Location unavailable",
   "login": "Login",
-  "loginAsAdmin": "Sign in as admin",
   "logOut": "Log out",
   "logOutLabel": "Log out?",
   "longitude": "Longitude",
@@ -1169,15 +1165,6 @@
   "lostPickupCodeReissue": "Lost pickup code? Reissue",
   "luggageOrBulkyItems": "Luggage or bulky items",
   "makeItYourOwn": "Make it your own",
-  "manageAppOpenTheAdminPortal": "Manage {brandName}? Open the admin portal",
-  "@manageAppOpenTheAdminPortal": {
-    "description": "Application message: manageAppOpenTheAdminPortal",
-    "placeholders": {
-      "brandName": {
-        "type": "String"
-      }
-    }
-  },
   "manageTourists": "Manage tourists",
   "mapView": "Map view",
   "mar": "Mar",

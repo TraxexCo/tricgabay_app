@@ -29,7 +29,10 @@ AuthAccessDecision evaluateAuthAccess({
       MessageCode.thisAccountHasAnInvalidRole,
     );
   }
-  if (expectedRole != null && role != expectedRole) {
+  // Administrators use the same sign-in screen as everyone else, whichever
+  // workspace is selected; their role, not the toggle, decides where they
+  // go. Tourists and drivers still can't enter each other's portal.
+  if (expectedRole != null && role != expectedRole && role != 'admin') {
     return AuthAccessDecision.deny(
       MessageCode.thisAccountBelongsToThePortalValue(switch (role) {
         'tourist' => MessageCode.tourist,

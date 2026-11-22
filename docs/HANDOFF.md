@@ -113,6 +113,14 @@ All 63 screen renders, plus full-height renders of the long screens, were checke
   - The announcement form has a gap between the audience and title fields.
   - The reports driver card is full width.
 
+### Admin sign-in merged into the main sign-in screen
+
+- The "Manage Tric Gabay? Open the admin portal" link and the separate admin sign-in screen are gone.
+- Admins sign in on the normal sign-in screen; either workspace tab works. Their account's role sends them to the admin dashboard.
+- `evaluateAuthAccess` lets an active admin through whichever tab is selected. Tourists and drivers still can't enter each other's portal. A new test covers both rules.
+- `/admin/login` now redirects to `/login` for old links. Signed-out visits to admin pages also go to `/login`.
+- Nothing changed on the server: signing up still can't create an admin account, and every admin action is still checked there.
+
 ## Left to do
 
 1. **Apply the two new migrations** on the hosted project, then rebuild and install on the phone. Check the tourist home sheet, the location explainer (fresh install, or clear the app's storage), the driver map label, and the no-drivers warning.

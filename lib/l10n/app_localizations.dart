@@ -842,12 +842,6 @@ abstract class AppLocalizations {
   /// **'Adjust pin'**
   String get adjustPin;
 
-  /// No description provided for @adminEmail.
-  ///
-  /// In en, this message translates to:
-  /// **'Admin email'**
-  String get adminEmail;
-
   /// No description provided for @administratorUpdatedFixedFares.
   ///
   /// In en, this message translates to:
@@ -859,12 +853,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Admin password is required'**
   String get adminPasswordIsRequired;
-
-  /// No description provided for @adminPortal.
-  ///
-  /// In en, this message translates to:
-  /// **'Admin portal'**
-  String get adminPortal;
 
   /// No description provided for @adminReviewPaymentOnHold.
   ///
@@ -1226,12 +1214,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back to sign in'**
   String get backToLogin;
-
-  /// No description provided for @backToUserLogin.
-  ///
-  /// In en, this message translates to:
-  /// **'Back to user sign-in'**
-  String get backToUserLogin;
 
   /// No description provided for @barangay.
   ///
@@ -4015,12 +3997,6 @@ abstract class AppLocalizations {
   /// **'Login'**
   String get login;
 
-  /// No description provided for @loginAsAdmin.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign in as admin'**
-  String get loginAsAdmin;
-
   /// No description provided for @logOut.
   ///
   /// In en, this message translates to:
@@ -4062,12 +4038,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Make it your own'**
   String get makeItYourOwn;
-
-  /// Application message: manageAppOpenTheAdminPortal
-  ///
-  /// In en, this message translates to:
-  /// **'Manage {brandName}? Open the admin portal'**
-  String manageAppOpenTheAdminPortal(String brandName);
 
   /// No description provided for @manageTourists.
   ///

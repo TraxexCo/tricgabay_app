@@ -48,7 +48,6 @@ import 'package:tricgabay_app/features/auth/screens/onboarding_screen.dart';
 import 'package:tricgabay_app/features/auth/screens/login_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/admin_live_map_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/admin_dashboard_screen.dart';
-import 'package:tricgabay_app/features/admin/screens/admin_login_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/admin_reports_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/spot_form_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/send_announcement_screen.dart';
@@ -204,7 +203,6 @@ final screenCases = <ScreenCase>[
   ScreenCase('LoginScreen', 'auth', () => LoginScreen()),
   ScreenCase('AdminLiveMapScreen', 'admin', () => AdminLiveMapScreen()),
   ScreenCase('AdminDashboardScreen', 'admin', () => AdminDashboardScreen()),
-  ScreenCase('AdminLoginScreen', 'admin', () => AdminLoginScreen()),
   ScreenCase('AdminReportsScreen', 'admin', () => AdminReportsScreen()),
   ScreenCase('SpotFormScreen', 'admin', () => SpotFormScreen()),
   ScreenCase('SendAnnouncementScreen', 'admin', () => SendAnnouncementScreen()),

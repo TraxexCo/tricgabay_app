@@ -26,6 +26,37 @@ void main() {
     );
   });
 
+  test('administrators sign in from the shared screen', () {
+    // The tourist/driver toggle doesn't apply to admins.
+    for (final portal in ['tourist', 'driver']) {
+      expect(
+        evaluateAuthAccess(
+          role: 'admin',
+          status: 'active',
+          expectedRole: portal,
+        ).allowed,
+        isTrue,
+      );
+    }
+    expect(
+      evaluateAuthAccess(
+        role: 'admin',
+        status: 'suspended',
+        expectedRole: 'tourist',
+      ).allowed,
+      isFalse,
+    );
+    expect(
+      evaluateAuthAccess(
+        role: 'driver',
+        status: 'active',
+        expectedRole: 'tourist',
+        driverApproval: 'approved',
+      ).allowed,
+      isFalse,
+    );
+  });
+
   test('invalid, suspended, and revoked identities fail closed', () {
     expect(
       evaluateAuthAccess(role: 'unknown', status: 'active').allowed,

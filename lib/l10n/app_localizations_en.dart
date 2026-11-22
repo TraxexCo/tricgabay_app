@@ -416,17 +416,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adjustPin => 'Adjust pin';
 
   @override
-  String get adminEmail => 'Admin email';
-
-  @override
   String get administratorUpdatedFixedFares =>
       'Administrator updated fixed fares.';
 
   @override
   String get adminPasswordIsRequired => 'Admin password is required';
-
-  @override
-  String get adminPortal => 'Admin portal';
 
   @override
   String get adminReviewPaymentOnHold => 'Admin review · payment on hold';
@@ -656,9 +650,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backToLogin => 'Back to sign in';
-
-  @override
-  String get backToUserLogin => 'Back to user sign-in';
 
   @override
   String get barangay => 'Barangay';
@@ -2269,9 +2260,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get login => 'Login';
 
   @override
-  String get loginAsAdmin => 'Sign in as admin';
-
-  @override
   String get logOut => 'Log out';
 
   @override
@@ -2291,11 +2279,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get makeItYourOwn => 'Make it your own';
-
-  @override
-  String manageAppOpenTheAdminPortal(String brandName) {
-    return 'Manage $brandName? Open the admin portal';
-  }
 
   @override
   String get manageTourists => 'Manage tourists';

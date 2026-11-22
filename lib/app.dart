@@ -58,7 +58,6 @@ import 'features/driver/screens/driver_emergency_screen.dart';
 
 // Admin screens
 import 'features/admin/screens/admin_shell_screen.dart';
-import 'features/admin/screens/admin_login_screen.dart';
 import 'features/admin/screens/admin_dashboard_screen.dart';
 import 'features/admin/screens/manage_drivers_screen.dart';
 import 'features/admin/screens/driver_detail_admin_screen.dart';
@@ -162,7 +161,7 @@ final appRouter = GoRouter(
       }
       return null;
     }
-    return protectedRole == 'admin' ? AppRoutes.adminLogin : AppRoutes.login;
+    return AppRoutes.login;
   },
   routes: [
     GoRoute(
@@ -406,9 +405,11 @@ final appRouter = GoRouter(
     ),
 
     // ─── Admin ────────────────────────────────────────────────
+    // Admins now sign in on the shared sign-in screen; old links to the
+    // separate admin sign-in page land there.
     GoRoute(
       path: AppRoutes.adminLogin,
-      builder: (context, state) => const AdminLoginScreen(),
+      redirect: (context, state) => AppRoutes.login,
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>

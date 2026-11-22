@@ -60,7 +60,6 @@ abstract final class MessageCode {
   static const adminDisputeUnsettled = '@l10n/adminDisputeUnsettled';
   static const adminDisputeWaiting = '@l10n/adminDisputeWaiting';
   static const adminDriverNote = '@l10n/adminDriverNote';
-  static const adminEmail = '@l10n/adminEmail';
   static const adminEscalatedOn = '@l10n/adminEscalatedOn';
   static const adminEscalationNote = '@l10n/adminEscalationNote';
   static const adminGcashDisputes = '@l10n/adminGcashDisputes';
@@ -69,7 +68,6 @@ abstract final class MessageCode {
       encodeMessage('adminGcashDisputesOpen', [count]);
   static const adminNoReceipt = '@l10n/adminNoReceipt';
   static const adminPasswordIsRequired = '@l10n/adminPasswordIsRequired';
-  static const adminPortal = '@l10n/adminPortal';
   static const adminReviewPaymentOnHold = '@l10n/adminReviewPaymentOnHold';
   static const adminRuleNotPaid = '@l10n/adminRuleNotPaid';
   static const adminRulePaid = '@l10n/adminRulePaid';
@@ -170,7 +168,6 @@ abstract final class MessageCode {
   static const back = '@l10n/back';
   static const backToExplore = '@l10n/backToExplore';
   static const backToLogin = '@l10n/backToLogin';
-  static const backToUserLogin = '@l10n/backToUserLogin';
   static const bad = '@l10n/bad';
   static const barangay = '@l10n/barangay';
   static const blocked = '@l10n/blocked';
@@ -950,15 +947,12 @@ abstract final class MessageCode {
   static const logOut = '@l10n/logOut';
   static const logOutLabel = '@l10n/logOutLabel';
   static const login = '@l10n/login';
-  static const loginAsAdmin = '@l10n/loginAsAdmin';
   static const longitude = '@l10n/longitude';
   static const lookingForADriver = '@l10n/lookingForADriver';
   static const lostPickupCodeReissue = '@l10n/lostPickupCodeReissue';
   static const luggage = '@l10n/luggage';
   static const luggageOrBulkyItems = '@l10n/luggageOrBulkyItems';
   static const makeItYourOwn = '@l10n/makeItYourOwn';
-  static const manageAppOpenTheAdminPortal =
-      '@l10n/manageAppOpenTheAdminPortal';
   static const manageTourists = '@l10n/manageTourists';
   static const mapView = '@l10n/mapView';
   static const mar = '@l10n/mar';

@@ -12,6 +12,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 
+import '../../../core/constants/app_routes.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../core/services/auth_service.dart';
@@ -64,9 +65,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       context.go(
         profile.applicationPending
             ? '/driver/application-pending'
-            : profile.role == AppRole.driver
-            ? '/driver/home'
-            : '/tourist/home',
+            : switch (profile.role) {
+                AppRole.admin => AppRoutes.adminDashboard,
+                AppRole.driver => '/driver/home',
+                _ => '/tourist/home',
+              },
       );
     } catch (error) {
       if (!mounted) return;
@@ -198,14 +201,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
             ],
-          ),
-          TextButton(
-            onPressed: () => context.push('/admin/login'),
-            child: Text(
-              context.l10n.manageAppOpenTheAdminPortal(AppBrand.name),
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(color: AppColors.textSecondary),
-            ),
           ),
         ];
         return AnnotatedRegion<SystemUiOverlayStyle>(
