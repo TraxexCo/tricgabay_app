@@ -1,9 +1,7 @@
 # Handoff: Tric-Gabay, updated 2026-11-22
 
-Branch `feature/gcash-payment-and-cleanup`, last commit `55f6b37` (local only, no remote).
-Start with "Session 2026-11-22" and "Left to do" below; the 2026-11-21 sections are history.
-
-Branch `feature/gcash-payment-and-cleanup` (local only: no git remote yet; base branch is `master`). Working tree clean. Last commit `f4d25cc`.
+Branch `feature/gcash-payment-and-cleanup` (local only, no remote; base branch `master`).
+**Start with "Left to do" at the end.** Then read "Current state (end of 2026-11-22)". Everything above that is history, oldest first.
 
 ## What was done (oldest first)
 
@@ -139,35 +137,121 @@ All 63 screen renders, plus full-height renders of the long screens, were checke
 - All 62 phone renders were reviewed. Fixed: the dollar icon on Reports, and a raw `GoException` page (now a friendly `errorBuilder`). The search screen's blank area in the render is the keyboard, not a bug.
 - **Tests:** in the cloud workspace, 2,561 pass. The only failures are DriverHome and DriverShell accessibility at text 1.0, which fail on untouched code there too. Not yet run on the PC.
 
-### Packages only, and admin package editor (professor feedback)
+### Packages only, and admin package editor (professor feedback, `79a3be6`)
 
-- **Build your day is gone.** Tourists can only book the fixed tour packages. The itinerary builder screen was deleted; the old route redirects to the packages list. The home screen shows a "Tour packages" row instead of the builder card, and a spot's sheet and info page show "See tours" plus an "Included in these tours" list. The fare summary shows "Choose a tour package" if no package is selected.
-- **Only the 11 places on the three package routes remain** (TRIC LAKBAY ₱700, TRIC SAYA ₱850, TRIC TUKLAS ₱1,000), in the app catalogue and in migration `20261122050000_package_only_catalog.sql`. The migration nulls `booking_stops.spot_id` for removed places (the name and coordinate snapshots stay, so old bookings still read correctly), removes their package stops, deletes them, and renames two places to the professor's spelling ("Nuestra Senora Del Perpetuo", "Zenny's Minasa Pasalubong").
-- **Admin package editor:** Admin → Tour packages (also from Manage spots). Admins with the content permission can create, edit (name, price, description, ordered stops, drag to reorder) and delete packages. New RPCs `admin_save_tour_package` and `admin_delete_tour_package` (security definer, content capability). A price change publishes a new fare revision, so existing bookings keep their price. Delete is a soft delete (`is_active = false`). Validation: name 3–60 characters and unique among active packages, price ₱1–₱100,000, 2–12 different active spots.
+- **Build your day is gone.** Tourists can only book the fixed tour packages. The itinerary builder screen was deleted; the old route redirects to the packages list. The home screen shows a "Tour packages" row instead of the builder card. A spot's sheet and info page show "See tours" plus an "Included in these tours" list. The booking review shows "Choose a tour package" if none is selected.
+- **Only the 11 places on the three package routes remain:** TRIC LAKBAY ₱700, TRIC SAYA ₱850, TRIC TUKLAS ₱1,000.
+  - Done in the app catalogue and in migration `20261122050000_package_only_catalog.sql`.
+  - The migration nulls `booking_stops.spot_id` for removed places; the name and coordinate snapshots stay, so old bookings still read correctly. It then removes their package stops and deletes them.
+  - It renames two places to the professor's spelling: "Nuestra Senora Del Perpetuo" and "Zenny's Minasa Pasalubong".
+  - Until the migration is pushed, the app hides non-package places from tourists anyway (`AppSession._applyCatalog`). Admins still see every place.
+- **Admin package editor:** Admin → Tour packages (also reachable from Manage spots).
+  - Admins with the content permission can create, edit and delete packages: name, price, description, and ordered stops with drag to reorder.
+  - New RPCs `admin_save_tour_package` and `admin_delete_tour_package` (security definer, content capability).
+  - A price change publishes a new fare revision, so existing bookings keep their price. Delete is a soft delete (`is_active = false`).
+  - Validation: name 3–60 characters and unique among active packages, price ₱1–₱100,000, 2–12 different active spots.
 - The custom-tour fare field was removed from Fixed fares; the stored value is kept unchanged.
-- The migration and both RPCs were run against a local Postgres 16 with a small stand-in schema, including permission refusal, every validation, create, edit, reorder, price revision and delete. They were not run against the real schema or the SQL test suite.
-- **Not done on purpose:** the server still accepts custom (no-package) bookings, because the SQL tests in `supabase/tests` create them. Blocking them server-side means updating those tests first.
+- The migration and both RPCs were run against a local Postgres 16 with a small stand-in schema. That covered permission refusal, every validation, create, edit, reorder, price revision and delete. They were **not** run against the real schema or the SQL test suite.
 
-## Left to do
+### Driver screens (`73942b2`)
 
-These need the PC, the hosted project or a person, so they were left for Claude Code on the PC:
+- **Driver home map:**
+  - Shows the driver's real town from Mapbox reverse geocoding (`lib/core/services/place_name_service.dart`) plus the distance to Bustos, e.g. "Baliuag · 6 km from Bustos". It adds "Outside the pickup area" past the service radius and says "Near Bustos town centre" within 1 km.
+  - The pickup area is a 15 km circle around Bustos (server default `service_area_radius_km`), which is why Baliwag counts as inside it.
+  - The map gets its own drags (`EagerGestureRecognizer`), so the page no longer scrolls while you pan. It stops snapping back to the driver on every GPS update, and a recenter button appears after panning.
+- **Bookings and earnings:** a shared, roomier `DriverTripCard` (`lib/features/driver/widgets/driver_trip_card.dart`). Earnings has a gradient summary card for the chosen period, three stat tiles and a "Trips in this period" list.
+- **Trip history from Account** opens `/driver/trip-history` above the tabs, so it has a Back button. It starts on the History tab. The Jobs tab itself still has no Back button, on purpose.
+- **Help & support** (shared `FeedbackScreen`) was redesigned. Topic tiles show a white check on a solid blue dot (the old blue-on-blue check was invisible). It has an emergency shortcut and a "Send message" button.
 
-1. **Run `flutter analyze` and `flutter test` on the PC.** Confirm whether the two DriverHome and DriverShell accessibility failures happen there. If they do, fix the contrast.
-2. **Push the three new migrations** with `supabase db push` (project `xcsrjuqzwequmeqzedzd`). Run `supabase db reset` and the SQL tests locally first if Docker is available:
-   - `20261122040000_count_online_drivers.sql`, needed for the "no drivers online" warning.
-   - `20261122040100_privacy_notice_gcash.sql`, which replaces the PayMongo text in the privacy notice and sets version 2026-11-22.
-   - `20261122050000_package_only_catalog.sql`, which deletes every tourist spot not on a package route and adds the package editor RPCs. The app's package editor fails until this is pushed. The two RPCs were added to `scripts/security/access_rules.ts`, but `supabase/security/authorization_catalog.json` was not regenerated: run `scripts/test_catalog_access.ts` (see TESTING.md, needs Docker), review the drift and update the snapshot, or CI's catalog check will refuse the new functions.
-   - Optional: block custom bookings in `create_booking` and update the SQL tests that create them.
-3. **Walk through the app on the phone over adb:**
-   - Sign in on the shared sign-in screen as `t1`, `d1` and `a1@tric.test`. Admins now use the normal screen; there is no separate admin portal any more.
-   - Check the tourist home sheet, the location explainer, the driver map label ("In the Bustos service area" or "N km from Bustos"), the no-drivers warning, the group note, the pickup-code card, and booking through the Book button with GPS on.
-4. **Owner tasks (only the owner can do these):**
-   - Enter verified Bustos emergency numbers in Admin → Emergency contacts.
-   - Check the package prices and routes in Admin → Tour packages.
-5. **Two-phone test** with real people standing together. Arrival requires being within 150 m of the pickup. Script: `docs/real-world-scenarios.md`.
-6. **Smaller items:**
+### Loading, refreshing and the blue logo (`9dbe657`, `ed28ce4`, `31cc2ce`)
+
+- **"Try again" emptied the app:** it re-ran `AppSession.initialize()`, which cleared places, packages and bookings and never reloaded them. It now only re-downloads (`_RefreshNotice` in `main.dart`). The notice is a slim, closable strip.
+- **Slow first load (5–15 s of empty screens):**
+  - The app starts from the built-in places and packages, then the saved trips (`_showSavedState`), while the server copy downloads.
+  - Places, packages and bookings are applied as soon as each arrives instead of waiting for every request (`_syncRemoteStateOnce`).
+  - The second account check right after splash/login is skipped (`_accessVerifiedAt`, 60 s).
+  - Each section retries once quietly (600 ms). Notifications got a read timeout.
+  - The offline snapshot save, offline replay and pickup-code purge can no longer fail the whole refresh.
+- **Blue logo on every return to the app** (even after pulling down the notification shade):
+  - `MinimumVersionGate` and `PrivacyConsentGate` re-ran their network checks on every resume and covered the app with `LaunchBarrier` meanwhile. They now re-check quietly, at most every 10 minutes, and never cover the app once loaded. The privacy gate still blocks on an account change.
+  - The full data refresh on resume runs only after 30 s or more away (`_leftAt` in `main.dart`).
+  - Verified on the phone with `scripts/phone_resume_check.cmd` (shade down/up, Home and back): the app stayed on the same screen.
+- **Writes never wait on, or fail because of, the follow-up refresh:** `AppSession._refreshAfterWrite()` waits at most 4 s and swallows refresh errors. This is used by every mutation (cancel, rate, accept, admin actions...).
+  - `createBooking` shows the new booking at once and refreshes in the background.
+  - It also no longer calls `loadPickupServiceArea` (the meeting point is fixed).
+  - "Saving booking" used to take about 10 s.
+- **Error details for testing:** builds made with `SHOW_ERROR_DETAILS=true` (set in the git-ignored `config/phone-test.json`) end error messages with "Details: <code message>". Release and test builds keep plain messages; `test/batch2_behaviors_test.dart` guards that.
+- **Still unknown:** an intermittent server read failure behind the old "Some information could not refresh" notice. The Honor phone blocks app logs from adb. With details on, the notice now names the failing section and error, so the next screenshot should show the cause.
+
+### Tourist side (`b124b8c`, `dd54df7`, `31cc2ce`, `2a83a02`)
+
+- **Meeting point:** every tour starts and ends at the Bustos Municipal Arts, Culture and Tourism Office.
+  - The office is at the Municipal Compound, Poblacion, Bustos, Bulacan 3007 (OSM way 316341741: 14.95369, 120.91894).
+  - There is no pickup choice any more. `createBooking` always sends these coordinates. The old location picker route is unused.
+  - The booking review shows the office card with a "loop" explainer and Call (+63 917 918 9665), Email (bustostourismofficial@gmail.com) and Get directions (Google Maps) buttons. The phone number came from the owner, not the website.
+- **Tour day and time** (`lib/core/config/tour_schedule.dart`, tests in `test/tour_schedule_test.dart`):
+  - Office hours: Monday to Friday, 8:00 AM to 5:00 PM (Municipal Hall hours). Closed on weekends and on 2026 and 2027 national holidays (Proclamations 1006 and 1427, listed in `closedDates`).
+  - Starts allowed from 8:00 AM to 1:00 PM (a tour takes about 4 h), and at least 1 h ahead. Today drops out once its last start is less than 1 h away.
+  - UI: a Calendar button (`showDatePicker` with `selectableDayPredicate`, open days only, up to a year ahead), quick day buttons, hourly start chips, and "Other time" (`showTimePicker`, validated by `isValidStart`).
+  - The year-long window needs migration `20261122060000_tour_booking_window.sql`. Until it is pushed, the server refuses bookings more than 30 days ahead.
+- **Rating:** the saved rating shows at once (no "failed" after a slow refresh, then "already rated" on the second tap). The tags are sent with the comment. New messages cover "already rated" and "not completed".
+- **Redesigns:**
+  - Trip & payment (`booking_detail_screen.dart`, `booking_detail_sections.dart`): photo header, section cards, and numbered route and history timelines.
+  - Discover (`tourist_search_screen.dart`): blue header, package carousel and big place cards. No keyboard on arrival.
+  - Emergency contacts: red "Call 911 now" card, spaced contact cards with green call buttons.
+  - My data (`data_rights_screen.dart`): Data Privacy Act header, 3-step explainer, status cards with a Download button. It was kept on purpose and works end to end: request → admin fulfils in Admin → Data requests → download JSON.
+- **Home map search** finds places in place (results list under the bar; tap flies the map and opens the card). It no longer jumps to Discover. The my-location button moves at once to the known position, then refines.
+- **Booking history from Account** opens `/tourist/booking-history` above the tabs, with Back, on the Past tab.
+- **Cancel:** a reason dialog with quick choices (the server needs 5+ characters; a short reason was the cancel error the owner hit). There is an instant "Booking cancelled." confirmation and clearer server-error messages.
+- **Driver going online:** `DriverAvailabilityController` tries GPS for 8 s, then a recent last-known fix, then a Wi-Fi/cell (medium accuracy) fix. Before, indoors it failed with "Could not get a current GPS position".
+- **Phone notifications late (up to 1 min):** the dispatcher ran once a minute. Migration `20261122070000_send_all_push_immediately.sql` adds a statement-level trigger on `message_deliveries` that calls `invoke_communications_dispatcher()` right away, the same pattern as the ride-offer push. The minute job stays as the retry fallback.
+
+### Current state (end of 2026-11-22)
+
+- Branch `feature/gcash-payment-and-cleanup`, last commit `2a83a02`. Local only; no remote.
+- `flutter analyze` is clean. `flutter test` in the cloud workspace: everything passes except DriverHome and DriverShell accessibility at text 1.0, which fail on untouched code there too.
+- The phone has the latest **profile** build, made with `scripts/phone_check_profile.cmd` (uses `config/phone-test.json`, which now has `SHOW_ERROR_DETAILS`).
+- Phone tooling: `phone_check*.cmd` (build, install, record launch), `phone_screens.cmd` (render all screens), `phone_logs.cmd` (flutter log; empty on this Honor phone), and `phone_resume_check.cmd` (shade and Home return screenshots into `build/phone_resume/`).
+- **None of today's 5 migrations are on the hosted project yet.**
+- The owner still has to test the admin side; the package editor needs the migrations first.
+
+## Left to do (for Claude Code on the PC)
+
+In this order:
+
+1. **Push the database updates** to project `xcsrjuqzwequmeqzedzd` with `supabase db push`. If Docker is available, run `supabase db reset` and the SQL tests in `supabase/tests` locally first. Pending migrations:
+   - `20261122040000_count_online_drivers.sql`: "no drivers online" count.
+   - `20261122040100_privacy_notice_gcash.sql`: GCash wording in the privacy notice, version 2026-11-22. Every user accepts once more.
+   - `20261122050000_package_only_catalog.sql`: deletes non-package places and adds `admin_save_tour_package` / `admin_delete_tour_package`. It was only tested on a stand-in schema, so check it against the real one first.
+   - `20261122060000_tour_booking_window.sql`: bookings up to 365 days ahead (rewrites `create_booking_with_schedule` with `pg_get_functiondef` + `replace`, and raises an error if the 30-day text isn't found).
+   - `20261122070000_send_all_push_immediately.sql`: instant push dispatch trigger.
+2. **Update the security catalog.** After the push, run `scripts/test_catalog_access.ts` (see TESTING.md; needs Docker) and update `supabase/security/authorization_catalog.json` for the new functions:
+   - the two package RPCs, which are already in `scripts/security/access_rules.ts`;
+   - `dispatch_queued_messages_now()`, a trigger-only function (execute revoked from everyone).
+
+   Otherwise CI's catalog check fails. Explanation for the owner: the catalog is the list of every server function and who may call it; CI refuses functions that aren't on the list.
+3. **Verify on the hosted project after the push:**
+   - Only 11 places remain.
+   - An admin can create, edit, reorder and delete a package.
+   - A booking 2+ months ahead is accepted.
+   - A cancellation push arrives within a few seconds.
+4. **Run `flutter analyze` and `flutter test` on the PC.** If DriverHome/DriverShell accessibility at text 1.0 fails there too, fix the contrast.
+5. **Server-side enforcement (recommended).** The tour-day rules (Mon–Fri, not holidays, 8:00–13:00 Manila start) and the fixed meeting point are enforced only in the app. Options:
+   - Add checks to `create_booking_with_schedule`.
+   - Add a `tour_closed_dates` table that admins can edit, replacing the hard-coded `TourSchedule.closedDates`. It needs Eid'l Fitr/Eid'l Adha each year and Bustos local holidays.
+   - Optionally block custom (no-package) bookings.
+
+   Update the SQL tests in `supabase/tests` that create bookings at arbitrary times or without a package.
+6. **Find the intermittent refresh failure.** With the phone-test build, if "Some information could not refresh. Details: …" appears, the details name the section and error. Fix the cause (RLS, timeout or query).
+7. **Clean-up:**
+   - Remove the unused location picker screen and route (`/tourist/location-picker`) and pickup-picking code (`BookingDraft.pickupLat/Lng`, `pickupAddress`). Delete `driverInServiceArea` if unused.
    - "+2 more" and "remaining" are English-only in Filipino mode.
-   - The admin spot cards leave empty space under the photo on wide phones.
-   - Plugins warn about the Kotlin Gradle plugin; plan the upgrade before Flutter enforces it.
-7. **Line endings:** git on Linux shows about 100 files as modified because only CRLF/LF differs. Don't commit those. Consider adding a `.gitattributes` with `* text=auto`.
-8. **Push the branch** to a private GitHub repo, then merge into `master`. Both need the owner's OK.
+   - Admin spot cards leave empty space under the photo on wide phones.
+   - Plan the Kotlin Gradle plugin upgrade (build warning).
+   - Line endings: about 74 files show as modified only because of CRLF/LF. Don't commit them; consider a `.gitattributes` with `* text=auto`.
+8. **Owner tasks:**
+   - Enter verified Bustos emergency numbers (Admin → Emergency contacts).
+   - Confirm package prices and routes (Admin → Tour packages).
+   - Confirm office hours and the phone number with the tourism office.
+9. **Two-phone test** with real people (arrival needs to be within 150 m of the pickup, which is now the tourism office). Script: `docs/real-world-scenarios.md`.
+10. **Push the branch** to a private GitHub repo and merge into `master`. Both need the owner's OK.
