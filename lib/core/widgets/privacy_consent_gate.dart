@@ -1,6 +1,7 @@
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'brand_logo_hero.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/backend_config.dart';
 import '../session/app_session.dart';
@@ -124,13 +125,8 @@ class _PrivacyConsentGateState extends State<PrivacyConsentGate>
     builder: (context, snapshot) {
       if (snapshot.connectionState != ConnectionState.done) {
         return RetainedGate(
-          barrier: Material(
-            child: Center(
-              child: Semantics(
-                label: context.l10n.privacyLoadingLabel,
-                child: const CircularProgressIndicator(),
-              ),
-            ),
+          barrier: LaunchBarrier(
+            semanticsLabel: context.l10n.privacyLoadingLabel,
           ),
           child: widget.child,
         );

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../constants/app_colors.dart';
 
 import 'shared_widgets.dart';
 
@@ -24,5 +27,28 @@ class BrandLogoHero extends StatelessWidget {
     flightShuttleBuilder: (_, _, _, _, _) =>
         const FittedBox(child: AppLogo(size: launchSize, showShadow: true)),
     child: AppLogo(size: size, showShadow: showShadow),
+  );
+}
+
+/// Shown while startup checks run (app version, privacy notice). It matches
+/// the phone's native launch screen exactly (brand blue, 128dp logo in the
+/// centre), so launch looks like one screen instead of flashing white.
+class LaunchBarrier extends StatelessWidget {
+  const LaunchBarrier({super.key, this.semanticsLabel});
+
+  final String? semanticsLabel;
+
+  @override
+  Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
+    value: SystemUiOverlayStyle.light,
+    child: ColoredBox(
+      color: AppColors.primary,
+      child: Center(
+        child: Semantics(
+          label: semanticsLabel,
+          child: const AppLogo(size: BrandLogoHero.launchSize),
+        ),
+      ),
+    ),
   );
 }

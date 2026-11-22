@@ -16,6 +16,9 @@
          
          This Theme is only used starting with V2 of Flutter's Android embedding. -->
     <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
-        <item name="android:windowBackground">?android:colorBackground</item>
+        <!-- Brand blue, not the system background: Android cross-fades from
+             the launch screen to the app, and a black (dark mode) window
+             behind both made the logo dim for a moment. -->
+        <item name="android:windowBackground">#0038A8</item>
     </style>
 </resources>

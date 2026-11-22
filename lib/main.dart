@@ -13,6 +13,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'core/widgets/brand_logo_hero.dart';
+import 'core/widgets/shared_widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,13 +48,25 @@ void main() async {
       'AUTH_APP_LINK_HOST': AuthLinkConfig.host,
     },
   );
+  // Each service is started on its own so one failure (a plugin that isn't
+  // ready, no network) can't stop the app from drawing its first screen.
+  // Android keeps showing the plain launch screen until that first frame.
   await Future.wait([
-    initializeDateFormatting('en_PH'),
-    initializeDateFormatting('fil_PH'),
-    BackendConfig.initialize(),
-    PushNotificationService.initializeCore(),
+    _startService('date formats', () async {
+      await initializeDateFormatting('en_PH');
+      await initializeDateFormatting('fil_PH');
+    }),
+    _startService('backend', BackendConfig.initialize),
+    _startService('notifications', PushNotificationService.initializeCore),
+    _startService(
+      'launch logo',
+      () => AppLogo.warmUp(BrandLogoHero.launchSize),
+    ),
   ]);
-  await Future.wait([AppSession.initialize(), TelemetryService.initialize()]);
+  await Future.wait([
+    _startService('session', AppSession.initialize),
+    _startService('diagnostics', TelemetryService.initialize),
+  ]);
 
   // The Mapbox native SDK initialization is not supported by Flutter web.
   // Calling it in a browser prevents runApp from ever rendering a first frame.
@@ -69,6 +83,15 @@ void main() async {
   );
 
   runApp(const ProviderScope(child: TricGabayApp()));
+}
+
+Future<void> _startService(String name, Future<void> Function() start) async {
+  try {
+    await start();
+  } catch (error, stack) {
+    debugPrint('Startup: $name failed: $error');
+    debugPrintStack(stackTrace: stack, maxFrames: 8);
+  }
 }
 
 class TricGabayApp extends StatefulWidget {

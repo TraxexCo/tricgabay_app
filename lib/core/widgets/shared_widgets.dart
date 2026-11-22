@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import '../../models/booking_model.dart';
@@ -18,11 +19,40 @@ class AppLogo extends StatelessWidget {
   /// The exact image this logo draws at [size], so callers can precache it
   /// and the logo never flashes blank while decoding.
   static ImageProvider provider(BuildContext context, double size) =>
+      providerFor(MediaQuery.devicePixelRatioOf(context), size);
+
+  static ImageProvider providerFor(double devicePixelRatio, double size) =>
       ResizeImage.resizeIfNeeded(
         null,
-        (size * MediaQuery.devicePixelRatioOf(context)).ceil(),
+        (size * devicePixelRatio).ceil(),
         const AssetImage(_asset),
       );
+
+  /// Decodes the launch-size logo before the first frame, so the hand-over
+  /// from the phone's launch screen never shows an empty circle. Gives up
+  /// quietly after two seconds.
+  static Future<void> warmUp(double size) {
+    final views = WidgetsBinding.instance.platformDispatcher.views;
+    if (views.isEmpty) return Future.value();
+    final done = Completer<void>();
+    final stream = providerFor(
+      views.first.devicePixelRatio,
+      size,
+    ).resolve(ImageConfiguration.empty);
+    late final ImageStreamListener listener;
+    listener = ImageStreamListener(
+      (_, _) {
+        if (!done.isCompleted) done.complete();
+      },
+      onError: (_, _) {
+        if (!done.isCompleted) done.complete();
+      },
+    );
+    stream.addListener(listener);
+    return done.future
+        .timeout(const Duration(seconds: 2), onTimeout: () {})
+        .whenComplete(() => stream.removeListener(listener));
+  }
 
   @override
   Widget build(BuildContext context) {

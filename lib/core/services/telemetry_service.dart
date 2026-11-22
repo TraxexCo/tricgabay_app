@@ -22,9 +22,11 @@ class TelemetryService {
 
   static Future<void> initialize() async {
     if (_ready || !_supported || !FirebaseConfig.isConfigured) return;
-    final prefs = await SharedPreferences.getInstance();
-    final consent = prefs.getBool('telemetry_consent_v1') ?? false;
     try {
+      // Inside the try: if saved settings can't be read, diagnostics stay
+      // off instead of stopping the app before its first screen.
+      final prefs = await SharedPreferences.getInstance();
+      final consent = prefs.getBool('telemetry_consent_v1') ?? false;
       if (Firebase.apps.isEmpty) {
         await Firebase.initializeApp(options: FirebaseConfig.options);
       }

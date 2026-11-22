@@ -1,5 +1,6 @@
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
+import 'brand_logo_hero.dart';
 import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -104,9 +105,7 @@ class _MinimumVersionGateState extends State<MinimumVersionGate>
     builder: (context, snapshot) {
       if (snapshot.connectionState != ConnectionState.done) {
         return RetainedGate(
-          barrier: const Material(
-            child: Center(child: CircularProgressIndicator()),
-          ),
+          barrier: const LaunchBarrier(),
           child: widget.child,
         );
       }
