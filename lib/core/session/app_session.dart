@@ -329,6 +329,20 @@ class AppSession {
     }
   }
 
+  /// Names the section and error in the device log (debug and profile
+  /// builds only) so a refresh banner can be traced to its cause.
+  static void _logSyncFailure(
+    RemoteSection section,
+    Object error, {
+    bool retrying = false,
+  }) {
+    if (kReleaseMode) return;
+    debugPrint(
+      '[sync] ${section.name} ${retrying ? 'failed, retrying' : 'failed'}: '
+      '${error.runtimeType}: $error',
+    );
+  }
+
   static Future<void> _syncRemoteStateOnce(Set<RemoteSection> sections) async {
     final userId = authenticatedUserId;
     final role = authenticatedRole;
@@ -347,10 +361,25 @@ class AppSession {
         RemoteSection section,
         Future<T> Function() load,
         T previous,
-      ) => refreshSection(load, previous, (error, stack) {
-        failures.add(section);
-        ErrorMessages.forError(error);
-      });
+      ) => refreshSection(
+        // One quiet retry: a single slow or dropped request on mobile data
+        // must not put an error banner over the whole app.
+        () async {
+          try {
+            return await load();
+          } catch (error) {
+            _logSyncFailure(section, error, retrying: true);
+            await Future<void>.delayed(const Duration(seconds: 2));
+            return load();
+          }
+        },
+        previous,
+        (error, stack) {
+          failures.add(section);
+          _logSyncFailure(section, error);
+          ErrorMessages.forError(error);
+        },
+      );
       final results = await Future.wait([
         sections.contains(RemoteSection.fares)
             ? readSection(
@@ -449,8 +478,15 @@ class AppSession {
         cancellationPolicy.value = results[1] as CancellationPolicy;
       }
       if (sections.contains(RemoteSection.spots)) {
-        allSpots.value = results[2] as List<TouristSpotModel>;
-        tourPackages.value = results[9] as List<TourPackageModel>;
+        final packages = results[9] as List<TourPackageModel>;
+        final spots = results[2] as List<TouristSpotModel>;
+        tourPackages.value = packages;
+        // Tourists only book packages, so they only see the places on a
+        // package route. Admins still see every place to build packages.
+        final onRoutes = {for (final p in packages) ...p.spotIds};
+        allSpots.value = role == 'admin' || onRoutes.isEmpty
+            ? spots
+            : spots.where((spot) => onRoutes.contains(spot.id)).toList();
       }
       if (sections.contains(RemoteSection.bookings)) {
         bookings.value = results[3] as List<BookingModel>;
@@ -579,6 +615,9 @@ class AppSession {
         }
       });
     } catch (error) {
+      if (!kReleaseMode) {
+        debugPrint('[sync] refresh failed: ${error.runtimeType}: $error');
+      }
       if (generation == _sessionGeneration && userId == authenticatedUserId) {
         final cached = await OfflineStateStore.restoreSnapshot(userId);
         if (cached != null && !cached.isStale && bookings.value.isEmpty) {

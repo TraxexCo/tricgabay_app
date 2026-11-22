@@ -29,6 +29,7 @@ import 'core/config/firebase_config.dart';
 import 'core/config/auth_link_config.dart';
 import 'core/constants/app_routes.dart';
 import 'core/theme/app_theme.dart';
+import 'core/constants/app_colors.dart';
 import 'core/session/app_session.dart';
 import 'core/services/push_notification_service.dart';
 import 'core/services/telemetry_service.dart';
@@ -195,27 +196,7 @@ class _TricGabayAppState extends State<TricGabayApp>
                     monitor: _connectivity,
                     retry: AppSession.syncRemoteState,
                   ),
-                  if (error != null)
-                    Material(
-                      child: SafeArea(
-                        bottom: false,
-                        child: Semantics(
-                          liveRegion: true,
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
-                              children: [
-                                Text(context.message(error)),
-                                TextButton(
-                                  onPressed: AppSession.initialize,
-                                  child: Text(context.l10n.retryStorage),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                  if (error != null) _RefreshNotice(error: error),
                   Expanded(
                     child: MinimumVersionGate(
                       child: PrivacyConsentGate(
@@ -231,4 +212,95 @@ class _TricGabayAppState extends State<TricGabayApp>
       },
     );
   }
+}
+
+/// A slim strip under the status bar when some data could not refresh.
+/// It never clears what is already shown: Try again only re-downloads, and
+/// the strip can be closed.
+class _RefreshNotice extends StatefulWidget {
+  const _RefreshNotice({required this.error});
+  final String error;
+
+  @override
+  State<_RefreshNotice> createState() => _RefreshNoticeState();
+}
+
+class _RefreshNoticeState extends State<_RefreshNotice> {
+  bool _retrying = false;
+
+  // Only a failed read of the device's own saved data needs the startup
+  // routine again; every other notice is a server refresh.
+  bool get _isLocalStorageError =>
+      widget.error ==
+      MessageCode.savedTripDataCouldNotBeReadBookingChangesArePausedToProtect;
+
+  Future<void> _retry() async {
+    setState(() => _retrying = true);
+    try {
+      if (_isLocalStorageError) {
+        await AppSession.initialize();
+        await AppSession.syncRemoteState();
+      } else {
+        await AppSession.syncRemoteState();
+      }
+    } catch (_) {
+      // The notice stays up with the latest message.
+    } finally {
+      if (mounted) setState(() => _retrying = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: AppColors.warningLight,
+    child: SafeArea(
+      bottom: false,
+      child: Semantics(
+        liveRegion: true,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 6, 4, 6),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.cloud_off_rounded,
+                size: 20,
+                color: AppColors.warning,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  context.message(widget.error),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12.5,
+                    height: 1.35,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              _retrying
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 14),
+                      child: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : TextButton(
+                      onPressed: _retry,
+                      child: Text(context.l10n.retryStorage),
+                    ),
+              IconButton(
+                tooltip: context.l10n.close,
+                onPressed: () => AppSession.storageError.value = null,
+                icon: const Icon(Icons.close_rounded, size: 20),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }
