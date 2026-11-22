@@ -5345,7 +5345,7 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get tourHoursNote =>
-      'May tour mula Lunes hanggang Biyernes, 8:00 AM hanggang 5:00 PM, at wala tuwing weekend at pista opisyal. Ang huling alis ay 1:00 PM.';
+      'May tour mula Lunes hanggang Biyernes, 8:00 AM hanggang 5:00 PM, at wala tuwing weekend at pista opisyal. Maaaring magsimula mula 8:00 AM hanggang 1:00 PM.';
 
   @override
   String get noTourDaysAvailable =>
@@ -5393,4 +5393,55 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get emailOffice => 'Mag-email';
+
+  @override
+  String get moreDates => 'Kalendaryo';
+
+  @override
+  String get otherTime => 'Ibang oras';
+
+  @override
+  String get chooseAStartTimeHelp => 'Simula mula 8:00 AM hanggang 1:00 PM';
+
+  @override
+  String get startTimeOutsideHours =>
+      'Pumili ng simula mula 8:00 AM hanggang 1:00 PM, at hindi bababa sa isang oras mula ngayon.';
+
+  @override
+  String get whyAreYouCancelling => 'Bakit ka magkakansela?';
+
+  @override
+  String get cancelReasonPlansChanged => 'Nagbago ang plano ko';
+
+  @override
+  String get cancelReasonWrongDay => 'Mali ang araw o oras na na-book ko';
+
+  @override
+  String get cancelReasonWeather => 'Masama ang panahon';
+
+  @override
+  String get cancelReasonFeelingUnwell => 'Masama ang pakiramdam ko';
+
+  @override
+  String get cancelReasonOutOfTime => 'Naubusan kami ng oras';
+
+  @override
+  String get otherReasonOptional => 'O isulat ang sariling dahilan';
+
+  @override
+  String get writeAtLeast5Characters => 'Sumulat ng hindi bababa sa 5 titik.';
+
+  @override
+  String get thisTripCanNoLongerBeCancelled =>
+      'Hindi na maaaring kanselahin ang biyaheng ito. Hilahin pababa para i-refresh at tingnan ang status.';
+
+  @override
+  String actionFailedWithDetailValue(String detail) {
+    return 'Hindi natapos ang aksyon. Detalye: $detail';
+  }
+
+  @override
+  String someInformationCouldNotRefreshDetailValue(String detail) {
+    return 'Hindi na-refresh ang ilang impormasyon. Detalye: $detail';
+  }
 }

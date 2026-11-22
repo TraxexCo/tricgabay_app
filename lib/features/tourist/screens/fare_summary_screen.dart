@@ -103,6 +103,102 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
     };
   }
 
+  /// The first open days as quick buttons, plus the chosen day if it was
+  /// picked from the calendar further ahead.
+  List<DateTime> get _quickDays {
+    final quick = _days.take(TourSchedule.quickDayCount).toList();
+    final day = _day;
+    if (day != null && !quick.contains(day)) quick.add(day);
+    return quick;
+  }
+
+  /// Hourly starts for the chosen day, plus a custom time if one was set.
+  List<DateTime> get _startOptions {
+    final day = _day;
+    if (day == null) return const [];
+    final options = TourSchedule.startTimes(day).toList();
+    final chosen = _scheduledAt;
+    if (chosen != null && !options.contains(chosen)) {
+      options
+        ..add(chosen)
+        ..sort();
+    }
+    return options;
+  }
+
+  /// Full calendar: only open tour days (Monday to Friday, not holidays,
+  /// up to a year ahead) can be tapped.
+  Future<void> _openCalendar() async {
+    if (_days.isEmpty) return;
+    final open = _days.toSet();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _day ?? _days.first,
+      firstDate: _days.first,
+      lastDate: _days.last,
+      selectableDayPredicate: (day) =>
+          open.contains(DateTime(day.year, day.month, day.day)),
+      helpText: context.l10n.chooseYourTourDay,
+    );
+    if (picked == null || !mounted) return;
+    _pickDay(DateTime(picked.year, picked.month, picked.day));
+  }
+
+  /// Any start time, e.g. 8:30 AM, as long as it is within office hours
+  /// (8:00 AM to 1:00 PM start) and at least an hour from now.
+  Future<void> _pickCustomTime() async {
+    final day = _day;
+    if (day == null) return;
+    final current = _scheduledAt == null
+        ? const TimeOfDay(hour: TourSchedule.openHour, minute: 30)
+        : TimeOfDay.fromDateTime(ServerClock.manila(_scheduledAt!));
+    final time = await showTimePicker(
+      context: context,
+      initialTime: current,
+      helpText: context.l10n.chooseAStartTimeHelp,
+    );
+    if (time == null || !mounted) return;
+    final start = ServerClock.fromManila(
+      day.year,
+      day.month,
+      day.day,
+      time.hour,
+      time.minute,
+    );
+    if (!TourSchedule.isValidStart(start)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.startTimeOutsideHours)),
+      );
+      return;
+    }
+    setState(() {
+      _scheduledAt = start;
+      _agreed = false;
+    });
+  }
+
+  Widget _timeChip(
+    String label, {
+    required bool selected,
+    required VoidCallback onTap,
+    IconData? icon,
+  }) => ChoiceChip(
+    avatar: icon == null
+        ? null
+        : Icon(icon, size: 18, color: AppColors.primary),
+    label: Text(label),
+    selected: selected,
+    showCheckmark: false,
+    selectedColor: AppColors.primary,
+    backgroundColor: AppColors.surface,
+    side: BorderSide(color: selected ? AppColors.primary : AppColors.border),
+    labelStyle: GoogleFonts.poppins(
+      fontWeight: FontWeight.w600,
+      color: selected ? Colors.white : AppColors.textPrimary,
+    ),
+    onSelected: _busy ? null : (_) => onTap(),
+  );
+
   Future<void> _openDirections() async {
     final uri = Uri.parse(
       'https://www.google.com/maps/search/?api=1&query='
@@ -260,20 +356,27 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
             else
               SizedBox(
                 height: 78,
-                child: ListView.separated(
+                child: ListView(
                   scrollDirection: Axis.horizontal,
-                  itemCount: _days.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 8),
-                  itemBuilder: (context, i) {
-                    final day = _days[i];
-                    final selected = day == _day;
-                    return _DayChip(
-                      label: _dayLabel(context, day),
-                      date: AppFormatters.monthDayShort(day),
-                      selected: selected,
-                      onTap: _busy ? null : () => _pickDay(day),
-                    );
-                  },
+                  children: [
+                    // The calendar first, so it is seen without scrolling.
+                    _DayChip(
+                      icon: Icons.calendar_month_rounded,
+                      label: context.l10n.moreDates,
+                      date: '',
+                      selected: false,
+                      onTap: _busy ? null : _openCalendar,
+                    ),
+                    for (final day in _quickDays) ...[
+                      const SizedBox(width: 8),
+                      _DayChip(
+                        label: _dayLabel(context, day),
+                        date: AppFormatters.monthDayShort(day),
+                        selected: day == _day,
+                        onTap: _busy ? null : () => _pickDay(day),
+                      ),
+                    ],
+                  ],
                 ),
               ),
             if (_day != null) ...[
@@ -290,33 +393,21 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  for (final start in TourSchedule.startTimes(_day!))
-                    ChoiceChip(
-                      label: Text(
-                        AppFormatters.time(ServerClock.manila(start)),
-                      ),
+                  for (final start in _startOptions)
+                    _timeChip(
+                      AppFormatters.time(ServerClock.manila(start)),
                       selected: start == _scheduledAt,
-                      showCheckmark: false,
-                      selectedColor: AppColors.primary,
-                      backgroundColor: AppColors.surface,
-                      side: BorderSide(
-                        color: start == _scheduledAt
-                            ? AppColors.primary
-                            : AppColors.border,
-                      ),
-                      labelStyle: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w600,
-                        color: start == _scheduledAt
-                            ? Colors.white
-                            : AppColors.textPrimary,
-                      ),
-                      onSelected: _busy
-                          ? null
-                          : (_) => setState(() {
-                              _scheduledAt = start;
-                              _agreed = false;
-                            }),
+                      onTap: () => setState(() {
+                        _scheduledAt = start;
+                        _agreed = false;
+                      }),
                     ),
+                  _timeChip(
+                    context.l10n.otherTime,
+                    icon: Icons.schedule_rounded,
+                    selected: false,
+                    onTap: _pickCustomTime,
+                  ),
                 ],
               ),
               const SizedBox(height: 10),
@@ -772,11 +863,13 @@ class _DayChip extends StatelessWidget {
     required this.date,
     required this.selected,
     required this.onTap,
+    this.icon,
   });
 
   final String label, date;
   final bool selected;
   final VoidCallback? onTap;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) => Semantics(
@@ -800,23 +893,36 @@ class _DayChip extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                label,
-                style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: selected ? Colors.white : AppColors.textPrimary,
+              if (icon != null)
+                Icon(icon, size: 18, color: AppColors.primary)
+              else
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: selected ? Colors.white : AppColors.textPrimary,
+                  ),
                 ),
-              ),
-              Text(
-                date,
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: selected
-                      ? Colors.white.withValues(alpha: .9)
-                      : AppColors.textSecondary,
+              if (icon != null)
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                  ),
                 ),
-              ),
+              if (icon == null)
+                Text(
+                  date,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: selected
+                        ? Colors.white.withValues(alpha: .9)
+                        : AppColors.textSecondary,
+                  ),
+                ),
             ],
           ),
         ),

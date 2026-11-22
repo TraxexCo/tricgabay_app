@@ -1,12 +1,20 @@
 import 'package:tricgabay_app/core/l10n/message_codes.g.dart';
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'telemetry_service.dart';
 import 'trip_rules.dart';
 
 class ErrorMessages {
   ErrorMessages._();
+
+  /// Phone-test builds (config/phone-test.json sets SHOW_ERROR_DETAILS)
+  /// name the underlying error so a tester's screenshot shows the cause.
+  /// Every other build, including release, keeps plain messages that never
+  /// echo server details.
+  static const showDetails =
+      !kReleaseMode && bool.fromEnvironment('SHOW_ERROR_DETAILS');
   static String forError(Object error) {
     unawaited(TelemetryService.recordNonFatal(error, StackTrace.current));
     if (error is ClientOperationException) {
@@ -34,6 +42,12 @@ class ErrorMessages {
           .accountAccessCouldNotBeCompletedCheckYourDetailsAndTryAgain;
     }
     if (error is PostgrestException) {
+      if (error.message.contains('A cancellation reason is required')) {
+        return MessageCode.writeAtLeast5Characters;
+      }
+      if (error.message.contains('Booking cannot be cancelled')) {
+        return MessageCode.thisTripCanNoLongerBeCancelled;
+      }
       if (error.message.contains('Completed tourist booking required')) {
         return MessageCode.youCanRateTheDriverAfterTheTripIsCompleted;
       }
@@ -99,8 +113,22 @@ class ErrorMessages {
             .pickupVerificationIsTemporarilyLockedPleaseWaitAndTryAgain;
       }
     }
+    // Test builds name the underlying error so a tester's screenshot shows
+    // the real cause; release builds keep the plain message.
+    if (showDetails) {
+      return MessageCode.actionFailedWithDetailValue(detailFor(error));
+    }
     return MessageCode
         .thisActionCouldNotBeCompletedYourExistingRecordsArePreservedRefreshAnd;
+  }
+
+  /// Short technical description of an error, for test builds only.
+  static String detailFor(Object error) {
+    final text = error is PostgrestException
+        ? '${error.code ?? ''} ${error.message}'
+        : '${error.runtimeType}: $error';
+    final clean = text.replaceAll(RegExp(r'\s+'), ' ').trim();
+    return clean.length > 160 ? '${clean.substring(0, 160)}…' : clean;
   }
 }
 

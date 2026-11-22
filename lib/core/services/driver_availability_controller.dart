@@ -58,7 +58,7 @@ class DriverAvailabilityController {
     required this.onPosition,
     required this.currentSettings,
     required this.streamSettings,
-    this.positionTimeout = const Duration(seconds: 15),
+    this.positionTimeout = const Duration(seconds: 8),
   });
 
   bool get isBusy => _transition != null;
@@ -133,12 +133,32 @@ class DriverAvailabilityController {
       );
     }
 
-    late final geo.Position position;
+    // A precise GPS fix can take long indoors. Try it briefly, then use a
+    // recent fix the phone already has, then a Wi-Fi/cell based fix.
+    geo.Position? position;
     try {
       position = await location
           .currentPosition(settings: currentSettings)
           .timeout(positionTimeout);
-    } catch (_) {
+    } catch (_) {}
+    if (position == null || !isUsableLocationSample(position)) {
+      try {
+        final last = await location.lastKnownPosition();
+        if (last != null && isUsableLocationSample(last)) position = last;
+      } catch (_) {}
+    }
+    if (position == null) {
+      try {
+        position = await location
+            .currentPosition(
+              settings: const geo.LocationSettings(
+                accuracy: geo.LocationAccuracy.medium,
+              ),
+            )
+            .timeout(positionTimeout);
+      } catch (_) {}
+    }
+    if (position == null) {
       await _cancelStream();
       return const DriverAvailabilityResult.failure(
         DriverAvailabilityFailure.positionUnavailable,

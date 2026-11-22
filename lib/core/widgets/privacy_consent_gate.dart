@@ -63,6 +63,8 @@ class _PrivacyConsentGateState extends State<PrivacyConsentGate>
   }
 
   void _authChanged() {
+    // A different account must see its own privacy check, not the last one.
+    _loadedOnce = false;
     _accountEpoch++;
     _checked = false;
     _checkedVersion = null;
@@ -72,8 +74,15 @@ class _PrivacyConsentGateState extends State<PrivacyConsentGate>
     if (mounted) setState(_refresh);
   }
 
+  /// True once the first check has finished. Later checks (on returning to
+  /// the app) run quietly behind the screen instead of covering it with
+  /// the launch logo.
+  bool _loadedOnce = false;
+  DateTime? _lastCheck;
+
   void _refresh() {
-    _future = (widget.loader ?? _load)();
+    _lastCheck = DateTime.now();
+    _future = (widget.loader ?? _load)().whenComplete(() => _loadedOnce = true);
   }
 
   Future<PrivacyState?> _load() async {
@@ -86,7 +95,15 @@ class _PrivacyConsentGateState extends State<PrivacyConsentGate>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && mounted) setState(_refresh);
+    // Pulling down the notification shade or switching apps briefly must
+    // not re-check every time: at most every 10 minutes.
+    final last = _lastCheck;
+    if (state == AppLifecycleState.resumed &&
+        mounted &&
+        (last == null ||
+            DateTime.now().difference(last) > const Duration(minutes: 10))) {
+      setState(_refresh);
+    }
   }
 
   Future<void> _accept(PrivacyNotice notice) async {
@@ -123,7 +140,7 @@ class _PrivacyConsentGateState extends State<PrivacyConsentGate>
   Widget build(BuildContext context) => FutureBuilder<PrivacyState?>(
     future: _future,
     builder: (context, snapshot) {
-      if (snapshot.connectionState != ConnectionState.done) {
+      if (snapshot.connectionState != ConnectionState.done && !_loadedOnce) {
         return RetainedGate(
           barrier: LaunchBarrier(
             semanticsLabel: context.l10n.privacyLoadingLabel,

@@ -56,16 +56,107 @@ extension _BookingDetailActions on _BookingDetailScreenState {
     return result;
   }
 
-  Future<void> _cancel(BookingModel b) async {
-    final reason = await _input(
-      b.status == BookingStatus.ongoing
-          ? MessageCode.endTourEarly
-          : MessageCode.cancelBooking,
-      b.status == BookingStatus.ongoing
-          ? MessageCode
-                .stopAtASafePlaceFirstTheTripWillEndImmediatelyPaymentWill
-          : _cancellationExplanation(b),
+  /// Asks why the trip is cancelled: one tap on a common reason, or a
+  /// written one. The server needs at least 5 characters.
+  Future<String?> _cancelReason(BookingModel b) async {
+    final ongoing = b.status == BookingStatus.ongoing;
+    final reasons = ongoing
+        ? [
+            context.l10n.cancelReasonFeelingUnwell,
+            context.l10n.cancelReasonWeather,
+            context.l10n.cancelReasonOutOfTime,
+          ]
+        : [
+            context.l10n.cancelReasonPlansChanged,
+            context.l10n.cancelReasonWrongDay,
+            context.l10n.cancelReasonWeather,
+          ];
+    final controller = TextEditingController();
+    String? picked;
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialog) {
+          final typed = controller.text.trim();
+          final reason = picked ?? typed;
+          final valid = reason.length >= 5;
+          return AlertDialog(
+            title: Text(
+              context.message(
+                ongoing ? MessageCode.endTourEarly : MessageCode.cancelBooking,
+              ),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.message(
+                      ongoing
+                          ? MessageCode
+                                .stopAtASafePlaceFirstTheTripWillEndImmediatelyPaymentWill
+                          : _cancellationExplanation(b),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    context.l10n.whyAreYouCancelling,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final option in reasons)
+                        ChoiceChip(
+                          label: Text(option),
+                          selected: picked == option,
+                          onSelected: (on) => setDialog(() {
+                            picked = on ? option : null;
+                            if (on) controller.clear();
+                          }),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: controller,
+                    maxLength: 300,
+                    maxLines: 2,
+                    onChanged: (_) => setDialog(() => picked = null),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.otherReasonOptional,
+                      helperText: typed.isNotEmpty && typed.length < 5
+                          ? context.l10n.writeAtLeast5Characters
+                          : null,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(context.l10n.goBack),
+              ),
+              FilledButton(
+                onPressed: valid ? () => Navigator.pop(ctx, reason) : null,
+                child: Text(context.l10n.confirm),
+              ),
+            ],
+          );
+        },
+      ),
     );
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+    controller.dispose();
+    return result;
+  }
+
+  Future<void> _cancel(BookingModel b) async {
+    final reason = await _cancelReason(b);
     if (reason != null && mounted) {
       await _run(
         () => AppSession.cancelBooking(

@@ -139,10 +139,23 @@ class _TricGabayAppState extends State<TricGabayApp>
     super.dispose();
   }
 
+  DateTime? _leftAt;
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _leftAt ??= DateTime.now();
+    }
     if (state == AppLifecycleState.resumed) {
-      _refreshAfterResume();
+      // A glance at the notification shade or a quick app switch keeps
+      // everything as it was; only a real absence refreshes the data.
+      final leftAt = _leftAt;
+      _leftAt = null;
+      if (leftAt != null &&
+          DateTime.now().difference(leftAt) >= const Duration(seconds: 30)) {
+        _refreshAfterResume();
+      }
     }
   }
 

@@ -60,8 +60,24 @@ class TourSchedule {
   /// The server only accepts bookings at least an hour ahead.
   static const minimumLead = Duration(hours: 1);
 
-  /// And at most 30 days ahead.
-  static const bookingWindowDays = 30;
+  /// And at most a year ahead (migration 20261122060000).
+  static const bookingWindowDays = 365;
+
+  /// Quick day buttons on the booking screen; the calendar covers the rest.
+  static const quickDayCount = 10;
+
+  /// Whether [start] is a time a tour may start: an open day, between
+  /// [openHour] and [lastStartHour] Manila time, and at least
+  /// [minimumLead] from now. Used for a custom time picked by hand.
+  static bool isValidStart(DateTime start, {DateTime? now}) {
+    final local = ServerClock.manila(start);
+    final day = DateTime(local.year, local.month, local.day);
+    final minutes = local.hour * 60 + local.minute;
+    return isOpenDay(day) &&
+        minutes >= openHour * 60 &&
+        minutes <= lastStartHour * 60 &&
+        !start.isBefore((now ?? ServerClock.now()).add(minimumLead));
+  }
 
   /// Start times offered on [day] (a Manila calendar date). For today only
   /// the times at least [minimumLead] away remain; a closed day has none.

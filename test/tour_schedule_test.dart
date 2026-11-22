@@ -40,7 +40,28 @@ void main() {
     expect(days, isNot(contains(DateTime(2026, 11, 30))));
     expect(days, isNot(contains(DateTime(2026, 12, 8))));
     expect(days.first, DateTime(2026, 11, 23));
-    expect(days.last, DateTime(2026, 12, 21));
-    expect(days, hasLength(19));
+    // Christmas Eve, Christmas, Rizal Day and New Year's Eve are closed too.
+    for (final day in [24, 25, 30, 31]) {
+      expect(days, isNot(contains(DateTime(2026, 12, day))));
+    }
+  });
+
+  test('the calendar reaches a year ahead', () {
+    final days = TourSchedule.bookableDays(now: manila(11, 22, 7));
+    expect(days.last.isAfter(DateTime(2027, 11, 1)), isTrue);
+    expect(days.last.isBefore(DateTime(2027, 11, 23)), isTrue);
+  });
+
+  test('a custom start must be inside office hours and an hour ahead', () {
+    final now = manila(11, 23, 9);
+    // Monday 23 Nov 2026.
+    expect(TourSchedule.isValidStart(manila(11, 23, 10, 30), now: now), true);
+    expect(TourSchedule.isValidStart(manila(11, 23, 9, 30), now: now), false);
+    expect(TourSchedule.isValidStart(manila(11, 23, 13, 15), now: now), false);
+    expect(TourSchedule.isValidStart(manila(11, 24, 7, 45), now: now), false);
+    expect(TourSchedule.isValidStart(manila(11, 24, 8, 30), now: now), true);
+    // Saturday and Bonifacio Day.
+    expect(TourSchedule.isValidStart(manila(11, 28, 9), now: now), false);
+    expect(TourSchedule.isValidStart(manila(11, 30, 9), now: now), false);
   });
 }

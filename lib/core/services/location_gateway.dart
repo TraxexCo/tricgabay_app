@@ -15,6 +15,9 @@ abstract interface class LocationGateway {
   });
 
   Stream<geo.Position> positionStream({required geo.LocationSettings settings});
+
+  /// The phone's most recent fix, if it has one (no waiting).
+  Future<geo.Position?> lastKnownPosition();
 }
 
 class GeolocatorLocationGateway implements LocationGateway {
@@ -40,6 +43,10 @@ class GeolocatorLocationGateway implements LocationGateway {
   Stream<geo.Position> positionStream({
     required geo.LocationSettings settings,
   }) => geo.Geolocator.getPositionStream(locationSettings: settings);
+
+  @override
+  Future<geo.Position?> lastKnownPosition() =>
+      geo.Geolocator.getLastKnownPosition();
 }
 
 bool isUsableLocationSample(

@@ -335,6 +335,18 @@ class AppSession {
 
   static DateTime? _accessVerifiedAt;
 
+  /// After the server has accepted a change, refresh the screens but never
+  /// let a slow or failed refresh turn the saved change into an error (or
+  /// keep a button spinning): wait at most a few seconds, then let the
+  /// refresh finish in the background.
+  static Future<void> _refreshAfterWrite() async {
+    try {
+      await syncRemoteState().timeout(const Duration(seconds: 4));
+    } catch (_) {
+      // The change is saved; the refresh notice handles any sync problem.
+    }
+  }
+
   static void _applyCatalog(
     List<TouristSpotModel> spots,
     List<TourPackageModel> packages,
@@ -406,6 +418,7 @@ class AppSession {
         return;
       }
       final failures = <RemoteSection>{};
+      String? firstFailure;
       Future<T> readSection<T>(
         RemoteSection section,
         Future<T> Function() load,
@@ -425,6 +438,7 @@ class AppSession {
         previous,
         (error, stack) {
           failures.add(section);
+          firstFailure ??= '${section.name}: ${ErrorMessages.detailFor(error)}';
           _logSyncFailure(section, error);
           ErrorMessages.forError(error);
         },
@@ -631,13 +645,20 @@ class AppSession {
             .where((booking) => booking.touristId == userId && booking.isActive)
             .map((booking) => booking.id)
             .toSet();
-        await BackendRepository.purgePickupCodes(
-          userId: userId,
-          retained: retained,
-        );
+        try {
+          await BackendRepository.purgePickupCodes(
+            userId: userId,
+            retained: retained,
+          );
+        } catch (_) {
+          // Housekeeping only; never fail the refresh over it.
+        }
       }
       storageError.value = failures.isEmpty
           ? null
+          // Test builds also say which part failed and why.
+          : ErrorMessages.showDetails && firstFailure != null
+          ? MessageCode.someInformationCouldNotRefreshDetailValue(firstFailure!)
           : MessageCode
                 .someInformationCouldNotRefreshPreviouslyLoadedDataIsShownReconnectAndRetry;
       if (_subscribedUserId != userId) {
@@ -663,27 +684,33 @@ class AppSession {
           },
         );
       }
-      await OfflineStateStore.saveSnapshot(
-        userId: userId,
-        bookings: bookings.value,
-        spots: allSpots.value,
-        farePolicy: farePolicy.value,
-        cancellationPolicy: cancellationPolicy.value,
-      );
-      await OfflineStateStore.replay(userId, (command) async {
-        switch (command.type) {
-          case 'notification_read':
-            await BackendRepository.markNotificationRead(
-              command.payload['notification_id'] as String,
-            );
-            return;
-          case 'notifications_read_all':
-            await BackendRepository.markAllNotificationsRead();
-            return;
-          default:
-            throw StateError(MessageCode.unsupportedOfflineCommand);
-        }
-      });
+      // Saving the offline copy and replaying queued taps are side jobs:
+      // a problem there must not mark the whole (successful) refresh failed.
+      try {
+        await OfflineStateStore.saveSnapshot(
+          userId: userId,
+          bookings: bookings.value,
+          spots: allSpots.value,
+          farePolicy: farePolicy.value,
+          cancellationPolicy: cancellationPolicy.value,
+        );
+      } catch (_) {}
+      try {
+        await OfflineStateStore.replay(userId, (command) async {
+          switch (command.type) {
+            case 'notification_read':
+              await BackendRepository.markNotificationRead(
+                command.payload['notification_id'] as String,
+              );
+              return;
+            case 'notifications_read_all':
+              await BackendRepository.markAllNotificationsRead();
+              return;
+            default:
+              throw StateError(MessageCode.unsupportedOfflineCommand);
+          }
+        });
+      } catch (_) {}
     } catch (error) {
       if (!kReleaseMode) {
         debugPrint('[sync] refresh failed: ${error.runtimeType}: $error');
@@ -701,8 +728,12 @@ class AppSession {
                 (cached.savedAt).toString(),
               );
         } else {
-          storageError.value = MessageCode
-              .couldNotSynchronizeWithTheServerCheckYourConnectionAndRetry;
+          storageError.value = ErrorMessages.showDetails
+              ? MessageCode.someInformationCouldNotRefreshDetailValue(
+                  'refresh: ${ErrorMessages.detailFor(error)}',
+                )
+              : MessageCode
+                    .couldNotSynchronizeWithTheServerCheckYourConnectionAndRetry;
         }
       }
       rethrow;
@@ -764,7 +795,7 @@ class AppSession {
       packageFares: packages,
       reason: reason.trim(),
     );
-    await syncRemoteState();
+    await _refreshAfterWrite();
   });
 
   static Future<void> saveCancellationPolicy({
@@ -793,7 +824,7 @@ class AppSession {
       terms: terms,
       reason: reason,
     );
-    await syncRemoteState();
+    await _refreshAfterWrite();
   }
 
   static Future<BookingModel> createBooking({
@@ -846,11 +877,8 @@ class AppSession {
       );
     }
     _requireServer();
-    final serviceArea = await BackendRepository.loadPickupServiceArea();
-    TripRules.require(
-      serviceArea.contains(lat, lng),
-      MessageCode.thePickupPinIsOutsideTheServiceAreaChooseANearbyPickupPoint,
-    );
+    // The meeting point is the tourism office, always inside the service
+    // area, so no extra round trip to check it.
     final created = await BackendRepository.createBooking(
       packageId: activePackageId,
       paymentMethod: paymentMethod,
@@ -863,8 +891,14 @@ class AppSession {
       accessibilityNeeds: draft.accessibilityNeeds,
       scheduledAt: draft.scheduledAt,
     );
-    await syncRemoteState();
+    // Show the new booking at once; the full refresh runs in the background
+    // so "Saving booking" ends as soon as the server has accepted it.
+    bookings.value = [
+      created.booking,
+      ...bookings.value.where((b) => b.id != created.booking.id),
+    ];
     activeBookingId = created.booking.id;
+    unawaited(syncRemoteState().catchError((Object _) {}));
     return created.booking;
   });
 
@@ -896,14 +930,14 @@ class AppSession {
       'p_booking_id': id,
       'p_reason': reason,
     });
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
   static Future<BookingModel> retryDriverSearch(String id) async {
     _requireServer();
     await BackendRepository.rpc('retry_booking_dispatch', {'p_booking_id': id});
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
@@ -913,7 +947,7 @@ class AppSession {
       MessageCode.decliningMatchedOffersRequiresTheConfiguredServer,
     );
     await BackendRepository.rpc('decline_booking_offer', {'p_booking_id': id});
-    await syncRemoteState();
+    await _refreshAfterWrite();
   }
 
   static Future<BookingModel> requestDriverReplacement(
@@ -928,7 +962,7 @@ class AppSession {
       'p_booking_id': id,
       'p_reason': reason,
     });
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
@@ -944,14 +978,14 @@ class AppSession {
       'p_booking_id': id,
       'p_find_replacement': findReplacement,
     });
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
   static Future<BookingModel> reportPickupArrival(String id) async {
     _requireServer();
     await BackendRepository.rpc('report_pickup_arrival', {'p_booking_id': id});
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
@@ -960,7 +994,7 @@ class AppSession {
     await BackendRepository.rpc('declare_tourist_no_show', {
       'p_booking_id': id,
     });
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
@@ -970,7 +1004,7 @@ class AppSession {
       'p_booking_id': id,
       'p_pickup_code': code,
     });
-    await syncRemoteState();
+    await _refreshAfterWrite();
     final booking = bookingById(id);
     if (booking.status != BookingStatus.ongoing) {
       throw StateError(
@@ -984,14 +1018,14 @@ class AppSession {
   static Future<BookingModel> reportArrival(String id) async {
     _requireServer();
     await BackendRepository.rpc('report_stop_arrival', {'p_booking_id': id});
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
   static Future<BookingModel> confirmArrival(String id) async {
     _requireServer();
     await BackendRepository.rpc('confirm_stop_arrival', {'p_booking_id': id});
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
@@ -1013,7 +1047,7 @@ class AppSession {
       'p_proposed_order': proposedOrder,
       'p_reason': reason,
     });
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
@@ -1026,7 +1060,7 @@ class AppSession {
       'p_route_change_id': requestId,
       'p_approve': approve,
     });
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
@@ -1038,7 +1072,7 @@ class AppSession {
       'p_booking_id': id,
       'p_reason': reason,
     });
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
@@ -1050,13 +1084,13 @@ class AppSession {
       'p_booking_id': id,
       'p_wait': wait,
     });
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
   static Future<BookingModel> resumeAfterBreakdown(String id) async {
     await BackendRepository.rpc('resume_after_breakdown', {'p_booking_id': id});
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
@@ -1074,7 +1108,7 @@ class AppSession {
   static Future<BookingModel> completeTrip(String id) async {
     _requireServer();
     await BackendRepository.rpc('complete_trip', {'p_booking_id': id});
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
@@ -1088,7 +1122,7 @@ class AppSession {
       'p_booking_id': id,
       'p_reason': reason,
     });
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
@@ -1102,7 +1136,7 @@ class AppSession {
       'p_booking_id': id,
       'p_statement': text,
     });
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
@@ -1117,7 +1151,7 @@ class AppSession {
       'p_charge_centavos': cents,
       'p_reason': reason,
     });
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
@@ -1131,7 +1165,7 @@ class AppSession {
       'p_booking_id': id,
       'p_direction': refund ? 'refund' : 'payment',
     });
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return bookingById(id);
   }
 
@@ -1185,7 +1219,7 @@ class AppSession {
     return _serial(() async {
       _requireServer();
       await BackendRepository.rpc('accept_booking', {'p_booking_id': id});
-      await syncRemoteState();
+      await _refreshAfterWrite();
       return bookingById(id);
     });
   }
@@ -1505,7 +1539,7 @@ class AppSession {
       reason: reason,
       blockedUntil: blockedUntil,
     );
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return;
   }
 
@@ -1522,7 +1556,7 @@ class AppSession {
       audience: audience,
       requestId: requestId,
     );
-    await syncRemoteState();
+    await _refreshAfterWrite();
     return;
   }
 
@@ -1539,7 +1573,7 @@ class AppSession {
     if (current != null) {
       final status = current['status'] == 'active' ? 'suspended' : 'active';
       await BackendRepository.setTouristStatus(id, status, reason: reason);
-      await syncRemoteState();
+      await _refreshAfterWrite();
     }
     return;
   }
@@ -1575,13 +1609,13 @@ class AppSession {
       fareCents: fareCents,
       spotIds: spotIds,
     );
-    await syncRemoteState();
+    await _refreshAfterWrite();
   }
 
   static Future<void> deleteTourPackage(String packageId) async {
     _requireServer();
     await BackendRepository.deleteTourPackage(packageId);
-    await syncRemoteState();
+    await _refreshAfterWrite();
   }
 
   static Future<void> deleteSpot(String spotId) async {

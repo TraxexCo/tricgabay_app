@@ -5266,7 +5266,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tourHoursNote =>
-      'Tours run Monday to Friday, 8:00 AM to 5:00 PM, and not on weekends or public holidays. The last tour leaves at 1:00 PM.';
+      'Tours run Monday to Friday, 8:00 AM to 5:00 PM, and not on weekends or public holidays. Start any time from 8:00 AM to 1:00 PM.';
 
   @override
   String get noTourDaysAvailable =>
@@ -5314,4 +5314,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emailOffice => 'Email';
+
+  @override
+  String get moreDates => 'Calendar';
+
+  @override
+  String get otherTime => 'Other time';
+
+  @override
+  String get chooseAStartTimeHelp => 'Start between 8:00 AM and 1:00 PM';
+
+  @override
+  String get startTimeOutsideHours =>
+      'Choose a start between 8:00 AM and 1:00 PM, at least an hour from now.';
+
+  @override
+  String get whyAreYouCancelling => 'Why are you cancelling?';
+
+  @override
+  String get cancelReasonPlansChanged => 'My plans changed';
+
+  @override
+  String get cancelReasonWrongDay => 'I booked the wrong day or time';
+
+  @override
+  String get cancelReasonWeather => 'Bad weather';
+
+  @override
+  String get cancelReasonFeelingUnwell => 'I\'m not feeling well';
+
+  @override
+  String get cancelReasonOutOfTime => 'We ran out of time';
+
+  @override
+  String get otherReasonOptional => 'Or write your own reason';
+
+  @override
+  String get writeAtLeast5Characters => 'Write at least 5 characters.';
+
+  @override
+  String get thisTripCanNoLongerBeCancelled =>
+      'This trip can no longer be cancelled. Pull down to refresh and check its status.';
+
+  @override
+  String actionFailedWithDetailValue(String detail) {
+    return 'This action could not be completed. Details: $detail';
+  }
+
+  @override
+  String someInformationCouldNotRefreshDetailValue(String detail) {
+    return 'Some information could not refresh. Details: $detail';
+  }
 }

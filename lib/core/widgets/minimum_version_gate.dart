@@ -50,13 +50,28 @@ class _MinimumVersionGateState extends State<MinimumVersionGate>
     super.dispose();
   }
 
+  /// True once the first check has finished. Later checks (on returning to
+  /// the app) run quietly behind the screen instead of covering it with
+  /// the launch logo.
+  bool _loadedOnce = false;
+  DateTime? _lastCheck;
+
   void _refresh() {
-    _future = (widget.loader ?? _load)();
+    _lastCheck = DateTime.now();
+    _future = (widget.loader ?? _load)().whenComplete(() => _loadedOnce = true);
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && mounted) setState(_refresh);
+    // Pulling down the notification shade or switching apps briefly must
+    // not re-check every time: at most every 10 minutes.
+    final last = _lastCheck;
+    if (state == AppLifecycleState.resumed &&
+        mounted &&
+        (last == null ||
+            DateTime.now().difference(last) > const Duration(minutes: 10))) {
+      setState(_refresh);
+    }
   }
 
   Future<({VersionPolicy policy, int build})> _load() async {
@@ -103,7 +118,7 @@ class _MinimumVersionGateState extends State<MinimumVersionGate>
   ) => FutureBuilder<({VersionPolicy policy, int build})>(
     future: _future,
     builder: (context, snapshot) {
-      if (snapshot.connectionState != ConnectionState.done) {
+      if (snapshot.connectionState != ConnectionState.done && !_loadedOnce) {
         return RetainedGate(
           barrier: const LaunchBarrier(),
           child: widget.child,

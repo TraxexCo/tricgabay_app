@@ -35,6 +35,8 @@ abstract final class MessageCode {
       '@l10n/accountCreatedConfirmYourEmailThenSignIn';
   static const accreditationVerified = '@l10n/accreditationVerified';
   static const actNow = '@l10n/actNow';
+  static String actionFailedWithDetailValue(String detail) =>
+      encodeMessage('actionFailedWithDetailValue', [detail]);
   static const activate = '@l10n/activate';
   static const activateTourist = '@l10n/activateTourist';
   static String activateValue(String value) =>
@@ -238,6 +240,11 @@ abstract final class MessageCode {
   static const cancelBookingNoCharge = '@l10n/cancelBookingNoCharge';
   static const cancelFree = '@l10n/cancelFree';
   static const cancelFreeOfCharge = '@l10n/cancelFreeOfCharge';
+  static const cancelReasonFeelingUnwell = '@l10n/cancelReasonFeelingUnwell';
+  static const cancelReasonOutOfTime = '@l10n/cancelReasonOutOfTime';
+  static const cancelReasonPlansChanged = '@l10n/cancelReasonPlansChanged';
+  static const cancelReasonWeather = '@l10n/cancelReasonWeather';
+  static const cancelReasonWrongDay = '@l10n/cancelReasonWrongDay';
   static const cancelThisBooking = '@l10n/cancelThisBooking';
   static const cancellationAndPaymentPolicy =
       '@l10n/cancellationAndPaymentPolicy';
@@ -290,6 +297,7 @@ abstract final class MessageCode {
       '@l10n/chooseABarangayAndEnterTheExactAddressBelow';
   static const chooseAPickupPointOnTheMapOrEnableLocationFirst =
       '@l10n/chooseAPickupPointOnTheMapOrEnableLocationFirst';
+  static const chooseAStartTimeHelp = '@l10n/chooseAStartTimeHelp';
   static const chooseATourDayAndStartTime = '@l10n/chooseATourDayAndStartTime';
   static const chooseATourPackage = '@l10n/chooseATourPackage';
   static const chooseATourPackageBody = '@l10n/chooseATourPackageBody';
@@ -1051,6 +1059,7 @@ abstract final class MessageCode {
     String thirdValue,
   ) => encodeMessage('modeValueLabel', [value, secondValue, thirdValue]);
   static const mon = '@l10n/mon';
+  static const moreDates = '@l10n/moreDates';
   static const moveTheMapPinOrUseYourCurrentLocationBeforeSaving =
       '@l10n/moveTheMapPinOrUseYourCurrentLocationBeforeSaving';
   static const moveWithin150mOfPickup = '@l10n/moveWithin150mOfPickup';
@@ -1224,6 +1233,8 @@ abstract final class MessageCode {
       encodeMessage('operationalAlertSNeedReviewValue', [value]);
   static const operationsCentre = '@l10n/operationsCentre';
   static const other = '@l10n/other';
+  static const otherReasonOptional = '@l10n/otherReasonOptional';
+  static const otherTime = '@l10n/otherTime';
   static const outsideThePickupArea = '@l10n/outsideThePickupArea';
   static const outstandingFareAction = '@l10n/outstandingFareAction';
   static const outstandingFareBlocked = '@l10n/outstandingFareBlocked';
@@ -1642,6 +1653,8 @@ abstract final class MessageCode {
   static const signOut = '@l10n/signOut';
   static const signUp = '@l10n/signUp';
   static const skip = '@l10n/skip';
+  static String someInformationCouldNotRefreshDetailValue(String detail) =>
+      encodeMessage('someInformationCouldNotRefreshDetailValue', [detail]);
   static const someInformationCouldNotRefreshPreviouslyLoadedDataIsShownReconnectAndRetry =
       '@l10n/someInformationCouldNotRefreshPreviouslyLoadedDataIsShownReconnectAndRetry';
   static const sos = '@l10n/sos';
@@ -1651,6 +1664,7 @@ abstract final class MessageCode {
   static const staleOnlineDrivers = '@l10n/staleOnlineDrivers';
   static const startNewSearch = '@l10n/startNewSearch';
   static const startTime = '@l10n/startTime';
+  static const startTimeOutsideHours = '@l10n/startTimeOutsideHours';
   static const statusBusy = '@l10n/statusBusy';
   static String statusValue(String value) =>
       encodeMessage('statusValue', [value]);
@@ -1821,6 +1835,8 @@ abstract final class MessageCode {
       '@l10n/thisTouristAccountCannotBookRightNowContactTheAdministrator';
   static const thisTouristAccountIsCurrentlyUnavailable =
       '@l10n/thisTouristAccountIsCurrentlyUnavailable';
+  static const thisTripCanNoLongerBeCancelled =
+      '@l10n/thisTripCanNoLongerBeCancelled';
   static const thisTripCouldNotBeFoundOrHasBeenRemoved =
       '@l10n/thisTripCouldNotBeFoundOrHasBeenRemoved';
   static const thisTripHasAlreadyEnded = '@l10n/thisTripHasAlreadyEnded';
@@ -2023,11 +2039,13 @@ abstract final class MessageCode {
   static const whenYouGetNotificationsTheyWillAppearHere =
       '@l10n/whenYouGetNotificationsTheyWillAppearHere';
   static const whereWouldYouLikeToGo = '@l10n/whereWouldYouLikeToGo';
+  static const whyAreYouCancelling = '@l10n/whyAreYouCancelling';
   static String willBeCompletedInThePaymongoTestEnvironmentValue(
     String value,
   ) => encodeMessage('willBeCompletedInThePaymongoTestEnvironmentValue', [
     value,
   ]);
+  static const writeAtLeast5Characters = '@l10n/writeAtLeast5Characters';
   static const youAlreadyHaveAnActiveBookingOpenTripsToContinueOrCancelIt =
       '@l10n/youAlreadyHaveAnActiveBookingOpenTripsToContinueOrCancelIt';
   static const youAlreadyRatedThisTrip = '@l10n/youAlreadyRatedThisTrip';

@@ -9094,7 +9094,7 @@ abstract class AppLocalizations {
   /// No description provided for @tourHoursNote.
   ///
   /// In en, this message translates to:
-  /// **'Tours run Monday to Friday, 8:00 AM to 5:00 PM, and not on weekends or public holidays. The last tour leaves at 1:00 PM.'**
+  /// **'Tours run Monday to Friday, 8:00 AM to 5:00 PM, and not on weekends or public holidays. Start any time from 8:00 AM to 1:00 PM.'**
   String get tourHoursNote;
 
   /// No description provided for @noTourDaysAvailable.
@@ -9174,6 +9174,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Email'**
   String get emailOffice;
+
+  /// No description provided for @moreDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get moreDates;
+
+  /// No description provided for @otherTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Other time'**
+  String get otherTime;
+
+  /// No description provided for @chooseAStartTimeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Start between 8:00 AM and 1:00 PM'**
+  String get chooseAStartTimeHelp;
+
+  /// No description provided for @startTimeOutsideHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a start between 8:00 AM and 1:00 PM, at least an hour from now.'**
+  String get startTimeOutsideHours;
+
+  /// No description provided for @whyAreYouCancelling.
+  ///
+  /// In en, this message translates to:
+  /// **'Why are you cancelling?'**
+  String get whyAreYouCancelling;
+
+  /// No description provided for @cancelReasonPlansChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'My plans changed'**
+  String get cancelReasonPlansChanged;
+
+  /// No description provided for @cancelReasonWrongDay.
+  ///
+  /// In en, this message translates to:
+  /// **'I booked the wrong day or time'**
+  String get cancelReasonWrongDay;
+
+  /// No description provided for @cancelReasonWeather.
+  ///
+  /// In en, this message translates to:
+  /// **'Bad weather'**
+  String get cancelReasonWeather;
+
+  /// No description provided for @cancelReasonFeelingUnwell.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m not feeling well'**
+  String get cancelReasonFeelingUnwell;
+
+  /// No description provided for @cancelReasonOutOfTime.
+  ///
+  /// In en, this message translates to:
+  /// **'We ran out of time'**
+  String get cancelReasonOutOfTime;
+
+  /// No description provided for @otherReasonOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Or write your own reason'**
+  String get otherReasonOptional;
+
+  /// No description provided for @writeAtLeast5Characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Write at least 5 characters.'**
+  String get writeAtLeast5Characters;
+
+  /// No description provided for @thisTripCanNoLongerBeCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'This trip can no longer be cancelled. Pull down to refresh and check its status.'**
+  String get thisTripCanNoLongerBeCancelled;
+
+  /// No description provided for @actionFailedWithDetailValue.
+  ///
+  /// In en, this message translates to:
+  /// **'This action could not be completed. Details: {detail}'**
+  String actionFailedWithDetailValue(String detail);
+
+  /// No description provided for @someInformationCouldNotRefreshDetailValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Some information could not refresh. Details: {detail}'**
+  String someInformationCouldNotRefreshDetailValue(String detail);
 }
 
 class _AppLocalizationsDelegate

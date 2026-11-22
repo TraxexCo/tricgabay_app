@@ -328,6 +328,11 @@ class FakeLocationGateway implements LocationGateway {
     return position();
   }
 
+  geo.Position? lastKnown;
+
+  @override
+  Future<geo.Position?> lastKnownPosition() async => lastKnown;
+
   void emit(geo.Position value) => _stream.add(value);
 
   Future<void> close() => _stream.close();

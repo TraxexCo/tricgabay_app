@@ -36,6 +36,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
       l.accountCreatedConfirmYourEmailThenSignIn,
     'accreditationVerified' => l.accreditationVerified,
     'actNow' => l.actNow,
+    'actionFailedWithDetailValue' => l.actionFailedWithDetailValue(text(0)),
     'activate' => l.activate,
     'activateTourist' => l.activateTourist,
     'activateValue' => l.activateValue(text(0)),
@@ -210,6 +211,11 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'cancelBookingNoCharge' => l.cancelBookingNoCharge,
     'cancelFree' => l.cancelFree,
     'cancelFreeOfCharge' => l.cancelFreeOfCharge,
+    'cancelReasonFeelingUnwell' => l.cancelReasonFeelingUnwell,
+    'cancelReasonOutOfTime' => l.cancelReasonOutOfTime,
+    'cancelReasonPlansChanged' => l.cancelReasonPlansChanged,
+    'cancelReasonWeather' => l.cancelReasonWeather,
+    'cancelReasonWrongDay' => l.cancelReasonWrongDay,
     'cancelThisBooking' => l.cancelThisBooking,
     'cancellationAndPaymentPolicy' => l.cancellationAndPaymentPolicy,
     'cancellationGraceExpired' => l.cancellationGraceExpired(
@@ -254,6 +260,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
       l.chooseABarangayAndEnterTheExactAddressBelow,
     'chooseAPickupPointOnTheMapOrEnableLocationFirst' =>
       l.chooseAPickupPointOnTheMapOrEnableLocationFirst,
+    'chooseAStartTimeHelp' => l.chooseAStartTimeHelp,
     'chooseATourDayAndStartTime' => l.chooseATourDayAndStartTime,
     'chooseATourPackage' => l.chooseATourPackage,
     'chooseATourPackageBody' => l.chooseATourPackageBody,
@@ -924,6 +931,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'modeValue' => l.modeValue(text(0)),
     'modeValueLabel' => l.modeValueLabel(text(0), text(1), text(2)),
     'mon' => l.mon,
+    'moreDates' => l.moreDates,
     'moveTheMapPinOrUseYourCurrentLocationBeforeSaving' =>
       l.moveTheMapPinOrUseYourCurrentLocationBeforeSaving,
     'moveWithin150mOfPickup' => l.moveWithin150mOfPickup,
@@ -1078,6 +1086,8 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     ),
     'operationsCentre' => l.operationsCentre,
     'other' => l.other,
+    'otherReasonOptional' => l.otherReasonOptional,
+    'otherTime' => l.otherTime,
     'outsideThePickupArea' => l.outsideThePickupArea,
     'outstandingFareAction' => l.outstandingFareAction,
     'outstandingFareBlocked' => l.outstandingFareBlocked,
@@ -1454,6 +1464,8 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'signOut' => l.signOut,
     'signUp' => l.signUp,
     'skip' => l.skip,
+    'someInformationCouldNotRefreshDetailValue' =>
+      l.someInformationCouldNotRefreshDetailValue(text(0)),
     'someInformationCouldNotRefreshPreviouslyLoadedDataIsShownReconnectAndRetry' =>
       l.someInformationCouldNotRefreshPreviouslyLoadedDataIsShownReconnectAndRetry,
     'sos' => l.sos,
@@ -1463,6 +1475,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'staleOnlineDrivers' => l.staleOnlineDrivers,
     'startNewSearch' => l.startNewSearch,
     'startTime' => l.startTime,
+    'startTimeOutsideHours' => l.startTimeOutsideHours,
     'statusBusy' => l.statusBusy,
     'statusValue' => l.statusValue(text(0)),
     'stillToPay' => l.stillToPay,
@@ -1615,6 +1628,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
       l.thisTouristAccountCannotBookRightNowContactTheAdministrator,
     'thisTouristAccountIsCurrentlyUnavailable' =>
       l.thisTouristAccountIsCurrentlyUnavailable,
+    'thisTripCanNoLongerBeCancelled' => l.thisTripCanNoLongerBeCancelled,
     'thisTripCouldNotBeFoundOrHasBeenRemoved' =>
       l.thisTripCouldNotBeFoundOrHasBeenRemoved,
     'thisTripHasAlreadyEnded' => l.thisTripHasAlreadyEnded,
@@ -1792,8 +1806,10 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'whenYouGetNotificationsTheyWillAppearHere' =>
       l.whenYouGetNotificationsTheyWillAppearHere,
     'whereWouldYouLikeToGo' => l.whereWouldYouLikeToGo,
+    'whyAreYouCancelling' => l.whyAreYouCancelling,
     'willBeCompletedInThePaymongoTestEnvironmentValue' =>
       l.willBeCompletedInThePaymongoTestEnvironmentValue(text(0)),
+    'writeAtLeast5Characters' => l.writeAtLeast5Characters,
     'youAlreadyHaveAnActiveBookingOpenTripsToContinueOrCancelIt' =>
       l.youAlreadyHaveAnActiveBookingOpenTripsToContinueOrCancelIt,
     'youAlreadyRatedThisTrip' => l.youAlreadyRatedThisTrip,

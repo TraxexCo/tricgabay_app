@@ -97,7 +97,9 @@ void main() {
           AppLifecycleState.resumed,
         );
         await tester.pump();
-        expect(fields, findsNothing);
+        // Returning to the app keeps the screen; the checks do not cover it
+        // with the launch logo again.
+        expect(fields, findsNWidgets(2));
         versionRefresh.complete((policy: const VersionPolicy(1, ''), build: 3));
         privacyRefresh.complete(null);
         await tester.pumpAndSettle();
