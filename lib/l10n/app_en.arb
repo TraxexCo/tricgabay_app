@@ -2694,16 +2694,18 @@
   "dataStepDownloadBody": "Save the file or share it to your email or drive.",
   "yourRequests": "Your requests",
   "chooseYourTourDay": "Choose your tour day",
-  "tourHoursNote": "Tours run 8:00 AM to 5:00 PM. The last tour leaves at 1:00 PM.",
+  "tourHoursNote": "Tours run Monday to Friday, 8:00 AM to 5:00 PM, and not on weekends or public holidays. The last tour leaves at 1:00 PM.",
   "noTourDaysAvailable": "No tour days are open right now. Please check again later.",
   "startTime": "Start time",
   "tomorrow": "Tomorrow",
   "noDriversForTodayBody": "No driver is online yet for today. Your request stays open, but choosing a later start or another day gives drivers more time to accept.",
-  "bustosTourismOffice": "Bustos Municipal Tourism Office",
-  "bustosTourismOfficeAddress": "Bustos Municipal Hall, Poblacion, Bustos, Bulacan",
+  "bustosTourismOffice": "Municipal Arts, Culture and Tourism Office",
+  "bustosTourismOfficeAddress": "Municipal Compound, Poblacion, Bustos, Bulacan 3007",
   "meetingPointExplainer": "Every tour starts here and brings you back here at the end. Please arrive 10 minutes before your start time.",
   "getDirections": "Get directions",
   "chooseATourDayAndStartTime": "Choose a tour day and start time first.",
-  "bustosTourismOfficeMeetingPoint": "Bustos Municipal Tourism Office (Municipal Hall)",
-  "tourStartsAndEndsAtOffice": "Starts and ends at the Bustos Municipal Tourism Office (Municipal Hall). Pick your tour day on the next screen."
+  "bustosTourismOfficeMeetingPoint": "Bustos Municipal Arts, Culture and Tourism Office (Municipal Compound)",
+  "tourStartsAndEndsAtOffice": "Starts and ends at the Bustos Municipal Arts, Culture and Tourism Office (Municipal Compound). Tours run Monday to Friday; pick your day on the next screen.",
+  "callOffice": "Call",
+  "emailOffice": "Email"
 }

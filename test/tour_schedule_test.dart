@@ -17,22 +17,30 @@ void main() {
   });
 
   test('in the morning today offers only starts at least an hour away', () {
-    final now = manila(11, 22, 9, 30);
+    // Tuesday 24 November 2026.
+    final now = manila(11, 24, 9, 30);
     final days = TourSchedule.bookableDays(now: now);
-    expect(days.first, DateTime(2026, 11, 22));
+    expect(days.first, DateTime(2026, 11, 24));
     final times = TourSchedule.startTimes(days.first, now: now);
-    expect(times.first, manila(11, 22, 11));
-    expect(times.last, manila(11, 22, 13));
+    expect(times.first, manila(11, 24, 11));
+    expect(times.last, manila(11, 24, 13));
   });
 
   test('after noon the last 1:00 PM start is gone, so today drops out', () {
-    final now = manila(11, 22, 12, 30);
-    expect(TourSchedule.bookableDays(now: now).first, DateTime(2026, 11, 23));
+    final now = manila(11, 24, 12, 30);
+    expect(TourSchedule.bookableDays(now: now).first, DateTime(2026, 11, 25));
   });
 
-  test('bookings stay inside the 30-day server window', () {
+  test('weekends and public holidays are closed', () {
+    // From Sunday 22 Nov: Bonifacio Day (30 Nov) and the Immaculate
+    // Conception (8 Dec) fall inside the 30-day window.
     final days = TourSchedule.bookableDays(now: manila(11, 22, 7));
-    expect(days, hasLength(30));
+    expect(days.every((d) => d.weekday <= DateTime.friday), isTrue);
+    expect(days, isNot(contains(DateTime(2026, 11, 22))));
+    expect(days, isNot(contains(DateTime(2026, 11, 30))));
+    expect(days, isNot(contains(DateTime(2026, 12, 8))));
+    expect(days.first, DateTime(2026, 11, 23));
     expect(days.last, DateTime(2026, 12, 21));
+    expect(days, hasLength(19));
   });
 }

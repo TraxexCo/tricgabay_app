@@ -5266,7 +5266,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tourHoursNote =>
-      'Tours run 8:00 AM to 5:00 PM. The last tour leaves at 1:00 PM.';
+      'Tours run Monday to Friday, 8:00 AM to 5:00 PM, and not on weekends or public holidays. The last tour leaves at 1:00 PM.';
 
   @override
   String get noTourDaysAvailable =>
@@ -5283,11 +5283,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'No driver is online yet for today. Your request stays open, but choosing a later start or another day gives drivers more time to accept.';
 
   @override
-  String get bustosTourismOffice => 'Bustos Municipal Tourism Office';
+  String get bustosTourismOffice =>
+      'Municipal Arts, Culture and Tourism Office';
 
   @override
   String get bustosTourismOfficeAddress =>
-      'Bustos Municipal Hall, Poblacion, Bustos, Bulacan';
+      'Municipal Compound, Poblacion, Bustos, Bulacan 3007';
 
   @override
   String get meetingPointExplainer =>
@@ -5302,9 +5303,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bustosTourismOfficeMeetingPoint =>
-      'Bustos Municipal Tourism Office (Municipal Hall)';
+      'Bustos Municipal Arts, Culture and Tourism Office (Municipal Compound)';
 
   @override
   String get tourStartsAndEndsAtOffice =>
-      'Starts and ends at the Bustos Municipal Tourism Office (Municipal Hall). Pick your tour day on the next screen.';
+      'Starts and ends at the Bustos Municipal Arts, Culture and Tourism Office (Municipal Compound). Tours run Monday to Friday; pick your day on the next screen.';
+
+  @override
+  String get callOffice => 'Call';
+
+  @override
+  String get emailOffice => 'Email';
 }

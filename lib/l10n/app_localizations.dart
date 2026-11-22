@@ -9094,7 +9094,7 @@ abstract class AppLocalizations {
   /// No description provided for @tourHoursNote.
   ///
   /// In en, this message translates to:
-  /// **'Tours run 8:00 AM to 5:00 PM. The last tour leaves at 1:00 PM.'**
+  /// **'Tours run Monday to Friday, 8:00 AM to 5:00 PM, and not on weekends or public holidays. The last tour leaves at 1:00 PM.'**
   String get tourHoursNote;
 
   /// No description provided for @noTourDaysAvailable.
@@ -9124,13 +9124,13 @@ abstract class AppLocalizations {
   /// No description provided for @bustosTourismOffice.
   ///
   /// In en, this message translates to:
-  /// **'Bustos Municipal Tourism Office'**
+  /// **'Municipal Arts, Culture and Tourism Office'**
   String get bustosTourismOffice;
 
   /// No description provided for @bustosTourismOfficeAddress.
   ///
   /// In en, this message translates to:
-  /// **'Bustos Municipal Hall, Poblacion, Bustos, Bulacan'**
+  /// **'Municipal Compound, Poblacion, Bustos, Bulacan 3007'**
   String get bustosTourismOfficeAddress;
 
   /// No description provided for @meetingPointExplainer.
@@ -9154,14 +9154,26 @@ abstract class AppLocalizations {
   /// No description provided for @bustosTourismOfficeMeetingPoint.
   ///
   /// In en, this message translates to:
-  /// **'Bustos Municipal Tourism Office (Municipal Hall)'**
+  /// **'Bustos Municipal Arts, Culture and Tourism Office (Municipal Compound)'**
   String get bustosTourismOfficeMeetingPoint;
 
   /// No description provided for @tourStartsAndEndsAtOffice.
   ///
   /// In en, this message translates to:
-  /// **'Starts and ends at the Bustos Municipal Tourism Office (Municipal Hall). Pick your tour day on the next screen.'**
+  /// **'Starts and ends at the Bustos Municipal Arts, Culture and Tourism Office (Municipal Compound). Tours run Monday to Friday; pick your day on the next screen.'**
   String get tourStartsAndEndsAtOffice;
+
+  /// No description provided for @callOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get callOffice;
+
+  /// No description provided for @emailOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get emailOffice;
 }
 
 class _AppLocalizationsDelegate

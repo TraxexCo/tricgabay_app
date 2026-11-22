@@ -2694,16 +2694,18 @@
   "dataStepDownloadBody": "I-save ang file o ibahagi sa email o drive mo.",
   "yourRequests": "Mga hiling mo",
   "chooseYourTourDay": "Piliin ang araw ng tour",
-  "tourHoursNote": "Bukas ang tour mula 8:00 AM hanggang 5:00 PM. Ang huling alis ay 1:00 PM.",
+  "tourHoursNote": "May tour mula Lunes hanggang Biyernes, 8:00 AM hanggang 5:00 PM, at wala tuwing weekend at pista opisyal. Ang huling alis ay 1:00 PM.",
   "noTourDaysAvailable": "Walang bukas na araw ng tour ngayon. Pakisubukan ulit mamaya.",
   "startTime": "Oras ng simula",
   "tomorrow": "Bukas",
   "noDriversForTodayBody": "Wala pang online na drayber para ngayong araw. Mananatiling bukas ang request mo, pero mas may oras ang mga drayber kung pipili ka ng mas huling oras o ibang araw.",
-  "bustosTourismOffice": "Bustos Municipal Tourism Office",
-  "bustosTourismOfficeAddress": "Bustos Municipal Hall, Poblacion, Bustos, Bulacan",
+  "bustosTourismOffice": "Municipal Arts, Culture and Tourism Office",
+  "bustosTourismOfficeAddress": "Municipal Compound, Poblacion, Bustos, Bulacan 3007",
   "meetingPointExplainer": "Dito nagsisimula ang bawat tour at dito ka rin ibababa pagkatapos. Pakidating 10 minuto bago ang oras ng simula.",
   "getDirections": "Paano pumunta",
   "chooseATourDayAndStartTime": "Pumili muna ng araw at oras ng tour.",
-  "bustosTourismOfficeMeetingPoint": "Bustos Municipal Tourism Office (Munisipyo)",
-  "tourStartsAndEndsAtOffice": "Nagsisimula at nagtatapos sa Bustos Municipal Tourism Office (Munisipyo). Piliin ang araw ng tour sa susunod na screen."
+  "bustosTourismOfficeMeetingPoint": "Bustos Municipal Arts, Culture and Tourism Office (Munisipyo)",
+  "tourStartsAndEndsAtOffice": "Nagsisimula at nagtatapos sa Bustos Municipal Arts, Culture and Tourism Office (Munisipyo). May tour mula Lunes hanggang Biyernes; piliin ang araw sa susunod na screen.",
+  "callOffice": "Tumawag",
+  "emailOffice": "Mag-email"
 }

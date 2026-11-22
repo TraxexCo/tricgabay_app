@@ -4,8 +4,9 @@ import '../services/server_clock.dart';
 /// Municipal Tourism Office, so the tourist picks a day and a start time,
 /// not a pickup point.
 ///
-/// Office hours below are the working assumption (8:00 AM to 5:00 PM, every
-/// day); change them here if the tourism office confirms different hours.
+/// Hours follow the Municipal Arts, Culture and Tourism Office: Monday to
+/// Friday, 8:00 AM to 5:00 PM, closed on weekends and public holidays
+/// (bustos.cloud/government/departments).
 class TourSchedule {
   TourSchedule._();
 
@@ -23,8 +24,38 @@ class TourSchedule {
   /// A day tour takes about four hours, so the last start is 1:00 PM.
   static const lastStartHour = 13;
 
-  /// Days the office runs tours (DateTime.monday = 1 ... sunday = 7).
-  static const openWeekdays = {1, 2, 3, 4, 5, 6, 7};
+  /// Days the office runs tours: Monday to Friday (DateTime.monday = 1).
+  static const openWeekdays = {1, 2, 3, 4, 5};
+
+  /// Nationwide regular holidays and special non-working days, when the
+  /// office is closed. 2026: Proclamation No. 1006; 2027: Proclamation
+  /// No. 1427. Eid'l Fitr and Eid'l Adha are proclaimed separately each
+  /// year, so add them (and any Bustos local holiday) when announced.
+  static final closedDates = <DateTime>{
+    // 2026
+    DateTime(2026, 1, 1), DateTime(2026, 2, 17), DateTime(2026, 4, 2),
+    DateTime(2026, 4, 3), DateTime(2026, 4, 4), DateTime(2026, 4, 9),
+    DateTime(2026, 5, 1), DateTime(2026, 6, 12), DateTime(2026, 8, 21),
+    DateTime(2026, 8, 31), DateTime(2026, 11, 1), DateTime(2026, 11, 2),
+    DateTime(2026, 11, 30), DateTime(2026, 12, 8), DateTime(2026, 12, 24),
+    DateTime(2026, 12, 25), DateTime(2026, 12, 30), DateTime(2026, 12, 31),
+    // 2027
+    DateTime(2027, 1, 1), DateTime(2027, 2, 6), DateTime(2027, 3, 25),
+    DateTime(2027, 3, 26), DateTime(2027, 3, 27), DateTime(2027, 4, 9),
+    DateTime(2027, 5, 1), DateTime(2027, 6, 12), DateTime(2027, 8, 21),
+    DateTime(2027, 8, 30), DateTime(2027, 11, 1), DateTime(2027, 11, 2),
+    DateTime(2027, 11, 30), DateTime(2027, 12, 8), DateTime(2027, 12, 24),
+    DateTime(2027, 12, 25), DateTime(2027, 12, 30), DateTime(2027, 12, 31),
+  };
+
+  /// Whether the office runs tours on this calendar date.
+  static bool isOpenDay(DateTime day) =>
+      openWeekdays.contains(day.weekday) &&
+      !closedDates.contains(DateTime(day.year, day.month, day.day));
+
+  /// The office's contact details, shown on the booking screen.
+  static const officeEmail = 'bustostourismofficial@gmail.com';
+  static const officePhone = '+639179189665';
 
   /// The server only accepts bookings at least an hour ahead.
   static const minimumLead = Duration(hours: 1);
@@ -35,7 +66,7 @@ class TourSchedule {
   /// Start times offered on [day] (a Manila calendar date). For today only
   /// the times at least [minimumLead] away remain; a closed day has none.
   static List<DateTime> startTimes(DateTime day, {DateTime? now}) {
-    if (!openWeekdays.contains(day.weekday)) return const [];
+    if (!isOpenDay(day)) return const [];
     final earliest = (now ?? ServerClock.now()).add(minimumLead);
     return [
       for (var hour = openHour; hour <= lastStartHour; hour++)

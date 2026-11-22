@@ -736,13 +736,29 @@ class _MeetingPointCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Align(
-          alignment: AlignmentDirectional.centerEnd,
-          child: TextButton.icon(
-            onPressed: onDirections,
-            icon: const Icon(Icons.directions_rounded),
-            label: Text(context.l10n.getDirections),
-          ),
+        Wrap(
+          alignment: WrapAlignment.end,
+          spacing: 4,
+          children: [
+            TextButton.icon(
+              onPressed: () =>
+                  launchUrl(Uri(scheme: 'tel', path: TourSchedule.officePhone)),
+              icon: const Icon(Icons.call_outlined),
+              label: Text(context.l10n.callOffice),
+            ),
+            TextButton.icon(
+              onPressed: () => launchUrl(
+                Uri(scheme: 'mailto', path: TourSchedule.officeEmail),
+              ),
+              icon: const Icon(Icons.mail_outline_rounded),
+              label: Text(context.l10n.emailOffice),
+            ),
+            TextButton.icon(
+              onPressed: onDirections,
+              icon: const Icon(Icons.directions_rounded),
+              label: Text(context.l10n.getDirections),
+            ),
+          ],
         ),
       ],
     ),

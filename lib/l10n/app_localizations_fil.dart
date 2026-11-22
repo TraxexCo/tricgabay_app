@@ -5345,7 +5345,7 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get tourHoursNote =>
-      'Bukas ang tour mula 8:00 AM hanggang 5:00 PM. Ang huling alis ay 1:00 PM.';
+      'May tour mula Lunes hanggang Biyernes, 8:00 AM hanggang 5:00 PM, at wala tuwing weekend at pista opisyal. Ang huling alis ay 1:00 PM.';
 
   @override
   String get noTourDaysAvailable =>
@@ -5362,11 +5362,12 @@ class AppLocalizationsFil extends AppLocalizations {
       'Wala pang online na drayber para ngayong araw. Mananatiling bukas ang request mo, pero mas may oras ang mga drayber kung pipili ka ng mas huling oras o ibang araw.';
 
   @override
-  String get bustosTourismOffice => 'Bustos Municipal Tourism Office';
+  String get bustosTourismOffice =>
+      'Municipal Arts, Culture and Tourism Office';
 
   @override
   String get bustosTourismOfficeAddress =>
-      'Bustos Municipal Hall, Poblacion, Bustos, Bulacan';
+      'Municipal Compound, Poblacion, Bustos, Bulacan 3007';
 
   @override
   String get meetingPointExplainer =>
@@ -5381,9 +5382,15 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get bustosTourismOfficeMeetingPoint =>
-      'Bustos Municipal Tourism Office (Munisipyo)';
+      'Bustos Municipal Arts, Culture and Tourism Office (Munisipyo)';
 
   @override
   String get tourStartsAndEndsAtOffice =>
-      'Nagsisimula at nagtatapos sa Bustos Municipal Tourism Office (Munisipyo). Piliin ang araw ng tour sa susunod na screen.';
+      'Nagsisimula at nagtatapos sa Bustos Municipal Arts, Culture and Tourism Office (Munisipyo). May tour mula Lunes hanggang Biyernes; piliin ang araw sa susunod na screen.';
+
+  @override
+  String get callOffice => 'Tumawag';
+
+  @override
+  String get emailOffice => 'Mag-email';
 }

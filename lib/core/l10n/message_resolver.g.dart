@@ -203,6 +203,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'call' => l.call,
     'call911Now' => l.call911Now,
     'callEmergencyServices' => l.callEmergencyServices,
+    'callOffice' => l.callOffice,
     'cancel' => l.cancel,
     'cancelBooking' => l.cancelBooking,
     'cancelBookingFeeValue' => l.cancelBookingFeeValue(text(0)),
@@ -501,6 +502,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'emailAddressMustNotExceedCharactersValue' =>
       l.emailAddressMustNotExceedCharactersValue(text(0)),
     'emailIsRequired' => l.emailIsRequired,
+    'emailOffice' => l.emailOffice,
     'emailReadOnly' => l.emailReadOnly,
     'emergency' => l.emergency,
     'emergencyContact' => l.emergencyContact,

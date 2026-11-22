@@ -230,6 +230,7 @@ abstract final class MessageCode {
   static const call = '@l10n/call';
   static const call911Now = '@l10n/call911Now';
   static const callEmergencyServices = '@l10n/callEmergencyServices';
+  static const callOffice = '@l10n/callOffice';
   static const cancel = '@l10n/cancel';
   static const cancelBooking = '@l10n/cancelBooking';
   static String cancelBookingFeeValue(String value) =>
@@ -573,6 +574,7 @@ abstract final class MessageCode {
   static String emailAddressMustNotExceedCharactersValue(String value) =>
       encodeMessage('emailAddressMustNotExceedCharactersValue', [value]);
   static const emailIsRequired = '@l10n/emailIsRequired';
+  static const emailOffice = '@l10n/emailOffice';
   static const emailReadOnly = '@l10n/emailReadOnly';
   static const emergency = '@l10n/emergency';
   static const emergencyContact = '@l10n/emergencyContact';
