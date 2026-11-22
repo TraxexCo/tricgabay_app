@@ -255,3 +255,13 @@ In this order:
    - Confirm office hours and the phone number with the tourism office.
 9. **Two-phone test** with real people (arrival needs to be within 150 m of the pickup, which is now the tourism office). Script: `docs/real-world-scenarios.md`.
 10. **Push the branch** to a private GitHub repo and merge into `master`. Both need the owner's OK.
+
+## Done on the PC (2026-11-22, evening)
+
+- **Migrations pushed** to `xcsrjuqzwequmeqzedzd` with `supabase db push --remote` (dry run first): `20261122040000` to `20261122070000`. `20261122050000_package_only_catalog.sql` was checked against the live schema first (FKs, nullable `booking_stops.spot_id`, identity `fare_revisions.revision`, all 11 place ids present).
+- **Local SQL tests** (Docker, isolated `tricgabay_batch4_isolated` stack, full 70-migration chain): 21 of 24 pgTAP suites pass. `002_financial_security`, `004_refund_reconciliation` and `008_batch2_booking_contracts` fail because they still exercise PayMongo RPCs that were deliberately revoked/disabled on 2026-11-20; they need rewriting or retiring (not caused by today's migrations).
+- **Security catalog regenerated** (`supabase/security/authorization_catalog.json`). `scripts/security/access_rules.ts` now also covers the GCash tables, RPCs and buckets from 2026-11-20, which had never been registered; `scripts/fixtures/authorization.sql` gained driver GCash rows. Full matrix: 7,982 cases, 0 failures.
+- **Hosted checks:** 11 places; admin a1 created, renamed, reordered, re-priced and deleted a package (rolled back afterwards; a tourist is refused); a booking 70 days ahead is accepted and 400 days is refused; a cancellation push reached the d1 phone about 1 s after the cancel.
+- **Flutter:** analyze clean; 2,566 tests pass. Fixed the Fixed fares intro text contrast (failed since `79a3be6`).
+- The phone is signed in as `d1`. A demo-tourist test booking `d9ad40fd` was created, assigned to d1 and cancelled for the push test.
+- Note: with `core.autocrlf=true`, `git stash`/checkout rewrites the line break inside `agreedValue` in `docs/localization-review.csv`; rerun `dart run tool/export_localization.dart` if the localization gate fails.

@@ -17,6 +17,24 @@
       ]
     },
     {
+      "key": "driver-gcash-qr",
+      "public": false,
+      "max_bytes": 5242880,
+      "mime_types": [
+        "image/jpeg",
+        "image/png"
+      ]
+    },
+    {
+      "key": "gcash-receipts",
+      "public": false,
+      "max_bytes": 5242880,
+      "mime_types": [
+        "image/jpeg",
+        "image/png"
+      ]
+    },
+    {
       "key": "profile-images",
       "public": false,
       "max_bytes": 5242880,
@@ -327,6 +345,31 @@
       "definition_hash": "d616a476f10eb1f73e837ba3c9bd08ea"
     },
     {
+      "key": "public.admin_delete_tour_package(text)",
+      "name": "admin_delete_tour_package",
+      "result": "void",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "text",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "423dbe16fbc5d5cc1f27be80286493fc"
+    },
+    {
       "key": "public.admin_review_driver_compliance(uuid, date, date, date, text, double precision, double precision, numeric, boolean, text)",
       "name": "admin_review_driver_compliance",
       "result": "driver_profiles",
@@ -350,6 +393,56 @@
       ],
       "public_execute": false,
       "definition_hash": "8ee0d7d3c1f0008eaf13a9d09c328c13"
+    },
+    {
+      "key": "public.admin_rule_gcash_dispute(uuid, text, text)",
+      "name": "admin_rule_gcash_dispute",
+      "result": "void",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid, text, text",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "39048791cd3eddee9e994e44c5247a53"
+    },
+    {
+      "key": "public.admin_save_tour_package(text, text, text, integer, text[])",
+      "name": "admin_save_tour_package",
+      "result": "text",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "text, text, text, integer, text[]",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "df5e9d500324f0bacd69cc88365856cc"
     },
     {
       "key": "public.admin_set_driver_status(uuid, driver_approval_status, text, timestamp with time zone)",
@@ -400,6 +493,31 @@
       ],
       "public_execute": false,
       "definition_hash": "9d9bfd0ef93d0642d8c69c40e28bf053"
+    },
+    {
+      "key": "public.admin_waive_unpaid_ruling(uuid, text)",
+      "name": "admin_waive_unpaid_ruling",
+      "result": "void",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid, text",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "635c36295bf5eebdecc3dc07daa6bb90"
     },
     {
       "key": "public.alert_blocked_checkout_expiry()",
@@ -473,6 +591,30 @@
       "definition_hash": "00deff109d0b69271f727ba2a9952f71"
     },
     {
+      "key": "public.auto_escalate_gcash_disputes()",
+      "name": "auto_escalate_gcash_disputes",
+      "result": "integer",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": false
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "6d36639270a9c461144ef64ce705cc8d"
+    },
+    {
       "key": "public.build_data_subject_export(uuid)",
       "name": "build_data_subject_export",
       "result": "jsonb",
@@ -495,6 +637,81 @@
       ],
       "public_execute": false,
       "definition_hash": "c443645de46af5028bbb6a2206908669"
+    },
+    {
+      "key": "public.can_read_driver_gcash_qr(text)",
+      "name": "can_read_driver_gcash_qr",
+      "result": "boolean",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "text",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "s",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "bb94e16674333513eb995509bc5af727"
+    },
+    {
+      "key": "public.can_read_gcash_receipt(text)",
+      "name": "can_read_gcash_receipt",
+      "result": "boolean",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "text",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "s",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "dc93a883ba91fd5772c9031892da1ae8"
+    },
+    {
+      "key": "public.can_upload_gcash_receipt(text)",
+      "name": "can_upload_gcash_receipt",
+      "result": "boolean",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "text",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "s",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "32055430cb497192573a33d902048dae"
     },
     {
       "key": "public.cancel_booking(uuid, text)",
@@ -653,12 +870,11 @@
       "privileges": {
         "anon": false,
         "service_role": true,
-        "authenticated": true
+        "authenticated": false
       },
       "volatility": "v",
       "search_path": "public",
       "execute_roles": [
-        "authenticated",
         "postgres",
         "service_role",
         "supabase_admin"
@@ -767,6 +983,31 @@
       "definition_hash": "4a2e62b5dbf0b10a0f1131f79ae083bd"
     },
     {
+      "key": "public.count_online_drivers()",
+      "name": "count_online_drivers",
+      "result": "integer",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "s",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "7fb8bb2f9f51298074173d6b9615bee0"
+    },
+    {
       "key": "public.create_booking(text, payment_method, text, double precision, double precision, jsonb)",
       "name": "create_booking",
       "result": "jsonb",
@@ -838,7 +1079,7 @@
         "supabase_admin"
       ],
       "public_execute": false,
-      "definition_hash": "a4a0ef53889cf172ebc8e5ea871c9765"
+      "definition_hash": "6e28a3dea787ad07a27bc13c050997b4"
     },
     {
       "key": "public.create_ranked_driver_offers(uuid)",
@@ -1041,6 +1282,30 @@
       "definition_hash": "3767878cfd40f068a47f5e591d73a57d"
     },
     {
+      "key": "public.dispatch_queued_messages_now()",
+      "name": "dispatch_queued_messages_now",
+      "result": "trigger",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": false
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "c473b0e047231c3323ae326fe14fb8bf"
+    },
+    {
       "key": "public.dispatch_released_booking()",
       "name": "dispatch_released_booking",
       "result": "trigger",
@@ -1087,6 +1352,56 @@
       ],
       "public_execute": false,
       "definition_hash": "b4777463498c6f70f7611e7f26cb8508"
+    },
+    {
+      "key": "public.driver_confirm_gcash_received(uuid)",
+      "name": "driver_confirm_gcash_received",
+      "result": "void",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "59c027ce88ce67ff2e61ddce7a4a6a26"
+    },
+    {
+      "key": "public.driver_flag_gcash_not_received(uuid, text)",
+      "name": "driver_flag_gcash_not_received",
+      "result": "void",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid, text",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "17c68e0ae93e80ae47cf8dbd62ac33d8"
     },
     {
       "key": "public.driver_is_match_eligible(uuid, double precision, double precision, integer, boolean)",
@@ -1396,6 +1711,81 @@
       "definition_hash": "02639e65631d3f67dcf3bda81ad7baed"
     },
     {
+      "key": "public.get_booking_driver_gcash(uuid)",
+      "name": "get_booking_driver_gcash",
+      "result": "TABLE(gcash_account_name text, gcash_number text, fare_centavos integer)",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "s",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "95a929ad169d046c9cc01a0aecb51f37"
+    },
+    {
+      "key": "public.get_booking_gcash_payee(uuid)",
+      "name": "get_booking_gcash_payee",
+      "result": "TABLE(gcash_account_name text, gcash_number text, fare_centavos integer, qr_object_path text)",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "s",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "d3cb7cdb5dca3d6180ea5ea6a774b677"
+    },
+    {
+      "key": "public.get_booking_gcash_reference(uuid)",
+      "name": "get_booking_gcash_reference",
+      "result": "text",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "s",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "586c1d51c409e7c7c4262164192b0a25"
+    },
+    {
       "key": "public.get_client_configuration()",
       "name": "get_client_configuration",
       "result": "jsonb",
@@ -1420,6 +1810,56 @@
       ],
       "public_execute": false,
       "definition_hash": "329d3c0d60e80547953a17337cb14414"
+    },
+    {
+      "key": "public.get_gcash_dispute_detail(uuid)",
+      "name": "get_gcash_dispute_detail",
+      "result": "jsonb",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "s",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "3a4d723fc69fb27f69a03ff636c2b51b"
+    },
+    {
+      "key": "public.get_my_outstanding_fare()",
+      "name": "get_my_outstanding_fare",
+      "result": "uuid",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "s",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "699e7bfaf3cab66a92a6088e87edf31a"
     },
     {
       "key": "public.get_operations_health()",
@@ -1817,6 +2257,55 @@
       "definition_hash": "e2dc4014b052c89adbdba0eb097db991"
     },
     {
+      "key": "public.list_gcash_disputes()",
+      "name": "list_gcash_disputes",
+      "result": "TABLE(booking_id uuid, reference_label text, tourist_name text, driver_name text, fare_centavos integer, payment_status text, disputed_at timestamp with time zone, escalated_at timestamp with time zone, has_proof boolean, ruling text, settled_at timestamp with time zone)",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "s",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "2beeda45610fa1bf1f2bbc869604a3bd"
+    },
+    {
+      "key": "public.lock_gcash_payment_booking(uuid, text)",
+      "name": "lock_gcash_payment_booking",
+      "result": "bookings",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid, text",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": false
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "a584700e872c20745cf126e9e810ec45"
+    },
+    {
       "key": "public.monitor_checkout_expiries()",
       "name": "monitor_checkout_expiries",
       "result": "integer",
@@ -1859,6 +2348,54 @@
       "execute_roles": null,
       "public_execute": false,
       "definition_hash": "3f71f9e4b9dacc87962d90c4770ad97a"
+    },
+    {
+      "key": "public.notify_driver_of_ride_offer()",
+      "name": "notify_driver_of_ride_offer",
+      "result": "trigger",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": false
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "d8b8e2d672ec699362e9dae1844cb05e"
+    },
+    {
+      "key": "public.notify_gcash_admins(uuid, text, text)",
+      "name": "notify_gcash_admins",
+      "result": "void",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid, text, text",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": false
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "c907e95907101dea17a20b96102a88cf"
     },
     {
       "key": "public.open_dispute(uuid, text)",
@@ -2136,6 +2673,26 @@
       "definition_hash": "24a3ff4fbc2d874e563125dc57aaacd1"
     },
     {
+      "key": "public.protect_confirmed_gcash_booking()",
+      "name": "protect_confirmed_gcash_booking",
+      "result": "trigger",
+      "schema": "public",
+      "strict": false,
+      "definer": false,
+      "argtypes": "",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": false
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": null,
+      "public_execute": false,
+      "definition_hash": "5389bda60ad2d134264963eb282e6c86"
+    },
+    {
       "key": "public.protect_profile_auth_identity()",
       "name": "protect_profile_auth_identity",
       "result": "trigger",
@@ -2301,6 +2858,30 @@
       ],
       "public_execute": false,
       "definition_hash": "afafafcac8b1534333f224873a326229"
+    },
+    {
+      "key": "public.record_gcash_event(uuid, text, text, text)",
+      "name": "record_gcash_event",
+      "result": "void",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid, text, text, text",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": false
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "3d4c7a7afae1f49004e26437169e93f7"
     },
     {
       "key": "public.record_own_privacy_consent(text)",
@@ -2696,6 +3277,31 @@
       "definition_hash": "866ef67fa322b8ee18c29a0a6fa58d42"
     },
     {
+      "key": "public.request_gcash_admin_review(uuid, text)",
+      "name": "request_gcash_admin_review",
+      "result": "void",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid, text",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "bb953f7ca554b3b2edea749ca0c33766"
+    },
+    {
       "key": "public.request_own_data_export(uuid, text)",
       "name": "request_own_data_export",
       "result": "uuid",
@@ -2743,6 +3349,50 @@
       ],
       "public_execute": false,
       "definition_hash": "7ca0e076f86f923927de6b0e99d001c4"
+    },
+    {
+      "key": "public.require_gcash_payment_due(bookings)",
+      "name": "require_gcash_payment_due",
+      "result": "void",
+      "schema": "public",
+      "strict": false,
+      "definer": false,
+      "argtypes": "bookings",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": false
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": null,
+      "public_execute": false,
+      "definition_hash": "220e10b58fca086f45d8e81d3e3258f9"
+    },
+    {
+      "key": "public.require_gcash_ruler()",
+      "name": "require_gcash_ruler",
+      "result": "void",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": false
+      },
+      "volatility": "s",
+      "search_path": "public",
+      "execute_roles": [
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "4768a7dd2d32a9635e3a7c912ff7af47"
     },
     {
       "key": "public.require_pickup_in_service_area(double precision, double precision)",
@@ -2804,12 +3454,11 @@
       "privileges": {
         "anon": false,
         "service_role": true,
-        "authenticated": true
+        "authenticated": false
       },
       "volatility": "v",
       "search_path": "public",
       "execute_roles": [
-        "authenticated",
         "postgres",
         "service_role",
         "supabase_admin"
@@ -3016,6 +3665,31 @@
       "definition_hash": "02e65083ae441b1488ad972aa9ea820e"
     },
     {
+      "key": "public.set_driver_gcash_qr(text)",
+      "name": "set_driver_gcash_qr",
+      "result": "void",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "text",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "0580b69cb5935c408958df9c51d6644e"
+    },
+    {
       "key": "public.set_driver_online(boolean)",
       "name": "set_driver_online",
       "result": "void",
@@ -3084,6 +3758,30 @@
       "execute_roles": null,
       "public_execute": false,
       "definition_hash": "951ccabd2dfd1669c5e023d05aa620ae"
+    },
+    {
+      "key": "public.settle_payment_ruling()",
+      "name": "settle_payment_ruling",
+      "result": "trigger",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": false
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "3c35e598baa7a6c16a41880b6d3297d3"
     },
     {
       "key": "public.start_trip(uuid, text)",
@@ -3159,6 +3857,105 @@
       ],
       "public_execute": false,
       "definition_hash": "ca4dde6042ee12ee5f3aff5e79e378d8"
+    },
+    {
+      "key": "public.tourist_has_outstanding_fare(uuid)",
+      "name": "tourist_has_outstanding_fare",
+      "result": "boolean",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": false
+      },
+      "volatility": "s",
+      "search_path": "public",
+      "execute_roles": [
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "82964e810f4375db4b40c1e5fcbb8526"
+    },
+    {
+      "key": "public.tourist_mark_gcash_sent(uuid, text)",
+      "name": "tourist_mark_gcash_sent",
+      "result": "void",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid, text",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "832f0abc50f3c3cdf934517f1ae6e4ea"
+    },
+    {
+      "key": "public.tourist_submit_gcash_proof(uuid, text, text)",
+      "name": "tourist_submit_gcash_proof",
+      "result": "void",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid, text, text",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "45db8efdb1da9cb13924a1213ea0bd2f"
+    },
+    {
+      "key": "public.tourist_switch_gcash_to_cash(uuid)",
+      "name": "tourist_switch_gcash_to_cash",
+      "result": "void",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "f5212508936969b853eab1496a399963"
     },
     {
       "key": "public.update_driver_service_profile(integer, boolean)",
@@ -5343,6 +6140,104 @@
       }
     },
     {
+      "key": "public.driver_gcash_details",
+      "rls": true,
+      "kind": "r",
+      "columns": [
+        {
+          "name": "driver_id",
+          "type": "uuid",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "gcash_number",
+          "type": "text",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "gcash_account_name",
+          "type": "text",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "qr_object_path",
+          "type": "text",
+          "identity": "",
+          "generated": ""
+        }
+      ],
+      "policies": [
+        {
+          "name": "driver_gcash_insert",
+          "check": "((driver_id = uid()) AND (current_profile_role() = 'driver'::app_role))",
+          "roles": [
+            "authenticated"
+          ],
+          "using": null,
+          "command": "a"
+        },
+        {
+          "name": "driver_gcash_read",
+          "check": null,
+          "roles": [
+            "authenticated"
+          ],
+          "using": "(((driver_id = uid()) AND (current_profile_role() = 'driver'::app_role)) OR is_admin())",
+          "command": "r"
+        },
+        {
+          "name": "driver_gcash_update",
+          "check": "((driver_id = uid()) AND (current_profile_role() = 'driver'::app_role))",
+          "roles": [
+            "authenticated"
+          ],
+          "using": "((driver_id = uid()) AND (current_profile_role() = 'driver'::app_role))",
+          "command": "w"
+        }
+      ],
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": true,
+          "update": false
+        }
+      }
+    },
+    {
       "key": "public.driver_location_history",
       "rls": true,
       "kind": "r",
@@ -6252,6 +7147,112 @@
       }
     },
     {
+      "key": "public.gcash_payment_confirmations",
+      "rls": true,
+      "kind": "r",
+      "columns": [
+        {
+          "name": "booking_id",
+          "type": "uuid",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "gcash_reference_no",
+          "type": "text",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "tourist_marked_sent_at",
+          "type": "timestamp with time zone",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "driver_confirmed_received_at",
+          "type": "timestamp with time zone",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "driver_confirmed_by",
+          "type": "uuid",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "dispute_note",
+          "type": "text",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "disputed_at",
+          "type": "timestamp with time zone",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "receipt_object_path",
+          "type": "text",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "proof_submitted_at",
+          "type": "timestamp with time zone",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "escalated_at",
+          "type": "timestamp with time zone",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "escalated_by",
+          "type": "uuid",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "escalation_note",
+          "type": "text",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "switched_to_cash_at",
+          "type": "timestamp with time zone",
+          "identity": "",
+          "generated": ""
+        }
+      ],
+      "policies": null,
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false
+        }
+      }
+    },
+    {
       "key": "public.internal_runtime_settings",
       "rls": true,
       "kind": "r",
@@ -6768,6 +7769,70 @@
         {
           "name": "value",
           "type": "bigint",
+          "identity": "",
+          "generated": ""
+        }
+      ],
+      "policies": null,
+      "privileges": {
+        "anon": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false
+        },
+        "service_role": {
+          "delete": true,
+          "insert": true,
+          "select": true,
+          "update": true
+        },
+        "authenticated": {
+          "delete": false,
+          "insert": false,
+          "select": false,
+          "update": false
+        }
+      }
+    },
+    {
+      "key": "public.payment_rulings",
+      "rls": true,
+      "kind": "r",
+      "columns": [
+        {
+          "name": "booking_id",
+          "type": "uuid",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "ruling",
+          "type": "text",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "ruled_by",
+          "type": "uuid",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "ruled_at",
+          "type": "timestamp with time zone",
+          "identity": "",
+          "generated": ""
+        },
+        {
+          "name": "settled_at",
+          "type": "timestamp with time zone",
           "identity": "",
           "generated": ""
         }
@@ -8508,6 +9573,42 @@
           ],
           "using": "((bucket_id = 'driver-documents'::text) AND is_pending_driver_application() AND ((storage.foldername(name))[1] = (uid())::text))",
           "command": "w"
+        },
+        {
+          "name": "driver_gcash_qr_insert",
+          "check": "((bucket_id = 'driver-gcash-qr'::text) AND (name ~ '^[0-9a-f-]{36}/[0-9a-f-]{36}\\.(jpg|png)$'::text) AND ((storage.foldername(name))[1] = (uid())::text) AND (current_profile_role() = 'driver'::app_role))",
+          "roles": [
+            "authenticated"
+          ],
+          "using": null,
+          "command": "a"
+        },
+        {
+          "name": "driver_gcash_qr_read",
+          "check": null,
+          "roles": [
+            "authenticated"
+          ],
+          "using": "((bucket_id = 'driver-gcash-qr'::text) AND can_read_driver_gcash_qr((storage.foldername(name))[1]))",
+          "command": "r"
+        },
+        {
+          "name": "gcash_receipt_insert",
+          "check": "((bucket_id = 'gcash-receipts'::text) AND (name ~ '^[0-9a-f-]{36}/[0-9a-f-]{36}\\.(jpg|png)$'::text) AND can_upload_gcash_receipt((storage.foldername(name))[1]))",
+          "roles": [
+            "authenticated"
+          ],
+          "using": null,
+          "command": "a"
+        },
+        {
+          "name": "gcash_receipt_read",
+          "check": null,
+          "roles": [
+            "authenticated"
+          ],
+          "using": "((bucket_id = 'gcash-receipts'::text) AND can_read_gcash_receipt((storage.foldername(name))[1]))",
+          "command": "r"
         },
         {
           "name": "profile_images_own_delete",

@@ -28,6 +28,8 @@ const snapshotPath = "supabase/security/authorization_catalog.json";
 const bucketNames = [
   "app-assets",
   "driver-documents",
+  "driver-gcash-qr",
+  "gcash-receipts",
   "profile-images",
   "tourist-spots",
 ];

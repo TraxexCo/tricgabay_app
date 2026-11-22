@@ -28,6 +28,9 @@ insert into public.trip_events(booking_id,actor_id,actor_role,event_type,descrip
 select pg_temp.matrix_id(2,i),pg_temp.matrix_id(1,i),'tourist','matrix_fixture','Synthetic event' from generate_series(1,2)i;
 insert into public.driver_locations(driver_id,latitude,longitude,accuracy_meters,recorded_at)
 select pg_temp.matrix_id(1,i),14.9571,120.9188,5,now() from unnest(array[3,4])i;
+-- GCash payout details for both drivers (synthetic numbers).
+insert into public.driver_gcash_details(driver_id,gcash_number,gcash_account_name,is_active)
+select pg_temp.matrix_id(1,i),'0917000000'||i,'Matrix Driver '||i,true from unnest(array[3,4])i;
 insert into public.driver_location_history(driver_id,booking_id,latitude,longitude,recorded_at)
 select pg_temp.matrix_id(1,i+2),pg_temp.matrix_id(2,i),14.9571,120.9188,now() from generate_series(1,2)i;
 insert into public.payments(id,booking_id,provider,provider_mode,provider_checkout_id,provider_payment_id,amount_centavos,status,paid_at)

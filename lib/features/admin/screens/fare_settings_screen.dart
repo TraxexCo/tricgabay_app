@@ -238,7 +238,16 @@ class _FareSettingsScreenState extends State<FareSettingsScreen> {
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          Text(context.l10n.setAFixedFareForEachTourPackage),
+          // Semi-bold: at regular weight the contrast check measured the
+          // anti-aliased strokes at 4.0:1, under the 4.5:1 minimum.
+          Text(
+            context.l10n.setAFixedFareForEachTourPackage,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+              height: 1.4,
+            ),
+          ),
           const SizedBox(height: 24),
           ..._packages.map((p) => _field(p.id, p.name)),
           TextFormField(

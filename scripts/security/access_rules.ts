@@ -192,6 +192,26 @@ export function relationRule(key: string, group = 1): RelationRule {
           delete: (a) => has(a, "content"),
         },
       );
+    // GCash direct payment (20261120 migrations). A driver reads and edits
+    // their own payout details through RLS; any administrator can read
+    // them. Writes are column grants (number, name, active flag), so the
+    // matrix's full-row INSERT is refused for everyone, while an UPDATE of
+    // the account name succeeds only for the owning driver.
+    // Confirmations and rulings have no table grants: only the GCash RPCs
+    // read or change them.
+    case "public.driver_gcash_details":
+      return rule(
+        `driver_id='${id(1, group + 2)}'`,
+        (a) => a.index === group + 2 || a.capability !== undefined,
+        {
+          update: (a) => a.index === group + 2,
+          updateColumn: "gcash_account_name",
+        },
+      );
+    case "public.gcash_payment_confirmations":
+      return rule(field(2, "booking_id"), nobody);
+    case "public.payment_rulings":
+      return rule(field(2, "booking_id"), nobody);
     case "public.fare_revisions":
       return rule(`id='${id(5)}'`, everybody);
     case "public.cancellation_policies":
@@ -276,6 +296,12 @@ export const rpcGroups: Record<string, string[]> = {
     "has_active_booking_offer",
     "notification_booking_id",
     "count_online_drivers",
+    // Storage-policy helpers and the caller's own unpaid fare; each checks
+    // the caller inside and returns false/null for anyone else.
+    "can_read_driver_gcash_qr",
+    "can_read_gcash_receipt",
+    "can_upload_gcash_receipt",
+    "get_my_outstanding_fare",
   ],
   tourist: [
     "create_booking",
@@ -288,6 +314,11 @@ export const rpcGroups: Record<string, string[]> = {
     "reissue_booking_pickup_code",
     "retry_booking_dispatch",
     "refresh_booking_offers",
+    "tourist_mark_gcash_sent",
+    "tourist_submit_gcash_proof",
+    "tourist_switch_gcash_to_cash",
+    "get_booking_gcash_payee",
+    "get_booking_driver_gcash",
   ],
   driver: [
     "accept_booking",
@@ -301,8 +332,12 @@ export const rpcGroups: Record<string, string[]> = {
     "report_vehicle_breakdown",
     "resume_after_breakdown",
     "report_route_deviation",
+    "driver_confirm_gcash_received",
+    "driver_flag_gcash_not_received",
+    "get_booking_gcash_reference",
   ],
   both: [
+    "request_gcash_admin_review",
     "cancel_booking",
     "open_dispute",
     "add_dispute_statement",
@@ -316,8 +351,17 @@ export const rpcGroups: Record<string, string[]> = {
     "publish_driver_location",
     "publish_driver_location_with_flags",
     "update_driver_service_profile",
+    "set_driver_gcash_qr",
   ],
   pending: ["submit_driver_application"],
+  // require_gcash_ruler(): finance or operations capability.
+  gcash_ruler: [
+    "admin_rule_gcash_dispute",
+    "admin_waive_unpaid_ruling",
+    "list_gcash_disputes",
+  ],
+  // The booking's tourist or driver, or a GCash ruler.
+  gcash_case: ["get_gcash_dispute_detail"],
   finance: [
     "publish_fares",
     "publish_cancellation_policy",
@@ -364,6 +408,11 @@ export function rpcAllowed(name: string, actor: Actor): boolean {
   }
   if (group === "driver") return actor.index === 3;
   if (group === "both") return actor.index === 1 || actor.index === 3;
+  const ruler = has(actor, "finance") || has(actor, "operations");
+  if (group === "gcash_ruler") return ruler;
+  if (group === "gcash_case") {
+    return actor.index === 1 || actor.index === 3 || ruler;
+  }
   return has(actor, group);
 }
 
@@ -465,6 +514,20 @@ export function rpcArguments(name: string, actor: Actor): string[] | undefined {
       "array['bustos-heritage-park','sta-cruz-chapel']",
     ],
     admin_delete_tour_package: ["'matrix-missing-package'"],
+    can_read_driver_gcash_qr: [`'${id(1, 3)}'`],
+    can_read_gcash_receipt: [`'${id(2)}'`],
+    can_upload_gcash_receipt: [`'${id(2)}'`],
+    tourist_mark_gcash_sent: [booking, "'1234567890123'"],
+    tourist_submit_gcash_proof: [
+      booking,
+      "'1234567890123'",
+      `'${id(2)}/receipt.jpg'`,
+    ],
+    driver_flag_gcash_not_received: [booking, reason],
+    request_gcash_admin_review: [booking, reason],
+    admin_rule_gcash_dispute: [booking, "'paid'", reason],
+    admin_waive_unpaid_ruling: [booking, reason],
+    set_driver_gcash_qr: ["auth.uid()::text||'/qr.jpg'"],
     publish_cancellation_policy: [
       "5",
       "20",
@@ -539,6 +602,12 @@ export function rpcArguments(name: string, actor: Actor): string[] | undefined {
       "confirm_stop_arrival",
       "retry_booking_dispatch",
       "refresh_booking_offers",
+      "tourist_switch_gcash_to_cash",
+      "get_booking_gcash_payee",
+      "get_booking_driver_gcash",
+      "driver_confirm_gcash_received",
+      "get_booking_gcash_reference",
+      "get_gcash_dispute_detail",
     ].includes(name)
   ) return [booking];
   if (
@@ -550,6 +619,8 @@ export function rpcArguments(name: string, actor: Actor): string[] | undefined {
       "get_privacy_notice",
       "get_privacy_consent_status",
       "get_operations_health",
+      "get_my_outstanding_fare",
+      "list_gcash_disputes",
     ].includes(name)
   ) return [];
   return undefined;
