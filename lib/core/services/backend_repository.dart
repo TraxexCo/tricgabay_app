@@ -884,7 +884,8 @@ class BackendRepository {
         .from('notifications')
         .select()
         .order('created_at', ascending: false)
-        .range(start, start + safeSize - 1);
+        .range(start, start + safeSize - 1)
+        .timeout(_readDeadline);
     return rows.map((row) => Map<String, dynamic>.from(row)).toList();
   }
 

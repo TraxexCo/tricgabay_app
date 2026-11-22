@@ -206,8 +206,11 @@ class AppSession {
       }
       await OfflineStateStore.initialize();
       if (BackendConfig.isConfigured) {
-        allSpots.value = [];
-        tourPackages.value = [];
+        // Start from the built-in places and packages so the map, Explore
+        // and Discover are filled at once; the server copy replaces them a
+        // moment later.
+        allSpots.value = TouristSpotModel.catalog;
+        tourPackages.value = TourPackageModel.catalog;
         bookings.value = [];
         activeBookingId = null;
         activeDriverBookingId = null;
@@ -329,6 +332,45 @@ class AppSession {
     }
   }
 
+  static DateTime? _accessVerifiedAt;
+
+  static void _applyCatalog(
+    List<TouristSpotModel> spots,
+    List<TourPackageModel> packages,
+    String? role,
+  ) {
+    tourPackages.value = packages;
+    // Tourists only book packages, so they only see the places on a package
+    // route. Admins still see every place to build packages.
+    final onRoutes = {for (final p in packages) ...p.spotIds};
+    allSpots.value = role == 'admin' || onRoutes.isEmpty
+        ? spots
+        : spots.where((spot) => onRoutes.contains(spot.id)).toList();
+  }
+
+  /// Shows the last saved trips, fares and places at once after sign-in,
+  /// while the fresh copy downloads.
+  static Future<void> _showSavedState(String userId) async {
+    final generation = _sessionGeneration;
+    try {
+      final cached = await OfflineStateStore.restoreSnapshot(userId);
+      if (cached == null ||
+          cached.isStale ||
+          generation != _sessionGeneration ||
+          userId != authenticatedUserId ||
+          bookings.value.isNotEmpty) {
+        return;
+      }
+      bookings.value = cached.bookings;
+      if (cached.spots.isNotEmpty) allSpots.value = cached.spots;
+      farePolicy.value = cached.farePolicy;
+      cancellationPolicy.value = cached.cancellationPolicy;
+      _restoreActiveIds();
+    } catch (_) {
+      // Saved data is only a head start; the download still runs.
+    }
+  }
+
   /// Names the section and error in the device log (debug and profile
   /// builds only) so a refresh banner can be traced to its cause.
   static void _logSyncFailure(
@@ -352,7 +394,13 @@ class AppSession {
       // Revalidate mutable account state on every authoritative refresh. A
       // long-lived access token must not preserve app access after a profile
       // suspension or driver-approval revocation.
-      if (!await refreshAccountAccess()) return;
+      // The splash or login screen has just checked the account; checking
+      // again here only delayed the first data by another round trip.
+      final verifiedAt = _accessVerifiedAt;
+      final recentlyVerified =
+          verifiedAt != null &&
+          DateTime.now().difference(verifiedAt) < const Duration(seconds: 60);
+      if (!recentlyVerified && !await refreshAccountAccess()) return;
       if (generation != _sessionGeneration || userId != authenticatedUserId) {
         return;
       }
@@ -369,7 +417,7 @@ class AppSession {
             return await load();
           } catch (error) {
             _logSyncFailure(section, error, retrying: true);
-            await Future<void>.delayed(const Duration(seconds: 2));
+            await Future<void>.delayed(const Duration(milliseconds: 600));
             return load();
           }
         },
@@ -380,6 +428,51 @@ class AppSession {
           ErrorMessages.forError(error);
         },
       );
+      final spotsRead = sections.contains(RemoteSection.spots)
+          ? readSection(
+              RemoteSection.spots,
+              () =>
+                  BackendRepository.loadSpots(includeInactive: role == 'admin'),
+              allSpots.value,
+            )
+          : Future.value(allSpots.value);
+      final packagesRead =
+          sections.contains(RemoteSection.spots) && role != 'driver'
+          ? readSection(
+              RemoteSection.spots,
+              BackendRepository.loadTourPackages,
+              tourPackages.value,
+            )
+          : Future.value(tourPackages.value);
+      final bookingsRead = sections.contains(RemoteSection.bookings)
+          ? readSection(
+              RemoteSection.bookings,
+              _readBookingWindow,
+              bookings.value,
+            )
+          : Future.value(bookings.value);
+      bool stillCurrent() =>
+          generation == _sessionGeneration && userId == authenticatedUserId;
+      // Show places and packages, then bookings, the moment each arrives
+      // instead of waiting for the slowest request (notifications, driver
+      // list).
+      if (sections.contains(RemoteSection.spots)) {
+        unawaited(
+          (spotsRead, packagesRead).wait.then((r) {
+            if (stillCurrent()) _applyCatalog(r.$1, r.$2, role);
+          }, onError: (_) {}),
+        );
+      }
+      if (sections.contains(RemoteSection.bookings)) {
+        unawaited(
+          bookingsRead.then((items) {
+            if (stillCurrent()) {
+              bookings.value = items;
+              _restoreActiveIds();
+            }
+          }, onError: (_) {}),
+        );
+      }
       final results = await Future.wait([
         sections.contains(RemoteSection.fares)
             ? readSection(
@@ -395,22 +488,8 @@ class AppSession {
                 cancellationPolicy.value,
               )
             : Future.value(cancellationPolicy.value),
-        sections.contains(RemoteSection.spots)
-            ? readSection(
-                RemoteSection.spots,
-                () => BackendRepository.loadSpots(
-                  includeInactive: role == 'admin',
-                ),
-                allSpots.value,
-              )
-            : Future.value(allSpots.value),
-        sections.contains(RemoteSection.bookings)
-            ? readSection(
-                RemoteSection.bookings,
-                _readBookingWindow,
-                bookings.value,
-              )
-            : Future.value(bookings.value),
+        spotsRead,
+        bookingsRead,
         sections.contains(RemoteSection.directory) ||
                 sections.contains(RemoteSection.bookings)
             ? readSection(RemoteSection.directory, _readDirectoryWindow, (
@@ -458,13 +537,7 @@ class AppSession {
               : Future.value(operationalAlerts.value)
         else
           Future.value(<Map<String, dynamic>>[]),
-        sections.contains(RemoteSection.spots) && role != 'driver'
-            ? readSection(
-                RemoteSection.spots,
-                BackendRepository.loadTourPackages,
-                tourPackages.value,
-              )
-            : Future.value(tourPackages.value),
+        packagesRead,
       ]);
       if (generation != _sessionGeneration ||
           userId != authenticatedUserId ||
@@ -478,15 +551,11 @@ class AppSession {
         cancellationPolicy.value = results[1] as CancellationPolicy;
       }
       if (sections.contains(RemoteSection.spots)) {
-        final packages = results[9] as List<TourPackageModel>;
-        final spots = results[2] as List<TouristSpotModel>;
-        tourPackages.value = packages;
-        // Tourists only book packages, so they only see the places on a
-        // package route. Admins still see every place to build packages.
-        final onRoutes = {for (final p in packages) ...p.spotIds};
-        allSpots.value = role == 'admin' || onRoutes.isEmpty
-            ? spots
-            : spots.where((spot) => onRoutes.contains(spot.id)).toList();
+        _applyCatalog(
+          results[2] as List<TouristSpotModel>,
+          results[9] as List<TourPackageModel>,
+          role,
+        );
       }
       if (sections.contains(RemoteSection.bookings)) {
         bookings.value = results[3] as List<BookingModel>;
@@ -1240,9 +1309,15 @@ class AppSession {
         _clearUserScopedState();
       }
     }
+    final newUser = authenticatedUserId != id;
     authenticatedUserId = id;
     authenticatedRole = role;
+    // Callers (splash, login) have just loaded and checked this profile.
+    _accessVerifiedAt = DateTime.now();
     _setAccountIdentity(id, name, email);
+    if (newUser && BackendConfig.isConfigured) {
+      unawaited(_showSavedState(id));
+    }
     if (role == 'tourist') {
       adminTourists.value = [
         ...adminTourists.value.where((u) => u['id'] != id),
@@ -1339,6 +1414,7 @@ class AppSession {
       return false;
     }
     _setAccountIdentity(profile.id, profile.name, profile.email);
+    _accessVerifiedAt = DateTime.now();
     return role != 'driver_pending';
   }
 
