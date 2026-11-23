@@ -65,3 +65,11 @@ app.*.map.json
 
 # Local audit/validation logs
 /.audit-output/
+
+# Secrets that must never be committed (the repository is public).
+.env
+.env.*
+!.env.example
+**/google-services.json
+**/GoogleService-Info.plist
+*.p12
