@@ -5621,4 +5621,66 @@ class AppLocalizationsEn extends AppLocalizations {
   String photoCreditValue(String value, String secondValue) {
     return 'Photo: $value · $secondValue · Wikimedia Commons';
   }
+
+  @override
+  String get pickerTitle => 'Pick the location';
+
+  @override
+  String get pickerSearchHint => 'Search a place or address';
+
+  @override
+  String get pickerNoResults =>
+      'No places found. Try another name, or drag the map to the spot.';
+
+  @override
+  String get pickerSearchFailed =>
+      'Search is not available right now. Drag the map to the spot instead.';
+
+  @override
+  String get pickerMyLocation => 'Go to my location';
+
+  @override
+  String get pickerPinnedSpot => 'Pinned spot';
+
+  @override
+  String get pickerFindingAddress => 'Finding the address…';
+
+  @override
+  String get pickerNoAddress =>
+      'No street address here. You can type it in the form.';
+
+  @override
+  String get pickerUseLocation => 'Use this location';
+
+  @override
+  String get hoursOpensAt => 'Opens';
+
+  @override
+  String get hoursClosesAt => 'Closes';
+
+  @override
+  String get hoursOpen24 => 'Open 24 hours, every day';
+
+  @override
+  String get hoursRemoveSchedule => 'Remove these hours';
+
+  @override
+  String get hoursAddSchedule => 'Add different hours for other days';
+
+  @override
+  String get hoursPickDays => 'Choose at least one day for the opening hours.';
+
+  @override
+  String get spotLocation => 'Location';
+
+  @override
+  String get pickOnMap => 'Search or pick on the map';
+
+  @override
+  String get entranceFeeHint => 'e.g. Free, or 200';
+
+  @override
+  String hoursCurrentValue(String value) {
+    return 'Saved now: $value. Set the days and times above to replace it.';
+  }
 }

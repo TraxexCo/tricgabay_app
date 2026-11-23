@@ -9694,6 +9694,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Photo: {value} · {secondValue} · Wikimedia Commons'**
   String photoCreditValue(String value, String secondValue);
+
+  /// No description provided for @pickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the location'**
+  String get pickerTitle;
+
+  /// No description provided for @pickerSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search a place or address'**
+  String get pickerSearchHint;
+
+  /// No description provided for @pickerNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No places found. Try another name, or drag the map to the spot.'**
+  String get pickerNoResults;
+
+  /// No description provided for @pickerSearchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Search is not available right now. Drag the map to the spot instead.'**
+  String get pickerSearchFailed;
+
+  /// No description provided for @pickerMyLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to my location'**
+  String get pickerMyLocation;
+
+  /// No description provided for @pickerPinnedSpot.
+  ///
+  /// In en, this message translates to:
+  /// **'Pinned spot'**
+  String get pickerPinnedSpot;
+
+  /// No description provided for @pickerFindingAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding the address…'**
+  String get pickerFindingAddress;
+
+  /// No description provided for @pickerNoAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'No street address here. You can type it in the form.'**
+  String get pickerNoAddress;
+
+  /// No description provided for @pickerUseLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this location'**
+  String get pickerUseLocation;
+
+  /// No description provided for @hoursOpensAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens'**
+  String get hoursOpensAt;
+
+  /// No description provided for @hoursClosesAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Closes'**
+  String get hoursClosesAt;
+
+  /// No description provided for @hoursOpen24.
+  ///
+  /// In en, this message translates to:
+  /// **'Open 24 hours, every day'**
+  String get hoursOpen24;
+
+  /// No description provided for @hoursRemoveSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove these hours'**
+  String get hoursRemoveSchedule;
+
+  /// No description provided for @hoursAddSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Add different hours for other days'**
+  String get hoursAddSchedule;
+
+  /// No description provided for @hoursPickDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least one day for the opening hours.'**
+  String get hoursPickDays;
+
+  /// No description provided for @spotLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get spotLocation;
+
+  /// No description provided for @pickOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Search or pick on the map'**
+  String get pickOnMap;
+
+  /// No description provided for @entranceFeeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Free, or 200'**
+  String get entranceFeeHint;
+
+  /// No description provided for @hoursCurrentValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved now: {value}. Set the days and times above to replace it.'**
+  String hoursCurrentValue(String value);
 }
 
 class _AppLocalizationsDelegate

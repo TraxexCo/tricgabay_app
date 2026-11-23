@@ -50,6 +50,7 @@ import 'package:tricgabay_app/features/admin/screens/admin_live_map_screen.dart'
 import 'package:tricgabay_app/features/admin/screens/admin_dashboard_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/admin_reports_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/spot_form_screen.dart';
+import 'package:tricgabay_app/features/admin/screens/admin_location_picker_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/send_announcement_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/ratings_feedback_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/gcash_disputes_screen.dart';
@@ -204,6 +205,11 @@ final screenCases = <ScreenCase>[
   ScreenCase('AdminDashboardScreen', 'admin', () => AdminDashboardScreen()),
   ScreenCase('AdminReportsScreen', 'admin', () => AdminReportsScreen()),
   ScreenCase('SpotFormScreen', 'admin', () => SpotFormScreen()),
+  ScreenCase(
+    'AdminLocationPickerScreen',
+    'admin',
+    () => const AdminLocationPickerScreen(),
+  ),
   ScreenCase('SendAnnouncementScreen', 'admin', () => SendAnnouncementScreen()),
   ScreenCase('RatingsFeedbackScreen', 'admin', () => RatingsFeedbackScreen()),
   ScreenCase('MonitorBookingsScreen', 'admin', () => MonitorBookingsScreen()),

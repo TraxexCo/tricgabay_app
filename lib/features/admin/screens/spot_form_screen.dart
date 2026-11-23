@@ -17,6 +17,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/utils/map_coordinate_validator.dart';
 import '../../../core/utils/validators.dart';
+import '../../../core/services/place_search_service.dart';
+import '../widgets/opening_hours_field.dart';
+import 'admin_location_picker_screen.dart';
 
 class SpotFormScreen extends ConsumerStatefulWidget {
   final TouristSpotModel? spot;
@@ -51,10 +54,10 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
       text: widget.spot?.description ?? '',
     );
     _addressController = TextEditingController(
-      text: widget.spot?.tips.firstOrNull ?? '',
+      text: widget.spot?.address ?? '',
     );
     _entranceFeeController = TextEditingController(
-      text: widget.spot?.entranceFee.replaceAll('₱', '').trim() ?? '0',
+      text: widget.spot?.entranceFee ?? '',
     );
     _openingHoursController = TextEditingController(
       text: widget.spot?.openingHours ?? '',
@@ -100,7 +103,38 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
     }
   }
 
+  /// A plain amount gets the peso sign; words like "Free" stay as typed.
+  String _entranceFee() {
+    final text = _entranceFeeController.text.trim();
+    if (text.isEmpty) return '';
+    return double.tryParse(text.replaceAll(',', '')) != null ? '₱$text' : text;
+  }
+
+  Future<void> _pickOnMap() async {
+    final picked = await Navigator.of(context).push<PlaceHit>(
+      MaterialPageRoute(
+        builder: (_) => AdminLocationPickerScreen(
+          latitude: double.tryParse(_latitudeController.text),
+          longitude: double.tryParse(_longitudeController.text),
+        ),
+      ),
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _latitudeController.text = picked.latitude.toStringAsFixed(7);
+      _longitudeController.text = picked.longitude.toStringAsFixed(7);
+      if (picked.address.isNotEmpty) _addressController.text = picked.address;
+      if (_nameController.text.trim().isEmpty && picked.name.isNotEmpty) {
+        _nameController.text = picked.name;
+      }
+    });
+  }
+
   Future<void> _saveSpot() async {
+    if (_openingHoursController.text.trim().isEmpty) {
+      AppSnackbar.showError(context, context.l10n.hoursPickDays);
+      return;
+    }
     if (_formKey.currentState!.validate()) {
       if (!BackendConfig.isConfigured) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -125,9 +159,10 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
         longitude: double.parse(_longitudeController.text),
         category: _category,
         imageUrls: widget.spot?.imageUrls ?? const [],
+        address: _addressController.text.trim(),
         openingHours: _openingHoursController.text.trim(),
-        entranceFee: '₱${_entranceFeeController.text.trim()}',
-        tips: widget.spot?.tips ?? [_addressController.text.trim()],
+        entranceFee: _entranceFee(),
+        tips: widget.spot?.tips ?? const [],
         isActive: _isActive,
         availabilityStatus: widget.spot?.availabilityStatus ?? 'open',
         closedUntil: widget.spot?.closedUntil,
@@ -284,11 +319,31 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
                     ),
               ),
               const SizedBox(height: 16),
+              Text(
+                context.l10n.spotLocation,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                onPressed: _saving ? null : _pickOnMap,
+                icon: const Icon(Icons.map_outlined),
+                label: Text(context.l10n.pickOnMap),
+              ),
+              const SizedBox(height: 12),
               AppTextField(
                 label: context.l10n.address,
                 hint: context.l10n.enterAddress,
                 controller: _addressController,
+                maxLines: 2,
                 maxLength: 300,
+                validator: (v) =>
+                    Validators.required(v, fieldName: MessageCode.address),
               ),
               const SizedBox(height: 16),
               Row(
@@ -338,32 +393,21 @@ class _SpotFormScreenState extends ConsumerState<SpotFormScreen> {
               AppTextField(
                 label: context.l10n.history,
                 hint: context.l10n.enterHistory,
-                maxLines: 3,
+                maxLines: 8,
                 maxLength: 3000,
                 controller: _historyController,
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppTextField(
-                      label: context.l10n.openingHours,
-                      hint: context.l10n.exampleOperatingHours,
-                      controller: _openingHoursController,
-                      maxLength: 120,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: AppTextField(
-                      label: context.l10n.entranceFee,
-                      hint: '0.00',
-                      keyboardType: TextInputType.number,
-                      controller: _entranceFeeController,
-                      maxLength: 40,
-                    ),
-                  ),
-                ],
+              OpeningHoursField(
+                initial: widget.spot?.openingHours ?? '',
+                onChanged: (value) => _openingHoursController.text = value,
+              ),
+              const SizedBox(height: 16),
+              AppTextField(
+                label: context.l10n.entranceFee,
+                hint: context.l10n.entranceFeeHint,
+                controller: _entranceFeeController,
+                maxLength: 120,
               ),
               const SizedBox(height: 16),
               SwitchListTile(

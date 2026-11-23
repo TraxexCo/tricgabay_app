@@ -23,11 +23,11 @@ class PlacePhotos {
   static const Map<String, List<(String, String)>> _credits = {
     'sta-cruz-chapel': [
       (_floro, _pd),
-      (_floro, _cc0),
-      (_floro, _cc0),
-      (_floro, _cc0),
       (_floro, _pd),
-      (_floro, _cc0),
+      (_floro, _pd),
+      (_floro, _pd),
+      (_floro, _pd),
+      (_floro, _pd),
     ],
     'sta-monica-chapel': [
       (_jfvFloro, _cc0),

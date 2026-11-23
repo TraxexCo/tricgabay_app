@@ -704,6 +704,7 @@ abstract final class MessageCode {
   static const enterYourFullName = '@l10n/enterYourFullName';
   static const enterYourPassword = '@l10n/enterYourPassword';
   static const entranceFee = '@l10n/entranceFee';
+  static const entranceFeeHint = '@l10n/entranceFeeHint';
   static const entranceFeesMayApply = '@l10n/entranceFeesMayApply';
   static const eta = '@l10n/eta';
   static const events = '@l10n/events';
@@ -941,12 +942,20 @@ abstract final class MessageCode {
   static const hiddenFromTourists = '@l10n/hiddenFromTourists';
   static String hideValue(String value) => encodeMessage('hideValue', [value]);
   static const history = '@l10n/history';
+  static const hoursAddSchedule = '@l10n/hoursAddSchedule';
   static String hoursAgoValue(String value) =>
       encodeMessage('hoursAgoValue', [value]);
+  static const hoursClosesAt = '@l10n/hoursClosesAt';
+  static String hoursCurrentValue(String value) =>
+      encodeMessage('hoursCurrentValue', [value]);
   static String hoursDuration(int count) =>
       encodeMessage('hoursDuration', [count]);
   static String hoursMinutesDuration(int hours, int minutes) =>
       encodeMessage('hoursMinutesDuration', [hours, minutes]);
+  static const hoursOpen24 = '@l10n/hoursOpen24';
+  static const hoursOpensAt = '@l10n/hoursOpensAt';
+  static const hoursPickDays = '@l10n/hoursPickDays';
+  static const hoursRemoveSchedule = '@l10n/hoursRemoveSchedule';
   static const howCanWeHelp = '@l10n/howCanWeHelp';
   static String howWasYourRideWithValue(String value) =>
       encodeMessage('howWasYourRideWithValue', [value]);
@@ -1410,6 +1419,16 @@ abstract final class MessageCode {
       encodeMessage('photoCreditValue', [value, secondValue]);
   static const photoGallery = '@l10n/photoGallery';
   static const photos = '@l10n/photos';
+  static const pickOnMap = '@l10n/pickOnMap';
+  static const pickerFindingAddress = '@l10n/pickerFindingAddress';
+  static const pickerMyLocation = '@l10n/pickerMyLocation';
+  static const pickerNoAddress = '@l10n/pickerNoAddress';
+  static const pickerNoResults = '@l10n/pickerNoResults';
+  static const pickerPinnedSpot = '@l10n/pickerPinnedSpot';
+  static const pickerSearchFailed = '@l10n/pickerSearchFailed';
+  static const pickerSearchHint = '@l10n/pickerSearchHint';
+  static const pickerTitle = '@l10n/pickerTitle';
+  static const pickerUseLocation = '@l10n/pickerUseLocation';
   static const pickup = '@l10n/pickup';
   static const pickupArrivalCanOnlyBeReportedForAnAcceptedBooking =
       '@l10n/pickupArrivalCanOnlyBeReportedForAnAcceptedBooking';
@@ -1749,6 +1768,7 @@ abstract final class MessageCode {
       '@l10n/someInformationCouldNotRefreshPreviouslyLoadedDataIsShownReconnectAndRetry';
   static const sos = '@l10n/sos';
   static String spotCount(int count) => encodeMessage('spotCount', [count]);
+  static const spotLocation = '@l10n/spotLocation';
   static const spotName = '@l10n/spotName';
   static const spots = '@l10n/spots';
   static const staleOnlineDrivers = '@l10n/staleOnlineDrivers';

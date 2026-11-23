@@ -5702,4 +5702,67 @@ class AppLocalizationsFil extends AppLocalizations {
   String photoCreditValue(String value, String secondValue) {
     return 'Larawan: $value · $secondValue · Wikimedia Commons';
   }
+
+  @override
+  String get pickerTitle => 'Piliin ang lokasyon';
+
+  @override
+  String get pickerSearchHint => 'Maghanap ng lugar o address';
+
+  @override
+  String get pickerNoResults =>
+      'Walang nahanap. Subukan ang ibang pangalan, o i-drag ang mapa sa lugar.';
+
+  @override
+  String get pickerSearchFailed =>
+      'Hindi magamit ang paghahanap ngayon. I-drag na lang ang mapa sa lugar.';
+
+  @override
+  String get pickerMyLocation => 'Pumunta sa aking lokasyon';
+
+  @override
+  String get pickerPinnedSpot => 'Naka-pin na lugar';
+
+  @override
+  String get pickerFindingAddress => 'Hinahanap ang address…';
+
+  @override
+  String get pickerNoAddress =>
+      'Walang address dito. Maaari mo itong i-type sa form.';
+
+  @override
+  String get pickerUseLocation => 'Gamitin ang lokasyong ito';
+
+  @override
+  String get hoursOpensAt => 'Bukas mula';
+
+  @override
+  String get hoursClosesAt => 'Sarado pagsapit ng';
+
+  @override
+  String get hoursOpen24 => 'Bukas 24 oras, araw-araw';
+
+  @override
+  String get hoursRemoveSchedule => 'Alisin ang oras na ito';
+
+  @override
+  String get hoursAddSchedule => 'Magdagdag ng ibang oras para sa ibang araw';
+
+  @override
+  String get hoursPickDays =>
+      'Pumili ng kahit isang araw para sa oras ng pagbubukas.';
+
+  @override
+  String get spotLocation => 'Lokasyon';
+
+  @override
+  String get pickOnMap => 'Maghanap o pumili sa mapa';
+
+  @override
+  String get entranceFeeHint => 'hal. Libre, o 200';
+
+  @override
+  String hoursCurrentValue(String value) {
+    return 'Nakatala ngayon: $value. Itakda ang mga araw at oras sa itaas para palitan ito.';
+  }
 }

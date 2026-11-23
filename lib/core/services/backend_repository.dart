@@ -123,7 +123,7 @@ class BackendRepository {
     var query = _client
         .from('tourist_spots')
         .select(
-          'id,name,description,history,category,latitude,longitude,image_url,opening_hours,entrance_fee_note,tips,distance_from_town,is_active,availability_status,closed_until,closure_reason',
+          'id,name,description,history,category,address,latitude,longitude,image_url,opening_hours,entrance_fee_note,tips,distance_from_town,is_active,availability_status,closed_until,closure_reason',
         );
     if (!includeInactive) query = query.eq('is_active', true);
     final rows = await query
@@ -143,6 +143,7 @@ class BackendRepository {
             name: map['name'],
             description: map['description'] ?? '',
             history: map['history'] ?? '',
+            address: map['address'] ?? '',
             category: _category(map['category']),
             latitude: MapCoordinateValidator.finiteNumber(map['latitude'])!,
             longitude: MapCoordinateValidator.finiteNumber(map['longitude'])!,

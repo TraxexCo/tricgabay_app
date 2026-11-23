@@ -112,6 +112,29 @@ class TouristSpotInfoScreen extends StatelessWidget {
                       ),
                     ],
                   ),
+                  if (spot.address.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.place_outlined,
+                          size: 18,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            context.message(spot.address),
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   if (spot.isTemporarilyClosed) ...[
                     Container(
