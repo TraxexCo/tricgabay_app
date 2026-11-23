@@ -19,7 +19,6 @@ import 'package:tricgabay_app/features/tourist/screens/tourist_edit_profile_scre
 import 'package:tricgabay_app/features/tourist/screens/tourist_bookings_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/rate_review_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/photo_gallery_screen.dart';
-import 'package:tricgabay_app/features/tourist/screens/location_picker_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/find_driver_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/feedback_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/favorites_screen.dart';
@@ -126,7 +125,6 @@ final screenCases = <ScreenCase>[
     'tourist',
     () => PhotoGalleryScreen(spotId: TouristSpotModel.catalog.first.id),
   ),
-  ScreenCase('LocationPickerScreen', 'tourist', () => LocationPickerScreen()),
   ScreenCase('FindDriverScreen', 'tourist', () => FindDriverScreen()),
   ScreenCase('FeedbackScreen', 'tourist', () => FeedbackScreen()),
   ScreenCase('FavoritesScreen', 'tourist', () => FavoritesScreen()),

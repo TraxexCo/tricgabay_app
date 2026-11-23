@@ -12,17 +12,6 @@
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
 		<string>Tric-Gabay</string>
-		<key>CFBundleURLTypes</key>
-		<array>
-			<dict>
-				<key>CFBundleURLName</key>
-				<string>payment-return</string>
-				<key>CFBundleURLSchemes</key>
-				<array>
-					<string>tricgabay</string>
-				</array>
-			</dict>
-		</array>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>

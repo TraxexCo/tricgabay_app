@@ -18,8 +18,6 @@ void main() {
     AppSession.allSpots.value = TouristSpotModel.catalog;
     AppSession.activePackageId = null;
     AppSession.itinerary.value = TouristSpotModel.catalog.take(2).toList();
-    AppSession.draft.pickupLat = 14.95;
-    AppSession.draft.pickupLng = 120.92;
     // Tours are booked for a chosen day and start time.
     AppSession.draft.scheduledAt = DateTime.now().toUtc().add(
       const Duration(days: 1),

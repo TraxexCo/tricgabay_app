@@ -75,11 +75,6 @@ class AppFormatters {
         : l.hoursMinutesDuration(hours, remainder);
   }
 
-  static String tripCount(int count, {String? locale}) =>
-      _labels(locale).numberOfTrips(count);
-  static String phoneDisplay(String phone) => phone.length == 11
-      ? '${phone.substring(0, 4)} ${phone.substring(4, 7)} ${phone.substring(7)}'
-      : phone;
   static String bookingId(String id) =>
       '#${id.substring(0, id.length < 8 ? id.length : 8).toUpperCase()}';
   static String initials(String name) {

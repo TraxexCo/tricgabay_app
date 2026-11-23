@@ -43,7 +43,6 @@ import 'features/tourist/screens/emergency_screen.dart';
 import 'features/tourist/screens/feedback_screen.dart';
 import 'features/tourist/screens/tour_packages_screen.dart';
 import 'features/tourist/screens/tour_package_detail_screen.dart';
-import 'features/tourist/screens/location_picker_screen.dart';
 
 // Driver screens
 import 'features/driver/screens/driver_shell_screen.dart';
@@ -268,10 +267,6 @@ final appRouter = GoRouter(
       builder: (context, state) => const TouristBookingsScreen(
         initialTab: TouristBookingsScreen.pastTab,
       ),
-    ),
-    GoRoute(
-      path: '/tourist/location-picker',
-      builder: (context, state) => const LocationPickerScreen(),
     ),
     GoRoute(
       path: '/tourist/spot/:spotId',

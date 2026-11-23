@@ -62,9 +62,7 @@ class AppSession {
   static final focusedSpotId = AppFeatureControllers.catalog.focusedSpotId;
 
   // ── Booking draft ─────────────────────────────────────────────────────
-  static final draft = BookingDraft(
-    AppFeatureControllers.booking.customPickupAddress,
-  );
+  static final draft = BookingDraft();
 
   // ── Fare ────────────────────────────────────────────────────────────────
 
@@ -148,14 +146,6 @@ class AppSession {
     activePackageId = package.id;
     itinerary.value = selected;
   }
-
-  static void clearTripPlan() {
-    activePackageId = null;
-    itinerary.value = [];
-  }
-
-  static bool isInItinerary(String spotId) =>
-      itinerary.value.any((s) => s.id == spotId);
 
   // ── Favorites ─────────────────────────────────────────────────────────────
 
@@ -1299,9 +1289,6 @@ class AppSession {
     notifications.value = [...notifications.value];
   }
 
-  static int get unreadNotificationCount =>
-      notifications.value.where((n) => !n.isRead).length;
-
   // ── User Profile ──────────────────────────────────────────────────────────
 
   static void updateAccountName(String name) {
@@ -1521,44 +1508,6 @@ class AppSession {
   static bool hasAdminCapability(String capability) =>
       adminCapabilities.value.contains('super_admin') ||
       adminCapabilities.value.contains(capability);
-
-  static Future<void> updateDriverStatus(
-    String id,
-    String status, {
-    required String reason,
-    DateTime? blockedUntil,
-  }) async {
-    TripRules.require(
-      reason.trim().length >= 5,
-      MessageCode.enterAReasonOfAtLeastFiveCharacters,
-    );
-    _requireServer();
-    await BackendRepository.setDriverApproval(
-      id,
-      status,
-      reason: reason,
-      blockedUntil: blockedUntil,
-    );
-    await _refreshAfterWrite();
-    return;
-  }
-
-  static Future<void> addSystemAnnouncement(
-    String title,
-    String message, {
-    required String audience,
-    required String requestId,
-  }) async {
-    _requireServer();
-    await BackendRepository.sendAnnouncement(
-      title,
-      message,
-      audience: audience,
-      requestId: requestId,
-    );
-    await _refreshAfterWrite();
-    return;
-  }
 
   static Future<void> toggleTouristStatus(
     String id, {

@@ -19,26 +19,12 @@ where id = '<verified-auth-user-uuid>';
 For closed test builds, disable mandatory email confirmation or add a
 complete confirmed-email onboarding flow before testing driver document upload.
 
-## PayMongo test mode
+## Payments
 
-Set these Supabase Edge Function secrets:
-
-```text
-PAYMONGO_TEST_SECRET_KEY=sk_test_...
-PAYMONGO_TEST_WEBHOOK_SECRET=whsk_...
-APP_PAYMENT_RETURN_URL=tricgabay://payment-return
-```
-
-Deploy `create-paymongo-checkout`, `paymongo-webhook`,
-`reconcile-paymongo-payment`, and `process-paymongo-refund`. Register the public webhook URL in PayMongo and
-subscribe to `checkout_session.payment.paid`, `payment.failed`,
-`payment.refunded`, and `payment.refund.updated`.
-
-The functions reject live events and secret keys not beginning with `sk_test_`.
-PayMongo currently limits actual refunds to live transactions. In a test-mode
-project, an administrator can complete the equivalent refund workflow after
-the server verifies the refundable amount. Records retain their provider mode
-internally so test and live payment activity remain distinguishable.
+Payments are cash or GCash sent straight to the driver; the app takes no
+online payment, so no payment provider secrets are needed. The PayMongo
+checkout used in early testing was retired on 2026-11-20 (its database
+functions remain but are closed to the app).
 
 ## Branded service email
 

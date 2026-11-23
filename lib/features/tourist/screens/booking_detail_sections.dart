@@ -275,9 +275,7 @@ extension _BookingDetailSections on _BookingDetailScreenState {
                     radius: 22,
                     backgroundColor: AppColors.primary,
                     child: Text(
-                      driverName.trim().isEmpty
-                          ? '?'
-                          : driverName.trim()[0].toUpperCase(),
+                      AppFormatters.initials(driverName),
                       style: GoogleFonts.poppins(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,

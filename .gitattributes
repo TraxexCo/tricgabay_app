@@ -1,0 +1,4 @@
+# The localization export (tool/export_localization.dart) writes CSV with CRLF
+# line endings, and the localization gate compares it byte for byte. Keep CRLF
+# in every checkout so the gate passes on Windows and Linux alike.
+docs/localization-review.csv text eol=crlf

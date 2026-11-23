@@ -60,7 +60,6 @@ void seedScreen(String role, String name) {
   AppSession.selectPackage(TourPackageModel.catalog.first);
   AppSession.userLatitude.value = 14.9571;
   AppSession.userLongitude.value = 120.9188;
-  AppSession.draft.pickupAddress.value = 'Bustos Municipal Hall, Bulacan';
   AppSession.adminDrivers.value = [
     {
       'id': 'd1',

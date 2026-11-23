@@ -31,7 +31,6 @@ class BookingStateController {
   final cancellationPolicy = ValueNotifier<CancellationPolicy>(
     const CancellationPolicy(),
   );
-  final customPickupAddress = ValueNotifier<String?>(null);
 }
 
 class DriverStateController {
