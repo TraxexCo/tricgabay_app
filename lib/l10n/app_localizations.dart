@@ -9276,6 +9276,418 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tour ended. An admin will review the payment.'**
   String get tourEndedConfirmation;
+
+  /// No description provided for @adminGcashDisputesEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When a driver says a GCash payment never arrived, it shows up here for your decision.'**
+  String get adminGcashDisputesEmptyBody;
+
+  /// No description provided for @alertKindDriverStale.
+  ///
+  /// In en, this message translates to:
+  /// **'A driver stopped sending their location'**
+  String get alertKindDriverStale;
+
+  /// No description provided for @alertKindJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'A scheduled server task failed'**
+  String get alertKindJobs;
+
+  /// No description provided for @alertKindLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'A driver\'s location looks wrong'**
+  String get alertKindLocation;
+
+  /// No description provided for @alertKindNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Some notifications failed to send'**
+  String get alertKindNotifications;
+
+  /// No description provided for @alertKindOther.
+  ///
+  /// In en, this message translates to:
+  /// **'System issue'**
+  String get alertKindOther;
+
+  /// No description provided for @alertKindPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment problem'**
+  String get alertKindPayment;
+
+  /// No description provided for @alertMarkResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark resolved'**
+  String get alertMarkResolved;
+
+  /// No description provided for @alertOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get alertOpen;
+
+  /// No description provided for @alertResolvedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert marked resolved'**
+  String get alertResolvedToast;
+
+  /// No description provided for @alertSystemHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a server issue with no screen to fix it. Mark it resolved once it stops.'**
+  String get alertSystemHint;
+
+  /// No description provided for @dashAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts'**
+  String get dashAccounts;
+
+  /// No description provided for @dashAllClear.
+  ///
+  /// In en, this message translates to:
+  /// **'All caught up'**
+  String get dashAllClear;
+
+  /// No description provided for @dashAllClearBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing needs your decision right now.'**
+  String get dashAllClearBody;
+
+  /// No description provided for @dashAnnouncements.
+  ///
+  /// In en, this message translates to:
+  /// **'Announce'**
+  String get dashAnnouncements;
+
+  /// No description provided for @dashAtAGlance.
+  ///
+  /// In en, this message translates to:
+  /// **'At a glance'**
+  String get dashAtAGlance;
+
+  /// No description provided for @dashDataRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Data requests'**
+  String get dashDataRequests;
+
+  /// No description provided for @dashEmergencyNumbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency numbers'**
+  String get dashEmergencyNumbers;
+
+  /// No description provided for @dashFares.
+  ///
+  /// In en, this message translates to:
+  /// **'Fares'**
+  String get dashFares;
+
+  /// No description provided for @dashLiveMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Live map'**
+  String get dashLiveMap;
+
+  /// No description provided for @dashNeedsAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs your attention'**
+  String get dashNeedsAttention;
+
+  /// No description provided for @dashPaymentReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment reviews'**
+  String get dashPaymentReviews;
+
+  /// No description provided for @dashReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Fares received'**
+  String get dashReceived;
+
+  /// No description provided for @dashSystemAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'System alerts'**
+  String get dashSystemAlerts;
+
+  /// No description provided for @dashTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin tools'**
+  String get dashTools;
+
+  /// No description provided for @dashTourists.
+  ///
+  /// In en, this message translates to:
+  /// **'Tourists'**
+  String get dashTourists;
+
+  /// No description provided for @dataRequestAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account holder'**
+  String get dataRequestAccount;
+
+  /// No description provided for @dataRequestPreparedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Export prepared. The account owner can now download it.'**
+  String get dataRequestPreparedToast;
+
+  /// No description provided for @dataRequestsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get dataRequestsDone;
+
+  /// No description provided for @dataRequestsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When a tourist or driver asks for a copy of their data, the request appears here.'**
+  String get dataRequestsEmptyBody;
+
+  /// No description provided for @dataRequestsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No data requests yet'**
+  String get dataRequestsEmptyTitle;
+
+  /// No description provided for @dataRequestsNoneWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'No requests are waiting.'**
+  String get dataRequestsNoneWaiting;
+
+  /// No description provided for @dataRequestsWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you'**
+  String get dataRequestsWaiting;
+
+  /// No description provided for @deletePlaceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tourists will no longer see this place. Tour packages that use it must be edited first.'**
+  String get deletePlaceBody;
+
+  /// No description provided for @disputeDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'GCash dispute'**
+  String get disputeDetailTitle;
+
+  /// No description provided for @disputeReceiptAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt attached'**
+  String get disputeReceiptAttached;
+
+  /// No description provided for @disputeRuledNotPaidToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked as not paid. Both sides were notified.'**
+  String get disputeRuledNotPaidToast;
+
+  /// No description provided for @disputeRuledPaidToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked as paid. Both sides were notified.'**
+  String get disputeRuledPaidToast;
+
+  /// No description provided for @disputeWaivedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Fare waived. The tourist no longer owes it.'**
+  String get disputeWaivedToast;
+
+  /// No description provided for @disputeWhatWeKnow.
+  ///
+  /// In en, this message translates to:
+  /// **'What both sides said'**
+  String get disputeWhatWeKnow;
+
+  /// No description provided for @disputeYourDecision.
+  ///
+  /// In en, this message translates to:
+  /// **'Your decision'**
+  String get disputeYourDecision;
+
+  /// No description provided for @disputedFare.
+  ///
+  /// In en, this message translates to:
+  /// **'Disputed fare'**
+  String get disputedFare;
+
+  /// No description provided for @emergencyConfirmFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Check this box before saving a number.'**
+  String get emergencyConfirmFirst;
+
+  /// No description provided for @emergencyContactSavedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contact saved'**
+  String get emergencyContactSavedToast;
+
+  /// No description provided for @emergencyContactsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No emergency contacts yet'**
+  String get emergencyContactsEmpty;
+
+  /// No description provided for @emergencyNumberNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Number not set yet'**
+  String get emergencyNumberNotSet;
+
+  /// No description provided for @emergencyNumbersAllSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Every number is verified and live for tourists and drivers.'**
+  String get emergencyNumbersAllSet;
+
+  /// No description provided for @fieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get fieldRequired;
+
+  /// No description provided for @hiddenFromTourists.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden from tourists'**
+  String get hiddenFromTourists;
+
+  /// No description provided for @newPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'New place'**
+  String get newPlace;
+
+  /// No description provided for @noBookingsInThisCategoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookings that match show up here.'**
+  String get noBookingsInThisCategoryBody;
+
+  /// No description provided for @placeOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Place options'**
+  String get placeOptions;
+
+  /// No description provided for @pullDownToTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull down to try again.'**
+  String get pullDownToTryAgain;
+
+  /// No description provided for @searchPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Search places'**
+  String get searchPlaces;
+
+  /// No description provided for @shownToTourists.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown to tourists'**
+  String get shownToTourists;
+
+  /// No description provided for @alertTimesValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}× seen'**
+  String alertTimesValue(String value);
+
+  /// No description provided for @dashBookingsToCheckValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} bookings to check'**
+  String dashBookingsToCheckValue(String value);
+
+  /// No description provided for @dashExportsToPrepareValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} exports to prepare'**
+  String dashExportsToPrepareValue(String value);
+
+  /// No description provided for @dashWaitingForDecisionValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} waiting for your decision'**
+  String dashWaitingForDecisionValue(String value);
+
+  /// No description provided for @deletePlaceValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {value}?'**
+  String deletePlaceValue(String value);
+
+  /// No description provided for @disputeDriverValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver: {value}'**
+  String disputeDriverValue(String value);
+
+  /// No description provided for @disputesSummaryValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} open · {secondValue} need a decision'**
+  String disputesSummaryValue(String value, String secondValue);
+
+  /// No description provided for @emergencyNumbersMissingValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} numbers still need to be verified. Tourists see these as unavailable.'**
+  String emergencyNumbersMissingValue(String value);
+
+  /// No description provided for @noteMinimumValue.
+  ///
+  /// In en, this message translates to:
+  /// **'At least {value} characters'**
+  String noteMinimumValue(String value);
+
+  /// No description provided for @noteTooShortValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Write {value} more characters'**
+  String noteTooShortValue(String value);
+
+  /// No description provided for @packagesTabValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Tour packages ({value})'**
+  String packagesTabValue(String value);
+
+  /// No description provided for @placesSummaryValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} places · {secondValue} hidden · {thirdValue} closed'**
+  String placesSummaryValue(
+    String value,
+    String secondValue,
+    String thirdValue,
+  );
+
+  /// No description provided for @placesTabValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Places ({value})'**
+  String placesTabValue(String value);
 }
 
 class _AppLocalizationsDelegate

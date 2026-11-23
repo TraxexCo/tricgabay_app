@@ -384,7 +384,11 @@ export const rpcGroups: Record<string, string[]> = {
     "admin_set_tourist_status",
     "fulfil_data_subject_request",
   ],
-  operations: ["update_emergency_contact", "get_operations_health"],
+  operations: [
+    "update_emergency_contact",
+    "get_operations_health",
+    "resolve_operational_alert",
+  ],
   super_admin: ["configure_service", "set_admin_capabilities"],
 };
 export function rpcAllowed(name: string, actor: Actor): boolean {
@@ -577,6 +581,7 @@ export function rpcArguments(name: string, actor: Actor): string[] | undefined {
       reason,
     ],
     fulfil_data_subject_request: [request],
+    resolve_operational_alert: ["gen_random_uuid()"],
     configure_service: ["14.9571", "120.9188", "15", "3", "''"],
     update_emergency_contact: [
       "'mdrrmo'",

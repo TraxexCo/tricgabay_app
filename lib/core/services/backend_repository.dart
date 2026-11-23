@@ -861,6 +861,20 @@ class BackendRepository {
     return rows.map((row) => Map<String, dynamic>.from(row)).toList();
   }
 
+  static Future<void> resolveOperationalAlert(String id) =>
+      rpc('resolve_operational_alert', {'p_alert_id': id});
+
+  /// How many data export requests still wait for an admin (max 100).
+  static Future<int> pendingDataRequestCount() async {
+    final rows = await _client
+        .from('data_subject_requests')
+        .select('id')
+        .eq('status', 'pending')
+        .limit(100)
+        .timeout(_readDeadline);
+    return rows.length;
+  }
+
   static Future<void> sendAnnouncement(
     String title,
     String body, {

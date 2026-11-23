@@ -62,9 +62,14 @@ class _PrivacyConsentGateState extends State<PrivacyConsentGate>
     super.dispose();
   }
 
+  /// Notice version this account just accepted here. The screen opens at
+  /// once instead of waiting for another server check.
+  String? _acceptedVersion;
+
   void _authChanged() {
     // A different account must see its own privacy check, not the last one.
     _loadedOnce = false;
+    _acceptedVersion = null;
     _accountEpoch++;
     _checked = false;
     _checkedVersion = null;
@@ -119,14 +124,14 @@ class _PrivacyConsentGateState extends State<PrivacyConsentGate>
         await PrivacyService.accept(notice.version, language: language);
       }
       if (!mounted || epoch != _accountEpoch) return;
-      await TelemetryService.setConsent(telemetry);
-      if (!mounted || epoch != _accountEpoch) return;
-      if (mounted && epoch == _accountEpoch) {
-        setState(() {
-          _error = null;
-          _refresh();
-        });
-      }
+      // Saved on the server: let the user in now. The diagnostics choice is
+      // stored in the background (it never blocks), and the next routine
+      // check confirms the acceptance from the server.
+      unawaited(TelemetryService.setConsent(telemetry));
+      setState(() {
+        _error = null;
+        _acceptedVersion = notice.version;
+      });
     } catch (error) {
       if (mounted && epoch == _accountEpoch) {
         setState(() => _error = ErrorMessages.forError(error));
@@ -149,7 +154,9 @@ class _PrivacyConsentGateState extends State<PrivacyConsentGate>
         );
       }
       if (!snapshot.hasError &&
-          (snapshot.data == null || snapshot.data!.accepted)) {
+          (snapshot.data == null ||
+              snapshot.data!.accepted ||
+              snapshot.data!.notice.version == _acceptedVersion)) {
         return RetainedGate(child: widget.child);
       }
       final notice = snapshot.data?.notice;

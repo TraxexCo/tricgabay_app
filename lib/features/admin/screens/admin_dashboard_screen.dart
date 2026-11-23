@@ -1,572 +1,645 @@
-import '../../../core/widgets/language_selection.dart';
-import 'package:tricgabay_app/core/utils/formatters.dart';
-import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
-import '../../../core/motion/motion_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/session/app_session.dart';
-import '../../../models/booking_model.dart';
-import '../../../core/l10n/record_labels.dart';
-import '../../../core/widgets/account_widgets.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import 'package:tricgabay_app/core/utils/formatters.dart';
 
-class AdminDashboardScreen extends StatelessWidget {
+import '../../../core/config/backend_config.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/l10n/record_labels.dart';
+import '../../../core/services/backend_repository.dart';
+import '../../../core/services/error_messages.dart';
+import '../../../core/session/app_session.dart';
+import '../../../core/widgets/account_widgets.dart';
+import '../../../core/widgets/language_selection.dart';
+import '../../../models/booking_model.dart';
+import '../widgets/admin_ui.dart';
+import 'emergency_contacts_admin_screen.dart';
+import 'gcash_disputes_screen.dart';
+
+/// Admin home: what needs a decision first, then today's numbers, then
+/// shortcuts to every admin tool.
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: ValueListenableBuilder<List<BookingModel>>(
-          valueListenable: AppSession.bookings,
-          builder: (context, bookings, _) {
-            return ValueListenableBuilder<List<Map<String, dynamic>>>(
-              valueListenable: AppSession.adminDrivers,
-              builder: (context, drivers, _) {
-                final settled = bookings.where(
-                  (b) =>
-                      !b.isActive &&
-                      !b.trip.reviewRequired &&
-                      b.refundDueCents == 0,
-                );
-                final totalRevenue = settled.fold<double>(
-                  0,
-                  (sum, b) => sum + b.trip.receivedCents / 100,
-                );
-                final includesDirectGcash = settled.any(
-                  (b) =>
-                      b.paymentMethod == PaymentMethod.gcashDirect &&
-                      b.trip.receivedCents > 0,
-                );
-                final int activeRides = bookings
-                    .where((b) => b.status == BookingStatus.ongoing)
-                    .length;
-                final int activeDrivers = drivers
-                    .where((d) => d['status'] == 'active')
-                    .length;
-                final int todayBookings = bookings
-                    .where(
-                      (b) => b.createdAt.isAfter(
-                        DateTime.now().subtract(const Duration(days: 1)),
-                      ),
-                    )
-                    .length;
-                final int verifications = drivers
-                    .where((d) => d['status'] == 'pending')
-                    .length;
-                final int totalAccounts =
-                    drivers.length + AppSession.adminTourists.value.length;
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
 
-                final recentBookings = bookings.toList()
-                  ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  /// Kept between visits so the badge shows at once when coming back.
+  static int _pendingDataRequests = 0;
 
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 110),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  context.l10n.operationsCentre,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 23,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                Text(
-                                  context.message(
-                                    AppFormatters.weekdayDate(DateTime.now()),
-                                  ),
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            tooltip: context.l10n.language,
-                            icon: const Icon(Icons.language),
-                            onPressed: () => showModalBottomSheet(
-                              context: context,
-                              builder: (_) => const LanguageSelection(),
-                            ),
-                          ),
-                          if (AppSession.hasAdminCapability('support'))
-                            IconButton(
-                              tooltip: context.l10n.sendAnAnnouncement,
-                              onPressed: () =>
-                                  context.push('/admin/announcements'),
-                              icon: const Icon(Icons.campaign_outlined),
-                            ),
-                          IconButton(
-                            tooltip: context.l10n.logOut,
-                            onPressed: () async {
-                              await AppSession.signOut();
-                              if (context.mounted) context.go('/login');
-                            },
-                            icon: const Icon(Icons.logout_rounded),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      AccountIdentityCard(
-                        roleLabel: context.l10n.administrator,
-                      ),
-                      if (AppSession.hasAdminCapability('operations') &&
-                          AppSession.operationalAlerts.value.isNotEmpty)
-                        Container(
-                          margin: const EdgeInsets.only(top: 14),
-                          padding: const EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFF4E5),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFFF5B041)),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.health_and_safety_outlined,
-                                color: Color(0xFFA65F00),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  context.l10n.operationalAlertSNeedReviewValue(
-                                    context.message(
-                                      (AppSession
-                                              .operationalAlerts
-                                              .value
-                                              .length)
-                                          .toString(),
-                                    ),
-                                  ),
-                                  style: GoogleFonts.poppins(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      const SizedBox(height: 22),
-                      InkWell(
-                        onTap: () => context.push('/admin/live-map'),
-                        borderRadius: BorderRadius.circular(25),
-                        child: Ink(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF102A43), Color(0xFF1B6CA8)],
-                            ),
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(13),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: .15),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: const Icon(
-                                  Icons.radar_rounded,
-                                  color: Color(0xFF8DE2C1),
-                                  size: 27,
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      context.l10n.driversActiveValue(
-                                        context.message(
-                                          (activeDrivers).toString(),
-                                        ),
-                                      ),
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 18,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    Text(
-                                      context.l10n.areCurrentlyOnATripValue(
-                                        context.message(
-                                          (activeRides).toString(),
-                                        ),
-                                      ),
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 14,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const Icon(
-                                Icons.chevron_right_rounded,
-                                color: Colors.white,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        context.l10n.liveOverview,
-                        style: GoogleFonts.poppins(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final width = constraints.maxWidth;
-                          final crossAxisCount = width > 600 ? 4 : 2;
-                          final itemWidth =
-                              (width - (12 * (crossAxisCount - 1))) /
-                              crossAxisCount;
-                          final aspectRatio =
-                              itemWidth /
-                              (64 +
-                                  MediaQuery.textScalerOf(context).scale(20) *
-                                      1.5 +
-                                  MediaQuery.textScalerOf(context).scale(12) *
-                                      3);
-
-                          return GridView.count(
-                            crossAxisCount: crossAxisCount,
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: aspectRatio,
-                            children: [
-                              for (final (i, metric) in <Widget>[
-                                _Metric(
-                                  value: todayBookings.toString(),
-                                  label: MessageCode.bookingsToday,
-                                  icon: Icons.receipt_long_outlined,
-                                  color: AppColors.primary,
-                                ),
-                                _Metric(
-                                  value: verifications.toString(),
-                                  label: MessageCode.driverVerifications,
-                                  icon: Icons.verified_user_outlined,
-                                  color: AppColors.warning,
-                                ),
-                                _Metric(
-                                  value: NumberFormat.compact(
-                                    locale: AppFormatters.resolvedLocale(null),
-                                  ).format(totalAccounts),
-                                  label: MessageCode.touristAccounts,
-                                  icon: Icons.people_outline_rounded,
-                                  color: AppColors.success,
-                                ),
-                                _Metric(
-                                  value: AppFormatters.currency(totalRevenue),
-                                  label: includesDirectGcash
-                                      ? context.l10n.gcashConfirmedFares
-                                      : MessageCode.confirmedCash,
-                                  icon: Icons.payments_outlined,
-                                  color: const Color(0xFF8E44AD),
-                                ),
-                              ].indexed)
-                                FadeSlideIn.staggered(index: i, child: metric),
-                            ],
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      Text(context.l10n.loadedBookingTotals),
-                      const SizedBox(height: 25),
-                      Text(
-                        context.l10n.actNow,
-                        style: GoogleFonts.poppins(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 11),
-                      if (AppSession.hasAdminCapability('driver_compliance'))
-                        _action(
-                          context,
-                          Icons.verified_user_outlined,
-                          MessageCode.reviewPendingDrivers,
-                          MessageCode.documentsAreWaitingForVerificationValue(
-                            (verifications).toString(),
-                          ),
-                          '/admin/drivers',
-                          AppColors.warning,
-                        ),
-                      if (AppSession.hasAdminCapability('content'))
-                        _action(
-                          context,
-                          Icons.tour_outlined,
-                          MessageCode.tourPackages,
-                          MessageCode.createEditOrDeleteTours,
-                          '/admin/packages',
-                          AppColors.primary,
-                        ),
-                      if (AppSession.hasAdminCapability('support')) ...[
-                        _action(
-                          context,
-                          Icons.campaign_outlined,
-                          MessageCode.sendAnAnnouncement,
-                          MessageCode.shareAnUpdateWithDriversOrTourists,
-                          '/admin/announcements',
-                          AppColors.primary,
-                        ),
-                        _action(
-                          context,
-                          Icons.people_outline,
-                          MessageCode.manageTourists,
-                          MessageCode.viewAndManageTouristAccounts,
-                          '/admin/tourists',
-                          AppColors.success,
-                        ),
-                        _action(
-                          context,
-                          Icons.forum_outlined,
-                          MessageCode.ratingsFeedback,
-                          MessageCode.respondToCommunityConcerns,
-                          '/admin/ratings',
-                          AppColors.secondary,
-                        ),
-                      ],
-                      if (AppSession.hasAdminCapability('finance') ||
-                          AppSession.hasAdminCapability('operations'))
-                        _action(
-                          context,
-                          Icons.gavel_rounded,
-                          MessageCode.adminGcashDisputes,
-                          MessageCode.adminGcashDisputesOpen(
-                            bookings
-                                .where(
-                                  (b) =>
-                                      b.paymentMethod ==
-                                          PaymentMethod.gcashDirect &&
-                                      b.paymentStatus == PaymentStatus.disputed,
-                                )
-                                .length,
-                          ),
-                          '/admin/gcash-disputes',
-                          AppColors.danger,
-                        ),
-                      if (AppSession.hasAdminCapability('operations'))
-                        _action(
-                          context,
-                          Icons.map_outlined,
-                          MessageCode.liveDriverTracking,
-                          MessageCode.viewActiveDriversOnTheMap,
-                          '/admin/live-map',
-                          const Color(0xFF8E44AD),
-                        ),
-                      if (AppSession.hasAdminCapability('support'))
-                        _action(
-                          context,
-                          Icons.download_outlined,
-                          MessageCode.dataExportRequests,
-                          MessageCode.preparePrivateAccountExports,
-                          '/admin/data-requests',
-                          AppColors.primary,
-                        ),
-                      if (AppSession.hasAdminCapability('operations')) ...[
-                        _action(
-                          context,
-                          Icons.local_hospital_outlined,
-                          MessageCode.emergencyContactsSettings,
-                          MessageCode.verifyLocalAgencyNumbers,
-                          '/admin/emergency-contacts',
-                          AppColors.danger,
-                        ),
-                        _action(
-                          context,
-                          Icons.monitor_heart_outlined,
-                          MessageCode.serviceHealth,
-                          MessageCode.reviewFailuresAndStaleDrivers,
-                          '/admin/health',
-                          AppColors.warning,
-                        ),
-                      ],
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              context.l10n.recentBookings,
-                              style: GoogleFonts.poppins(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          Flexible(
-                            child: TextButton(
-                              onPressed: () => context.push('/admin/bookings'),
-                              child: Text(context.l10n.viewAll),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (recentBookings.isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          child: Center(
-                            child: Text(
-                              context.l10n.noRecentBookings,
-                              style: GoogleFonts.poppins(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ),
-                        )
-                      else
-                        ...recentBookings
-                            .take(3)
-                            .map(
-                              (b) => _booking(
-                                context,
-                                // Tour name and a short reference instead of
-                                // the full database id.
-                                AppSession.bookingTitle(b),
-                                '#${b.id.split('-').first.toUpperCase()} · ${b.touristName}',
-                                bookingStatusLabel(context, b.status),
-                                _getStatusColor(b.status),
-                              ),
-                            ),
-                    ],
-                  ),
-                );
-              },
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Color _getStatusColor(BookingStatus status) {
-    switch (status) {
-      case BookingStatus.completed:
-        return AppColors.success;
-      case BookingStatus.pending:
-        return AppColors.warning;
-      case BookingStatus.ongoing:
-        return AppColors.primary;
-      case BookingStatus.cancelled:
-        return AppColors.danger;
-      default:
-        return AppColors.textSecondary;
+  @override
+  void initState() {
+    super.initState();
+    _loadDataRequestCount();
+    // Warm the slower admin lists so they open with data.
+    if (AppSession.hasAdminCapability('operations')) {
+      EmergencyContactsAdminScreen.prefetch();
+    }
+    if (AppSession.hasAdminCapability('finance') ||
+        AppSession.hasAdminCapability('operations')) {
+      GcashDisputesScreen.prefetch();
     }
   }
 
-  Widget _action(
+  Future<void> _loadDataRequestCount() async {
+    if (!BackendConfig.isConfigured ||
+        !AppSession.hasAdminCapability('support')) {
+      return;
+    }
+    try {
+      final count = await BackendRepository.pendingDataRequestCount();
+      if (mounted) setState(() => _pendingDataRequests = count);
+    } catch (_) {
+      // Only a badge; the screen itself shows any error.
+    }
+  }
+
+  Future<void> _open(String route) async {
+    await context.push(route);
+    if (mounted) _loadDataRequestCount();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: SafeArea(
+      child: ValueListenableBuilder<List<BookingModel>>(
+        valueListenable: AppSession.bookings,
+        builder: (context, bookings, _) =>
+            ValueListenableBuilder<List<Map<String, dynamic>>>(
+              valueListenable: AppSession.adminDrivers,
+              builder: (context, drivers, _) =>
+                  ValueListenableBuilder<List<Map<String, dynamic>>>(
+                    valueListenable: AppSession.operationalAlerts,
+                    builder: (context, alerts, _) =>
+                        _body(context, bookings, drivers, alerts),
+                  ),
+            ),
+      ),
+    ),
+  );
+
+  Widget _body(
     BuildContext context,
-    IconData icon,
-    String title,
-    String description,
-    String route,
-    Color color,
+    List<BookingModel> bookings,
+    List<Map<String, dynamic>> drivers,
+    List<Map<String, dynamic>> alerts,
   ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        child: InkWell(
-          onTap: () => context.push(route),
-          borderRadius: BorderRadius.circular(18),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
+    final l = context.l10n;
+    final can = AppSession.hasAdminCapability;
+    final money = can('finance') || can('operations');
+
+    final disputes = bookings.where(isOpenGcashDispute).length;
+    final reviews = bookings
+        .where((b) => needsPaymentReview(b) && !isOpenGcashDispute(b))
+        .length;
+    final pendingDrivers = drivers
+        .where((d) => d['status'] == 'pending')
+        .length;
+    final activeDrivers = drivers.where((d) => d['status'] == 'active').length;
+    final onTrip = bookings
+        .where((b) => b.status == BookingStatus.ongoing)
+        .length;
+    final today = DateTime.now().subtract(const Duration(days: 1));
+    final todayBookings = bookings
+        .where((b) => b.createdAt.isAfter(today))
+        .length;
+    final settled = bookings.where(
+      (b) => !b.isActive && !b.trip.reviewRequired && b.refundDueCents == 0,
+    );
+    final revenue = settled.fold<double>(
+      0,
+      (sum, b) => sum + b.trip.receivedCents / 100,
+    );
+    final accounts = drivers.length + AppSession.adminTourists.value.length;
+    final showAlerts = can('operations') && alerts.isNotEmpty;
+
+    final attention = <_AttentionItem>[
+      if (showAlerts)
+        _AttentionItem(
+          icon: Icons.notification_important_outlined,
+          color: AppColors.danger,
+          title: l.dashSystemAlerts,
+          body: l.operationalAlertSNeedReviewValue(alerts.length.toString()),
+          count: alerts.length,
+          onTap: () => _openAlerts(alerts),
+        ),
+      if (money && disputes > 0)
+        _AttentionItem(
+          icon: Icons.gavel_rounded,
+          color: AppColors.danger,
+          title: l.adminGcashDisputes,
+          body: l.dashWaitingForDecisionValue(disputes.toString()),
+          count: disputes,
+          onTap: () => _open('/admin/gcash-disputes'),
+        ),
+      if (money && reviews > 0)
+        _AttentionItem(
+          icon: Icons.fact_check_outlined,
+          color: AppColors.warning,
+          title: l.dashPaymentReviews,
+          body: l.dashBookingsToCheckValue(reviews.toString()),
+          count: reviews,
+          onTap: () => _open('/admin/bookings'),
+        ),
+      if (can('driver_compliance') && pendingDrivers > 0)
+        _AttentionItem(
+          icon: Icons.badge_outlined,
+          color: AppColors.warning,
+          title: l.reviewPendingDrivers,
+          body: l.documentsAreWaitingForVerificationValue(
+            pendingDrivers.toString(),
+          ),
+          count: pendingDrivers,
+          onTap: () => context.go('/admin/drivers'),
+        ),
+      if (can('support') && _pendingDataRequests > 0)
+        _AttentionItem(
+          icon: Icons.download_outlined,
+          color: AppColors.primary,
+          title: l.dataExportRequests,
+          body: l.dashExportsToPrepareValue(_pendingDataRequests.toString()),
+          count: _pendingDataRequests,
+          onTap: () => _open('/admin/data-requests'),
+        ),
+    ];
+
+    final tools = <_Tool>[
+      if (money)
+        _Tool(
+          Icons.fact_check_outlined,
+          l.dashPaymentReviews,
+          AppColors.primary,
+          '/admin/bookings',
+          reviews,
+        ),
+      if (money)
+        _Tool(
+          Icons.gavel_rounded,
+          l.adminGcashDisputes,
+          AppColors.danger,
+          '/admin/gcash-disputes',
+          disputes,
+        ),
+      if (can('content'))
+        _Tool(
+          Icons.tour_outlined,
+          l.tourPackages,
+          AppColors.primary,
+          '/admin/packages',
+          0,
+        ),
+      if (can('operations'))
+        _Tool(
+          Icons.map_outlined,
+          l.dashLiveMap,
+          AppColors.success,
+          '/admin/live-map',
+          0,
+        ),
+      if (can('support')) ...[
+        _Tool(
+          Icons.people_outline_rounded,
+          l.dashTourists,
+          AppColors.success,
+          '/admin/tourists',
+          0,
+        ),
+        _Tool(
+          Icons.campaign_outlined,
+          l.dashAnnouncements,
+          AppColors.warning,
+          '/admin/announcements',
+          0,
+        ),
+        _Tool(
+          Icons.forum_outlined,
+          l.ratingsFeedback,
+          AppColors.secondaryDark,
+          '/admin/ratings',
+          0,
+        ),
+        _Tool(
+          Icons.download_outlined,
+          l.dashDataRequests,
+          AppColors.primary,
+          '/admin/data-requests',
+          _pendingDataRequests,
+        ),
+      ],
+      if (can('operations'))
+        _Tool(
+          Icons.local_hospital_outlined,
+          l.dashEmergencyNumbers,
+          AppColors.danger,
+          '/admin/emergency-contacts',
+          0,
+        ),
+      if (can('finance'))
+        _Tool(
+          Icons.payments_outlined,
+          l.dashFares,
+          AppColors.success,
+          '/admin/fare-settings',
+          0,
+        ),
+    ];
+
+    final recent = bookings.toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        await Future.wait([
+          AppSession.syncRemoteState(),
+          _loadDataRequestCount(),
+        ]);
+      },
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 110),
+        children: [
+          _header(context),
+          const SizedBox(height: 14),
+          AccountIdentityCard(roleLabel: l.administrator),
+          const SizedBox(height: 24),
+          AdminSectionTitle(l.dashNeedsAttention),
+          if (attention.isEmpty)
+            AdminPanel(
+              color: AppColors.successLight.withValues(alpha: .5),
+              borderColor: AppColors.successLight,
+              child: Row(
+                children: [
+                  const IconTile(
+                    Icons.task_alt_rounded,
+                    AppColors.success,
+                    size: 40,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l.dashAllClear,
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          l.dashAllClearBody,
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            for (final item in attention) _attentionRow(item),
+          const SizedBox(height: 14),
+          _liveCard(context, activeDrivers, onTrip),
+          const SizedBox(height: 24),
+          AdminSectionTitle(l.dashAtAGlance),
+          IntrinsicHeight(
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: .12),
-                    borderRadius: BorderRadius.circular(13),
-                  ),
-                  child: Icon(icon, color: color),
-                ),
-                const SizedBox(width: 12),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.message(title),
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      Text(
-                        context.message(description),
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
+                  child: _stat(
+                    todayBookings.toString(),
+                    l.bookingsToday,
+                    Icons.receipt_long_outlined,
+                    AppColors.primary,
                   ),
                 ),
-                const Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 15,
-                  color: AppColors.textHint,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _stat(
+                    AppFormatters.currencyShort(revenue),
+                    l.dashReceived,
+                    Icons.payments_outlined,
+                    AppColors.success,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _stat(
+                    NumberFormat.compact(
+                      locale: AppFormatters.resolvedLocale(null),
+                    ).format(accounts),
+                    l.dashAccounts,
+                    Icons.people_outline_rounded,
+                    AppColors.warning,
+                  ),
                 ),
               ],
             ),
           ),
-        ),
+          const SizedBox(height: 24),
+          if (tools.isNotEmpty) ...[
+            AdminSectionTitle(l.dashTools),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final columns = constraints.maxWidth > 560 ? 4 : 3;
+                final width =
+                    (constraints.maxWidth - 10 * (columns - 1)) / columns;
+                return Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    for (final tool in tools)
+                      SizedBox(width: width, child: _toolTile(tool)),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+          ],
+          AdminSectionTitle(
+            l.recentBookings,
+            trailing: money
+                ? TextButton(
+                    onPressed: () => _open('/admin/bookings'),
+                    child: Text(l.viewAll),
+                  )
+                : null,
+          ),
+          if (recent.isEmpty)
+            AdminPanel(
+              child: Row(
+                children: [
+                  const IconTile(
+                    Icons.inbox_outlined,
+                    AppColors.textSecondary,
+                    size: 40,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      l.noRecentBookings,
+                      style: GoogleFonts.poppins(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            for (final b in recent.take(4)) _bookingRow(context, b, money),
+        ],
       ),
     );
   }
 
-  Widget _booking(
-    BuildContext context,
-    String id,
-    String subtitle,
-    String state,
-    Color color,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+  Widget _header(BuildContext context) => Row(
+    children: [
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.l10n.operationsCentre,
+              style: GoogleFonts.poppins(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            Text(
+              context.message(AppFormatters.weekdayDate(DateTime.now())),
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+      IconButton(
+        tooltip: context.l10n.language,
+        icon: const Icon(Icons.language),
+        onPressed: () => showModalBottomSheet(
+          context: context,
+          builder: (_) => const LanguageSelection(),
+        ),
+      ),
+      IconButton(
+        tooltip: context.l10n.logOut,
+        onPressed: () async {
+          await AppSession.signOut();
+          if (context.mounted) context.go('/login');
+        },
+        icon: const Icon(Icons.logout_rounded),
+      ),
+    ],
+  );
+
+  Widget _attentionRow(_AttentionItem item) => AdminPanel(
+    margin: const EdgeInsets.only(bottom: 10),
+    padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+    borderColor: item.color.withValues(alpha: .35),
+    onTap: item.onTap,
+    child: Row(
+      children: [
+        IconTile(item.icon, item.color, size: 42),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.title,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Text(
+                item.body,
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        CountBadge(item.count, color: item.color),
+        const SizedBox(width: 4),
+        const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+      ],
+    ),
+  );
+
+  Widget _liveCard(BuildContext context, int active, int onTrip) {
+    final card = Ink(
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF102A43), Color(0xFF1B6CA8)],
+        ),
+        borderRadius: BorderRadius.circular(22),
       ),
       child: Row(
         children: [
           Container(
-            width: 35,
-            height: 35,
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: .1),
-              borderRadius: BorderRadius.circular(11),
+              color: Colors.white.withValues(alpha: .15),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(
-              Icons.electric_rickshaw_outlined,
-              size: 19,
-              color: AppColors.primary,
+              Icons.radar_rounded,
+              color: Color(0xFF8DE2C1),
+              size: 26,
             ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.driversActiveValue(active.toString()),
+                  style: GoogleFonts.poppins(
+                    fontSize: 17,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  context.l10n.areCurrentlyOnATripValue(onTrip.toString()),
+                  style: GoogleFonts.poppins(fontSize: 13, color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+          if (AppSession.hasAdminCapability('operations'))
+            const Icon(Icons.chevron_right_rounded, color: Colors.white),
+        ],
+      ),
+    );
+    if (!AppSession.hasAdminCapability('operations')) return card;
+    return InkWell(
+      onTap: () => _open('/admin/live-map'),
+      borderRadius: BorderRadius.circular(22),
+      child: card,
+    );
+  }
+
+  Widget _stat(String value, String label, IconData icon, Color color) =>
+      Container(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 20, color: color),
+            const SizedBox(height: 8),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value,
+                style: GoogleFonts.poppins(
+                  fontSize: 19,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      );
+
+  Widget _toolTile(_Tool tool) => Material(
+    color: AppColors.surface,
+    clipBehavior: Clip.antiAlias,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+      side: const BorderSide(color: AppColors.border),
+    ),
+    child: InkWell(
+      onTap: () => _open(tool.route),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 14, 8, 12),
+        child: Column(
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                IconTile(tool.icon, tool.color, size: 44),
+                Positioned(top: -8, right: -12, child: CountBadge(tool.count)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Room for two lines always, so tiles in a row match.
+            SizedBox(
+              height: MediaQuery.textScalerOf(context).scale(12) * 1.25 * 2 + 2,
+              child: Text(
+                tool.label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  height: 1.25,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  Widget _bookingRow(BuildContext context, BookingModel b, bool canOpen) {
+    final color = switch (b.status) {
+      BookingStatus.completed => AppColors.success,
+      BookingStatus.pending => AppColors.warning,
+      BookingStatus.ongoing => AppColors.primary,
+      BookingStatus.cancelled => AppColors.danger,
+      _ => AppColors.textSecondary,
+    };
+    return AdminPanel(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      onTap: canOpen ? () => _open('/admin/booking/${b.id}') : null,
+      child: Row(
+        children: [
+          const IconTile(
+            Icons.electric_rickshaw_outlined,
+            AppColors.primary,
+            size: 36,
           ),
           const SizedBox(width: 11),
           Expanded(
@@ -574,33 +647,42 @@ class AdminDashboardScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  context.message(id),
+                  context.message(AppSession.bookingTitle(b)),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 Text(
-                  context.message(subtitle),
+                  context.l10n.twoPartSummary(
+                    AppFormatters.bookingId(b.id),
+                    b.touristName,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
                     color: AppColors.textSecondary,
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
             decoration: BoxDecoration(
               color: color.withValues(alpha: .12),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
-              context.message(state),
+              bookingStatusLabel(context, b.status),
               style: GoogleFonts.poppins(
-                fontSize: 14,
+                fontSize: 12,
                 color: color,
                 fontWeight: FontWeight.w700,
               ),
@@ -610,76 +692,252 @@ class AdminDashboardScreen extends StatelessWidget {
       ),
     );
   }
+
+  // ── Operational alerts ────────────────────────────────────────────────
+
+  Future<void> _openAlerts(List<Map<String, dynamic>> alerts) async {
+    // All alerts point to the same place: go straight there.
+    final routes = alerts.map(_alertRoute).toSet();
+    if (routes.length == 1 && routes.first != null) {
+      await _open(routes.first!);
+      return;
+    }
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _AlertsSheet(onOpen: _open),
+    );
+  }
 }
 
-class _Metric extends StatelessWidget {
-  const _Metric({
-    required this.value,
-    required this.label,
-    required this.icon,
-    required this.color,
-  });
-  final String value, label;
-  final IconData icon;
-  final Color color;
+enum _AlertKind { payment, driverStale, location, notifications, jobs, other }
+
+_AlertKind _alertKind(Map<String, dynamic> alert) {
+  final metadata = alert['metadata'];
+  final metric = metadata is Map ? metadata['metric'] : null;
+  final category = alert['category'];
+  if (category == 'payment' ||
+      metric == 'failed_payments' ||
+      metric == 'blocked_expiry') {
+    return _AlertKind.payment;
+  }
+  if (category == 'dispatch' || metric == 'stale_online_drivers') {
+    return _AlertKind.driverStale;
+  }
+  if (category == 'location') return _AlertKind.location;
+  if (metric == 'notification_failures') return _AlertKind.notifications;
+  if (metric == 'cron_failures') return _AlertKind.jobs;
+  return _AlertKind.other;
+}
+
+/// The driver an alert is about, from keys like `mock-location:<id>`.
+String? _alertDriverId(Map<String, dynamic> alert) {
+  final key = alert['dedupe_key'] as String? ?? '';
+  final split = key.indexOf(':');
+  if (split < 0 || key.startsWith('health:')) return null;
+  final id = key.substring(split + 1);
+  return RegExp(r'^[0-9a-f-]{36}$').hasMatch(id) ? id : null;
+}
+
+/// Where the admin can fix what the alert is about, or null when it is a
+/// system problem with no screen of its own.
+String? _alertRoute(Map<String, dynamic> alert) {
+  switch (_alertKind(alert)) {
+    case _AlertKind.payment:
+      return AppSession.hasAdminCapability('finance') ||
+              AppSession.hasAdminCapability('operations')
+          ? '/admin/gcash-disputes'
+          : null;
+    case _AlertKind.driverStale:
+    case _AlertKind.location:
+      final driver = _alertDriverId(alert);
+      if (driver != null &&
+          AppSession.hasAdminCapability('driver_compliance')) {
+        return '/admin/drivers/$driver';
+      }
+      return '/admin/live-map';
+    case _AlertKind.notifications:
+    case _AlertKind.jobs:
+    case _AlertKind.other:
+      return null;
+  }
+}
+
+class _AlertsSheet extends StatefulWidget {
+  const _AlertsSheet({required this.onOpen});
+
+  final Future<void> Function(String route) onOpen;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: .06),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+  State<_AlertsSheet> createState() => _AlertsSheetState();
+}
+
+class _AlertsSheetState extends State<_AlertsSheet> {
+  String? _busy;
+
+  Future<void> _resolve(Map<String, dynamic> alert) async {
+    final id = alert['id'] as String?;
+    if (id == null || _busy != null) return;
+    setState(() => _busy = id);
+    try {
+      if (BackendConfig.isConfigured) {
+        await BackendRepository.resolveOperationalAlert(id);
+      }
+      AppSession.operationalAlerts.value = [
+        for (final a in AppSession.operationalAlerts.value)
+          if (a['id'] != id) a,
+      ];
+      if (!mounted) return;
+      showAdminToast(context, context.l10n.alertResolvedToast);
+      if (AppSession.operationalAlerts.value.isEmpty) Navigator.pop(context);
+    } catch (error) {
+      if (mounted) {
+        showAdminToast(context, ErrorMessages.forError(error), error: true);
+      }
+    } finally {
+      if (mounted) setState(() => _busy = null);
+    }
+  }
+
+  String _title(BuildContext context, _AlertKind kind) => switch (kind) {
+    _AlertKind.payment => context.l10n.alertKindPayment,
+    _AlertKind.driverStale => context.l10n.alertKindDriverStale,
+    _AlertKind.location => context.l10n.alertKindLocation,
+    _AlertKind.notifications => context.l10n.alertKindNotifications,
+    _AlertKind.jobs => context.l10n.alertKindJobs,
+    _AlertKind.other => context.l10n.alertKindOther,
+  };
+
+  IconData _icon(_AlertKind kind) => switch (kind) {
+    _AlertKind.payment => Icons.payments_outlined,
+    _AlertKind.driverStale => Icons.location_off_outlined,
+    _AlertKind.location => Icons.wrong_location_outlined,
+    _AlertKind.notifications => Icons.notifications_off_outlined,
+    _AlertKind.jobs => Icons.schedule_outlined,
+    _AlertKind.other => Icons.report_gmailerrorred_outlined,
+  };
+
+  @override
+  Widget build(BuildContext context) =>
+      ValueListenableBuilder<List<Map<String, dynamic>>>(
+        valueListenable: AppSession.operationalAlerts,
+        builder: (context, alerts, _) => ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * .8,
           ),
-        ],
-      ),
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+            children: [
+              AdminSectionTitle(context.l10n.dashSystemAlerts),
+              for (final alert in alerts) _alert(context, alert),
+            ],
+          ),
+        ),
+      );
+
+  Widget _alert(BuildContext context, Map<String, dynamic> alert) {
+    final kind = _alertKind(alert);
+    final route = _alertRoute(alert);
+    final seen = DateTime.tryParse(alert['last_seen_at']?.toString() ?? '');
+    final times = (alert['occurrences'] as num?)?.toInt() ?? 1;
+    final critical = alert['severity'] == 'critical';
+    final tone = critical ? AppColors.danger : AppColors.warning;
+    return AdminPanel(
+      borderColor: tone.withValues(alpha: .35),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: .12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 18, color: color),
-          ),
-          Column(
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
             children: [
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  context.message(value),
-                  style: GoogleFonts.poppins(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
+              IconTile(_icon(kind), tone, size: 40),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _title(context, kind),
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    if (seen != null)
+                      Text(
+                        context.l10n.twoPartSummary(
+                          AppFormatters.dateTime(seen.toLocal()),
+                          context.l10n.alertTimesValue(times.toString()),
+                        ),
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    if (route == null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          context.l10n.alertSystemHint,
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              Text(
-                context.message(label),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: _busy == null ? () => _resolve(alert) : null,
+                child: Text(context.l10n.alertMarkResolved),
               ),
+              if (route != null) ...[
+                const SizedBox(width: 6),
+                FilledButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    widget.onOpen(route);
+                  },
+                  child: Text(context.l10n.alertOpen),
+                ),
+              ],
             ],
           ),
         ],
       ),
     );
   }
+}
+
+class _AttentionItem {
+  const _AttentionItem({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.body,
+    required this.count,
+    required this.onTap,
+  });
+  final IconData icon;
+  final Color color;
+  final String title, body;
+  final int count;
+  final VoidCallback onTap;
+}
+
+class _Tool {
+  const _Tool(this.icon, this.label, this.color, this.route, this.count);
+  final IconData icon;
+  final String label;
+  final Color color;
+  final String route;
+  final int count;
 }

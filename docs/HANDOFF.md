@@ -275,3 +275,23 @@ In this order:
   - **008 (16):** a PayMongo request is refused and stores nothing; cash and direct-GCash requests go straight to `pending`, unpaid; request IDs are idempotent and conflicts are refused; one active booking per tourist; pickup area; pickup-code reissue and rate limit.
 - Fresh local reset: all 24 suites pass, 464 assertions.
 - The stray `android/app/src/main/kotlin/com/tricgabay/tricgabay_app/MainActivity.kt` (untracked Flutter template default) was deleted. The build uses `com.tricgabay.app.MainActivity`: the manifest's `.MainActivity` resolves against namespace `com.tricgabay.app`, as the merged manifest shows. A debug APK builds without it.
+
+## 2026-11-23: Admin side fixes (after the owner's admin test)
+
+- **Privacy notice (all roles):** redesigned (header card, three short summary cards, full legal text folded into "Read the full notice", diagnostics switch and the accept checkbox as cards). "Accept and continue" now lets the user in as soon as the server saves the acceptance; it no longer waits for a second status check or for the diagnostics setting.
+- **Admin home:** "Needs your attention" lists only things waiting (system alerts, GCash disputes, payment reviews, pending drivers, data export requests), each with a count and a tap to the right screen. "Admin tools" is a grid with red count badges. Service health was removed (screen, route and card).
+- **System alerts:** tapping the alert row goes straight to the screen that fixes it (payment → GCash disputes, driver location → that driver or the live map). If alerts point to different places, a sheet lists them with "Open" and "Mark resolved".
+- **New migration `20261123010000_resolve_operational_alerts.sql`** (not pushed yet):
+  - `resolve_operational_alert(p_alert_id uuid)`: operations admins close an alert.
+  - `collect_operations_health()` now also closes health alerts whose metric is back to 0. Before this, alerts were never closed and the banner stayed forever.
+  - Already added to `scripts/security/access_rules.ts` (operations group, probe argument `gen_random_uuid()`). After `supabase db push`, regenerate `supabase/security/authorization_catalog.json` as before.
+  - Until it is pushed, "Mark resolved" shows an error; everything else works.
+- **GCash disputes:** cards no longer overlap (name and amount on one row, reference and status chips below). The list shows the last copy at once (also preloaded from the admin home) instead of a spinner. Clear empty state. Detail screen: decision buttons fixed at the bottom; toasts say what happened ("Marked as paid. Both sides were notified.").
+- **Reason boxes** (`showNoteDialog`): show "At least 5 characters" and "Write 2 more characters" instead of a button that silently did nothing.
+- **Toasts:** one style everywhere (dark blue, icon, white text).
+- **Data export requests:** requester name, "Waiting for you" and "Done" sections, empty state, success toast. Fulfilment uses the same `fulfil_data_subject_request` RPC (pgTAP 016 covers it).
+- **Emergency contacts (admin):** opens instantly from a preloaded copy; summary banner; edit form as a bottom sheet with field errors and a visible "check the box first" message.
+- **Places tab:** now has two tabs, Places and Tour packages. Places list with search, category chips (no invisible check mark), visibility switch with a label, and a delete confirmation (delete had none). Package cards show the photo, price and numbered stops.
+- **Reports:** the revenue line no longer dips below zero (`preventCurveOverShooting`, clipped to the chart); period chips have no invisible check mark; "trips" is translated.
+- **Bookings & payment reviews:** tabs start at the left edge with counts; cards rebuilt so nothing overlaps (tour, reference, date, amount, tourist, driver, status chips).
+- **Driver home:** the offline status panel is now opaque, fixing the DriverHome/DriverShell contrast test that failed at text 1.0.

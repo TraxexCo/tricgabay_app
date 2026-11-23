@@ -52,7 +52,6 @@ import 'package:tricgabay_app/features/admin/screens/admin_reports_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/spot_form_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/send_announcement_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/ratings_feedback_screen.dart';
-import 'package:tricgabay_app/features/admin/screens/operations_health_screen.dart';
 import 'package:tricgabay_app/features/admin/screens/gcash_disputes_screen.dart';
 import 'package:tricgabay_app/core/services/gcash_repository.dart';
 import 'package:tricgabay_app/features/admin/screens/monitor_bookings_screen.dart';
@@ -207,19 +206,6 @@ final screenCases = <ScreenCase>[
   ScreenCase('SpotFormScreen', 'admin', () => SpotFormScreen()),
   ScreenCase('SendAnnouncementScreen', 'admin', () => SendAnnouncementScreen()),
   ScreenCase('RatingsFeedbackScreen', 'admin', () => RatingsFeedbackScreen()),
-  ScreenCase(
-    'OperationsHealthScreen',
-    'admin',
-    () => OperationsHealthScreen(
-      loader: () async => {
-        'failed_payments': 2,
-        'blocked_expiry': 1,
-        'cron_failures': 0,
-        'stale_online_drivers': 4,
-        'notification_failures': 3,
-      },
-    ),
-  ),
   ScreenCase('MonitorBookingsScreen', 'admin', () => MonitorBookingsScreen()),
   ScreenCase('ManageTouristsScreen', 'admin', () => ManageTouristsScreen()),
   ScreenCase('ManageSpotsScreen', 'admin', () => ManageSpotsScreen()),

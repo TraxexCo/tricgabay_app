@@ -5451,4 +5451,250 @@ class AppLocalizationsFil extends AppLocalizations {
   @override
   String get tourEndedConfirmation =>
       'Natapos ang tour. Susuriin ng admin ang bayad.';
+
+  @override
+  String get adminGcashDisputesEmptyBody =>
+      'Kapag sinabi ng drayber na hindi dumating ang bayad sa GCash, lalabas ito rito para sa iyong desisyon.';
+
+  @override
+  String get alertKindDriverStale =>
+      'Huminto sa pagpapadala ng lokasyon ang isang drayber';
+
+  @override
+  String get alertKindJobs => 'Pumalya ang isang nakatakdang gawain ng server';
+
+  @override
+  String get alertKindLocation => 'Mukhang mali ang lokasyon ng isang drayber';
+
+  @override
+  String get alertKindNotifications => 'May mga abisong hindi naipadala';
+
+  @override
+  String get alertKindOther => 'Isyu sa sistema';
+
+  @override
+  String get alertKindPayment => 'Problema sa bayad';
+
+  @override
+  String get alertMarkResolved => 'Markahang naayos';
+
+  @override
+  String get alertOpen => 'Buksan';
+
+  @override
+  String get alertResolvedToast => 'Namarkahang naayos ang alerto';
+
+  @override
+  String get alertSystemHint =>
+      'Isyu ito sa server na walang screen para ayusin. Markahang naayos kapag huminto na.';
+
+  @override
+  String get dashAccounts => 'Mga account';
+
+  @override
+  String get dashAllClear => 'Walang naghihintay';
+
+  @override
+  String get dashAllClearBody => 'Walang kailangang desisyunan ngayon.';
+
+  @override
+  String get dashAnnouncements => 'Mag-anunsyo';
+
+  @override
+  String get dashAtAGlance => 'Sa isang tingin';
+
+  @override
+  String get dashDataRequests => 'Hiling sa datos';
+
+  @override
+  String get dashEmergencyNumbers => 'Numero pang-emerhensiya';
+
+  @override
+  String get dashFares => 'Pamasahe';
+
+  @override
+  String get dashLiveMap => 'Live na mapa';
+
+  @override
+  String get dashNeedsAttention => 'Kailangan ng iyong pansin';
+
+  @override
+  String get dashPaymentReviews => 'Pagsusuri ng bayad';
+
+  @override
+  String get dashReceived => 'Natanggap na pamasahe';
+
+  @override
+  String get dashSystemAlerts => 'Mga alerto ng sistema';
+
+  @override
+  String get dashTools => 'Mga gamit ng admin';
+
+  @override
+  String get dashTourists => 'Mga turista';
+
+  @override
+  String get dataRequestAccount => 'May-ari ng account';
+
+  @override
+  String get dataRequestPreparedToast =>
+      'Naihanda na ang export. Maaari na itong i-download ng may-ari ng account.';
+
+  @override
+  String get dataRequestsDone => 'Tapos na';
+
+  @override
+  String get dataRequestsEmptyBody =>
+      'Kapag humingi ng kopya ng kanilang datos ang turista o drayber, lalabas dito ang hiling.';
+
+  @override
+  String get dataRequestsEmptyTitle => 'Wala pang hiling sa datos';
+
+  @override
+  String get dataRequestsNoneWaiting => 'Walang naghihintay na hiling.';
+
+  @override
+  String get dataRequestsWaiting => 'Naghihintay sa iyo';
+
+  @override
+  String get deletePlaceBody =>
+      'Hindi na makikita ng mga turista ang lugar na ito. Kailangang i-edit muna ang mga tour package na gumagamit nito.';
+
+  @override
+  String get disputeDetailTitle => 'Alitan sa GCash';
+
+  @override
+  String get disputeReceiptAttached => 'May resibo';
+
+  @override
+  String get disputeRuledNotPaidToast =>
+      'Minarkahang hindi bayad. Naabisuhan ang dalawang panig.';
+
+  @override
+  String get disputeRuledPaidToast =>
+      'Minarkahang bayad. Naabisuhan ang dalawang panig.';
+
+  @override
+  String get disputeWaivedToast =>
+      'Pinatawad ang pamasahe. Wala nang utang ang turista.';
+
+  @override
+  String get disputeWhatWeKnow => 'Ang sinabi ng dalawang panig';
+
+  @override
+  String get disputeYourDecision => 'Ang iyong desisyon';
+
+  @override
+  String get disputedFare => 'Pamasaheng pinagtatalunan';
+
+  @override
+  String get emergencyConfirmFirst =>
+      'Lagyan muna ng tsek bago i-save ang numero.';
+
+  @override
+  String get emergencyContactSavedToast => 'Na-save ang emergency contact';
+
+  @override
+  String get emergencyContactsEmpty => 'Wala pang emergency contact';
+
+  @override
+  String get emergencyNumberNotSet => 'Wala pang numero';
+
+  @override
+  String get emergencyNumbersAllSet =>
+      'Beripikado at live na ang bawat numero para sa mga turista at drayber.';
+
+  @override
+  String get fieldRequired => 'Kailangan';
+
+  @override
+  String get hiddenFromTourists => 'Nakatago sa mga turista';
+
+  @override
+  String get newPlace => 'Bagong lugar';
+
+  @override
+  String get noBookingsInThisCategoryBody =>
+      'Dito lalabas ang mga tugmang reserbasyon.';
+
+  @override
+  String get placeOptions => 'Mga opsyon sa lugar';
+
+  @override
+  String get pullDownToTryAgain => 'Hilahin pababa para subukang muli.';
+
+  @override
+  String get searchPlaces => 'Maghanap ng lugar';
+
+  @override
+  String get shownToTourists => 'Nakikita ng mga turista';
+
+  @override
+  String alertTimesValue(String value) {
+    return 'Nakita nang $value×';
+  }
+
+  @override
+  String dashBookingsToCheckValue(String value) {
+    return '$value reserbasyon ang susuriin';
+  }
+
+  @override
+  String dashExportsToPrepareValue(String value) {
+    return '$value export ang ihahanda';
+  }
+
+  @override
+  String dashWaitingForDecisionValue(String value) {
+    return '$value ang naghihintay ng iyong desisyon';
+  }
+
+  @override
+  String deletePlaceValue(String value) {
+    return 'Burahin ang $value?';
+  }
+
+  @override
+  String disputeDriverValue(String value) {
+    return 'Drayber: $value';
+  }
+
+  @override
+  String disputesSummaryValue(String value, String secondValue) {
+    return '$value bukas · $secondValue ang kailangang desisyunan';
+  }
+
+  @override
+  String emergencyNumbersMissingValue(String value) {
+    return '$value numero pa ang kailangang beripikahin. Hindi pa ito magagamit ng mga turista.';
+  }
+
+  @override
+  String noteMinimumValue(String value) {
+    return 'Hindi bababa sa $value na karakter';
+  }
+
+  @override
+  String noteTooShortValue(String value) {
+    return 'Magsulat pa ng $value na karakter';
+  }
+
+  @override
+  String packagesTabValue(String value) {
+    return 'Tour package ($value)';
+  }
+
+  @override
+  String placesSummaryValue(
+    String value,
+    String secondValue,
+    String thirdValue,
+  ) {
+    return '$value lugar · $secondValue nakatago · $thirdValue sarado';
+  }
+
+  @override
+  String placesTabValue(String value) {
+    return 'Mga lugar ($value)';
+  }
 }

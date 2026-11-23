@@ -69,6 +69,8 @@ abstract final class MessageCode {
   static const adminEscalationNote = '@l10n/adminEscalationNote';
   static const adminGcashDisputes = '@l10n/adminGcashDisputes';
   static const adminGcashDisputesEmpty = '@l10n/adminGcashDisputesEmpty';
+  static const adminGcashDisputesEmptyBody =
+      '@l10n/adminGcashDisputesEmptyBody';
   static String adminGcashDisputesOpen(int count) =>
       encodeMessage('adminGcashDisputesOpen', [count]);
   static const adminNoReceipt = '@l10n/adminNoReceipt';
@@ -98,6 +100,18 @@ abstract final class MessageCode {
   static const agreedPolicy = '@l10n/agreedPolicy';
   static String agreedValue(String value) =>
       encodeMessage('agreedValue', [value]);
+  static const alertKindDriverStale = '@l10n/alertKindDriverStale';
+  static const alertKindJobs = '@l10n/alertKindJobs';
+  static const alertKindLocation = '@l10n/alertKindLocation';
+  static const alertKindNotifications = '@l10n/alertKindNotifications';
+  static const alertKindOther = '@l10n/alertKindOther';
+  static const alertKindPayment = '@l10n/alertKindPayment';
+  static const alertMarkResolved = '@l10n/alertMarkResolved';
+  static const alertOpen = '@l10n/alertOpen';
+  static const alertResolvedToast = '@l10n/alertResolvedToast';
+  static const alertSystemHint = '@l10n/alertSystemHint';
+  static String alertTimesValue(String value) =>
+      encodeMessage('alertTimesValue', [value]);
   static const all = '@l10n/all';
   static const allStopsAreConfirmedOpenTripControlsToFinish =
       '@l10n/allStopsAreConfirmedOpenTripControlsToFinish';
@@ -447,7 +461,35 @@ abstract final class MessageCode {
     'customTourNewBookingsUseTheseRatesExistingBookingsKeepTheirAgreedFareValue',
     [value, secondValue],
   );
+  static const dashAccounts = '@l10n/dashAccounts';
+  static const dashAllClear = '@l10n/dashAllClear';
+  static const dashAllClearBody = '@l10n/dashAllClearBody';
+  static const dashAnnouncements = '@l10n/dashAnnouncements';
+  static const dashAtAGlance = '@l10n/dashAtAGlance';
+  static String dashBookingsToCheckValue(String value) =>
+      encodeMessage('dashBookingsToCheckValue', [value]);
+  static const dashDataRequests = '@l10n/dashDataRequests';
+  static const dashEmergencyNumbers = '@l10n/dashEmergencyNumbers';
+  static String dashExportsToPrepareValue(String value) =>
+      encodeMessage('dashExportsToPrepareValue', [value]);
+  static const dashFares = '@l10n/dashFares';
+  static const dashLiveMap = '@l10n/dashLiveMap';
+  static const dashNeedsAttention = '@l10n/dashNeedsAttention';
+  static const dashPaymentReviews = '@l10n/dashPaymentReviews';
+  static const dashReceived = '@l10n/dashReceived';
+  static const dashSystemAlerts = '@l10n/dashSystemAlerts';
+  static const dashTools = '@l10n/dashTools';
+  static const dashTourists = '@l10n/dashTourists';
+  static String dashWaitingForDecisionValue(String value) =>
+      encodeMessage('dashWaitingForDecisionValue', [value]);
   static const dataExportRequests = '@l10n/dataExportRequests';
+  static const dataRequestAccount = '@l10n/dataRequestAccount';
+  static const dataRequestPreparedToast = '@l10n/dataRequestPreparedToast';
+  static const dataRequestsDone = '@l10n/dataRequestsDone';
+  static const dataRequestsEmptyBody = '@l10n/dataRequestsEmptyBody';
+  static const dataRequestsEmptyTitle = '@l10n/dataRequestsEmptyTitle';
+  static const dataRequestsNoneWaiting = '@l10n/dataRequestsNoneWaiting';
+  static const dataRequestsWaiting = '@l10n/dataRequestsWaiting';
   static const dataRightsIntro = '@l10n/dataRightsIntro';
   static const dataStepDownloadBody = '@l10n/dataStepDownloadBody';
   static const dataStepDownloadTitle = '@l10n/dataStepDownloadTitle';
@@ -469,6 +511,9 @@ abstract final class MessageCode {
   static const deletePackageBody = '@l10n/deletePackageBody';
   static String deletePackageValue(String value) =>
       encodeMessage('deletePackageValue', [value]);
+  static const deletePlaceBody = '@l10n/deletePlaceBody';
+  static String deletePlaceValue(String value) =>
+      encodeMessage('deletePlaceValue', [value]);
   static String deletedValue(String value) =>
       encodeMessage('deletedValue', [value]);
   static const deletingAccount = '@l10n/deletingAccount';
@@ -486,8 +531,20 @@ abstract final class MessageCode {
   static const discoverBustos = '@l10n/discoverBustos';
   static String discoverSubtitle(String places, String tours) =>
       encodeMessage('discoverSubtitle', [places, tours]);
+  static const disputeDetailTitle = '@l10n/disputeDetailTitle';
+  static String disputeDriverValue(String value) =>
+      encodeMessage('disputeDriverValue', [value]);
   static const disputePaymentReportAProblem =
       '@l10n/disputePaymentReportAProblem';
+  static const disputeReceiptAttached = '@l10n/disputeReceiptAttached';
+  static const disputeRuledNotPaidToast = '@l10n/disputeRuledNotPaidToast';
+  static const disputeRuledPaidToast = '@l10n/disputeRuledPaidToast';
+  static const disputeWaivedToast = '@l10n/disputeWaivedToast';
+  static const disputeWhatWeKnow = '@l10n/disputeWhatWeKnow';
+  static const disputeYourDecision = '@l10n/disputeYourDecision';
+  static const disputedFare = '@l10n/disputedFare';
+  static String disputesSummaryValue(String value, String secondValue) =>
+      encodeMessage('disputesSummaryValue', [value, secondValue]);
   static String distanceKilometers(String value) =>
       encodeMessage('distanceKilometers', [value]);
   static String distanceMeters(String value) =>
@@ -587,10 +644,17 @@ abstract final class MessageCode {
   static const emailOffice = '@l10n/emailOffice';
   static const emailReadOnly = '@l10n/emailReadOnly';
   static const emergency = '@l10n/emergency';
+  static const emergencyConfirmFirst = '@l10n/emergencyConfirmFirst';
   static const emergencyContact = '@l10n/emergencyContact';
+  static const emergencyContactSavedToast = '@l10n/emergencyContactSavedToast';
   static const emergencyContacts = '@l10n/emergencyContacts';
+  static const emergencyContactsEmpty = '@l10n/emergencyContactsEmpty';
   static const emergencyContactsSettings = '@l10n/emergencyContactsSettings';
   static const emergencyHelp = '@l10n/emergencyHelp';
+  static const emergencyNumberNotSet = '@l10n/emergencyNumberNotSet';
+  static const emergencyNumbersAllSet = '@l10n/emergencyNumbersAllSet';
+  static String emergencyNumbersMissingValue(String value) =>
+      encodeMessage('emergencyNumbersMissingValue', [value]);
   static const emergencySafety = '@l10n/emergencySafety';
   static const endSafelyReviewPayment = '@l10n/endSafelyReviewPayment';
   static const endTheTourSafelyFirstToOpenASettlementReview =
@@ -689,6 +753,7 @@ abstract final class MessageCode {
   static const feedbackSubmittedThankYou = '@l10n/feedbackSubmittedThankYou';
   static String fieldMustBeBetween(String field, int minimum, int maximum) =>
       encodeMessage('fieldMustBeBetween', [field, minimum, maximum]);
+  static const fieldRequired = '@l10n/fieldRequired';
   static const filipino = '@l10n/filipino';
   static const filipinoName = '@l10n/filipinoName';
   static const finalCharge = '@l10n/finalCharge';
@@ -873,6 +938,7 @@ abstract final class MessageCode {
   static const helpSupport = '@l10n/helpSupport';
   static const heritage = '@l10n/heritage';
   static const hidden = '@l10n/hidden';
+  static const hiddenFromTourists = '@l10n/hiddenFromTourists';
   static String hideValue(String value) => encodeMessage('hideValue', [value]);
   static const history = '@l10n/history';
   static String hoursAgoValue(String value) =>
@@ -1093,6 +1159,7 @@ abstract final class MessageCode {
       encodeMessage('newBookingsUseTheseFaresValue', [value]);
   static const newPackage = '@l10n/newPackage';
   static const newPassword = '@l10n/newPassword';
+  static const newPlace = '@l10n/newPlace';
   static const newRideRequest = '@l10n/newRideRequest';
   static const newTouristRating = '@l10n/newTouristRating';
   static const next = '@l10n/next';
@@ -1105,6 +1172,8 @@ abstract final class MessageCode {
   static const noBlockedDrivers = '@l10n/noBlockedDrivers';
   static const noBookingsHereYet = '@l10n/noBookingsHereYet';
   static const noBookingsInThisCategory = '@l10n/noBookingsInThisCategory';
+  static const noBookingsInThisCategoryBody =
+      '@l10n/noBookingsInThisCategoryBody';
   static const noCharge = '@l10n/noCharge';
   static const noCompletedBookingsFoundForThisPeriod =
       '@l10n/noCompletedBookingsFoundForThisPeriod';
@@ -1146,6 +1215,10 @@ abstract final class MessageCode {
   static const notRated = '@l10n/notRated';
   static const notVerified = '@l10n/notVerified';
   static const notYet = '@l10n/notYet';
+  static String noteMinimumValue(String value) =>
+      encodeMessage('noteMinimumValue', [value]);
+  static String noteTooShortValue(String value) =>
+      encodeMessage('noteTooShortValue', [value]);
   static const notificationDeliveryFailures =
       '@l10n/notificationDeliveryFailures';
   static const notificationUpdateTitle = '@l10n/notificationUpdateTitle';
@@ -1254,6 +1327,8 @@ abstract final class MessageCode {
       encodeMessage('packageSavedValue', [value]);
   static const packageStopsChangedSelectThePackageAgain =
       '@l10n/packageStopsChangedSelectThePackageAgain';
+  static String packagesTabValue(String value) =>
+      encodeMessage('packagesTabValue', [value]);
   static const pageNotFoundBody = '@l10n/pageNotFoundBody';
   static const pageNotFoundTitle = '@l10n/pageNotFoundTitle';
   static const paid = '@l10n/paid';
@@ -1349,10 +1424,18 @@ abstract final class MessageCode {
   static const pickupVerificationIsTemporarilyLockedPleaseWaitAndTryAgain =
       '@l10n/pickupVerificationIsTemporarilyLockedPleaseWaitAndTryAgain';
   static const pickupWait = '@l10n/pickupWait';
+  static const placeOptions = '@l10n/placeOptions';
   static const placeholderTheOwnerMustVerifyAndEnterANumber =
       '@l10n/placeholderTheOwnerMustVerifyAndEnterANumber';
   static const places = '@l10n/places';
   static const placesOnOurTours = '@l10n/placesOnOurTours';
+  static String placesSummaryValue(
+    String value,
+    String secondValue,
+    String thirdValue,
+  ) => encodeMessage('placesSummaryValue', [value, secondValue, thirdValue]);
+  static String placesTabValue(String value) =>
+      encodeMessage('placesTabValue', [value]);
   static const placesYouSaved = '@l10n/placesYouSaved';
   static const planYourTrip = '@l10n/planYourTrip';
   static const plateNumber = '@l10n/plateNumber';
@@ -1437,6 +1520,7 @@ abstract final class MessageCode {
   static const publishTheseFixedFares = '@l10n/publishTheseFixedFares';
   static const publishedPolicy = '@l10n/publishedPolicy';
   static const publishing = '@l10n/publishing';
+  static const pullDownToTryAgain = '@l10n/pullDownToTryAgain';
   static const punctual = '@l10n/punctual';
   static const radius130Km = '@l10n/radius130Km';
   static const rateDriver = '@l10n/rateDriver';
@@ -1591,6 +1675,7 @@ abstract final class MessageCode {
   static const search = '@l10n/search';
   static const searchAgain = '@l10n/searchAgain';
   static const searchDrivers = '@l10n/searchDrivers';
+  static const searchPlaces = '@l10n/searchPlaces';
   static const searchSpots = '@l10n/searchSpots';
   static const searchWindowEnded = '@l10n/searchWindowEnded';
   static const secureYourAccount = '@l10n/secureYourAccount';
@@ -1646,6 +1731,7 @@ abstract final class MessageCode {
       '@l10n/shareThisCodeOnlyWhenYouAreOnBoard';
   static const sharingLocation = '@l10n/sharingLocation';
   static String showValue(String value) => encodeMessage('showValue', [value]);
+  static const shownToTourists = '@l10n/shownToTourists';
   static const signInAfterConfirmingYourEmail =
       '@l10n/signInAfterConfirmingYourEmail';
   static const signInBeforeSendingFeedback =

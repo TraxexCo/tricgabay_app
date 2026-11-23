@@ -436,7 +436,9 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                                             .clamp(200, 300)
                                       : 108 * scale,
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: .10),
+                                    // Opaque, so the white status text stays
+                                    // readable wherever the panel sits.
+                                    color: AppColors.darkSurface,
                                     borderRadius: BorderRadius.circular(18),
                                   ),
                                   clipBehavior: Clip.antiAlias,

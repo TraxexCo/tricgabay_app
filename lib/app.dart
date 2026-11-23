@@ -3,7 +3,6 @@ import 'core/widgets/shared_widgets.dart';
 import 'core/widgets/data_rights_screen.dart';
 import 'features/admin/screens/data_requests_admin_screen.dart';
 import 'features/admin/screens/emergency_contacts_admin_screen.dart';
-import 'features/admin/screens/operations_health_screen.dart';
 import 'features/driver/screens/driver_application_pending_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -165,7 +164,6 @@ final appRouter = GoRouter(
           ],
           final value
               when value.startsWith('/admin/emergency-contacts') ||
-                  value.startsWith('/admin/health') ||
                   value.startsWith('/admin/live-map') ||
                   value.startsWith('/admin/reports') =>
             ['operations'],
@@ -529,10 +527,6 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/admin/emergency-contacts',
       builder: (context, state) => const EmergencyContactsAdminScreen(),
-    ),
-    GoRoute(
-      path: '/admin/health',
-      builder: (context, state) => const OperationsHealthScreen(),
     ),
     GoRoute(
       path: '/admin/live-map',

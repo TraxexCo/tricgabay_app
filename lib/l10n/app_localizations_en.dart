@@ -5372,4 +5372,248 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tourEndedConfirmation =>
       'Tour ended. An admin will review the payment.';
+
+  @override
+  String get adminGcashDisputesEmptyBody =>
+      'When a driver says a GCash payment never arrived, it shows up here for your decision.';
+
+  @override
+  String get alertKindDriverStale => 'A driver stopped sending their location';
+
+  @override
+  String get alertKindJobs => 'A scheduled server task failed';
+
+  @override
+  String get alertKindLocation => 'A driver\'s location looks wrong';
+
+  @override
+  String get alertKindNotifications => 'Some notifications failed to send';
+
+  @override
+  String get alertKindOther => 'System issue';
+
+  @override
+  String get alertKindPayment => 'Payment problem';
+
+  @override
+  String get alertMarkResolved => 'Mark resolved';
+
+  @override
+  String get alertOpen => 'Open';
+
+  @override
+  String get alertResolvedToast => 'Alert marked resolved';
+
+  @override
+  String get alertSystemHint =>
+      'This is a server issue with no screen to fix it. Mark it resolved once it stops.';
+
+  @override
+  String get dashAccounts => 'Accounts';
+
+  @override
+  String get dashAllClear => 'All caught up';
+
+  @override
+  String get dashAllClearBody => 'Nothing needs your decision right now.';
+
+  @override
+  String get dashAnnouncements => 'Announce';
+
+  @override
+  String get dashAtAGlance => 'At a glance';
+
+  @override
+  String get dashDataRequests => 'Data requests';
+
+  @override
+  String get dashEmergencyNumbers => 'Emergency numbers';
+
+  @override
+  String get dashFares => 'Fares';
+
+  @override
+  String get dashLiveMap => 'Live map';
+
+  @override
+  String get dashNeedsAttention => 'Needs your attention';
+
+  @override
+  String get dashPaymentReviews => 'Payment reviews';
+
+  @override
+  String get dashReceived => 'Fares received';
+
+  @override
+  String get dashSystemAlerts => 'System alerts';
+
+  @override
+  String get dashTools => 'Admin tools';
+
+  @override
+  String get dashTourists => 'Tourists';
+
+  @override
+  String get dataRequestAccount => 'Account holder';
+
+  @override
+  String get dataRequestPreparedToast =>
+      'Export prepared. The account owner can now download it.';
+
+  @override
+  String get dataRequestsDone => 'Done';
+
+  @override
+  String get dataRequestsEmptyBody =>
+      'When a tourist or driver asks for a copy of their data, the request appears here.';
+
+  @override
+  String get dataRequestsEmptyTitle => 'No data requests yet';
+
+  @override
+  String get dataRequestsNoneWaiting => 'No requests are waiting.';
+
+  @override
+  String get dataRequestsWaiting => 'Waiting for you';
+
+  @override
+  String get deletePlaceBody =>
+      'Tourists will no longer see this place. Tour packages that use it must be edited first.';
+
+  @override
+  String get disputeDetailTitle => 'GCash dispute';
+
+  @override
+  String get disputeReceiptAttached => 'Receipt attached';
+
+  @override
+  String get disputeRuledNotPaidToast =>
+      'Marked as not paid. Both sides were notified.';
+
+  @override
+  String get disputeRuledPaidToast =>
+      'Marked as paid. Both sides were notified.';
+
+  @override
+  String get disputeWaivedToast =>
+      'Fare waived. The tourist no longer owes it.';
+
+  @override
+  String get disputeWhatWeKnow => 'What both sides said';
+
+  @override
+  String get disputeYourDecision => 'Your decision';
+
+  @override
+  String get disputedFare => 'Disputed fare';
+
+  @override
+  String get emergencyConfirmFirst => 'Check this box before saving a number.';
+
+  @override
+  String get emergencyContactSavedToast => 'Emergency contact saved';
+
+  @override
+  String get emergencyContactsEmpty => 'No emergency contacts yet';
+
+  @override
+  String get emergencyNumberNotSet => 'Number not set yet';
+
+  @override
+  String get emergencyNumbersAllSet =>
+      'Every number is verified and live for tourists and drivers.';
+
+  @override
+  String get fieldRequired => 'Required';
+
+  @override
+  String get hiddenFromTourists => 'Hidden from tourists';
+
+  @override
+  String get newPlace => 'New place';
+
+  @override
+  String get noBookingsInThisCategoryBody =>
+      'Bookings that match show up here.';
+
+  @override
+  String get placeOptions => 'Place options';
+
+  @override
+  String get pullDownToTryAgain => 'Pull down to try again.';
+
+  @override
+  String get searchPlaces => 'Search places';
+
+  @override
+  String get shownToTourists => 'Shown to tourists';
+
+  @override
+  String alertTimesValue(String value) {
+    return '$value× seen';
+  }
+
+  @override
+  String dashBookingsToCheckValue(String value) {
+    return '$value bookings to check';
+  }
+
+  @override
+  String dashExportsToPrepareValue(String value) {
+    return '$value exports to prepare';
+  }
+
+  @override
+  String dashWaitingForDecisionValue(String value) {
+    return '$value waiting for your decision';
+  }
+
+  @override
+  String deletePlaceValue(String value) {
+    return 'Delete $value?';
+  }
+
+  @override
+  String disputeDriverValue(String value) {
+    return 'Driver: $value';
+  }
+
+  @override
+  String disputesSummaryValue(String value, String secondValue) {
+    return '$value open · $secondValue need a decision';
+  }
+
+  @override
+  String emergencyNumbersMissingValue(String value) {
+    return '$value numbers still need to be verified. Tourists see these as unavailable.';
+  }
+
+  @override
+  String noteMinimumValue(String value) {
+    return 'At least $value characters';
+  }
+
+  @override
+  String noteTooShortValue(String value) {
+    return 'Write $value more characters';
+  }
+
+  @override
+  String packagesTabValue(String value) {
+    return 'Tour packages ($value)';
+  }
+
+  @override
+  String placesSummaryValue(
+    String value,
+    String secondValue,
+    String thirdValue,
+  ) {
+    return '$value places · $secondValue hidden · $thirdValue closed';
+  }
+
+  @override
+  String placesTabValue(String value) {
+    return 'Places ($value)';
+  }
 }

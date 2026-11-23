@@ -10,6 +10,7 @@ import '../../../core/session/app_session.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../models/tourist_spot_model.dart';
+import '../widgets/admin_ui.dart';
 
 /// Creates a tour package, or edits one when [package] is given: its name,
 /// description, fixed price and the ordered stops the driver follows.
@@ -67,8 +68,10 @@ class _PackageFormScreenState extends State<PackageFormScreen> {
   Future<void> _save() async {
     if (_saving || !_form.currentState!.validate()) return;
     if (_stops.length < 2) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.chooseTwoToTwelveDifferentStops)),
+      showAdminToast(
+        context,
+        context.l10n.chooseTwoToTwelveDifferentStops,
+        error: true,
       );
       return;
     }
@@ -82,17 +85,11 @@ class _PackageFormScreenState extends State<PackageFormScreen> {
         spotIds: _stops,
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.packageSavedValue(_name.text))),
-      );
+      showAdminToast(context, context.l10n.packageSavedValue(_name.text));
       context.pop();
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.message(ErrorMessages.forError(error))),
-          ),
-        );
+        showAdminToast(context, ErrorMessages.forError(error), error: true);
       }
     } finally {
       if (mounted) setState(() => _saving = false);

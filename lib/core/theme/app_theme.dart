@@ -326,11 +326,16 @@ class AppTheme {
   static SnackBarThemeData get _snackBarTheme {
     return SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      backgroundColor: AppColors.textPrimary,
+      backgroundColor: AppColors.primaryDark,
       actionTextColor: AppColors.secondary,
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      contentTextStyle: GoogleFonts.poppins(fontSize: 13),
+      elevation: 6,
+      insetPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      contentTextStyle: GoogleFonts.poppins(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: Colors.white,
+      ),
     );
   }
 

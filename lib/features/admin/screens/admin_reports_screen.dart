@@ -275,16 +275,19 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
                       (e) => Padding(
                         padding: const EdgeInsets.only(right: 8.0),
                         child: ChoiceChip(
+                          showCheckmark: false,
                           label: Text(context.message(e)),
                           selected: e == _selectedFilter,
                           onSelected: (val) {
                             if (val) setState(() => _selectedFilter = e);
                           },
                           selectedColor: AppColors.primary,
-                          labelStyle: TextStyle(
+                          labelStyle: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
                             color: e == _selectedFilter
                                 ? Colors.white
-                                : Colors.black,
+                                : AppColors.textPrimary,
                           ),
                         ),
                       ),
@@ -376,12 +379,17 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
                                 ),
                               ),
                               borderData: FlBorderData(show: false),
+                              clipData: const FlClipData.all(),
                               minY: 0,
                               maxY: maxY,
                               lineBarsData: [
                                 LineChartBarData(
                                   spots: chartData,
                                   isCurved: true,
+                                  // Smooth, but never dip under zero between
+                                  // a busy day and an empty one.
+                                  preventCurveOverShooting: true,
+                                  curveSmoothness: .25,
                                   color: AppColors.primary,
                                   barWidth: 3,
                                   dotData: const FlDotData(show: false),
@@ -422,7 +430,7 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
                         driver.rating == 0
                             ? MessageCode.notRated
                             : '${driver.rating.toStringAsFixed(1)} ★',
-                        '${driver.trips} ${driver.trips == 1 ? 'trip' : 'trips'}',
+                        context.l10n.tripsValue(driver.trips.toString()),
                       ),
                     ),
                 ],

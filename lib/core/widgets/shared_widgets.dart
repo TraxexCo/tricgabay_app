@@ -445,11 +445,33 @@ class AppSnackbar {
 
   static void _show(BuildContext context, String message, Color color) {
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
+    final success = color == AppColors.success;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
       SnackBar(
-        content: Text(context.message(message)),
-        backgroundColor: color,
+        backgroundColor: success ? AppColors.primaryDark : color,
         behavior: SnackBarBehavior.floating,
+        content: Row(
+          children: [
+            Icon(
+              success
+                  ? Icons.check_circle_rounded
+                  : Icons.error_outline_rounded,
+              color: success ? AppColors.secondary : Colors.white,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                context.message(message),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

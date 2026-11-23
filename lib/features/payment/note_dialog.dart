@@ -48,6 +48,7 @@ class _NoteDialog extends StatefulWidget {
 class _NoteDialogState extends State<_NoteDialog> {
   // Owned by the dialog so it outlives the closing animation.
   final _controller = TextEditingController();
+  bool _touched = false;
 
   @override
   void dispose() {
@@ -55,34 +56,64 @@ class _NoteDialogState extends State<_NoteDialog> {
     super.dispose();
   }
 
+  bool get _valid => _controller.text.trim().length >= widget.minLength;
+
   @override
-  Widget build(BuildContext context) => AlertDialog(
-    title: Text(widget.title),
-    content: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (widget.body != null) Text(widget.body!),
-        TextField(
-          controller: _controller,
-          maxLength: widget.maxLength,
-          minLines: 1,
-          maxLines: 4,
-          decoration: InputDecoration(labelText: widget.label),
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final needsText = widget.minLength > 0;
+    return AlertDialog(
+      title: Text(widget.title),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (widget.body != null) ...[
+            Text(widget.body!),
+            const SizedBox(height: 12),
+          ],
+          TextField(
+            controller: _controller,
+            maxLength: widget.maxLength,
+            minLines: needsText ? 3 : 1,
+            maxLines: 5,
+            autofocus: true,
+            textCapitalization: TextCapitalization.sentences,
+            onChanged: (_) => setState(() => _touched = true),
+            decoration: InputDecoration(
+              labelText: widget.label,
+              alignLabelWithHint: true,
+              helperText: needsText
+                  ? l.noteMinimumValue(widget.minLength.toString())
+                  : null,
+              errorText: needsText && _touched && !_valid
+                  ? l.noteTooShortValue(
+                      (widget.minLength - _controller.text.trim().length)
+                          .toString(),
+                    )
+                  : null,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l.cancel),
+        ),
+        FilledButton(
+          // Always tappable: a too-short note shows why instead of a
+          // button that silently does nothing.
+          onPressed: () {
+            if (_valid) {
+              Navigator.pop(context, _controller.text.trim());
+            } else {
+              setState(() => _touched = true);
+            }
+          },
+          child: Text(widget.confirmLabel),
         ),
       ],
-    ),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(context),
-        child: Text(context.l10n.cancel),
-      ),
-      FilledButton(
-        onPressed: () {
-          final text = _controller.text.trim();
-          if (text.length >= widget.minLength) Navigator.pop(context, text);
-        },
-        child: Text(widget.confirmLabel),
-      ),
-    ],
-  );
+    );
+  }
 }
