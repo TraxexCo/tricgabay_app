@@ -16,6 +16,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'pickup_recovery_material.dart';
 
 import '../../models/booking_model.dart';
+import '../../models/place_photos.dart';
 import '../../models/tourist_spot_model.dart';
 import '../../models/trip_record.dart';
 import '../config/backend_config.dart';
@@ -145,9 +146,13 @@ class BackendRepository {
             category: _category(map['category']),
             latitude: MapCoordinateValidator.finiteNumber(map['latitude'])!,
             longitude: MapCoordinateValidator.finiteNumber(map['longitude'])!,
-            imageUrls: map['image_url'] == null || map['image_url'] == ''
-                ? const []
-                : [map['image_url'] as String],
+            // Bundled real photos win; otherwise the one stored image.
+            imageUrls: PlacePhotos.pathsFor(
+              map['id'] as String,
+              map['image_url'] == null || map['image_url'] == ''
+                  ? const []
+                  : [map['image_url'] as String],
+            ),
             openingHours: map['opening_hours'] ?? '',
             entranceFee: map['entrance_fee_note'] ?? '',
             tips: List<String>.from(map['tips'] ?? const []),

@@ -1432,5 +1432,59 @@
     "value": "place,locality",
     "kind": "protocol",
     "reason": "Mapbox reverse-geocoding feature types query parameter; never shown in the interface."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "Judgefloro",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "JFVelasquez Floro",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "KurteousDerhen",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "Elmer B. Domingo",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "FBenjr123",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "Public domain",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "CC0",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "CC BY-SA 3.0",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "CC BY-SA 4.0",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
   }
 ]

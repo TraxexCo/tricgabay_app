@@ -9688,6 +9688,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Places ({value})'**
   String placesTabValue(String value);
+
+  /// No description provided for @photoCreditValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo: {value} · {secondValue} · Wikimedia Commons'**
+  String photoCreditValue(String value, String secondValue);
 }
 
 class _AppLocalizationsDelegate

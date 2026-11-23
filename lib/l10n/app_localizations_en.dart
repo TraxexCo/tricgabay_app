@@ -5616,4 +5616,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String placesTabValue(String value) {
     return 'Places ($value)';
   }
+
+  @override
+  String photoCreditValue(String value, String secondValue) {
+    return 'Photo: $value · $secondValue · Wikimedia Commons';
+  }
 }

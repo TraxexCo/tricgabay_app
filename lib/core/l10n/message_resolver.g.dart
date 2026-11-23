@@ -1235,6 +1235,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'phone' => l.phone,
     'phoneNumber' => l.phoneNumber,
     'phoneNumberIsRequired' => l.phoneNumberIsRequired,
+    'photoCreditValue' => l.photoCreditValue(text(0), text(1)),
     'photoGallery' => l.photoGallery,
     'photos' => l.photos,
     'pickup' => l.pickup,

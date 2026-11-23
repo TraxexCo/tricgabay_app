@@ -5697,4 +5697,9 @@ class AppLocalizationsFil extends AppLocalizations {
   String placesTabValue(String value) {
     return 'Mga lugar ($value)';
   }
+
+  @override
+  String photoCreditValue(String value, String secondValue) {
+    return 'Larawan: $value · $secondValue · Wikimedia Commons';
+  }
 }

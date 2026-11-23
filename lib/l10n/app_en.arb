@@ -2807,5 +2807,7 @@
   "placesSummaryValue": "{value} places · {secondValue} hidden · {thirdValue} closed",
   "@placesSummaryValue": {"placeholders": {"value": {"type": "String"}, "secondValue": {"type": "String"}, "thirdValue": {"type": "String"}}},
   "placesTabValue": "Places ({value})",
-  "@placesTabValue": {"placeholders": {"value": {"type": "String"}}}
+  "@placesTabValue": {"placeholders": {"value": {"type": "String"}}},
+  "photoCreditValue": "Photo: {value} · {secondValue} · Wikimedia Commons",
+  "@photoCreditValue": {"placeholders": {"value": {"type": "String"}, "secondValue": {"type": "String"}}}
 }

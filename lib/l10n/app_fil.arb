@@ -2807,5 +2807,7 @@
   "placesSummaryValue": "{value} lugar · {secondValue} nakatago · {thirdValue} sarado",
   "@placesSummaryValue": {"placeholders": {"value": {"type": "String"}, "secondValue": {"type": "String"}, "thirdValue": {"type": "String"}}},
   "placesTabValue": "Mga lugar ({value})",
-  "@placesTabValue": {"placeholders": {"value": {"type": "String"}}}
+  "@placesTabValue": {"placeholders": {"value": {"type": "String"}}},
+  "photoCreditValue": "Larawan: {value} · {secondValue} · Wikimedia Commons",
+  "@photoCreditValue": {"placeholders": {"value": {"type": "String"}, "secondValue": {"type": "String"}}}
 }

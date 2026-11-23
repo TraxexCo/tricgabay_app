@@ -80,6 +80,7 @@ flutter:
   assets:
     - assets/images/tric_gabay_logo.png
     - assets/optimized_images/
+    - assets/optimized_images/places/
     - assets/google_fonts/
 
 # Native launch screen. It matches the first Flutter frame (brand blue with

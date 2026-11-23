@@ -1,3 +1,4 @@
+import 'place_photos.dart';
 import '../core/constants/app_brand.dart';
 import 'package:tricgabay_app/core/l10n/message_codes.g.dart';
 
@@ -108,7 +109,9 @@ class TouristSpotModel {
       latitude: 14.9532835,
       longitude: 120.9186307,
       category: SpotCategory.heritage,
-      imageUrls: ['assets/images/bustos_heritage_park.jpg'],
+      imageUrls: PlacePhotos.pathsFor('bustos-heritage-park', [
+        'assets/images/bustos_heritage_park.jpg',
+      ]),
       openingHours: 'Open daily',
       entranceFee: 'Free',
       tips: [
@@ -127,7 +130,9 @@ class TouristSpotModel {
       latitude: 14.9344482,
       longitude: 120.9070123,
       category: SpotCategory.church,
-      imageUrls: ['assets/images/san_isidro_labrador_parish.jpg'],
+      imageUrls: PlacePhotos.pathsFor('sta-cruz-chapel', [
+        'assets/images/san_isidro_labrador_parish.jpg',
+      ]),
       openingHours: MessageCode.checkLocally,
       entranceFee: 'Free',
       tips: ['Dress respectfully', 'Keep voices low during services'],
@@ -143,7 +148,9 @@ class TouristSpotModel {
       latitude: 14.9578495,
       longitude: 120.9437551,
       category: SpotCategory.church,
-      imageUrls: ['assets/images/sto_nino_tugyaw_festival.jpg'],
+      imageUrls: PlacePhotos.pathsFor('sta-monica-chapel', [
+        'assets/images/sto_nino_tugyaw_festival.jpg',
+      ]),
       openingHours: MessageCode.checkLocally,
       entranceFee: 'Free',
       tips: ['Dress respectfully', 'Confirm service times before visiting'],
@@ -159,7 +166,9 @@ class TouristSpotModel {
       latitude: 14.9550547,
       longitude: 120.9096725,
       category: SpotCategory.church,
-      imageUrls: ['assets/images/sto_nino_tugyaw_festival.jpg'],
+      imageUrls: PlacePhotos.pathsFor('sto-nino-church', [
+        'assets/images/sto_nino_tugyaw_festival.jpg',
+      ]),
       openingHours: 'Check parish schedule',
       entranceFee: 'Free',
       tips: ['Dress modestly', 'Avoid disrupting Mass or private prayer'],
@@ -175,7 +184,9 @@ class TouristSpotModel {
       latitude: 14.9530664,
       longitude: 120.9192362,
       category: SpotCategory.market,
-      imageUrls: ['assets/images/minasa_festival.jpg'],
+      imageUrls: PlacePhotos.pathsFor('zenys-minasa', [
+        'assets/images/minasa_festival.jpg',
+      ]),
       openingHours: 'Check store hours',
       entranceFee: 'No entrance fee',
       tips: ['Ask about available box sizes', 'Buy near the end of the tour'],
@@ -191,7 +202,9 @@ class TouristSpotModel {
       latitude: 14.9432705,
       longitude: 120.9069568,
       category: SpotCategory.church,
-      imageUrls: ['assets/images/san_isidro_labrador_parish.jpg'],
+      imageUrls: PlacePhotos.pathsFor('st-peter-chapel', [
+        'assets/images/san_isidro_labrador_parish.jpg',
+      ]),
       openingHours: MessageCode.checkLocally,
       entranceFee: 'Free',
       tips: ['Dress respectfully', 'Confirm chapel access before visiting'],
@@ -207,7 +220,9 @@ class TouristSpotModel {
       latitude: 14.9490860,
       longitude: 120.9115939,
       category: SpotCategory.church,
-      imageUrls: ['assets/images/sto_nino_tugyaw_festival.jpg'],
+      imageUrls: PlacePhotos.pathsFor('sto-nino-chapel', [
+        'assets/images/sto_nino_tugyaw_festival.jpg',
+      ]),
       openingHours: MessageCode.checkLocally,
       entranceFee: 'Free',
       tips: ['Dress respectfully', 'Confirm chapel access before visiting'],
@@ -222,7 +237,9 @@ class TouristSpotModel {
       latitude: 14.9553980,
       longitude: 120.9177589,
       category: SpotCategory.church,
-      imageUrls: ['assets/images/san_isidro_labrador_parish.jpg'],
+      imageUrls: PlacePhotos.pathsFor('perpetual-help-chapel', [
+        'assets/images/san_isidro_labrador_parish.jpg',
+      ]),
       openingHours: MessageCode.checkLocally,
       entranceFee: 'Free',
       tips: ['Dress respectfully', 'Keep voices low during services'],
@@ -237,7 +254,9 @@ class TouristSpotModel {
       latitude: 14.9504841,
       longitude: 120.9327939,
       category: SpotCategory.church,
-      imageUrls: ['assets/images/sto_nino_tugyaw_festival.jpg'],
+      imageUrls: PlacePhotos.pathsFor('sto-rosario-chapel', [
+        'assets/images/sto_nino_tugyaw_festival.jpg',
+      ]),
       openingHours: MessageCode.checkLocally,
       entranceFee: 'Free',
       tips: ['Dress respectfully', 'Confirm chapel access before visiting'],
@@ -252,7 +271,9 @@ class TouristSpotModel {
       latitude: 14.9365935,
       longitude: 120.9277048,
       category: SpotCategory.church,
-      imageUrls: ['assets/images/san_isidro_labrador_parish.jpg'],
+      imageUrls: PlacePhotos.pathsFor('immaculate-conception-chapel', [
+        'assets/images/san_isidro_labrador_parish.jpg',
+      ]),
       openingHours: MessageCode.checkLocally,
       entranceFee: 'Free',
       tips: ['Dress respectfully', 'Keep voices low during services'],
@@ -268,7 +289,9 @@ class TouristSpotModel {
       latitude: 14.9442340,
       longitude: 120.9082740,
       category: SpotCategory.other,
-      imageUrls: ['assets/images/galilee_wonderland_resort.jpg'],
+      imageUrls: PlacePhotos.pathsFor('galilee-wailing-wall', [
+        'assets/images/galilee_wonderland_resort.jpg',
+      ]),
       openingHours: MessageCode.checkLocally,
       entranceFee: MessageCode.checkLocally,
       tips: ['Confirm access before visiting', 'Allow time for photos'],
@@ -332,7 +355,7 @@ class TourPackageModel {
         'sto-nino-church',
         'zenys-minasa',
       ],
-      imageUrl: 'assets/images/bustos_heritage_park.jpg',
+      imageUrl: 'assets/optimized_images/places/bustos-heritage-park_1.webp',
       highlights: [
         'Fixed five-stop itinerary',
         'Heritage and faith landmarks',
@@ -352,7 +375,7 @@ class TourPackageModel {
         'sto-nino-chapel',
         'zenys-minasa',
       ],
-      imageUrl: 'assets/images/sto_nino_tugyaw_festival.jpg',
+      imageUrl: 'assets/optimized_images/places/sta-monica-chapel_1.webp',
       highlights: [
         'Fixed five-stop itinerary',
         'Three community chapels',
@@ -375,7 +398,7 @@ class TourPackageModel {
         'galilee-wailing-wall',
         'zenys-minasa',
       ],
-      imageUrl: 'assets/images/san_isidro_labrador_parish.jpg',
+      imageUrl: 'assets/optimized_images/places/sto-nino-church_1.webp',
       highlights: [
         'Fixed eight-stop itinerary',
         'Heritage and chapel trail',

@@ -1406,6 +1406,8 @@ abstract final class MessageCode {
   static const phone = '@l10n/phone';
   static const phoneNumber = '@l10n/phoneNumber';
   static const phoneNumberIsRequired = '@l10n/phoneNumberIsRequired';
+  static String photoCreditValue(String value, String secondValue) =>
+      encodeMessage('photoCreditValue', [value, secondValue]);
   static const photoGallery = '@l10n/photoGallery';
   static const photos = '@l10n/photos';
   static const pickup = '@l10n/pickup';

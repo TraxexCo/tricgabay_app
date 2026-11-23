@@ -1,3 +1,4 @@
+import '../../../models/place_photos.dart';
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -131,6 +132,29 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
                           },
                         ),
                       ],
+                    ),
+                  ),
+                ),
+              if (_showUI &&
+                  PlacePhotos.creditFor(spot.imageUrls[_currentIndex]) != null)
+                Positioned(
+                  bottom: 64,
+                  left: 16,
+                  right: 16,
+                  child: Text(
+                    context.l10n.photoCreditValue(
+                      PlacePhotos.creditFor(
+                        spot.imageUrls[_currentIndex],
+                      )!.author,
+                      PlacePhotos.creditFor(
+                        spot.imageUrls[_currentIndex],
+                      )!.licence,
+                    ),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 12,
+                      shadows: const [Shadow(blurRadius: 6)],
                     ),
                   ),
                 ),
