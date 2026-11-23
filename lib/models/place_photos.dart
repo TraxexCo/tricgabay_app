@@ -14,6 +14,10 @@ class PlacePhotos {
   static const _domingo = 'Elmer B. Domingo';
   static const _fbenjr = 'FBenjr123';
   static const _pd = 'Public domain';
+  static const _galilee = 'Galilee Wonderland';
+  static const _permission = 'Used with permission';
+  static const _manlapaz = 'Benilda Manlapaz';
+  static const _alainSantos = 'Alain Santos';
   static const _cc0 = 'CC0';
   static const _bySa3 = 'CC BY-SA 3.0';
   static const _bySa4 = 'CC BY-SA 4.0';
@@ -21,6 +25,21 @@ class PlacePhotos {
   /// Author and licence of each photo, in order; photo n of a place is
   /// `assets/optimized_images/places/<place id>_<n>.webp`.
   static const Map<String, List<(String, String)>> _credits = {
+    'zenys-minasa': [
+      (_manlapaz, _permission),
+      (_manlapaz, _permission),
+      (_alainSantos, _permission),
+      (_manlapaz, _permission),
+      (_manlapaz, _permission),
+      (_alainSantos, _permission),
+    ],
+    'galilee-wailing-wall': [
+      (_galilee, _permission),
+      (_galilee, _permission),
+      (_galilee, _permission),
+      (_galilee, _permission),
+      (_galilee, _permission),
+    ],
     'sta-cruz-chapel': [
       (_floro, _pd),
       (_floro, _pd),

@@ -243,29 +243,6 @@ class TouristSpotModel {
       distanceFromTown: 1.8,
     ),
     TouristSpotModel(
-      id: 'sto-nino-chapel',
-      name: "Sto. Niño Chapel",
-      description:
-          "A small community chapel dedicated to the Sto. Niño, the patron of Bustos, and a stop on the TRIC SAYA route.",
-      history:
-          "Devotion to the Sto. Niño is at the center of Bustos life. The town chose the Holy Child as its patron in memory of the infants who drowned in the Angat River in 1862, the tragedy that led to the founding of the parish and the town in 1867.\n\nNeighborhood chapels like this one keep that devotion close to home. Families gather here to pray to the Holy Child, especially in January, when the whole town celebrates the Sto. Niño feast with processions and the Tugyaw street dancing.",
-      address: "WWX6+MQX, Bustos, Bulacan",
-      latitude: 14.949086,
-      longitude: 120.9115939,
-      category: SpotCategory.church,
-      imageUrls: PlacePhotos.pathsFor('sto-nino-chapel', [
-        'assets/images/sto_nino_tugyaw_festival.jpg',
-      ]),
-      openingHours: "Mon–Fri 8:00 AM–5:00 PM",
-      entranceFee: "Free",
-      tips: [
-        "Visits are arranged by the Bustos Tourism Office during tour hours",
-        "The busiest time is the Sto. Niño feast every third Sunday of January",
-        "Dress modestly inside the chapel",
-      ],
-      distanceFromTown: 0.9,
-    ),
-    TouristSpotModel(
       id: 'perpetual-help-chapel',
       name: "Our Lady of Perpetual Help Chapel",
       description:
@@ -430,19 +407,20 @@ class TourPackageModel {
       id: 'tric-saya',
       name: 'TRIC SAYA',
       description:
-          'A five-stop chapel trail that begins at Bustos Heritage Park and ends with local minasa pasalubong.',
+          'A five-stop faith trail from Bustos Heritage Park through two chapels and the Sto. Niño Parish Church, ending with local minasa pasalubong.',
       duration: 'Flexible schedule',
       spotIds: [
         'bustos-heritage-park',
         'sta-monica-chapel',
         'st-peter-chapel',
-        'sto-nino-chapel',
+        // The tour's "Sto. Niño" stop is the parish church in Poblacion.
+        'sto-nino-church',
         'zenys-minasa',
       ],
       imageUrl: 'assets/optimized_images/places/sta-monica-chapel_1.webp',
       highlights: [
         'Fixed five-stop itinerary',
-        'Three community chapels',
+        'Two community chapels and the parish church',
         'Minasa pasalubong stop',
       ],
     ),

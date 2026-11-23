@@ -76,18 +76,6 @@ The chapel''s San Pedro parish pastoral council organizes Masses, novenas and th
 where id='st-peter-chapel';
 
 update public.tourist_spots set
-  name='Sto. Niño Chapel',
-  description='A small community chapel dedicated to the Sto. Niño, the patron of Bustos, and a stop on the TRIC SAYA route.',
-  history='Devotion to the Sto. Niño is at the center of Bustos life. The town chose the Holy Child as its patron in memory of the infants who drowned in the Angat River in 1862, the tragedy that led to the founding of the parish and the town in 1867.
-
-Neighborhood chapels like this one keep that devotion close to home. Families gather here to pray to the Holy Child, especially in January, when the whole town celebrates the Sto. Niño feast with processions and the Tugyaw street dancing.',
-  address='WWX6+MQX, Bustos, Bulacan',
-  opening_hours='Mon–Fri 8:00 AM–5:00 PM',
-  entrance_fee_note='Free',
-  tips='["Visits are arranged by the Bustos Tourism Office during tour hours", "The busiest time is the Sto. Niño feast every third Sunday of January", "Dress modestly inside the chapel"]'::jsonb
-where id='sto-nino-chapel';
-
-update public.tourist_spots set
   name='Our Lady of Perpetual Help Chapel',
   description='The Chapel of Our Lady of Perpetual Help (Bisita ng Ina ng Laging Saklolo) in Sitio Pitong Gatang, Poblacion, a short walk from the Heritage Park and a stop on TRIC TUKLAS.',
   history='This is the Poblacion chapel of the Sto. Niño Parish. It is dedicated to Our Mother of Perpetual Help, the Marian devotion whose Wednesday novena is one of the most widely prayed in the Philippines. It serves the families of Sitio Pitong Gatang, a neighborhood of the town center.
@@ -134,3 +122,14 @@ The Wailing Wall follows the Western Wall in Jerusalem, the last remaining wall 
   entrance_fee_note='Resort entrance: ₱200 adults, ₱180 kids, ₱160 seniors and PWD',
   tips='["The wall is inside the resort, so the resort entrance fee may apply; confirm at the gate", "Bring a pen and a small piece of paper for your prayer", "Respect people who are praying at the wall"]'::jsonb
 where id='galilee-wailing-wall';
+
+-- The TRIC SAYA "Sto. Niño" stop is the Sto. Niño Parish Church in Poblacion
+-- (confirmed by the owner); the separate pin pointed at the wrong place.
+update public.tour_package_stops set spot_id='sto-nino-church'
+where package_id='tric-saya' and spot_id='sto-nino-chapel';
+
+update public.tour_packages set
+  description='A five-stop faith trail from Bustos Heritage Park through two chapels and the Sto. Niño Parish Church, ending with local minasa pasalubong.'
+where id='tric-saya';
+
+update public.tourist_spots set is_active=false where id='sto-nino-chapel';

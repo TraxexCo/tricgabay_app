@@ -1924,5 +1924,41 @@
     "value": "address,street,neighborhood,locality,place",
     "kind": "protocol",
     "reason": "Mapbox Geocoding API parameter value, never shown to users."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "Galilee Wonderland",
+    "kind": "data",
+    "reason": "Photo credit for images the business owner allowed the app to use, shown in the photo viewer."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "Used with permission",
+    "kind": "data",
+    "reason": "Photo credit for images the business owner allowed the app to use, shown in the photo viewer."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "Benilda Manlapaz",
+    "kind": "data",
+    "reason": "Photo credit for images the photographer allowed the app to use, shown in the photo viewer."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "Alain Santos",
+    "kind": "data",
+    "reason": "Photo credit for images the photographer allowed the app to use, shown in the photo viewer."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A five-stop faith trail from Bustos Heritage Park through two chapels and the Sto. Niño Parish Church, ending with local minasa pasalubong.",
+    "kind": "data",
+    "reason": "Bundled tour-package record mirrored from the tour_packages table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Two community chapels and the parish church",
+    "kind": "data",
+    "reason": "Bundled tour-package record mirrored from the tour_packages table."
   }
 ]
