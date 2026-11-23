@@ -856,7 +856,7 @@
         "supabase_admin"
       ],
       "public_execute": false,
-      "definition_hash": "f5c672ac4beb43e05a9d3972f65f1484"
+      "definition_hash": "893bf3e576138fc142b1af5ace9aa91b"
     },
     {
       "key": "public.complete_paymongo_test_refund(uuid, integer, text)",
@@ -3490,6 +3490,31 @@
       ],
       "public_execute": false,
       "definition_hash": "7bea1a14d12984b34518d1a037f1fd17"
+    },
+    {
+      "key": "public.resolve_operational_alert(uuid)",
+      "name": "resolve_operational_alert",
+      "result": "void",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "uuid",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": true
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "authenticated",
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "77a4e1623df89effbcf341ea212628a8"
     },
     {
       "key": "public.resume_after_breakdown(uuid)",
