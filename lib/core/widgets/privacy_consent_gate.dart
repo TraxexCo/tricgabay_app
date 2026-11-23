@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/backend_config.dart';
 import '../session/app_session.dart';
 import '../services/privacy_service.dart';
+import '../services/transient_retry.dart';
 import '../services/error_messages.dart';
 import '../services/telemetry_service.dart';
 import 'retained_gate.dart';
@@ -95,7 +96,7 @@ class _PrivacyConsentGateState extends State<PrivacyConsentGate>
         BackendConfig.client.auth.currentUser == null) {
       return null;
     }
-    return PrivacyService.status();
+    return retryTransient(PrivacyService.status, label: 'Privacy check');
   }
 
   @override

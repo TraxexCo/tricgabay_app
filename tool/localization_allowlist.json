@@ -1960,5 +1960,11 @@
     "value": "Two community chapels and the parish church",
     "kind": "data",
     "reason": "Bundled tour-package record mirrored from the tour_packages table."
+  },
+  {
+    "file": "lib/core/widgets/privacy_consent_gate.dart",
+    "value": "Privacy check",
+    "kind": "protocol",
+    "reason": "Developer log label for the privacy check retry; never shown in the interface."
   }
 ]
