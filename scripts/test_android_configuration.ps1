@@ -24,4 +24,7 @@ try{
   foreach($flavor in @('dev','staging','production')){Check-Configuration $flavor}
   foreach($key in @('SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','MAPBOX_PUBLIC_TOKEN','FIREBASE_API_KEY','FIREBASE_APP_ID','FIREBASE_MESSAGING_SENDER_ID','FIREBASE_PROJECT_ID','AUTH_APP_LINK_HOST')){Check-Configuration 'production' $key}
   Write-Output "ANDROID_CONFIGURATION_PASS checks=$checks flavors=3 required_service_values_fail_closed=true synthetic_values_only=true"
+  # The last check expects Gradle to fail, which leaves LASTEXITCODE at 1.
+  # GitHub's pwsh step exits with LASTEXITCODE, so clear it once all checks pass.
+  $global:LASTEXITCODE=0
 }finally{$env:ALLOW_DEBUG_RELEASE_SIGNING=$previousSigning}
