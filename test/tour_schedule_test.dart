@@ -69,6 +69,7 @@ void main() {
     final tuesday = DateTime(2026, 11, 24);
     const chapel = 'Mon–Fri 8:00 AM–5:00 PM';
     const zenys = 'Mon–Fri 7:00 AM–6:00 PM · Sat, Sun 7:00 AM–5:00 PM';
+    const closesAtThree = 'Mon–Fri 7:00 AM–3:00 PM';
     const galilee = 'Mon–Sun 7:00 AM–3:00 PM · Mon–Sun 4:00 PM–11:00 PM';
 
     test('without stop hours the office window is unchanged', () {
@@ -88,9 +89,47 @@ void main() {
     test('a stop that closes at 3 PM ends the last start at 11:00 AM', () {
       final window = TourSchedule.startWindow(
         tuesday,
-        stopHours: const [chapel, galilee],
+        stopHours: const [chapel, 'Mon–Sun 7:00 AM–3:00 PM'],
       )!;
       expect(window.last, 11 * 60);
+    });
+
+    test('a church open 8-12 and 2-5 keeps the 8:00 to 1:00 window', () {
+      const church =
+          'Tue–Sat 8:00 AM–12:00 PM · Tue–Sat 2:00 PM–5:00 PM · '
+          'Sun 9:30 AM–12:00 PM';
+      final window = TourSchedule.startWindow(
+        tuesday,
+        stopHours: const [church, zenys, galilee],
+      )!;
+      expect((window.first, window.last), (8 * 60, 13 * 60));
+      expect(
+        TourSchedule.startTimes(
+          tuesday,
+          now: DateTime(2026, 11, 20),
+          stopHours: const [church],
+        ),
+        hasLength(6),
+      );
+    });
+
+    test('a long break between sittings counts only the first sitting', () {
+      final window = TourSchedule.startWindow(
+        tuesday,
+        stopHours: const ['Mon–Fri 8:00 AM–12:00 PM · Mon–Fri 5:00 PM–9:00 PM'],
+      );
+      expect(window?.last, 8 * 60);
+    });
+
+    test('a stop closed on Monday leaves Monday with no tour', () {
+      const church = 'Tue–Sat 8:00 AM–12:00 PM · Tue–Sat 2:00 PM–5:00 PM';
+      expect(
+        TourSchedule.startWindow(
+          DateTime(2026, 11, 23),
+          stopHours: const [church],
+        ),
+        isNull,
+      );
     });
 
     test('a late opening pushes the first start later', () {
@@ -131,13 +170,13 @@ void main() {
       final hours = TourSchedule.startTimes(
         tuesday,
         now: now,
-        stopHours: const [chapel, galilee],
+        stopHours: const [chapel, closesAtThree],
       );
       expect(hours.length, 4); // 8, 9, 10, 11
       final quarters = TourSchedule.quarterHourStarts(
         tuesday,
         now: now,
-        stopHours: const [chapel, galilee],
+        stopHours: const [chapel, closesAtThree],
       );
       expect(quarters.first, manila(11, 24, 8));
       expect(quarters.last, manila(11, 24, 11));
@@ -145,7 +184,7 @@ void main() {
         TourSchedule.isValidStart(
           manila(11, 24, 11, 15),
           now: now,
-          stopHours: const [chapel, galilee],
+          stopHours: const [chapel, closesAtThree],
         ),
         false,
       );
@@ -153,7 +192,7 @@ void main() {
         TourSchedule.isValidStart(
           manila(11, 24, 11),
           now: now,
-          stopHours: const [chapel, galilee],
+          stopHours: const [chapel, closesAtThree],
         ),
         true,
       );

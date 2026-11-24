@@ -28,6 +28,10 @@ class TourSchedule {
   /// How long a tour takes. Every stop must still be open when it ends.
   static const tourHours = 4;
 
+  /// A break between two opening sittings of a stop this short (minutes) is
+  /// bridged: the tour can pass the stop before or after it.
+  static const maxBridgedBreakMinutes = 120;
+
   /// Days the office runs tours: Monday to Friday (DateTime.monday = 1).
   static const openWeekdays = {1, 2, 3, 4, 5};
 
@@ -76,7 +80,9 @@ class TourSchedule {
   /// It starts from the office window ([openHour] to [lastStartHour]) and
   /// narrows it to the stops: no start before the last stop to open, and the
   /// tour ([tourHours]) must end before the first stop to close. A stop with
-  /// two sittings in a day counts its first. Hours that cannot be read, and
+  /// two sittings split by a short break counts as one; after a long break only
+  /// the first sitting counts.
+  /// Hours that cannot be read, and
   /// "open 24 hours", set no limit. Null when a stop is closed that day or
   /// the window is empty.
   static ({int first, int last})? startWindow(
@@ -88,15 +94,24 @@ class TourSchedule {
     for (final text in stopHours) {
       final blocks = OpeningHoursText.parse(text);
       if (blocks == null) continue;
-      final today = blocks.where((b) => b.days.contains(day.weekday)).toList()
-        ..sort(
-          (a, b) => (a.opens.hour * 60 + a.opens.minute).compareTo(
-            b.opens.hour * 60 + b.opens.minute,
-          ),
-        );
+      final today = blocks.where((b) => b.days.contains(day.weekday)).toList();
       if (today.isEmpty) return null;
-      final opens = today.first.opens.hour * 60 + today.first.opens.minute;
-      final closes = today.first.closes.hour * 60 + today.first.closes.minute;
+      final sittings = [
+        for (final b in today)
+          (
+            opens: b.opens.hour * 60 + b.opens.minute,
+            closes: b.closes.hour * 60 + b.closes.minute,
+          ),
+      ]..sort((a, b) => a.opens.compareTo(b.opens));
+      // Sittings split by a short break (a lunch hour: 8-12 and 2-5) count
+      // as one, since the tour passes the stop on either side of the break.
+      // A long break ends the first sitting; only that one counts.
+      var opens = sittings.first.opens;
+      var closes = sittings.first.closes;
+      for (final sitting in sittings.skip(1)) {
+        if (sitting.opens - closes > maxBridgedBreakMinutes) break;
+        if (sitting.closes > closes) closes = sitting.closes;
+      }
       if (opens > first) first = opens;
       if (closes - tourHours * 60 < last) last = closes - tourHours * 60;
     }
