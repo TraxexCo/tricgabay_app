@@ -9820,6 +9820,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Closing time must be later than opening time.'**
   String get hoursCloseAfterOpen;
+
+  /// No description provided for @stopsSkippedClosedThatDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped on this day because it is closed: {stops}'**
+  String stopsSkippedClosedThatDay(String stops);
 }
 
 class _AppLocalizationsDelegate

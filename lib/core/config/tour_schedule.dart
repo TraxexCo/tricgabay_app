@@ -74,6 +74,13 @@ class TourSchedule {
   /// Quick day buttons on the booking screen; the calendar covers the rest.
   static const quickDayCount = 10;
 
+  /// Whether a stop with opening hours [hoursText] is open on [day]. Hours
+  /// that cannot be read, and "open 24 hours", count as open.
+  static bool isStopOpenOn(DateTime day, String hoursText) {
+    final blocks = OpeningHoursText.parse(hoursText);
+    return blocks == null || blocks.any((b) => b.days.contains(day.weekday));
+  }
+
   /// The earliest and latest start, in minutes after midnight, on [day]
   /// (a Manila calendar date) for a tour whose stops keep [stopHours].
   ///
@@ -81,21 +88,29 @@ class TourSchedule {
   /// narrows it to the stops: no start before the last stop to open, and the
   /// tour ([tourHours]) must end before the first stop to close. A stop with
   /// two sittings split by a short break counts as one; after a long break only
-  /// the first sitting counts.
+  /// the first sitting counts. A stop closed that weekday is skipped, not a
+  /// reason to cancel the day, as long as two stops remain.
   /// Hours that cannot be read, and
-  /// "open 24 hours", set no limit. Null when a stop is closed that day or
-  /// the window is empty.
+  /// "open 24 hours", set no limit. Null when fewer than two stops are open
+  /// that day or the window is empty.
   static ({int first, int last})? startWindow(
     DateTime day, {
     Iterable<String> stopHours = const [],
   }) {
     var first = openHour * 60;
     var last = lastStartHour * 60;
+    var openStops = 0;
+    var listed = 0;
     for (final text in stopHours) {
+      listed++;
       final blocks = OpeningHoursText.parse(text);
-      if (blocks == null) continue;
+      if (blocks == null) {
+        openStops++; // unreadable or 24 hours: no limit, still a stop
+        continue;
+      }
       final today = blocks.where((b) => b.days.contains(day.weekday)).toList();
-      if (today.isEmpty) return null;
+      if (today.isEmpty) continue; // closed that day: the tour skips it
+      openStops++;
       final sittings = [
         for (final b in today)
           (
@@ -114,6 +129,10 @@ class TourSchedule {
       }
       if (opens > first) first = opens;
       if (closes - tourHours * 60 < last) last = closes - tourHours * 60;
+    }
+    // A tour needs at least two stops; closed ones are skipped.
+    if (listed > 0 && (openStops == 0 || (listed >= 2 && openStops < 2))) {
+      return null;
     }
     return first > last ? null : (first: first, last: last);
   }

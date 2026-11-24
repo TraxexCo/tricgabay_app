@@ -5692,4 +5692,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get hoursCloseAfterOpen =>
       'Closing time must be later than opening time.';
+
+  @override
+  String stopsSkippedClosedThatDay(String stops) {
+    return 'Skipped on this day because it is closed: $stops';
+  }
 }

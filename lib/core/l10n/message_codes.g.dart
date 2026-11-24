@@ -1797,6 +1797,8 @@ abstract final class MessageCode {
       encodeMessage('stopsDoneValue', [done, total]);
   static const stopsInOrder = '@l10n/stopsInOrder';
   static const stopsIncluded = '@l10n/stopsIncluded';
+  static String stopsSkippedClosedThatDay(String stops) =>
+      encodeMessage('stopsSkippedClosedThatDay', [stops]);
   static String stopsValue(String value) =>
       encodeMessage('stopsValue', [value]);
   static String stopsValueLabel(String value, String secondValue) =>

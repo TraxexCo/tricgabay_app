@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/trip_record.dart';
 import '../services/fare_policy.dart';
+import '../services/server_clock.dart';
 import '../services/cancellation_policy.dart';
 import '../services/trip_rules.dart';
 import '../services/backend_repository.dart';
@@ -817,6 +818,21 @@ class AppSession {
     await _refreshAfterWrite();
   }
 
+  /// The package's stops that are open on the calendar day (Manila) of
+  /// [scheduledAt]. A stop closed that weekday, such as a church closed on
+  /// Mondays, is left out of the tour.
+  static List<TouristSpotModel> stopsOpenOnTourDay(
+    List<TouristSpotModel> spots,
+    DateTime scheduledAt,
+  ) {
+    final local = ServerClock.manila(scheduledAt);
+    final day = DateTime(local.year, local.month, local.day);
+    return [
+      for (final spot in spots)
+        if (TourSchedule.isStopOpenOn(day, spot.openingHours)) spot,
+    ];
+  }
+
   static Future<BookingModel> createBooking({
     required PaymentMethod paymentMethod,
     required int expectedFareRevision,
@@ -875,7 +891,7 @@ class AppSession {
       pickupAddress: MessageCode.bustosTourismOfficeMeetingPoint,
       pickupLatitude: lat,
       pickupLongitude: lng,
-      stops: spots,
+      stops: stopsOpenOnTourDay(spots, draft.scheduledAt!),
       passengerCount: draft.passengerCount,
       luggageNotes: draft.luggageNotes,
       accessibilityNeeds: draft.accessibilityNeeds,

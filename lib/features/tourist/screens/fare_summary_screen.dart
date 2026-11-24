@@ -46,6 +46,20 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
     ];
   }
 
+  /// Names of the package's stops that are closed on the chosen day; the
+  /// tour leaves them out.
+  List<String> get _skippedStops {
+    final day = _day;
+    final ids = AppSession.activePackage?.spotIds ?? const <String>[];
+    if (day == null) return const [];
+    return [
+      for (final spot in AppSession.allSpots.value)
+        if (ids.contains(spot.id) &&
+            !TourSchedule.isStopOpenOn(day, spot.openingHours))
+          spot.name,
+    ];
+  }
+
   @override
   void initState() {
     super.initState();
@@ -476,6 +490,19 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                   ),
                 ],
               ),
+              if (_skippedStops.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Text(
+                  context.l10n.stopsSkippedClosedThatDay(
+                    _skippedStops.join(', '),
+                  ),
+                  style: GoogleFonts.poppins(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.warning,
+                  ),
+                ),
+              ],
               const SizedBox(height: 10),
               Text(
                 context.l10n.driverMatchingBegins30MinutesBeforePickup,

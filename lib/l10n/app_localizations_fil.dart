@@ -5774,4 +5774,9 @@ class AppLocalizationsFil extends AppLocalizations {
   @override
   String get hoursCloseAfterOpen =>
       'Dapat mas huli ang oras ng pagsasara kaysa sa oras ng pagbubukas.';
+
+  @override
+  String stopsSkippedClosedThatDay(String stops) {
+    return 'Laktaw sa araw na ito dahil sarado: $stops';
+  }
 }

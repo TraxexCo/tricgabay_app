@@ -2832,5 +2832,7 @@
   "@hoursCurrentValue": {"placeholders": {"value": {"type": "String"}}},
   "startTimeWindowHelp": "Maaari kang magsimula sa pagitan ng {first} at {last}, habang bukas ang bawat hinto sa tour na ito.",
   "@startTimeWindowHelp": {"placeholders": {"first": {"type": "String"}, "last": {"type": "String"}}},
-  "hoursCloseAfterOpen": "Dapat mas huli ang oras ng pagsasara kaysa sa oras ng pagbubukas."
+  "hoursCloseAfterOpen": "Dapat mas huli ang oras ng pagsasara kaysa sa oras ng pagbubukas.",
+  "stopsSkippedClosedThatDay": "Laktaw sa araw na ito dahil sarado: {stops}",
+  "@stopsSkippedClosedThatDay": {"placeholders": {"stops": {"type": "String"}}}
 }

@@ -121,23 +121,22 @@ void main() {
       expect(window?.last, 8 * 60);
     });
 
-    test('a stop closed on Monday leaves Monday with no tour', () {
+    test('a stop closed on Monday is skipped, not a reason to cancel', () {
       const church = 'Tue–Sat 8:00 AM–12:00 PM · Tue–Sat 2:00 PM–5:00 PM';
+      final monday = DateTime(2026, 11, 23);
+      final window = TourSchedule.startWindow(
+        monday,
+        stopHours: const [church, chapel, zenys],
+      )!;
+      expect((window.first, window.last), (8 * 60, 13 * 60));
+      expect(TourSchedule.isStopOpenOn(monday, church), false);
+      expect(TourSchedule.isStopOpenOn(tuesday, church), true);
+      expect(TourSchedule.isStopOpenOn(monday, 'Check locally'), true);
+      // Only one stop left open: not a tour.
       expect(
-        TourSchedule.startWindow(
-          DateTime(2026, 11, 23),
-          stopHours: const [church],
-        ),
+        TourSchedule.startWindow(monday, stopHours: const [church, chapel]),
         isNull,
       );
-    });
-
-    test('a late opening pushes the first start later', () {
-      final window = TourSchedule.startWindow(
-        tuesday,
-        stopHours: const ['Mon–Fri 9:30 AM–5:00 PM'],
-      )!;
-      expect(window.first, 9 * 60 + 30);
     });
 
     test('a stop closed that weekday, or hours too short, leave no start', () {

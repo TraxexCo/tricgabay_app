@@ -2832,5 +2832,7 @@
   "@hoursCurrentValue": {"placeholders": {"value": {"type": "String"}}},
   "startTimeWindowHelp": "You can start between {first} and {last}, while every stop on this tour is open.",
   "@startTimeWindowHelp": {"placeholders": {"first": {"type": "String"}, "last": {"type": "String"}}},
-  "hoursCloseAfterOpen": "Closing time must be later than opening time."
+  "hoursCloseAfterOpen": "Closing time must be later than opening time.",
+  "stopsSkippedClosedThatDay": "Skipped on this day because it is closed: {stops}",
+  "@stopsSkippedClosedThatDay": {"placeholders": {"stops": {"type": "String"}}}
 }

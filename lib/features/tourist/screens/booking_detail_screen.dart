@@ -203,12 +203,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
               _replacementCard(booking, driver: driver, admin: admin),
             if (!admin &&
                 !driver &&
-                const [
-                  BookingStatus.paymentPending,
-                  BookingStatus.scheduled,
-                  BookingStatus.pending,
-                  BookingStatus.accepted,
-                ].contains(booking.status))
+                // The code is only shown once a driver has accepted, so
+                // that is the only time there is one to lose.
+                booking.status == BookingStatus.accepted)
               TextButton(
                 onPressed: _busy
                     ? null

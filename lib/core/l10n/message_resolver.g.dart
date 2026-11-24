@@ -1583,6 +1583,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'stopsDoneValue' => l.stopsDoneValue(text(0), text(1)),
     'stopsInOrder' => l.stopsInOrder,
     'stopsIncluded' => l.stopsIncluded,
+    'stopsSkippedClosedThatDay' => l.stopsSkippedClosedThatDay(text(0)),
     'stopsValue' => l.stopsValue(text(0)),
     'stopsValueLabel' => l.stopsValueLabel(text(0), text(1)),
     'storageIsUnavailableRetryStorageBeforeMakingChanges' =>

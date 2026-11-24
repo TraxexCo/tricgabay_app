@@ -1363,6 +1363,7 @@ Pananatilihin ng mga kasalukuyang reserbasyon ang orihinal na patakaran.","Needs
 "stopsDoneValue","{done} of {total} done","{done} sa {total} tapos","Needs native-speaker review"
 "stopsInOrder","Stops, in order","Mga hinto, sunod-sunod","Needs native-speaker review"
 "stopsIncluded","Stops included","Mga kasamang hintuan","Needs native-speaker review"
+"stopsSkippedClosedThatDay","Skipped on this day because it is closed: {stops}","Laktaw sa araw na ito dahil sarado: {stops}","Needs native-speaker review"
 "stopsValue","{value} stops","{value} hintuan","Needs native-speaker review"
 "stopsValueLabel","{value} stops • ₱{secondValue}","{value} hintuan • ₱{secondValue}","Needs native-speaker review"
 "storageIsUnavailableRetryStorageBeforeMakingChanges","Storage is unavailable. Retry storage before making changes.","Hindi available ang storage. Subukan muli ito bago gumawa ng pagbabago.","Needs native-speaker review"
