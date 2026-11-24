@@ -1591,7 +1591,7 @@
         "supabase_admin"
       ],
       "public_execute": false,
-      "definition_hash": "8cbc326710f09798a5d7eccb5cdbb1e5"
+      "definition_hash": "e911d3964f62a54d2b698487e8026e3a"
     },
     {
       "key": "public.expire_unpaid_bookings()",

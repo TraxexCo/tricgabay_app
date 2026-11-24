@@ -43,7 +43,9 @@ select ('e5250000-0000-4000-8000-' || lpad((100 + i)::text, 12, '0'))::uuid,
          when 5 then 'ongoing'::public.booking_status
          else 'pending'::public.booking_status end,
   'Expiry fixture', 14.9571, 120.9188, crypt('2468', gen_salt('bf')),
-  now() - interval '1 day',
+  -- Booking 3 is an immediate booking whose search window is still open (see 027
+  -- for expired immediate bookings); the others' windows ended a day ago.
+  case when i = 3 then now() + interval '10 minutes' else now() - interval '1 day' end,
   case i when 1 then now() - interval '2 hours'
          when 2 then now() - interval '10 minutes'
          when 3 then null
@@ -104,7 +106,7 @@ select is((select count(*)::integer from public.notifications
 select is((select status::text from public.bookings where id = 'e5250000-0000-4000-8000-000000000102'),
   'pending', 'a booking inside the 30-minute grace stays pending');
 select is((select status::text from public.bookings where id = 'e5250000-0000-4000-8000-000000000103'),
-  'pending', 'a pending booking with no scheduled start is not touched');
+  'pending', 'a pending booking with no scheduled start and an open search window is not touched');
 select is((select status::text from public.bookings where id = 'e5250000-0000-4000-8000-000000000104'),
   'accepted', 'an accepted booking is not touched');
 select is((select status::text from public.bookings where id = 'e5250000-0000-4000-8000-000000000105'),
