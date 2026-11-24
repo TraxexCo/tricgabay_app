@@ -48,9 +48,45 @@ class _AdminLocationPickerScreenState extends State<AdminLocationPickerScreen> {
   /// False until the map has been moved to the start position; camera
   /// reports before that are the SDK's default view and must be ignored.
   bool _mapReady = false;
+
+  /// True while the map flies to a search result, so the camera reports of
+  /// that flight don't replace the name and address just chosen.
+  bool _flying = false;
   String? _address;
   String? _pickedName;
   bool _loadingAddress = false;
+
+  /// The map is created once. Every camera move calls setState (the address
+  /// card follows the pin); a map rebuilt each time was handed a "new"
+  /// starting view and snapped back to it, so it could not be dragged.
+  late final Widget _mapView = MapSurface(
+    builder: (context) => MapWidget(
+      styleUri: MapboxConfig.mapStyle,
+      onMapCreated: (map) async {
+        _map = map;
+        await map.setCamera(
+          CameraOptions(
+            center: Point(coordinates: Position(_startLng, _startLat)),
+            zoom: _startZoom,
+          ),
+        );
+        // Let the move above settle before listening.
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+        _mapReady = true;
+        if (mounted) unawaited(_lookUpAddress());
+        await map.compass.updateSettings(CompassSettings(enabled: false));
+        await map.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
+        await map.location.updateSettings(
+          LocationComponentSettings(enabled: true),
+        );
+      },
+      onCameraChangeListener: _onCameraChanged,
+      viewport: CameraViewportState(
+        center: Point(coordinates: Position(_startLng, _startLat)),
+        zoom: _startZoom,
+      ),
+    ),
+  );
 
   @override
   void initState() {
@@ -104,17 +140,24 @@ class _AdminLocationPickerScreenState extends State<AdminLocationPickerScreen> {
       _pickedName = hit.name;
       _address = hit.address.isEmpty ? null : hit.address;
     });
-    await _map?.flyTo(
-      CameraOptions(
-        center: Point(coordinates: Position(hit.longitude, hit.latitude)),
-        zoom: 17.5,
-      ),
-      MapAnimationOptions(duration: 600),
-    );
+    _flying = true;
+    try {
+      await _map?.flyTo(
+        CameraOptions(
+          center: Point(coordinates: Position(hit.longitude, hit.latitude)),
+          zoom: 17.5,
+        ),
+        MapAnimationOptions(duration: 600),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+    } finally {
+      _flying = false;
+    }
+    if (mounted && hit.address.isEmpty) unawaited(_lookUpAddress());
   }
 
   void _onCameraChanged(CameraChangedEventData event) {
-    if (!_mapReady) return;
+    if (!_mapReady || _flying) return;
     final center = event.cameraState.center.coordinates;
     final lat = center.lat.toDouble(), lng = center.lng.toDouble();
     if ((lat - _lat).abs() < 1e-6 && (lng - _lng).abs() < 1e-6) return;
@@ -181,48 +224,7 @@ class _AdminLocationPickerScreenState extends State<AdminLocationPickerScreen> {
       appBar: AppBar(title: Text(l.pickerTitle)),
       body: Stack(
         children: [
-          Positioned.fill(
-            child: kIsWeb
-                ? const WebMapFallback()
-                : MapSurface(
-                    builder: (context) => MapWidget(
-                      styleUri: MapboxConfig.mapStyle,
-                      onMapCreated: (map) async {
-                        _map = map;
-                        await map.setCamera(
-                          CameraOptions(
-                            center: Point(
-                              coordinates: Position(_startLng, _startLat),
-                            ),
-                            zoom: _startZoom,
-                          ),
-                        );
-                        // Let the move above settle before listening.
-                        await Future<void>.delayed(
-                          const Duration(milliseconds: 300),
-                        );
-                        _mapReady = true;
-                        if (mounted) unawaited(_lookUpAddress());
-                        await map.compass.updateSettings(
-                          CompassSettings(enabled: false),
-                        );
-                        await map.scaleBar.updateSettings(
-                          ScaleBarSettings(enabled: false),
-                        );
-                        await map.location.updateSettings(
-                          LocationComponentSettings(enabled: true),
-                        );
-                      },
-                      onCameraChangeListener: _onCameraChanged,
-                      viewport: CameraViewportState(
-                        center: Point(
-                          coordinates: Position(_startLng, _startLat),
-                        ),
-                        zoom: _startZoom,
-                      ),
-                    ),
-                  ),
-          ),
+          Positioned.fill(child: kIsWeb ? const WebMapFallback() : _mapView),
           // The pin always marks the middle of the map.
           IgnorePointer(
             child: Center(
