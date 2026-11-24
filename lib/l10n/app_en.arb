@@ -2710,8 +2710,8 @@
   "emailOffice": "Email",
   "moreDates": "Calendar",
   "otherTime": "Other time",
-  "chooseAStartTimeHelp": "Start between 8:00 AM and 1:00 PM",
-  "startTimeOutsideHours": "Choose a start between 8:00 AM and 1:00 PM, at least an hour from now.",
+  "chooseAStartTimeHelp": "Choose a start time",
+  "startTimeOutsideHours": "Choose a start when every stop on this tour is open, at least an hour from now.",
   "whyAreYouCancelling": "Why are you cancelling?",
   "cancelReasonPlansChanged": "My plans changed",
   "cancelReasonWrongDay": "I booked the wrong day or time",
@@ -2829,5 +2829,8 @@
   "pickOnMap": "Search or pick on the map",
   "entranceFeeHint": "e.g. Free, or 200",
   "hoursCurrentValue": "Saved now: {value}. Set the days and times above to replace it.",
-  "@hoursCurrentValue": {"placeholders": {"value": {"type": "String"}}}
+  "@hoursCurrentValue": {"placeholders": {"value": {"type": "String"}}},
+  "startTimeWindowHelp": "You can start between {first} and {last}, while every stop on this tour is open.",
+  "@startTimeWindowHelp": {"placeholders": {"first": {"type": "String"}, "last": {"type": "String"}}},
+  "hoursCloseAfterOpen": "Closing time must be later than opening time."
 }

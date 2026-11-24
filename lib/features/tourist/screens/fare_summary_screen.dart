@@ -30,11 +30,22 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
   int _passengerCount = AppSession.draft.passengerCount;
   // Tours run on a chosen day from the tourism office; the tourist picks the
   // day and a start time inside office hours (see TourSchedule).
-  late List<DateTime> _days = TourSchedule.bookableDays();
+  late List<DateTime> _days = TourSchedule.bookableDays(stopHours: _stopHours);
   DateTime? _day;
   DateTime? _scheduledAt;
   late final TextEditingController _luggageNotes;
   late final TextEditingController _accessibilityNeeds;
+
+  /// Opening hours of every stop on the chosen package: tours can only start
+  /// when all of them are open.
+  List<String> get _stopHours {
+    final ids = AppSession.activePackage?.spotIds ?? const <String>[];
+    return [
+      for (final spot in AppSession.allSpots.value)
+        if (ids.contains(spot.id)) spot.openingHours,
+    ];
+  }
+
   @override
   void initState() {
     super.initState();
@@ -50,7 +61,7 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
   /// Keeps a still-valid earlier choice; otherwise picks the first open
   /// start time.
   void _restoreSchedule() {
-    _days = TourSchedule.bookableDays();
+    _days = TourSchedule.bookableDays(stopHours: _stopHours);
     final previous = AppSession.draft.scheduledAt;
     if (previous != null) {
       final local = ServerClock.manila(previous);
@@ -62,7 +73,11 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
                 d.day == local.day,
           )
           .firstOrNull;
-      if (day != null && TourSchedule.startTimes(day).contains(previous)) {
+      if (day != null &&
+          TourSchedule.startTimes(
+            day,
+            stopHours: _stopHours,
+          ).contains(previous)) {
         _day = day;
         _scheduledAt = previous;
         return;
@@ -71,11 +86,11 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
     _day = _days.firstOrNull;
     _scheduledAt = _day == null
         ? null
-        : TourSchedule.startTimes(_day!).firstOrNull;
+        : TourSchedule.startTimes(_day!, stopHours: _stopHours).firstOrNull;
   }
 
   void _pickDay(DateTime day) {
-    final times = TourSchedule.startTimes(day);
+    final times = TourSchedule.startTimes(day, stopHours: _stopHours);
     setState(() {
       _day = day;
       // Keep the same hour on the new day when it is offered.
@@ -116,7 +131,10 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
   List<DateTime> get _startOptions {
     final day = _day;
     if (day == null) return const [];
-    final options = TourSchedule.startTimes(day).toList();
+    final options = TourSchedule.startTimes(
+      day,
+      stopHours: _stopHours,
+    ).toList();
     final chosen = _scheduledAt;
     if (chosen != null && !options.contains(chosen)) {
       options
@@ -144,35 +162,83 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
     _pickDay(DateTime(picked.year, picked.month, picked.day));
   }
 
-  /// Any start time, e.g. 8:30 AM, as long as it is within office hours
-  /// (8:00 AM to 1:00 PM start) and at least an hour from now.
+  /// Any start in 15-minute steps, but only inside the hours when every
+  /// stop on the tour is open (and at least an hour from now).
   Future<void> _pickCustomTime() async {
     final day = _day;
     if (day == null) return;
-    final current = _scheduledAt == null
-        ? const TimeOfDay(hour: TourSchedule.openHour, minute: 30)
-        : TimeOfDay.fromDateTime(ServerClock.manila(_scheduledAt!));
-    final time = await showTimePicker(
+    final slots = TourSchedule.quarterHourStarts(day, stopHours: _stopHours);
+    if (slots.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.startTimeOutsideHours)),
+      );
+      return;
+    }
+    final picked = await showModalBottomSheet<DateTime>(
       context: context,
-      initialTime: current,
-      helpText: context.l10n.chooseAStartTimeHelp,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheet) {
+        final l = sheet.l10n;
+        return SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(sheet).height * .7,
+            ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l.chooseAStartTimeHelp,
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l.startTimeWindowHelp(
+                      AppFormatters.time(ServerClock.manila(slots.first)),
+                      AppFormatters.time(ServerClock.manila(slots.last)),
+                    ),
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final slot in slots)
+                        ChoiceChip(
+                          label: Text(
+                            AppFormatters.time(ServerClock.manila(slot)),
+                          ),
+                          selected: slot == _scheduledAt,
+                          onSelected: (_) => Navigator.pop(sheet, slot),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
-    if (time == null || !mounted) return;
-    final start = ServerClock.fromManila(
-      day.year,
-      day.month,
-      day.day,
-      time.hour,
-      time.minute,
-    );
-    if (!TourSchedule.isValidStart(start)) {
+    if (picked == null || !mounted) return;
+    if (!TourSchedule.isValidStart(picked, stopHours: _stopHours)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.startTimeOutsideHours)),
       );
       return;
     }
     setState(() {
-      _scheduledAt = start;
+      _scheduledAt = picked;
       _agreed = false;
     });
   }

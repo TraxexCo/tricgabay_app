@@ -5322,11 +5322,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get otherTime => 'Other time';
 
   @override
-  String get chooseAStartTimeHelp => 'Start between 8:00 AM and 1:00 PM';
+  String get chooseAStartTimeHelp => 'Choose a start time';
 
   @override
   String get startTimeOutsideHours =>
-      'Choose a start between 8:00 AM and 1:00 PM, at least an hour from now.';
+      'Choose a start when every stop on this tour is open, at least an hour from now.';
 
   @override
   String get whyAreYouCancelling => 'Why are you cancelling?';
@@ -5683,4 +5683,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String hoursCurrentValue(String value) {
     return 'Saved now: $value. Set the days and times above to replace it.';
   }
+
+  @override
+  String startTimeWindowHelp(String first, String last) {
+    return 'You can start between $first and $last, while every stop on this tour is open.';
+  }
+
+  @override
+  String get hoursCloseAfterOpen =>
+      'Closing time must be later than opening time.';
 }

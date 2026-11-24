@@ -1488,49 +1488,49 @@
     "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
   },
   {
-    "file": "lib/features/admin/widgets/opening_hours_field.dart",
+    "file": "lib/core/utils/opening_hours.dart",
     "value": "Mon",
     "kind": "protocol",
     "reason": "Stored English opening-hours format kept in the database record; the editor shows localized day names."
   },
   {
-    "file": "lib/features/admin/widgets/opening_hours_field.dart",
+    "file": "lib/core/utils/opening_hours.dart",
     "value": "Tue",
     "kind": "protocol",
     "reason": "Stored English opening-hours format kept in the database record; the editor shows localized day names."
   },
   {
-    "file": "lib/features/admin/widgets/opening_hours_field.dart",
+    "file": "lib/core/utils/opening_hours.dart",
     "value": "Wed",
     "kind": "protocol",
     "reason": "Stored English opening-hours format kept in the database record; the editor shows localized day names."
   },
   {
-    "file": "lib/features/admin/widgets/opening_hours_field.dart",
+    "file": "lib/core/utils/opening_hours.dart",
     "value": "Thu",
     "kind": "protocol",
     "reason": "Stored English opening-hours format kept in the database record; the editor shows localized day names."
   },
   {
-    "file": "lib/features/admin/widgets/opening_hours_field.dart",
+    "file": "lib/core/utils/opening_hours.dart",
     "value": "Fri",
     "kind": "protocol",
     "reason": "Stored English opening-hours format kept in the database record; the editor shows localized day names."
   },
   {
-    "file": "lib/features/admin/widgets/opening_hours_field.dart",
+    "file": "lib/core/utils/opening_hours.dart",
     "value": "Sat",
     "kind": "protocol",
     "reason": "Stored English opening-hours format kept in the database record; the editor shows localized day names."
   },
   {
-    "file": "lib/features/admin/widgets/opening_hours_field.dart",
+    "file": "lib/core/utils/opening_hours.dart",
     "value": "Sun",
     "kind": "protocol",
     "reason": "Stored English opening-hours format kept in the database record; the editor shows localized day names."
   },
   {
-    "file": "lib/features/admin/widgets/opening_hours_field.dart",
+    "file": "lib/core/utils/opening_hours.dart",
     "value": "Open 24 hours, daily",
     "kind": "protocol",
     "reason": "Stored English opening-hours format kept in the database record; the editor shows localized day names."

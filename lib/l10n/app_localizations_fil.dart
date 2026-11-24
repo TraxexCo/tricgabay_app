@@ -5401,11 +5401,11 @@ class AppLocalizationsFil extends AppLocalizations {
   String get otherTime => 'Ibang oras';
 
   @override
-  String get chooseAStartTimeHelp => 'Simula mula 8:00 AM hanggang 1:00 PM';
+  String get chooseAStartTimeHelp => 'Pumili ng oras ng simula';
 
   @override
   String get startTimeOutsideHours =>
-      'Pumili ng simula mula 8:00 AM hanggang 1:00 PM, at hindi bababa sa isang oras mula ngayon.';
+      'Pumili ng simula na bukas ang bawat hinto sa tour na ito, at hindi bababa sa isang oras mula ngayon.';
 
   @override
   String get whyAreYouCancelling => 'Bakit ka magkakansela?';
@@ -5765,4 +5765,13 @@ class AppLocalizationsFil extends AppLocalizations {
   String hoursCurrentValue(String value) {
     return 'Nakatala ngayon: $value. Itakda ang mga araw at oras sa itaas para palitan ito.';
   }
+
+  @override
+  String startTimeWindowHelp(String first, String last) {
+    return 'Maaari kang magsimula sa pagitan ng $first at $last, habang bukas ang bawat hinto sa tour na ito.';
+  }
+
+  @override
+  String get hoursCloseAfterOpen =>
+      'Dapat mas huli ang oras ng pagsasara kaysa sa oras ng pagbubukas.';
 }

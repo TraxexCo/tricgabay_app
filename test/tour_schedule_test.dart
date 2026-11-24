@@ -64,4 +64,99 @@ void main() {
     expect(TourSchedule.isValidStart(manila(11, 28, 9), now: now), false);
     expect(TourSchedule.isValidStart(manila(11, 30, 9), now: now), false);
   });
+
+  group('start window from the stops\' opening hours', () {
+    final tuesday = DateTime(2026, 11, 24);
+    const chapel = 'Mon–Fri 8:00 AM–5:00 PM';
+    const zenys = 'Mon–Fri 7:00 AM–6:00 PM · Sat, Sun 7:00 AM–5:00 PM';
+    const galilee = 'Mon–Sun 7:00 AM–3:00 PM · Mon–Sun 4:00 PM–11:00 PM';
+
+    test('without stop hours the office window is unchanged', () {
+      final window = TourSchedule.startWindow(tuesday)!;
+      expect(window.first, 8 * 60);
+      expect(window.last, 13 * 60);
+    });
+
+    test('stops open 8-5 and 7-6 keep the usual 8:00 to 1:00 window', () {
+      final window = TourSchedule.startWindow(
+        tuesday,
+        stopHours: const [chapel, zenys],
+      )!;
+      expect((window.first, window.last), (8 * 60, 13 * 60));
+    });
+
+    test('a stop that closes at 3 PM ends the last start at 11:00 AM', () {
+      final window = TourSchedule.startWindow(
+        tuesday,
+        stopHours: const [chapel, galilee],
+      )!;
+      expect(window.last, 11 * 60);
+    });
+
+    test('a late opening pushes the first start later', () {
+      final window = TourSchedule.startWindow(
+        tuesday,
+        stopHours: const ['Mon–Fri 9:30 AM–5:00 PM'],
+      )!;
+      expect(window.first, 9 * 60 + 30);
+    });
+
+    test('a stop closed that weekday, or hours too short, leave no start', () {
+      expect(
+        TourSchedule.startWindow(
+          DateTime(2026, 11, 28),
+          stopHours: const [chapel],
+        ),
+        isNull,
+      );
+      expect(
+        TourSchedule.startWindow(
+          tuesday,
+          stopHours: const ['Mon–Fri 8:00 AM–11:00 AM'],
+        ),
+        isNull,
+      );
+    });
+
+    test('unreadable or all-day hours set no limit', () {
+      final window = TourSchedule.startWindow(
+        tuesday,
+        stopHours: const ['Check locally', 'Open 24 hours, daily'],
+      )!;
+      expect((window.first, window.last), (8 * 60, 13 * 60));
+    });
+
+    test('offered times and the custom check follow the window', () {
+      final now = manila(11, 23, 7);
+      final hours = TourSchedule.startTimes(
+        tuesday,
+        now: now,
+        stopHours: const [chapel, galilee],
+      );
+      expect(hours.length, 4); // 8, 9, 10, 11
+      final quarters = TourSchedule.quarterHourStarts(
+        tuesday,
+        now: now,
+        stopHours: const [chapel, galilee],
+      );
+      expect(quarters.first, manila(11, 24, 8));
+      expect(quarters.last, manila(11, 24, 11));
+      expect(
+        TourSchedule.isValidStart(
+          manila(11, 24, 11, 15),
+          now: now,
+          stopHours: const [chapel, galilee],
+        ),
+        false,
+      );
+      expect(
+        TourSchedule.isValidStart(
+          manila(11, 24, 11),
+          now: now,
+          stopHours: const [chapel, galilee],
+        ),
+        true,
+      );
+    });
+  });
 }

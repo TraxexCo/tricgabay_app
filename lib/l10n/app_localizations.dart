@@ -9190,13 +9190,13 @@ abstract class AppLocalizations {
   /// No description provided for @chooseAStartTimeHelp.
   ///
   /// In en, this message translates to:
-  /// **'Start between 8:00 AM and 1:00 PM'**
+  /// **'Choose a start time'**
   String get chooseAStartTimeHelp;
 
   /// No description provided for @startTimeOutsideHours.
   ///
   /// In en, this message translates to:
-  /// **'Choose a start between 8:00 AM and 1:00 PM, at least an hour from now.'**
+  /// **'Choose a start when every stop on this tour is open, at least an hour from now.'**
   String get startTimeOutsideHours;
 
   /// No description provided for @whyAreYouCancelling.
@@ -9808,6 +9808,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saved now: {value}. Set the days and times above to replace it.'**
   String hoursCurrentValue(String value);
+
+  /// No description provided for @startTimeWindowHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'You can start between {first} and {last}, while every stop on this tour is open.'**
+  String startTimeWindowHelp(String first, String last);
+
+  /// No description provided for @hoursCloseAfterOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing time must be later than opening time.'**
+  String get hoursCloseAfterOpen;
 }
 
 class _AppLocalizationsDelegate

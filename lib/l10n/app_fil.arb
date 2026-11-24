@@ -2710,8 +2710,8 @@
   "emailOffice": "Mag-email",
   "moreDates": "Kalendaryo",
   "otherTime": "Ibang oras",
-  "chooseAStartTimeHelp": "Simula mula 8:00 AM hanggang 1:00 PM",
-  "startTimeOutsideHours": "Pumili ng simula mula 8:00 AM hanggang 1:00 PM, at hindi bababa sa isang oras mula ngayon.",
+  "chooseAStartTimeHelp": "Pumili ng oras ng simula",
+  "startTimeOutsideHours": "Pumili ng simula na bukas ang bawat hinto sa tour na ito, at hindi bababa sa isang oras mula ngayon.",
   "whyAreYouCancelling": "Bakit ka magkakansela?",
   "cancelReasonPlansChanged": "Nagbago ang plano ko",
   "cancelReasonWrongDay": "Mali ang araw o oras na na-book ko",
@@ -2829,5 +2829,8 @@
   "pickOnMap": "Maghanap o pumili sa mapa",
   "entranceFeeHint": "hal. Libre, o 200",
   "hoursCurrentValue": "Nakatala ngayon: {value}. Itakda ang mga araw at oras sa itaas para palitan ito.",
-  "@hoursCurrentValue": {"placeholders": {"value": {"type": "String"}}}
+  "@hoursCurrentValue": {"placeholders": {"value": {"type": "String"}}},
+  "startTimeWindowHelp": "Maaari kang magsimula sa pagitan ng {first} at {last}, habang bukas ang bawat hinto sa tour na ito.",
+  "@startTimeWindowHelp": {"placeholders": {"first": {"type": "String"}, "last": {"type": "String"}}},
+  "hoursCloseAfterOpen": "Dapat mas huli ang oras ng pagsasara kaysa sa oras ng pagbubukas."
 }

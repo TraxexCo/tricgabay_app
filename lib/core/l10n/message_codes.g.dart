@@ -945,6 +945,7 @@ abstract final class MessageCode {
   static const hoursAddSchedule = '@l10n/hoursAddSchedule';
   static String hoursAgoValue(String value) =>
       encodeMessage('hoursAgoValue', [value]);
+  static const hoursCloseAfterOpen = '@l10n/hoursCloseAfterOpen';
   static const hoursClosesAt = '@l10n/hoursClosesAt';
   static String hoursCurrentValue(String value) =>
       encodeMessage('hoursCurrentValue', [value]);
@@ -1775,6 +1776,8 @@ abstract final class MessageCode {
   static const startNewSearch = '@l10n/startNewSearch';
   static const startTime = '@l10n/startTime';
   static const startTimeOutsideHours = '@l10n/startTimeOutsideHours';
+  static String startTimeWindowHelp(String first, String last) =>
+      encodeMessage('startTimeWindowHelp', [first, last]);
   static const statusBusy = '@l10n/statusBusy';
   static String statusValue(String value) =>
       encodeMessage('statusValue', [value]);

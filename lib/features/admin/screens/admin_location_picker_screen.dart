@@ -38,6 +38,16 @@ class _AdminLocationPickerScreenState extends State<AdminLocationPickerScreen> {
 
   late double _lat = widget.latitude ?? MapboxConfig.bustosLat;
   late double _lng = widget.longitude ?? MapboxConfig.bustosLng;
+
+  /// Where the map opens. Fixed for the life of the screen: building the map
+  /// from [_lat]/[_lng] let the map's first (default) camera report drag the
+  /// view to the middle of the USA.
+  late final double _startLat = _lat, _startLng = _lng;
+  late final double _startZoom = widget.latitude == null ? 14 : 17.5;
+
+  /// False until the map has been moved to the start position; camera
+  /// reports before that are the SDK's default view and must be ignored.
+  bool _mapReady = false;
   String? _address;
   String? _pickedName;
   bool _loadingAddress = false;
@@ -104,6 +114,7 @@ class _AdminLocationPickerScreenState extends State<AdminLocationPickerScreen> {
   }
 
   void _onCameraChanged(CameraChangedEventData event) {
+    if (!_mapReady) return;
     final center = event.cameraState.center.coordinates;
     final lat = center.lat.toDouble(), lng = center.lng.toDouble();
     if ((lat - _lat).abs() < 1e-6 && (lng - _lng).abs() < 1e-6) return;
@@ -178,6 +189,20 @@ class _AdminLocationPickerScreenState extends State<AdminLocationPickerScreen> {
                       styleUri: MapboxConfig.mapStyle,
                       onMapCreated: (map) async {
                         _map = map;
+                        await map.setCamera(
+                          CameraOptions(
+                            center: Point(
+                              coordinates: Position(_startLng, _startLat),
+                            ),
+                            zoom: _startZoom,
+                          ),
+                        );
+                        // Let the move above settle before listening.
+                        await Future<void>.delayed(
+                          const Duration(milliseconds: 300),
+                        );
+                        _mapReady = true;
+                        if (mounted) unawaited(_lookUpAddress());
                         await map.compass.updateSettings(
                           CompassSettings(enabled: false),
                         );
@@ -190,8 +215,10 @@ class _AdminLocationPickerScreenState extends State<AdminLocationPickerScreen> {
                       },
                       onCameraChangeListener: _onCameraChanged,
                       viewport: CameraViewportState(
-                        center: Point(coordinates: Position(_lng, _lat)),
-                        zoom: widget.latitude == null ? 14 : 17.5,
+                        center: Point(
+                          coordinates: Position(_startLng, _startLat),
+                        ),
+                        zoom: _startZoom,
                       ),
                     ),
                   ),
