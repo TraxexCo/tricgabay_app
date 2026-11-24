@@ -124,7 +124,9 @@ export function relationRule(key: string, group = 1): RelationRule {
     case "public.cash_confirmations":
       return rule(field(12), money);
     case "public.booking_reviews":
-      return rule(field(2, "booking_id"), everybody);
+      // The tourist who wrote it, the driver it is about, and operations,
+      // finance or support admins - not the public (20261125040000).
+      return rule(field(2, "booking_id"), booking);
     case "public.booking_route_changes":
       return rule(field(13), ops);
     case "public.booking_offers":

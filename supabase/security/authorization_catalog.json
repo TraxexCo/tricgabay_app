@@ -4931,10 +4931,12 @@
       ],
       "policies": [
         {
-          "name": "reviews_read",
+          "name": "reviews_participant_capability_read",
           "check": null,
-          "roles": null,
-          "using": "true",
+          "roles": [
+            "authenticated"
+          ],
+          "using": "((tourist_id = uid()) OR (driver_id = uid()) OR has_admin_capability('operations'::text) OR has_admin_capability('finance'::text) OR has_admin_capability('support'::text))",
           "command": "r"
         }
       ],
@@ -4942,7 +4944,7 @@
         "anon": {
           "delete": false,
           "insert": false,
-          "select": true,
+          "select": false,
           "update": false
         },
         "service_role": {
