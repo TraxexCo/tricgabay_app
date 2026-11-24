@@ -260,7 +260,7 @@ class BackendRepository {
     booking_stops(id,spot_id,spot_name_snapshot,latitude_snapshot,longitude_snapshot,stop_order),
     booking_offers(driver_id,status,expires_at),
     booking_route_changes(id,requested_by,requested_role,change_type,target_stop_id,proposed_order,reason,created_at,status),
-    trip_events(created_at,actor_role,description),payments(status,amount_centavos),
+    trip_events(created_at,actor_role,description,metadata),payments(status,amount_centavos),
     cash_confirmations(direction,actor_role),booking_reviews(rating,review)
   ''');
     if (bookingId != null) query = query.eq('id', bookingId);
@@ -518,7 +518,10 @@ class BackendRepository {
                     .map(
                       (event) => TripEvent(
                         DateTime.parse(event['created_at']),
-                        _actor(event['actor_role']),
+                        TripEvent.actorFromRow(
+                          role: event['actor_role'] as String?,
+                          metadata: event['metadata'],
+                        ),
                         event['description'],
                       ),
                     )
@@ -1122,10 +1125,6 @@ class BackendRepository {
               .firstOrNull ??
           BookingStatus.unknown,
   };
-  static TripActor _actor(String? value) => TripActor.values.firstWhere(
-    (actor) => actor.name == value,
-    orElse: () => TripActor.unknown,
-  );
   static PaymentStatus _paymentStatus(String value) => switch (value) {
     'checkout_created' => PaymentStatus.checkoutCreated,
     'processing' => PaymentStatus.processing,
