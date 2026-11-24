@@ -73,3 +73,6 @@ app.*.map.json
 **/google-services.json
 **/GoogleService-Info.plist
 *.p12
+
+# Local database backups (contain auth hashes and tokens)
+/backups/

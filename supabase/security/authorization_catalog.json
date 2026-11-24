@@ -1029,7 +1029,31 @@
         "supabase_admin"
       ],
       "public_execute": false,
-      "definition_hash": "871260e3f954722afc4d04b99b3ca7a2"
+      "definition_hash": "1211dbf258c62c451e8cea93ad3c53b1"
+    },
+    {
+      "key": "public.create_booking(text, payment_method, text, double precision, double precision, jsonb, timestamp with time zone)",
+      "name": "create_booking",
+      "result": "jsonb",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "text, payment_method, text, double precision, double precision, jsonb, timestamp with time zone",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": false
+      },
+      "volatility": "v",
+      "search_path": "public, extensions",
+      "execute_roles": [
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "66f36c950090c87d95e80b42d902cd34"
     },
     {
       "key": "public.create_booking_with_requirements(text, payment_method, text, double precision, double precision, jsonb, integer, text, text)",
@@ -1079,7 +1103,7 @@
         "supabase_admin"
       ],
       "public_execute": false,
-      "definition_hash": "6e28a3dea787ad07a27bc13c050997b4"
+      "definition_hash": "edc4d537c0c4f1eb037ee3e23744abfe"
     },
     {
       "key": "public.create_ranked_driver_offers(uuid)",
@@ -1544,6 +1568,30 @@
       ],
       "public_execute": false,
       "definition_hash": "c60d52828c85405448e449b8a76ebdde"
+    },
+    {
+      "key": "public.expire_stale_pending_bookings()",
+      "name": "expire_stale_pending_bookings",
+      "result": "integer",
+      "schema": "public",
+      "strict": false,
+      "definer": true,
+      "argtypes": "",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": false
+      },
+      "volatility": "v",
+      "search_path": "public",
+      "execute_roles": [
+        "postgres",
+        "service_role",
+        "supabase_admin"
+      ],
+      "public_execute": false,
+      "definition_hash": "8cbc326710f09798a5d7eccb5cdbb1e5"
     },
     {
       "key": "public.expire_unpaid_bookings()",
@@ -2446,6 +2494,26 @@
       ],
       "public_execute": false,
       "definition_hash": "7383e332f585e84ad6db2e73aa0d2612"
+    },
+    {
+      "key": "public.package_stop_ids_open_on(text, timestamp with time zone)",
+      "name": "package_stop_ids_open_on",
+      "result": "text[]",
+      "schema": "public",
+      "strict": false,
+      "definer": false,
+      "argtypes": "text, timestamp with time zone",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": false
+      },
+      "volatility": "s",
+      "search_path": "public",
+      "execute_roles": null,
+      "public_execute": false,
+      "definition_hash": "25892374bbfaffc2fffb218bd7510a59"
     },
     {
       "key": "public.prepare_account_deletion(uuid, uuid)",
@@ -3832,6 +3900,26 @@
       ],
       "public_execute": false,
       "definition_hash": "4151db914f83dada0d530d0d53f530a4"
+    },
+    {
+      "key": "public.stop_open_on_weekday(text, integer)",
+      "name": "stop_open_on_weekday",
+      "result": "boolean",
+      "schema": "public",
+      "strict": false,
+      "definer": false,
+      "argtypes": "text, integer",
+      "extension": null,
+      "privileges": {
+        "anon": false,
+        "service_role": true,
+        "authenticated": false
+      },
+      "volatility": "i",
+      "search_path": "public",
+      "execute_roles": null,
+      "public_execute": false,
+      "definition_hash": "64fad085875fc4e9345517b7a6190d3c"
     },
     {
       "key": "public.submit_driver_application(text, text, date, date, integer, boolean, text, text)",
