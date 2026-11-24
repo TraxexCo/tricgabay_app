@@ -2,6 +2,7 @@ import 'package:tricgabay_app/core/l10n/message_codes.g.dart';
 import 'spot_image_material.dart';
 import 'remote_pagination.dart';
 import 'section_refresh.dart';
+import 'embedded_rows.dart';
 import 'dart:async';
 import 'booking_request_material.dart';
 import 'pickup_service_area.dart';
@@ -324,7 +325,9 @@ class BackendRepository {
           final cashRows = (row['cash_confirmations'] as List? ?? [])
               .map((item) => Map<String, dynamic>.from(item))
               .toList();
-          final reviews = row['booking_reviews'] as List? ?? [];
+          // One-to-one (the review's primary key is booking_id): an object or
+          // null, not a list. embeddedRows reads either shape.
+          final reviews = embeddedRows(row['booking_reviews']);
           final offerRows = (row['booking_offers'] as List? ?? [])
               .map((item) => Map<String, dynamic>.from(item))
               .toList();
@@ -542,6 +545,7 @@ class BackendRepository {
         (error, stack) {
           unawaited(TelemetryService.recordNonFatal(error, stack));
         },
+        rowName: 'booking ${source['id']}',
       );
     }
     return DataPage(

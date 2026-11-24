@@ -1966,5 +1966,17 @@
     "value": "Privacy check",
     "kind": "protocol",
     "reason": "Developer log label for the privacy check retry; never shown in the interface."
+  },
+  {
+    "file": "lib/core/services/embedded_rows.dart",
+    "value": "Embedded row is {1}, expected an object",
+    "kind": "protocol",
+    "reason": "Developer-facing exception text for an unexpected server response shape; never shown in the interface."
+  },
+  {
+    "file": "lib/core/services/embedded_rows.dart",
+    "value": "Embedded rows are {1}, expected a list, an object or null",
+    "kind": "protocol",
+    "reason": "Developer-facing exception text for an unexpected server response shape; never shown in the interface."
   }
 ]
