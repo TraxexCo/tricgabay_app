@@ -37,9 +37,9 @@ Route A is the recommended one. Supabase describes project transfer as moving a 
 
 ### Risk: auth emails
 
-- The hosted project currently has **Confirm email on**. Checked on the public auth settings endpoint: `mailer_autoconfirm` is false, so sign-up needs a confirmed email.
-- Supabase's built-in email sender only delivers to addresses that belong to the organization's team, and it is rate-limited. It is meant for testing. Unless custom SMTP is configured, **a real new tourist or driver will never receive the confirmation email** and cannot sign in.
-- Whether custom SMTP is configured could not be read from here. Check it in the dashboard (Authentication, SMTP settings) before telling the client the app is ready for the public.
+- **Current state (checked 2026-11-26 on the public auth settings endpoint): Confirm email is OFF** (`mailer_autoconfirm` true), and sign-up is open. A new tourist is signed in at sign-up and goes straight to the tourist home (app build 9 and later; builds before that still showed "Confirm your email" and sent the user to login).
+- Supabase's built-in email sender only delivers to addresses that belong to the organization's team, and it is rate-limited. It is meant for testing. With Confirm email off, sign-up no longer needs it. **If Confirm email is turned back on without custom SMTP, a real new tourist or driver will never receive the confirmation email** and cannot sign in. Password reset has the same dependency (it also needs the real auth domain).
+- Whether custom SMTP is configured could not be read from here. Check it in the dashboard (Authentication, SMTP settings) before turning Confirm email on, and before telling the client the app is ready for the public.
 - The existing test accounts are not affected, because they were created directly.
 
 ## Before the transfer
@@ -72,6 +72,20 @@ Do not delete or recreate the project. Do not rotate keys during the transfer.
 7. **Remove your access** from the project once the client confirms.
 8. **Keep one backup** from before the transfer for a while, then delete it securely.
 
+### Verified after the transfer (2026-11-26)
+
+Read-only checks plus a phone smoke test on the release APK (versionCode 9). Nothing was created or changed.
+
+- **Project:** same ref `xcsrjuqzwequmeqzedzd`, `ACTIVE_HEALTHY`, now in the client's organization. `supabase link` still points at the same ref. A second, unrelated project also sits in that organization; it is not part of this app.
+- **Edge Functions:** 3, all `ACTIVE` (`dispatch-communications` v11 with JWT required, `health-check` v1, `delete-account` v1).
+- **Edge Function secrets:** all 15 names still present, none missing and none new (the list in the appendix).
+- **Database** (via the linked CLI, `supabase db query --linked`): 11 cron jobs, 9 active and 2 inactive (the PayMongo ones), the 9 active ones all ran in the last 15 minutes with no failures; 6 storage buckets (2 public, 4 private); the 3 vault entries and 2 scheduler tokens present; 49 bookings, 28 reviews; no driver left online.
+- **Auth settings:** Confirm email off (`mailer_autoconfirm` true), sign-up open, email provider on.
+- **Phone:** t1 (packages and past bookings), d1 (queue and Active) and a1 (all 49 bookings, all 28 reviews) each reached their home screens with no error text and no crash. Forgot password still shows "Password recovery is not configured for this build."
+- **Not tested:** push notifications (no booking was created), and password reset and auth emails (need the real domain and SMTP).
+- **The two throwaway sign-up accounts** (`demo1@tric.test`, `demo2@tric.test`) still existed at the time of the check and are to be deleted in the dashboard.
+- **Access note:** the Supabase tool used by the assistant (MCP) is refused for SQL after the transfer; the CLI session still works.
+
 ## What stays on your accounts, and what to tell the client
 
 Stays with you, unless you move it:
@@ -94,7 +108,7 @@ What to tell the client:
 
 1. **Real SMTP (Brevo).** Verify a sender domain. In Supabase, Authentication, SMTP settings, point Auth at Brevo so confirmation and reset emails reach any address. Use the same domain for the booking-email secrets.
 2. **A real auth domain.** Choose it (for example `auth.<their-domain>`). Host `https://<domain>/.well-known/assetlinks.json` for package `com.tricgabay.app` with the **release key's** SHA-256. Serve a page at `https://<domain>/auth/reset-password`. In Supabase, set the Site URL and add that URL to the Redirect URLs.
-3. **Turn Confirm email back on and test it.** It reads as on today (see the risk above). Whatever state it is in, after items 1 and 2, do a full sign-up with a real inbox and check that the link works.
+3. **Decide on Confirm email and test it.** It is off today (see the risk above). If you want it on again, do it only after items 1 and 2, then do a full sign-up with a real inbox and check that the link works. The app handles both settings (build 9 and later).
 4. **Create the real upload keystore** (run it yourself in a terminal; it asks for the keystore password and the key password, and you type them there):
    `keytool -genkeypair -v -keystore C:\Users\Prince\keys\tricgabay-upload.jks -alias tricgabay -keyalg RSA -keysize 2048 -validity 10000`
    Then put the same two passwords in `android\key.properties` (gitignored). Back up the `.jks` file and both passwords outside the repo. Losing them means no more updates under that key.
