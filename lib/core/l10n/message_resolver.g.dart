@@ -1028,7 +1028,6 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'newPassword' => l.newPassword,
     'newPlace' => l.newPlace,
     'newRideRequest' => l.newRideRequest,
-    'newTouristRating' => l.newTouristRating,
     'next' => l.next,
     'noActiveBookingOpenTripsToViewYourHistory' =>
       l.noActiveBookingOpenTripsToViewYourHistory,
@@ -1445,7 +1444,6 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'reviewActiveAndCompletedTrips' => l.reviewActiveAndCompletedTrips,
     'reviewAndPublishFares' => l.reviewAndPublishFares,
     'reviewAndPublishPolicy' => l.reviewAndPublishPolicy,
-    'reviewCountSummary' => l.reviewCountSummary,
     'reviewFailuresAndStaleDrivers' => l.reviewFailuresAndStaleDrivers,
     'reviewFare' => l.reviewFare,
     'reviewFinalCharge' => l.reviewFinalCharge,

@@ -3342,9 +3342,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewAndPublishPolicy => 'Review and publish policy';
 
   @override
-  String get reviewCountSummary => '(128 reviews)';
-
-  @override
   String get reviewFailuresAndStaleDrivers =>
       'Review failures and stale drivers';
 
@@ -4801,9 +4798,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lastSevenDays => '7 days';
-
-  @override
-  String get newTouristRating => ' 5.0 (New)';
 
   @override
   String get exampleOperatingHours => '8:00 AM - 5:00 PM';

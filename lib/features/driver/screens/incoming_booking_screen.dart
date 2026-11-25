@@ -152,25 +152,6 @@ class IncomingBookingScreen extends ConsumerWidget {
                                             fontSize: 18,
                                           ),
                                         ),
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.star,
-                                              color: AppColors.secondary,
-                                              size: 16,
-                                            ),
-                                            Flexible(
-                                              child: Text(
-                                                context.l10n.newTouristRating,
-                                                style: GoogleFonts.poppins(
-                                                  color:
-                                                      AppColors.textSecondary,
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
                                       ],
                                     ),
                                   ),

@@ -3394,9 +3394,6 @@ class AppLocalizationsFil extends AppLocalizations {
   String get reviewAndPublishPolicy => 'Suriin at ilathala ang patakaran';
 
   @override
-  String get reviewCountSummary => '(128 pagsusuri)';
-
-  @override
   String get reviewFailuresAndStaleDrivers =>
       'Suriin ang mga pagpalya at drayber na walang bagong heartbeat';
 
@@ -4875,9 +4872,6 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get lastSevenDays => '7 araw';
-
-  @override
-  String get newTouristRating => ' 5.0 (Bago)';
 
   @override
   String get exampleOperatingHours => '8:00 AM – 5:00 PM';

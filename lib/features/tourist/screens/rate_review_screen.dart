@@ -27,7 +27,8 @@ const _ratingTags = [
 ];
 
 class _RateReviewScreenState extends State<RateReviewScreen> {
-  double _rating = 5.0;
+  /// 0 until the tourist picks a star; Submit stays disabled until then.
+  double _rating = 0;
   final _reviewCtrl = TextEditingController();
   final _selectedTags = <String>{};
   BookingModel? _booking;
@@ -118,7 +119,7 @@ class _RateReviewScreenState extends State<RateReviewScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: RatingBar.builder(
-                initialRating: 5,
+                initialRating: 0,
                 minRating: 1,
                 direction: Axis.horizontal,
                 allowHalfRating: false,
@@ -131,21 +132,25 @@ class _RateReviewScreenState extends State<RateReviewScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-              decoration: BoxDecoration(
-                color: AppColors.secondary.withValues(alpha: .13),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Text(
-                context.message(_getRatingLabel()),
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.secondaryDark,
+            if (_rating > 0)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.secondary.withValues(alpha: .13),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Text(
+                  context.message(_getRatingLabel()),
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.secondaryDark,
+                  ),
                 ),
               ),
-            ),
             const SizedBox(height: 24),
             Wrap(
               spacing: 8,
@@ -174,47 +179,50 @@ class _RateReviewScreenState extends State<RateReviewScreen> {
             AppButton(
               label: context.l10n.submitReview,
               isLoading: _isSubmitting,
-              onPressed: () async {
-                setState(() => _isSubmitting = true);
-                if (!mounted) return;
-                try {
-                  // Chosen tags go in front of the comment, so the driver
-                  // and admins see them with the review.
-                  final tags = [
-                    for (final tag in _ratingTags)
-                      if (_selectedTags.contains(tag)) context.message(tag),
-                  ];
-                  final comment = _reviewCtrl.text.trim();
-                  await AppSession.markBookingRated(
-                    widget.bookingId,
-                    _rating,
-                    review: [
-                      if (tags.isNotEmpty) tags.join(', '),
-                      if (comment.isNotEmpty) comment,
-                    ].join('. '),
-                  );
-                } catch (e) {
-                  if (context.mounted) {
-                    setState(() => _isSubmitting = false);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          context.message(ErrorMessages.forError(e)),
-                        ),
-                      ),
-                    );
-                  }
-                  return;
-                }
-                if (!mounted) return;
-                setState(() => _isSubmitting = false);
-                if (!context.mounted) return;
-                AppSnackbar.showSuccess(
-                  context,
-                  MessageCode.thankYouForYourFeedback,
-                );
-                _returnToBooking(context);
-              },
+              onPressed: _rating < 1
+                  ? null
+                  : () async {
+                      setState(() => _isSubmitting = true);
+                      if (!mounted) return;
+                      try {
+                        // Chosen tags go in front of the comment, so the driver
+                        // and admins see them with the review.
+                        final tags = [
+                          for (final tag in _ratingTags)
+                            if (_selectedTags.contains(tag))
+                              context.message(tag),
+                        ];
+                        final comment = _reviewCtrl.text.trim();
+                        await AppSession.markBookingRated(
+                          widget.bookingId,
+                          _rating,
+                          review: [
+                            if (tags.isNotEmpty) tags.join(', '),
+                            if (comment.isNotEmpty) comment,
+                          ].join('. '),
+                        );
+                      } catch (e) {
+                        if (context.mounted) {
+                          setState(() => _isSubmitting = false);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                context.message(ErrorMessages.forError(e)),
+                              ),
+                            ),
+                          );
+                        }
+                        return;
+                      }
+                      if (!mounted) return;
+                      setState(() => _isSubmitting = false);
+                      if (!context.mounted) return;
+                      AppSnackbar.showSuccess(
+                        context,
+                        MessageCode.thankYouForYourFeedback,
+                      );
+                      _returnToBooking(context);
+                    },
             ),
             const SizedBox(height: 16),
             TextButton(

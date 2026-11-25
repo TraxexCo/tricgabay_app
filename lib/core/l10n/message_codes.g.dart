@@ -1169,7 +1169,6 @@ abstract final class MessageCode {
   static const newPassword = '@l10n/newPassword';
   static const newPlace = '@l10n/newPlace';
   static const newRideRequest = '@l10n/newRideRequest';
-  static const newTouristRating = '@l10n/newTouristRating';
   static const next = '@l10n/next';
   static const noActiveBookingOpenTripsToViewYourHistory =
       '@l10n/noActiveBookingOpenTripsToViewYourHistory';
@@ -1647,7 +1646,6 @@ abstract final class MessageCode {
       '@l10n/reviewActiveAndCompletedTrips';
   static const reviewAndPublishFares = '@l10n/reviewAndPublishFares';
   static const reviewAndPublishPolicy = '@l10n/reviewAndPublishPolicy';
-  static const reviewCountSummary = '@l10n/reviewCountSummary';
   static const reviewFailuresAndStaleDrivers =
       '@l10n/reviewFailuresAndStaleDrivers';
   static const reviewFare = '@l10n/reviewFare';

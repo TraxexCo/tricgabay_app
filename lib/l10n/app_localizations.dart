@@ -5883,12 +5883,6 @@ abstract class AppLocalizations {
   /// **'Review and publish policy'**
   String get reviewAndPublishPolicy;
 
-  /// No description provided for @reviewCountSummary.
-  ///
-  /// In en, this message translates to:
-  /// **'(128 reviews)'**
-  String get reviewCountSummary;
-
   /// No description provided for @reviewFailuresAndStaleDrivers.
   ///
   /// In en, this message translates to:
@@ -8316,12 +8310,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'7 days'**
   String get lastSevenDays;
-
-  /// No description provided for @newTouristRating.
-  ///
-  /// In en, this message translates to:
-  /// **' 5.0 (New)'**
-  String get newTouristRating;
 
   /// No description provided for @exampleOperatingHours.
   ///
