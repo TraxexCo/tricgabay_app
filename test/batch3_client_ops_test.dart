@@ -11,7 +11,6 @@ import 'package:tricgabay_app/l10n/app_localizations_fil.dart';
 import 'package:tricgabay_app/core/widgets/role_navigation_bar.dart';
 import 'package:tricgabay_app/core/utils/validators.dart';
 import 'package:tricgabay_app/core/services/error_messages.dart';
-import 'package:tricgabay_app/core/config/auth_link_config.dart';
 import 'package:tricgabay_app/core/services/connectivity_monitor.dart';
 import 'package:tricgabay_app/core/widgets/offline_banner.dart';
 import 'package:tricgabay_app/core/session/app_session.dart';
@@ -50,20 +49,6 @@ void main() {
       ),
       'Hindi makumpleto ang aksiyong ito. Nananatili ang iyong mga tala. I-refresh at subukan muli.',
     );
-  });
-  test('reset links use exactly the configured HTTPS domain', () {
-    expect(
-      AuthLinkConfig.resetUri('auth.example.test').toString(),
-      'https://auth.example.test/auth/reset-password',
-    );
-    for (final host in [
-      '',
-      'https://auth.example.test',
-      'bad.test/path',
-      'unconfigured.invalid',
-    ]) {
-      expect(() => AuthLinkConfig.resetUri(host), throwsStateError);
-    }
   });
   testWidgets('offline banner retries and reconnect catches up once', (
     tester,

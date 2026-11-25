@@ -26,8 +26,6 @@ import 'core/config/mapbox_config.dart';
 import 'core/config/backend_config.dart';
 import 'core/config/build_environment.dart';
 import 'core/config/firebase_config.dart';
-import 'core/config/auth_link_config.dart';
-import 'core/constants/app_routes.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_colors.dart';
 import 'core/session/app_session.dart';
@@ -46,7 +44,6 @@ void main() async {
       'FIREBASE_APP_ID': FirebaseConfig.appId,
       'FIREBASE_MESSAGING_SENDER_ID': FirebaseConfig.messagingSenderId,
       'FIREBASE_PROJECT_ID': FirebaseConfig.projectId,
-      'AUTH_APP_LINK_HOST': AuthLinkConfig.host,
     },
   );
   // Each service is started on its own so one failure (a plugin that isn't
@@ -115,10 +112,6 @@ class _TricGabayAppState extends State<TricGabayApp>
       _authSubscription = BackendConfig.client.auth.onAuthStateChange.listen((
         state,
       ) {
-        if (state.event == AuthChangeEvent.passwordRecovery) {
-          appRouter.go(AppRoutes.resetPassword);
-          return;
-        }
         if (state.event == AuthChangeEvent.signedOut &&
             AppSession.authenticatedUserId != null) {
           unawaited(AppSession.handleSessionEnded());

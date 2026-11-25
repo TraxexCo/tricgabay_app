@@ -41,6 +41,7 @@ import 'package:tricgabay_app/features/driver/screens/driver_home_screen.dart';
 import 'package:tricgabay_app/features/auth/screens/forgot_password_screen.dart';
 import 'package:tricgabay_app/features/auth/screens/splash_screen.dart';
 import 'package:tricgabay_app/features/auth/screens/reset_password_screen.dart';
+import 'package:tricgabay_app/features/auth/screens/verify_email_code_screen.dart';
 import 'package:tricgabay_app/features/auth/screens/register_tourist_screen.dart';
 import 'package:tricgabay_app/features/auth/screens/register_role_screen.dart';
 import 'package:tricgabay_app/features/auth/screens/register_driver_screen.dart';
@@ -195,7 +196,16 @@ final screenCases = <ScreenCase>[
     'auth',
     () => SplashScreen(restoreProfile: () => Completer<Never>().future),
   ),
-  ScreenCase('ResetPasswordScreen', 'auth', () => ResetPasswordScreen()),
+  ScreenCase(
+    'ResetPasswordScreen',
+    'auth',
+    () => ResetPasswordScreen(email: 'tourist@example.test'),
+  ),
+  ScreenCase(
+    'VerifyEmailCodeScreen',
+    'auth',
+    () => VerifyEmailCodeScreen(args: VerifyEmailArgs('tourist@example.test')),
+  ),
   ScreenCase('RegisterTouristScreen', 'auth', () => RegisterTouristScreen()),
   ScreenCase('RegisterRoleScreen', 'auth', () => RegisterRoleScreen()),
   ScreenCase('RegisterDriverScreen', 'auth', () => RegisterDriverScreen()),

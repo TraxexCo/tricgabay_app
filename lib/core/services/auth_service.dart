@@ -1,7 +1,6 @@
 import 'package:tricgabay_app/core/l10n/message_codes.g.dart';
 import 'privacy_service.dart';
 import 'image_upload_validator.dart';
-import '../config/auth_link_config.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
@@ -393,11 +392,48 @@ class AuthService {
       '${value.month.toString().padLeft(2, '0')}-'
       '${value.day.toString().padLeft(2, '0')}';
 
-  static Future<void> sendPasswordReset(String email) =>
-      _client.auth.resetPasswordForEmail(
-        email.trim(),
-        redirectTo: AuthLinkConfig.resetUri().toString(),
+  /// Confirms a new account with the 6-digit code from the sign-up email.
+  /// A correct code signs the user in.
+  static Future<void> verifySignUpCode({
+    required String email,
+    required String code,
+  }) async {
+    final response = await _client.auth.verifyOTP(
+      email: email.trim(),
+      token: code.trim(),
+      type: OtpType.signup,
+    );
+    if (response.session == null) {
+      throw const AuthException(MessageCode.signInDidNotComplete);
+    }
+  }
+
+  /// Emails a new sign-up code.
+  static Future<void> resendSignUpCode(String email) =>
+      _client.auth.resend(type: OtpType.signup, email: email.trim());
+
+  /// Emails a password-reset code. Supabase answers the same whether or not
+  /// the email has an account.
+  static Future<void> requestPasswordResetCode(String email) =>
+      _client.auth.resetPasswordForEmail(email.trim());
+
+  /// Checks the reset code. A correct code opens a short recovery session, in
+  /// which [updateRecoveredPassword] may set the new password.
+  static Future<void> verifyRecoveryCode({
+    required String email,
+    required String code,
+  }) async {
+    final response = await _client.auth.verifyOTP(
+      email: email.trim(),
+      token: code.trim(),
+      type: OtpType.recovery,
+    );
+    if (response.session == null) {
+      throw const AuthException(
+        MessageCode.thisPasswordResetLinkIsInvalidOrExpiredRequestANewOne,
       );
+    }
+  }
 
   static Future<void> updateRecoveredPassword(String password) async {
     final decision = evaluatePasswordRecoverySession(

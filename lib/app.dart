@@ -20,6 +20,7 @@ import 'features/auth/screens/register_tourist_screen.dart';
 import 'features/auth/screens/register_driver_screen.dart';
 import 'features/auth/screens/forgot_password_screen.dart';
 import 'features/auth/screens/reset_password_screen.dart';
+import 'features/auth/screens/verify_email_code_screen.dart';
 
 // Tourist screens
 import 'features/tourist/screens/tourist_shell_screen.dart';
@@ -215,7 +216,19 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.resetPassword,
-      builder: (context, state) => const ResetPasswordScreen(),
+      // The email comes from the forgot-password screen; without it there is
+      // nothing to verify, so start again from there.
+      redirect: (context, state) =>
+          state.extra is String ? null : AppRoutes.forgotPassword,
+      builder: (context, state) =>
+          ResetPasswordScreen(email: state.extra! as String),
+    ),
+    GoRoute(
+      path: AppRoutes.verifyEmail,
+      redirect: (context, state) =>
+          state.extra is VerifyEmailArgs ? null : AppRoutes.login,
+      builder: (context, state) =>
+          VerifyEmailCodeScreen(args: state.extra! as VerifyEmailArgs),
     ),
 
     // ─── Tourist Shell ───────────────────────────────────────

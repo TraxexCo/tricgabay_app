@@ -1,5 +1,6 @@
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../constants/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -23,6 +24,8 @@ class AppTextField extends StatefulWidget {
   final bool autofocus;
   final bool readOnly;
   final VoidCallback? onTap;
+  final List<TextInputFormatter>? inputFormatters;
+  final Iterable<String>? autofillHints;
 
   const AppTextField({
     super.key,
@@ -45,6 +48,8 @@ class AppTextField extends StatefulWidget {
     this.autofocus = false,
     this.readOnly = false,
     this.onTap,
+    this.inputFormatters,
+    this.autofillHints,
   });
 
   @override
@@ -70,6 +75,8 @@ class _AppTextFieldState extends State<AppTextField> {
       obscureText: widget.obscureText ? _obscure : false,
       maxLines: widget.obscureText ? 1 : widget.maxLines,
       maxLength: widget.maxLength,
+      inputFormatters: widget.inputFormatters,
+      autofillHints: widget.autofillHints,
       enabled: widget.enabled,
       onChanged: widget.onChanged,
       onFieldSubmitted: widget.onSubmitted,

@@ -1630,12 +1630,6 @@ abstract class AppLocalizations {
   /// **'Check road restrictions'**
   String get checkRoadRestrictions;
 
-  /// No description provided for @checkYourEmail.
-  ///
-  /// In en, this message translates to:
-  /// **'Check your email'**
-  String get checkYourEmail;
-
   /// No description provided for @chooseABarangayAndEnterTheExactAddressBelow.
   ///
   /// In en, this message translates to:
@@ -2893,12 +2887,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter your email'**
   String get enterYourEmail;
-
-  /// No description provided for @enterYourEmailAndWeWillSendYouALinkToResetYour.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter your email and we will send you a link to reset your password.'**
-  String get enterYourEmailAndWeWillSendYouALinkToResetYour;
 
   /// No description provided for @enterYourFullName.
   ///
@@ -6225,12 +6213,6 @@ abstract class AppLocalizations {
   /// **'Send refund to PayMongo?'**
   String get sendRefundToPaymongo;
 
-  /// No description provided for @sendResetLink.
-  ///
-  /// In en, this message translates to:
-  /// **'Send reset link'**
-  String get sendResetLink;
-
   /// No description provided for @sep.
   ///
   /// In en, this message translates to:
@@ -6930,7 +6912,7 @@ abstract class AppLocalizations {
   /// No description provided for @thisPasswordResetLinkIsInvalidOrExpiredRequestANewOne.
   ///
   /// In en, this message translates to:
-  /// **'This password-reset link is invalid or expired. Request a new one.'**
+  /// **'This password reset has expired. Ask for a new code.'**
   String get thisPasswordResetLinkIsInvalidOrExpiredRequestANewOne;
 
   /// No description provided for @thisPickupPinIsOutsideTheServiceAreaMoveThePinCloserTo.
@@ -7430,12 +7412,6 @@ abstract class AppLocalizations {
   /// **'Use at least 8 characters'**
   String get useAtLeast8Characters;
 
-  /// No description provided for @useAtLeastEightCharactersAvoidAPasswordYouUseOnAnotherService.
-  ///
-  /// In en, this message translates to:
-  /// **'Use at least eight characters. Avoid a password you use on another service.'**
-  String get useAtLeastEightCharactersAvoidAPasswordYouUseOnAnotherService;
-
   /// No description provided for @useLettersSpacesHyphensApostrophesOrPeriodsInYourName.
   ///
   /// In en, this message translates to:
@@ -7717,12 +7693,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wed'**
   String get wed;
-
-  /// No description provided for @weHaveSentPasswordRecoveryInstructionsToYourEmail.
-  ///
-  /// In en, this message translates to:
-  /// **'We have sent password recovery instructions to your email.'**
-  String get weHaveSentPasswordRecoveryInstructionsToYourEmail;
 
   /// No description provided for @welcomeBack.
   ///
@@ -8064,12 +8034,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign-in did not complete.'**
   String get signInDidNotComplete;
-
-  /// No description provided for @authResetConfigurationRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Password recovery is not configured for this build.'**
-  String get authResetConfigurationRequired;
 
   /// No description provided for @pickupRecoveryFailed.
   ///
@@ -9820,6 +9784,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{value} out of 5 stars'**
   String ratingOutOfFiveValue(String value);
+
+  /// No description provided for @verifyYourEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your email'**
+  String get verifyYourEmail;
+
+  /// No description provided for @enterSixDigitCodeEmailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code we emailed you'**
+  String get enterSixDigitCodeEmailed;
+
+  /// No description provided for @codeSentToValue.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a code to {value}.'**
+  String codeSentToValue(String value);
+
+  /// No description provided for @sixDigitCode.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code'**
+  String get sixDigitCode;
+
+  /// No description provided for @verifyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verifyCode;
+
+  /// No description provided for @resendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get resendCode;
+
+  /// No description provided for @resendCodeInValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code in {value}s'**
+  String resendCodeInValue(String value);
+
+  /// No description provided for @newCodeSent.
+  ///
+  /// In en, this message translates to:
+  /// **'A new code is on its way.'**
+  String get newCodeSent;
+
+  /// No description provided for @codeWrongOrExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'That code is wrong or has expired. Check it, or ask for a new one.'**
+  String get codeWrongOrExpired;
+
+  /// No description provided for @codeRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many tries. Wait a few minutes, then try again.'**
+  String get codeRateLimited;
+
+  /// No description provided for @enterAllSixDigits.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter all 6 digits.'**
+  String get enterAllSixDigits;
+
+  /// No description provided for @neverShareThisCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Never share this code with anyone.'**
+  String get neverShareThisCode;
+
+  /// No description provided for @sendResetCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get sendResetCode;
+
+  /// No description provided for @enterYourEmailAndWeWillSendYouA6DigitCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email and we will send you a 6-digit code to reset your password.'**
+  String get enterYourEmailAndWeWillSendYouA6DigitCode;
+
+  /// No description provided for @resetCodeSentNeutral.
+  ///
+  /// In en, this message translates to:
+  /// **'If an account exists for {value}, we sent a 6-digit code to it.'**
+  String resetCodeSentNeutral(String value);
 }
 
 class _AppLocalizationsDelegate

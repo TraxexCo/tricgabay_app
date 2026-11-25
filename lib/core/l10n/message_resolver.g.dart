@@ -155,7 +155,6 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'auditedRouteChangesRequireTheConfiguredServer' =>
       l.auditedRouteChangesRequireTheConfiguredServer,
     'aug' => l.aug,
-    'authResetConfigurationRequired' => l.authResetConfigurationRequired,
     'availability' => l.availability,
     'avatarCleanupPendingForObjectValue' =>
       l.avatarCleanupPendingForObjectValue(text(0)),
@@ -266,7 +265,6 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'checkLocally' => l.checkLocally,
     'checkOutInBustosBulacanValue' => l.checkOutInBustosBulacanValue(text(0)),
     'checkRoadRestrictions' => l.checkRoadRestrictions,
-    'checkYourEmail' => l.checkYourEmail,
     'checkingGpsAndPermission' => l.checkingGpsAndPermission,
     'checkoutCouldNotBeCreated' => l.checkoutCouldNotBeCreated,
     'chooseABarangayAndEnterTheExactAddressBelow' =>
@@ -307,7 +305,10 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'closeTemporarily' => l.closeTemporarily,
     'closed' => l.closed,
     'closureReason' => l.closureReason,
+    'codeRateLimited' => l.codeRateLimited,
     'codeReissueCouldNotBeConfirmed' => l.codeReissueCouldNotBeConfirmed,
+    'codeSentToValue' => l.codeSentToValue(text(0)),
+    'codeWrongOrExpired' => l.codeWrongOrExpired,
     'compactCurrency' => l.compactCurrency(text(0)),
     'completeAllDocumentAndServiceAreaFields' =>
       l.completeAllDocumentAndServiceAreaFields,
@@ -598,12 +599,14 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'enterAValidPhoneNumber' => l.enterAValidPhoneNumber,
     'enterAValidPrice' => l.enterAValidPrice,
     'enterAddress' => l.enterAddress,
+    'enterAllSixDigits' => l.enterAllSixDigits,
     'enterAnAdminEmail' => l.enterAnAdminEmail,
     'enterDescription' => l.enterDescription,
     'enterDriverApp' => l.enterDriverApp,
     'enterHistory' => l.enterHistory,
     'enterPesosWithAtMostTwoDecimalPlaces' =>
       l.enterPesosWithAtMostTwoDecimalPlaces,
+    'enterSixDigitCodeEmailed' => l.enterSixDigitCodeEmailed,
     'enterThePickupAddressBelow' => l.enterThePickupAddressBelow,
     'enterTheReasonForApprovingOrRestoringServiceAtLeastFiveCharacters' =>
       l.enterTheReasonForApprovingOrRestoringServiceAtLeastFiveCharacters,
@@ -611,8 +614,8 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'enterValidFixedFaresForEveryRoute' => l.enterValidFixedFaresForEveryRoute,
     'enterYourAnnouncementDetailsHere' => l.enterYourAnnouncementDetailsHere,
     'enterYourEmail' => l.enterYourEmail,
-    'enterYourEmailAndWeWillSendYouALinkToResetYour' =>
-      l.enterYourEmailAndWeWillSendYouALinkToResetYour,
+    'enterYourEmailAndWeWillSendYouA6DigitCode' =>
+      l.enterYourEmailAndWeWillSendYouA6DigitCode,
     'enterYourFullName' => l.enterYourFullName,
     'enterYourPassword' => l.enterYourPassword,
     'entranceFee' => l.entranceFee,
@@ -1023,7 +1026,9 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'navigate' => l.navigate,
     'needHelpRightNow' => l.needHelpRightNow,
     'needsReview' => l.needsReview,
+    'neverShareThisCode' => l.neverShareThisCode,
     'newBookingsUseTheseFaresValue' => l.newBookingsUseTheseFaresValue(text(0)),
+    'newCodeSent' => l.newCodeSent,
     'newPackage' => l.newPackage,
     'newPassword' => l.newPassword,
     'newPlace' => l.newPlace,
@@ -1423,6 +1428,9 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'requestToSkipValue' => l.requestToSkipValue(text(0)),
     'requestedOnValue' => l.requestedOnValue(text(0)),
     'requests' => l.requests,
+    'resendCode' => l.resendCode,
+    'resendCodeInValue' => l.resendCodeInValue(text(0)),
+    'resetCodeSentNeutral' => l.resetCodeSentNeutral(text(0)),
     'resetMap' => l.resetMap,
     'resolve' => l.resolve,
     'resolvePaymentReview' => l.resolvePaymentReview,
@@ -1517,7 +1525,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'sendProposal' => l.sendProposal,
     'sendRefundRequestToPaymongo' => l.sendRefundRequestToPaymongo,
     'sendRefundToPaymongo' => l.sendRefundToPaymongo,
-    'sendResetLink' => l.sendResetLink,
+    'sendResetCode' => l.sendResetCode,
     'sendSupportMessage' => l.sendSupportMessage,
     'sep' => l.sep,
     'serverConnectionRequired' => l.serverConnectionRequired,
@@ -1550,6 +1558,7 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'signInFirst' => l.signInFirst,
     'signOut' => l.signOut,
     'signUp' => l.signUp,
+    'sixDigitCode' => l.sixDigitCode,
     'skip' => l.skip,
     'someInformationCouldNotRefreshDetailValue' =>
       l.someInformationCouldNotRefreshDetailValue(text(0)),
@@ -1825,8 +1834,6 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'uploadValue' => l.uploadValue(text(0)),
     'uploading' => l.uploading,
     'useAtLeast8Characters' => l.useAtLeast8Characters,
-    'useAtLeastEightCharactersAvoidAPasswordYouUseOnAnotherService' =>
-      l.useAtLeastEightCharactersAvoidAPasswordYouUseOnAnotherService,
     'useDeviceLanguage' => l.useDeviceLanguage,
     'useLettersSpacesHyphensApostrophesOrPeriodsInYourName' =>
       l.useLettersSpacesHyphensApostrophesOrPeriodsInYourName,
@@ -1850,9 +1857,11 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'verifiedPickupArrivalIsRequiredBeforeReportingANoShow' =>
       l.verifiedPickupArrivalIsRequiredBeforeReportingANoShow,
     'verifiedTourist' => l.verifiedTourist,
+    'verifyCode' => l.verifyCode,
     'verifyLocalAgencyNumbers' => l.verifyLocalAgencyNumbers,
     'verifyPickup' => l.verifyPickup,
     'verifyPickupCodeStart' => l.verifyPickupCodeStart,
+    'verifyYourEmail' => l.verifyYourEmail,
     'viewActiveDriversOnTheMap' => l.viewActiveDriversOnTheMap,
     'viewAll' => l.viewAll,
     'viewAndManageTouristAccounts' => l.viewAndManageTouristAccounts,
@@ -1884,8 +1893,6 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
       l.waitingForTheTouristToChooseDoNotProceedToPickup,
     'waitingPeriodCompleted' => l.waitingPeriodCompleted,
     'waived' => l.waived,
-    'weHaveSentPasswordRecoveryInstructionsToYourEmail' =>
-      l.weHaveSentPasswordRecoveryInstructionsToYourEmail,
     'weLlSendNearbyBookingsYourWay' => l.weLlSendNearbyBookingsYourWay,
     'weWillRemindYouAndStartMatching30MinutesBeforePickup' =>
       l.weWillRemindYouAndStartMatching30MinutesBeforePickup,

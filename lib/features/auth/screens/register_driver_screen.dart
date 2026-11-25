@@ -10,7 +10,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/config/backend_config.dart';
+import '../../../core/constants/app_routes.dart';
 import '../../../core/services/auth_service.dart';
+import 'verify_email_code_screen.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 
@@ -88,22 +90,39 @@ class _RegisterDriverScreenState extends ConsumerState<RegisterDriverScreen> {
     if (consent == null || !mounted) return;
     setState(() => _submitting = true);
     try {
-      final outcome = await AuthService.registerDriver(
-        privacyVersion: consent.version,
-        privacyLanguage: consent.shownLanguage!,
-        name: _name.text,
-        email: _email.text,
-        phone: _phone.text,
-        password: _password.text,
-        plateNumber: _plate.text,
-        franchiseNumber: _franchise.text,
-        licenseExpiresOn: _licenseExpiresOn!,
-        franchiseExpiresOn: _franchiseExpiresOn!,
-        passengerCapacity: _passengerCapacity,
-        acceptsAccessibilityRequests: _acceptsAccessibilityRequests,
-        licenseBytes: await _documents['license']!.readAsBytes(),
-        vehicleRegistrationBytes: await _documents['vehicle']!.readAsBytes(),
-      );
+      final licenseBytes = await _documents['license']!.readAsBytes();
+      final vehicleBytes = await _documents['vehicle']!.readAsBytes();
+      Future<DriverRegistrationOutcome> register() =>
+          AuthService.registerDriver(
+            privacyVersion: consent.version,
+            privacyLanguage: consent.shownLanguage!,
+            name: _name.text,
+            email: _email.text,
+            phone: _phone.text,
+            password: _password.text,
+            plateNumber: _plate.text,
+            franchiseNumber: _franchise.text,
+            licenseExpiresOn: _licenseExpiresOn!,
+            franchiseExpiresOn: _franchiseExpiresOn!,
+            passengerCapacity: _passengerCapacity,
+            acceptsAccessibilityRequests: _acceptsAccessibilityRequests,
+            licenseBytes: licenseBytes,
+            vehicleRegistrationBytes: vehicleBytes,
+          );
+      var outcome = await register();
+      // No session yet: the account needs the 6-digit code we just emailed.
+      // Once it is entered the user is signed in, and the same form data
+      // finishes the application (the app resumes it for a signed-in user).
+      if (outcome == DriverRegistrationOutcome.awaitingEmailConfirmation &&
+          mounted) {
+        final verified =
+            await context.push<bool>(
+              AppRoutes.verifyEmail,
+              extra: VerifyEmailArgs(_email.text.trim()),
+            ) ??
+            false;
+        if (verified && mounted) outcome = await register();
+      }
       if (!mounted) return;
       if (outcome == DriverRegistrationOutcome.awaitingEmailConfirmation) {
         ScaffoldMessenger.of(context).showSnackBar(
