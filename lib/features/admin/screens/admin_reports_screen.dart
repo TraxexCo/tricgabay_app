@@ -1,3 +1,5 @@
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -6,7 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_card.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../models/booking_model.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -18,12 +20,16 @@ class AdminReportsScreen extends ConsumerStatefulWidget {
 }
 
 class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
-  String _selectedFilter = 'This Week';
-  final List<String> _filters = ['This Week', 'This Month', 'This Year'];
+  String _selectedFilter = MessageCode.thisWeek;
+  final List<String> _filters = [
+    MessageCode.thisWeek,
+    MessageCode.thisMonth,
+    MessageCode.thisYear,
+  ];
 
   List<({String name, double rating, int trips})> _driverPerformance() {
     final grouped = <String, List<BookingModel>>{};
-    for (final booking in PrototypeSession.bookings.value.where(
+    for (final booking in AppSession.bookings.value.where(
       (b) => b.status == BookingStatus.completed && b.driverName != null,
     )) {
       grouped.putIfAbsent(booking.driverName!, () => []).add(booking);
@@ -55,7 +61,7 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
           _csv(booking.id),
           booking.status.name,
           booking.paymentMethod.name,
-          (booking.trip.receivedCents / 100).toStringAsFixed(2),
+          AppFormatters.decimalInput((booking.trip.receivedCents / 100)),
           booking.createdAt.toUtc().toIso8601String(),
           booking.completedAt?.toUtc().toIso8601String() ?? '',
         ].join(','),
@@ -63,21 +69,25 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
     ];
     await SharePlus.instance.share(
       ShareParams(
-        subject: 'Tric-Gabay $_selectedFilter report',
-        text:
-            'Confirmed transactions only. Open reviews and outstanding refunds are excluded.',
+        subject: context.l10n.appReportValue(
+          context.message(_selectedFilter),
+          AppBrand.name,
+        ),
+        text: context
+            .l10n
+            .confirmedTransactionsOnlyOpenReviewsAndOutstandingRefundsAreExcluded,
         files: [
           XFile.fromData(utf8.encode(rows.join('\r\n')), mimeType: 'text/csv'),
         ],
         fileNameOverrides: [
-          'tric-gabay-${_selectedFilter.toLowerCase().replaceAll(' ', '-')}.csv',
+          'tric-gabay-${DateTime.now().toUtc().millisecondsSinceEpoch}.csv',
         ],
       ),
     );
   }
 
   List<BookingModel> _getFilteredBookings() {
-    final bookings = PrototypeSession.bookings.value;
+    final bookings = AppSession.bookings.value;
     final now = DateTime.now();
 
     return bookings.where((b) {
@@ -87,9 +97,9 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
           b.trip.receivedCents == 0) {
         return false;
       }
-      if (_selectedFilter == 'This Week') {
+      if (_selectedFilter == MessageCode.thisWeek) {
         return now.difference(b.createdAt).inDays <= 7;
-      } else if (_selectedFilter == 'This Month') {
+      } else if (_selectedFilter == MessageCode.thisMonth) {
         return now.difference(b.createdAt).inDays <= 30;
       } else {
         // This Year
@@ -101,18 +111,18 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
   List<FlSpot> _getChartData(List<BookingModel> filteredBookings) {
     if (filteredBookings.isEmpty) {
       // Return flat line if empty
-      int emptyDays = _selectedFilter == 'This Week'
+      int emptyDays = _selectedFilter == MessageCode.thisWeek
           ? 7
-          : (_selectedFilter == 'This Month' ? 30 : 12);
+          : (_selectedFilter == MessageCode.thisMonth ? 30 : 12);
       return List.generate(emptyDays, (i) => FlSpot(i.toDouble(), 0));
     }
 
-    int days = _selectedFilter == 'This Week'
+    int days = _selectedFilter == MessageCode.thisWeek
         ? 7
-        : (_selectedFilter == 'This Month' ? 30 : 12);
+        : (_selectedFilter == MessageCode.thisMonth ? 30 : 12);
     List<FlSpot> spots = [];
 
-    if (_selectedFilter == 'This Year') {
+    if (_selectedFilter == MessageCode.thisYear) {
       Map<int, double> monthlyRevenue = {for (var i = 0; i < 12; i++) i: 0.0};
       final now = DateTime.now();
 
@@ -162,45 +172,22 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
       fontSize: 10,
       color: AppColors.textSecondary,
     );
-    Widget text = const Text('');
+    Widget text = Text(context.message(''));
     final now = DateTime.now();
 
-    if (_selectedFilter == 'This Year') {
+    if (_selectedFilter == MessageCode.thisYear) {
       int index = value.toInt();
       if (index >= 0 && index < 12) {
         int monthsAgo = 11 - index;
         DateTime d = DateTime(now.year, now.month - monthsAgo, 1);
-        List<String> months = [
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec',
-        ];
-        text = Text(months[d.month - 1], style: style);
+        text = Text(AppFormatters.monthShort(d), style: style);
       }
-    } else if (_selectedFilter == 'This Week') {
+    } else if (_selectedFilter == MessageCode.thisWeek) {
       int index = value.toInt();
       if (index >= 0 && index < 7) {
         int daysAgo = 6 - index;
         DateTime d = now.subtract(Duration(days: daysAgo));
-        List<String> weekdays = [
-          'Mon',
-          'Tue',
-          'Wed',
-          'Thu',
-          'Fri',
-          'Sat',
-          'Sun',
-        ];
-        text = Text(weekdays[d.weekday - 1], style: style);
+        text = Text(AppFormatters.weekdayShort(d), style: style);
       }
     } else {
       // This Month
@@ -209,7 +196,7 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
         if (index % 5 == 0 || index == 29) {
           int daysAgo = 29 - index;
           DateTime d = now.subtract(Duration(days: daysAgo));
-          text = Text('${d.day}/${d.month}', style: style);
+          text = Text(AppFormatters.monthDay(d), style: style);
         }
       }
     }
@@ -226,12 +213,17 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
     if (value >= 1000) {
       return SideTitleWidget(
         axisSide: meta.axisSide,
-        child: Text('₱${(value / 1000).toStringAsFixed(1)}k', style: style),
+        child: Text(
+          context.l10n.compactCurrency(
+            context.message(((value / 1000).toStringAsFixed(1)).toString()),
+          ),
+          style: style,
+        ),
       );
     }
     return SideTitleWidget(
       axisSide: meta.axisSide,
-      child: Text('₱${value.toStringAsFixed(0)}', style: style),
+      child: Text(AppFormatters.currencyShort(value), style: style),
     );
   }
 
@@ -241,6 +233,9 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
     final totalRevenue = filteredBookings.fold(
       0.0,
       (sum, item) => sum + (item.trip.receivedCents / 100),
+    );
+    final includesDirectGcash = filteredBookings.any(
+      (booking) => booking.paymentMethod == PaymentMethod.gcashDirect,
     );
     final totalBookings = filteredBookings.length;
     final chartData = _getChartData(filteredBookings);
@@ -258,9 +253,10 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8FB),
       appBar: AppBar(
-        title: const Text('Reports & Analytics'),
+        title: Text(context.l10n.reportsAnalytics),
         actions: [
           IconButton(
+            tooltip: context.l10n.downloadReport,
             icon: const Icon(Icons.file_download),
             onPressed: _exportReport,
           ),
@@ -279,16 +275,19 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
                       (e) => Padding(
                         padding: const EdgeInsets.only(right: 8.0),
                         child: ChoiceChip(
-                          label: Text(e),
+                          showCheckmark: false,
+                          label: Text(context.message(e)),
                           selected: e == _selectedFilter,
                           onSelected: (val) {
                             if (val) setState(() => _selectedFilter = e);
                           },
                           selectedColor: AppColors.primary,
-                          labelStyle: TextStyle(
+                          labelStyle: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
                             color: e == _selectedFilter
                                 ? Colors.white
-                                : Colors.black,
+                                : AppColors.textPrimary,
                           ),
                         ),
                       ),
@@ -301,21 +300,25 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
               children: [
                 Expanded(
                   child: _buildReportStat(
-                    'Total Revenue',
-                    '₱ ${totalRevenue.toStringAsFixed(0)}',
-                    Icons.attach_money,
+                    includesDirectGcash
+                        ? context.l10n.gcashConfirmedFares
+                        : MessageCode.totalRevenue,
+                    AppFormatters.currencyShort(totalRevenue),
+                    Icons.payments_outlined,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: _buildReportStat(
-                    'Total Bookings',
+                    MessageCode.totalBookings,
                     '$totalBookings',
                     Icons.receipt_long,
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 8),
+            Text(context.l10n.loadedBookingTotals),
             const SizedBox(height: 16),
             AppCard(
               padding: const EdgeInsets.all(16),
@@ -323,7 +326,9 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Revenue Over Time',
+                    includesDirectGcash
+                        ? context.l10n.gcashConfirmedFaresOverTime
+                        : context.l10n.revenueOverTime,
                     style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 24),
@@ -331,9 +336,11 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
                     height: 200,
                     width: double.infinity,
                     child: filteredBookings.isEmpty
-                        ? const Center(
+                        ? Center(
                             child: Text(
-                              'No completed bookings found for this period.',
+                              context
+                                  .l10n
+                                  .noCompletedBookingsFoundForThisPeriod,
                               style: TextStyle(color: AppColors.textSecondary),
                             ),
                           )
@@ -372,12 +379,17 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
                                 ),
                               ),
                               borderData: FlBorderData(show: false),
+                              clipData: const FlClipData.all(),
                               minY: 0,
                               maxY: maxY,
                               lineBarsData: [
                                 LineChartBarData(
                                   spots: chartData,
                                   isCurved: true,
+                                  // Smooth, but never dip under zero between
+                                  // a busy day and an empty one.
+                                  preventCurveOverShooting: true,
+                                  curveSmoothness: .25,
                                   color: AppColors.primary,
                                   barWidth: 3,
                                   dotData: const FlDotData(show: false),
@@ -399,16 +411,16 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
             AppCard(
               padding: const EdgeInsets.all(16),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Driver performance',
+                    context.l10n.driverPerformance,
                     style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   if (driverPerformance.isEmpty)
-                    const Text(
-                      'No completed driver trips yet.',
+                    Text(
+                      context.l10n.noCompletedDriverTripsYet,
                       style: TextStyle(color: AppColors.textSecondary),
                     )
                   else
@@ -416,9 +428,9 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
                       (driver) => _performanceRow(
                         driver.name,
                         driver.rating == 0
-                            ? 'Not rated'
+                            ? MessageCode.notRated
                             : '${driver.rating.toStringAsFixed(1)} ★',
-                        '${driver.trips} ${driver.trips == 1 ? 'trip' : 'trips'}',
+                        context.l10n.tripsValue(driver.trips.toString()),
                       ),
                     ),
                 ],
@@ -439,14 +451,14 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
           Icon(icon, color: AppColors.primary),
           const SizedBox(height: 12),
           Text(
-            value,
+            context.message(value),
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
           Text(
-            label,
+            context.message(label),
             style: GoogleFonts.poppins(
               color: AppColors.textSecondary,
               fontSize: 12,
@@ -463,10 +475,16 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen> {
       children: [
         const CircleAvatar(radius: 16, child: Icon(Icons.person, size: 16)),
         const SizedBox(width: 9),
-        Expanded(child: Text(name)),
-        Text(rating, style: const TextStyle(color: AppColors.secondary)),
+        Expanded(child: Text(context.message(name))),
+        Text(
+          context.message(rating),
+          style: const TextStyle(color: AppColors.secondary),
+        ),
         const SizedBox(width: 12),
-        Text(trips, style: const TextStyle(color: AppColors.textSecondary)),
+        Text(
+          context.message(trips),
+          style: const TextStyle(color: AppColors.textSecondary),
+        ),
       ],
     ),
   );

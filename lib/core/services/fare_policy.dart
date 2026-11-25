@@ -1,3 +1,5 @@
+import 'package:tricgabay_app/core/l10n/message_codes.g.dart';
+
 class FarePolicy {
   final int revision;
   final int customFareCents;
@@ -17,19 +19,21 @@ class FarePolicy {
   int quote(String? packageId) {
     if (packageId == null) return customFareCents;
     final fare = packageFares[packageId];
-    if (fare == null) throw StateError('This package has no published price.');
+    if (fare == null) {
+      throw StateError(MessageCode.thisPackageHasNoPublishedPrice);
+    }
     return fare;
   }
 
   static int parsePrice(String text) {
     if (!RegExp(r'^\d{1,6}(\.\d{1,2})?$').hasMatch(text.trim())) {
       throw const FormatException(
-        'Enter pesos with at most two decimal places.',
+        MessageCode.enterPesosWithAtMostTwoDecimalPlaces,
       );
     }
     final cents = (double.parse(text.trim()) * 100).round();
     if (cents <= 0 || cents > 10000000) {
-      throw const FormatException('Enter a price between ₱0.01 and ₱100,000.');
+      throw const FormatException(MessageCode.enterAPriceBetween001And100000);
     }
     return cents;
   }

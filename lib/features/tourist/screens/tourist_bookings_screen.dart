@@ -1,36 +1,44 @@
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/widgets/remote_page_controls.dart';
+import '../../../core/services/realtime_refresh_policy.dart';
+import '../../../core/widgets/list_skeleton.dart';
+import '../../../core/services/server_clock.dart';
 import 'package:flutter/material.dart';
+import '../../../core/motion/motion_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/shared_widgets.dart';
-import '../../../models/booking_model.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
+import '../../../core/l10n/record_labels.dart';
 
 class TouristBookingsScreen extends StatelessWidget {
-  const TouristBookingsScreen({super.key});
+  const TouristBookingsScreen({super.key, this.initialTab = 0});
+
+  static const pastTab = 1;
+
+  /// The tab shown first; booking history from the account screen opens on
+  /// Past.
+  final int initialTab;
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
+      initialIndex: initialTab,
       child: Scaffold(
+        bottomNavigationBar: const RemotePageControls(directory: false),
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          title: Text(
-            'My Bookings',
-            style: GoogleFonts.poppins(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          backgroundColor: AppColors.surface,
-          bottom: const TabBar(
+          title: Text(context.l10n.myBookings),
+          bottom: TabBar(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textSecondary,
             indicatorColor: AppColors.primary,
             tabs: [
-              Tab(text: 'Ongoing'),
-              Tab(text: 'Past'),
+              Tab(text: context.l10n.active),
+              Tab(text: context.l10n.past),
             ],
           ),
         ),
@@ -51,21 +59,29 @@ class _BookingList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<BookingModel>>(
-      valueListenable: PrototypeSession.bookings,
-      builder: (context, bookingsList, _) {
+    return ListenableBuilder(
+      listenable: Listenable.merge([
+        AppSession.bookings,
+        AppSession.loadingSections,
+      ]),
+      builder: (context, _) {
+        final bookingsList = AppSession.bookings.value;
+        if (bookingsList.isEmpty &&
+            AppSession.loadingSections.value.contains(RemoteSection.bookings)) {
+          return const ListSkeleton();
+        }
         final bookings = status == 'ongoing'
             ? bookingsList
                   .where(
                     (b) =>
-                        b.touristId == PrototypeSession.currentTouristId &&
+                        b.touristId == AppSession.currentTouristId &&
                         b.isActive,
                   )
                   .toList()
             : bookingsList
                   .where(
                     (b) =>
-                        b.touristId == PrototypeSession.currentTouristId &&
+                        b.touristId == AppSession.currentTouristId &&
                         !b.isActive,
                   )
                   .toList();
@@ -74,103 +90,134 @@ class _BookingList extends StatelessWidget {
           return EmptyStateWidget(
             icon: status == 'ongoing' ? Icons.directions_bike : Icons.history,
             title: status == 'ongoing'
-                ? 'No active trips'
-                : 'No past trips yet',
+                ? MessageCode.noActiveTrips
+                : MessageCode.noPastTripsYet,
             subtitle: status == 'ongoing'
-                ? 'Book a tour to get started!'
-                : 'Your completed rides will appear here.',
+                ? MessageCode.bookATourToGetStarted
+                : MessageCode.yourCompletedRidesWillAppearHere,
           );
         }
 
         return ListView.builder(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
           itemCount: bookings.length,
-          itemBuilder: (context, index) {
-            final b = bookings[index];
-            final names = b.stops.map((s) => s.spotName).toList();
-            final preview = names.take(2).join(', ');
-            final overflow = names.length > 2
-                ? ' +${names.length - 2} more'
-                : '';
+          itemBuilder: (context, index) => FadeSlideIn.staggered(
+            index: index,
+            child: Builder(
+              builder: (context) {
+                final b = bookings[index];
+                final names = b.stops.map((s) => s.spotName).toList();
+                final preview = names.take(2).join(', ');
+                final overflow = names.length > 2
+                    ? ' +${names.length - 2} more'
+                    : '';
 
-            return GestureDetector(
-              onTap: () => context.push('/tourist/bookings/${b.id}'),
-              child: AppCard(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                return GestureDetector(
+                  onTap: () => context.push('/tourist/bookings/${b.id}'),
+                  child: AppCard(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            b.id.toUpperCase(),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textSecondary,
+                        // Tour name first; the long database id meant
+                        // nothing to riders.
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                context.message(AppSession.bookingTitle(b)),
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 8),
+                            StatusBadge.bookingStatus(b.status),
+                          ],
                         ),
-                        StatusBadge.bookingStatus(b.status.name),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      '$preview$overflow',
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      b.scheduledAt == null
-                          ? b.createdAt.toLocal().toString().split('.')[0]
-                          : 'Pickup: ${b.scheduledAt!.toLocal().toString().split('.')[0]}',
-                      style: GoogleFonts.poppins(
-                        color: AppColors.textSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const Divider(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
+                        const SizedBox(height: 4),
                         Text(
-                          'Agreed fare',
+                          context.message('$preview$overflow'),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
+                            fontSize: 13.5,
                             color: AppColors.textSecondary,
                           ),
                         ),
+                        const SizedBox(height: 4),
                         Text(
-                          '₱${b.totalFare.toStringAsFixed(2)}',
+                          context.message(
+                            b.scheduledAt == null
+                                ? AppFormatters.dateTime(b.createdAt.toLocal())
+                                : MessageCode.pickupValue(
+                                    (ServerClock.formatManila(
+                                      b.scheduledAt!,
+                                    )).toString(),
+                                  ),
+                          ),
                           style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                            fontSize: 16,
+                            color: AppColors.textHint,
+                            fontSize: 12.5,
                           ),
                         ),
+                        const Divider(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                context.l10n.agreedFare,
+                                style: GoogleFonts.poppins(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                            Flexible(
+                              child: Text(
+                                context.message(
+                                  '₱${AppFormatters.amount(b.totalFareCents / 100)}',
+                                ),
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (!b.isActive)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Text(
+                              context.message(
+                                b.trip.reviewRequired
+                                    ? MessageCode.paymentOnHoldAdminReview
+                                    : MessageCode.finalChargeValue(
+                                        (AppFormatters.amount(
+                                          ((b.trip.finalChargeCents ?? 0) /
+                                              100),
+                                        )).toString(),
+                                        paymentStatusLabel(
+                                          context,
+                                          b.paymentStatus,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
-                    if (!b.isActive)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Text(
-                          b.trip.reviewRequired
-                              ? 'Payment on hold · admin review'
-                              : 'Final charge: ₱${((b.trip.finalChargeCents ?? 0) / 100).toStringAsFixed(2)} · ${b.paymentStatus.name}',
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            );
-          },
+                  ),
+                );
+              },
+            ),
+          ),
         );
       },
     );

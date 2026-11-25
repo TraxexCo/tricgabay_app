@@ -1,3 +1,4 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -27,55 +28,57 @@ class _RegisterRoleScreenState extends State<RegisterRoleScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'I am a...',
-                style: GoogleFonts.poppins(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  context.l10n.iAmA,
+                  style: GoogleFonts.poppins(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Choose how you want to use Tric Gabay',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  color: AppColors.textSecondary,
+                const SizedBox(height: 8),
+                Text(
+                  context.l10n.chooseHowYouWantToUseApp(AppBrand.name),
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 40),
-              _buildRoleCard(
-                title: 'Tourist',
-                description:
-                    'Explore spots, build itineraries, and book tricycles easily.',
-                icon: Icons.tour,
-                value: 'tourist',
-              ),
-              const SizedBox(height: 20),
-              _buildRoleCard(
-                title: 'Driver',
-                description:
-                    'Receive bookings, earn money, and showcase your local knowledge.',
-                icon: Icons.electric_rickshaw,
-                value: 'driver',
-              ),
-              const Spacer(),
-              AppButton(
-                label: 'Next',
-                onPressed: _selectedRole == null
-                    ? null
-                    : () {
-                        if (_selectedRole == 'tourist') {
-                          context.push('/register/tourist');
-                        } else {
-                          context.push('/register/driver');
-                        }
-                      },
-              ),
-            ],
+                const SizedBox(height: 40),
+                _buildRoleCard(
+                  title: MessageCode.tourist,
+                  description: MessageCode
+                      .exploreSpotsBuildItinerariesAndBookTricyclesEasily,
+                  icon: Icons.tour,
+                  value: 'tourist',
+                ),
+                const SizedBox(height: 20),
+                _buildRoleCard(
+                  title: MessageCode.driver,
+                  description: MessageCode
+                      .receiveBookingsEarnMoneyAndShowcaseYourLocalKnowledge,
+                  icon: Icons.electric_rickshaw,
+                  value: 'driver',
+                ),
+                const SizedBox(height: 24),
+                AppButton(
+                  label: context.l10n.next,
+                  onPressed: _selectedRole == null
+                      ? null
+                      : () {
+                          if (_selectedRole == 'tourist') {
+                            context.push('/register/tourist');
+                          } else {
+                            context.push('/register/driver');
+                          }
+                        },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -89,60 +92,65 @@ class _RegisterRoleScreenState extends State<RegisterRoleScreen> {
     required String value,
   }) {
     final isSelected = _selectedRole == value;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedRole = value),
-      child: AppCard(
-        padding: const EdgeInsets.all(24),
-        child: Container(
-          decoration: BoxDecoration(
-            border: isSelected
-                ? Border.all(color: AppColors.primary, width: 2)
-                : Border.all(color: Colors.transparent),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.primary.withValues(alpha: 0.1)
-                      : AppColors.background,
-                  shape: BoxShape.circle,
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: context.message(title),
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedRole = value),
+        child: AppCard(
+          padding: const EdgeInsets.all(24),
+          child: Container(
+            decoration: BoxDecoration(
+              border: isSelected
+                  ? Border.all(color: AppColors.primary, width: 2)
+                  : Border.all(color: Colors.transparent),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.primary.withValues(alpha: 0.1)
+                        : AppColors.background,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 40,
+                    color: isSelected
+                        ? AppColors.primary
+                        : AppColors.textSecondary,
+                  ),
                 ),
-                child: Icon(
-                  icon,
-                  size: 40,
-                  color: isSelected
-                      ? AppColors.primary
-                      : AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.poppins(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.message(title),
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
+                      const SizedBox(height: 4),
+                      Text(
+                        context.message(description),
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -1,6 +1,9 @@
+import '../core/services/server_clock.dart';
 import 'trip_record.dart';
 
 enum BookingStatus {
+  unknown,
+  paymentPending,
   scheduled,
   pending,
   accepted,
@@ -10,14 +13,30 @@ enum BookingStatus {
   cancelled,
 }
 
-enum PaymentMethod { cash, online }
+/// Reads an integer centavo amount. Offline snapshots written before amounts
+/// were stored in centavos hold pesos as a double under [legacyPesosKey].
+int readCents(
+  Map<String, dynamic> map,
+  String key, {
+  required String legacyPesosKey,
+}) {
+  final cents = map[key];
+  if (cents is num) return cents.round();
+  final pesos = map[legacyPesosKey];
+  return pesos is num ? (pesos * 100).round() : 0;
+}
+
+enum PaymentMethod { unknown, cash, online, gcashDirect }
 
 enum PaymentStatus {
+  unknown,
   unpaid,
   checkoutCreated,
   processing,
   failed,
   awaitingConfirmation,
+  gcashAwaitingConfirmation,
+  disputed,
   underReview,
   paid,
   waived,
@@ -33,7 +52,7 @@ class BookingStop {
   final String spotName;
   final double latitude;
   final double longitude;
-  final double fare;
+  final int fareCents;
 
   const BookingStop({
     this.id = '',
@@ -41,7 +60,7 @@ class BookingStop {
     required this.spotName,
     required this.latitude,
     required this.longitude,
-    required this.fare,
+    required this.fareCents,
   });
 
   factory BookingStop.fromMap(Map<String, dynamic> map) => BookingStop(
@@ -50,7 +69,7 @@ class BookingStop {
     spotName: map['spotName'] ?? '',
     latitude: (map['latitude'] ?? 0.0).toDouble(),
     longitude: (map['longitude'] ?? 0.0).toDouble(),
-    fare: (map['fare'] ?? 0.0).toDouble(),
+    fareCents: readCents(map, 'fareCents', legacyPesosKey: 'fare'),
   );
 
   Map<String, dynamic> toMap() => {
@@ -59,7 +78,7 @@ class BookingStop {
     'spotName': spotName,
     'latitude': latitude,
     'longitude': longitude,
-    'fare': fare,
+    'fareCents': fareCents,
   };
 }
 
@@ -94,7 +113,7 @@ class BookingRouteChange {
         proposedOrder: List<String>.from(map['proposedOrder'] ?? const []),
         reason: map['reason'] ?? '',
         createdAt: map['createdAt'] == null
-            ? DateTime.now()
+            ? ServerClock.now()
             : DateTime.parse(map['createdAt']),
       );
 
@@ -124,8 +143,8 @@ class BookingModel {
   final int passengerCount;
   final String luggageNotes;
   final String accessibilityNeeds;
-  final double baseFare;
-  final double totalFare;
+  final int baseFareCents;
+  final int totalFareCents;
   final PaymentMethod paymentMethod;
   final PaymentStatus paymentStatus;
   final BookingStatus status;
@@ -147,6 +166,9 @@ class BookingModel {
   final String? cancellationReason;
   final double? driverRating;
   final String? driverReview;
+
+  /// When the tourist's review was saved; null until there is one.
+  final DateTime? driverReviewedAt;
   final int freeCancellationMinutes;
   final int acceptedCancellationPercent;
   final int driverWaitMinutes;
@@ -154,12 +176,14 @@ class BookingModel {
   final TripRecord trip;
 
   bool get isActive =>
+      status == BookingStatus.unknown ||
+      status == BookingStatus.paymentPending ||
       status == BookingStatus.scheduled ||
       status == BookingStatus.pending ||
       status == BookingStatus.accepted ||
       status == BookingStatus.replacementPending ||
       status == BookingStatus.ongoing;
-  int get quotedCents => (totalFare * 100).round();
+  int get quotedCents => totalFareCents;
   int get amountDueCents => trip.reviewRequired
       ? 0
       : ((trip.finalChargeCents ?? 0) - trip.receivedCents).clamp(
@@ -174,16 +198,16 @@ class BookingModel {
       acceptedAt?.add(Duration(minutes: freeCancellationMinutes));
   bool get isWithinFreeCancellation =>
       freeCancellationUntil == null ||
-      !DateTime.now().isAfter(freeCancellationUntil!);
+      !ServerClock.now().isAfter(freeCancellationUntil!);
   int get lateCancellationFeeCents =>
       (quotedCents * acceptedCancellationPercent / 100).round();
   int get noShowFeeCents => (quotedCents * noShowFeePercent / 100).round();
   bool get isDispatchExpired =>
       status == BookingStatus.pending &&
       dispatchExpiresAt != null &&
-      !DateTime.now().isBefore(dispatchExpiresAt!);
+      !ServerClock.now().isBefore(dispatchExpiresAt!);
   bool get isOfferExpired =>
-      offerExpiresAt != null && !DateTime.now().isBefore(offerExpiresAt!);
+      offerExpiresAt != null && !ServerClock.now().isBefore(offerExpiresAt!);
 
   const BookingModel({
     required this.id,
@@ -199,8 +223,8 @@ class BookingModel {
     this.passengerCount = 1,
     this.luggageNotes = '',
     this.accessibilityNeeds = '',
-    required this.baseFare,
-    required this.totalFare,
+    required this.baseFareCents,
+    required this.totalFareCents,
     required this.paymentMethod,
     this.paymentStatus = PaymentStatus.unpaid,
     this.status = BookingStatus.pending,
@@ -222,6 +246,7 @@ class BookingModel {
     this.cancellationReason,
     this.driverRating,
     this.driverReview,
+    this.driverReviewedAt,
     this.freeCancellationMinutes = 5,
     this.acceptedCancellationPercent = 20,
     this.driverWaitMinutes = 10,
@@ -248,23 +273,31 @@ class BookingModel {
       passengerCount: map['passengerCount'] ?? 1,
       luggageNotes: map['luggageNotes'] ?? '',
       accessibilityNeeds: map['accessibilityNeeds'] ?? '',
-      baseFare: (map['baseFare'] ?? 0.0).toDouble(),
-      totalFare: (map['totalFare'] ?? 0.0).toDouble(),
+      baseFareCents: readCents(
+        map,
+        'baseFareCents',
+        legacyPesosKey: 'baseFare',
+      ),
+      totalFareCents: readCents(
+        map,
+        'totalFareCents',
+        legacyPesosKey: 'totalFare',
+      ),
       paymentMethod: PaymentMethod.values.firstWhere(
         (p) => p.name == map['paymentMethod'],
-        orElse: () => PaymentMethod.cash,
+        orElse: () => PaymentMethod.unknown,
       ),
       paymentStatus: PaymentStatus.values.firstWhere(
         (p) => p.name == map['paymentStatus'],
-        orElse: () => PaymentStatus.unpaid,
+        orElse: () => PaymentStatus.unknown,
       ),
       status: BookingStatus.values.firstWhere(
         (s) => s.name == map['status'],
-        orElse: () => BookingStatus.pending,
+        orElse: () => BookingStatus.unknown,
       ),
       createdAt: map['createdAt'] != null
           ? DateTime.parse(map['createdAt'])
-          : DateTime.now(),
+          : ServerClock.now(),
       scheduledAt: map['scheduledAt'] == null
           ? null
           : DateTime.parse(map['scheduledAt']),
@@ -306,6 +339,9 @@ class BookingModel {
       cancellationReason: map['cancellationReason'],
       driverRating: (map['driverRating'] as num?)?.toDouble(),
       driverReview: map['driverReview'],
+      driverReviewedAt: map['driverReviewedAt'] != null
+          ? DateTime.parse(map['driverReviewedAt'])
+          : null,
       freeCancellationMinutes: map['freeCancellationMinutes'] ?? 5,
       acceptedCancellationPercent: map['acceptedCancellationPercent'] ?? 20,
       driverWaitMinutes: map['driverWaitMinutes'] ?? 10,
@@ -329,8 +365,8 @@ class BookingModel {
     'passengerCount': passengerCount,
     'luggageNotes': luggageNotes,
     'accessibilityNeeds': accessibilityNeeds,
-    'baseFare': baseFare,
-    'totalFare': totalFare,
+    'baseFareCents': baseFareCents,
+    'totalFareCents': totalFareCents,
     'paymentMethod': paymentMethod.name,
     'paymentStatus': paymentStatus.name,
     'status': status.name,
@@ -352,6 +388,7 @@ class BookingModel {
     'cancellationReason': cancellationReason,
     'driverRating': driverRating,
     'driverReview': driverReview,
+    'driverReviewedAt': driverReviewedAt?.toIso8601String(),
     'freeCancellationMinutes': freeCancellationMinutes,
     'acceptedCancellationPercent': acceptedCancellationPercent,
     'driverWaitMinutes': driverWaitMinutes,
@@ -373,8 +410,8 @@ class BookingModel {
     int? passengerCount,
     String? luggageNotes,
     String? accessibilityNeeds,
-    double? baseFare,
-    double? totalFare,
+    int? baseFareCents,
+    int? totalFareCents,
     PaymentMethod? paymentMethod,
     PaymentStatus? paymentStatus,
     BookingStatus? status,
@@ -396,6 +433,7 @@ class BookingModel {
     String? cancellationReason,
     double? driverRating,
     String? driverReview,
+    DateTime? driverReviewedAt,
     int? freeCancellationMinutes,
     int? acceptedCancellationPercent,
     int? driverWaitMinutes,
@@ -416,8 +454,8 @@ class BookingModel {
       passengerCount: passengerCount ?? this.passengerCount,
       luggageNotes: luggageNotes ?? this.luggageNotes,
       accessibilityNeeds: accessibilityNeeds ?? this.accessibilityNeeds,
-      baseFare: baseFare ?? this.baseFare,
-      totalFare: totalFare ?? this.totalFare,
+      baseFareCents: baseFareCents ?? this.baseFareCents,
+      totalFareCents: totalFareCents ?? this.totalFareCents,
       paymentMethod: paymentMethod ?? this.paymentMethod,
       paymentStatus: paymentStatus ?? this.paymentStatus,
       status: status ?? this.status,
@@ -442,6 +480,7 @@ class BookingModel {
       cancellationReason: cancellationReason ?? this.cancellationReason,
       driverRating: driverRating ?? this.driverRating,
       driverReview: driverReview ?? this.driverReview,
+      driverReviewedAt: driverReviewedAt ?? this.driverReviewedAt,
       freeCancellationMinutes:
           freeCancellationMinutes ?? this.freeCancellationMinutes,
       acceptedCancellationPercent:

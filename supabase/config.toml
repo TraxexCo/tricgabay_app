@@ -1,16 +1,37 @@
 project_id = "tricgabay"
 
-[functions.create-paymongo-checkout]
-verify_jwt = true
+[realtime]
+enabled = true
 
-[functions.process-paymongo-refund]
-verify_jwt = true
+[storage]
+file_size_limit = "5MiB"
 
-[functions.reconcile-paymongo-payment]
-verify_jwt = true
+[storage.buckets.driver-documents]
+public = false
+file_size_limit = "5MiB"
+allowed_mime_types = ["image/jpeg"]
+
+[storage.buckets.profile-images]
+public = false
+file_size_limit = "5MiB"
+allowed_mime_types = ["image/jpeg", "image/png"]
+
+[storage.buckets.tourist-spots]
+public = true
+file_size_limit = "5MiB"
+allowed_mime_types = ["image/jpeg", "image/png"]
+
+[storage.buckets.app-assets]
+public = true
+file_size_limit = "1MiB"
+allowed_mime_types = ["image/png"]
 
 [functions.dispatch-communications]
 verify_jwt = true
 
-[functions.paymongo-webhook]
+[functions.delete-account]
+# The handler validates user tokens with Auth and restricts worker resumption to the service key.
+verify_jwt = false
+
+[functions.health-check]
 verify_jwt = false

@@ -1,3 +1,6 @@
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,10 +8,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/config/backend_config.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/services/backend_repository.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../core/l10n/record_labels.dart';
 
 class DriverDetailAdminScreen extends ConsumerStatefulWidget {
   final String driverId;
@@ -31,6 +36,58 @@ class _DriverDetailAdminScreenState
   DateTime? _inspectionExpiry;
   String? _hydratedDriverId;
   bool _saving = false;
+  bool _loadingGcash = false;
+
+  Future<void> _showGcashDetails() async {
+    if (_loadingGcash) return;
+    setState(() => _loadingGcash = true);
+    try {
+      final details = await BackendRepository.driverGcashDetails(
+        widget.driverId,
+      );
+      if (!mounted) return;
+      final l10n = context.l10n;
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.gcashDetails),
+          content: details == null
+              ? Text(l10n.gcashNotConfigured)
+              : SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l10n.gcashAccountName),
+                      SelectableText(details['gcash_account_name'] as String),
+                      Text(l10n.gcashNumber),
+                      SelectableText(details['gcash_number'] as String),
+                      Text(
+                        details['is_active'] == true
+                            ? l10n.gcashActive
+                            : l10n.gcashInactive,
+                      ),
+                    ],
+                  ),
+                ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.close),
+            ),
+          ],
+        ),
+      );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.gcashActionFailed)));
+      }
+    } finally {
+      if (mounted) setState(() => _loadingGcash = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -85,34 +142,34 @@ class _DriverDetailAdminScreenState
     final start = DateTime(today.year, today.month, today.day);
     final issues = <String>[];
     if ((driver['licensePath'] ?? '').toString().isEmpty) {
-      issues.add('Driver license document is missing.');
+      issues.add(MessageCode.driverLicenseDocumentIsMissing);
     }
     if ((driver['vehicleDocumentPath'] ?? '').toString().isEmpty) {
-      issues.add('Franchise / OR-CR document is missing.');
+      issues.add(MessageCode.franchiseOrCrDocumentIsMissing);
     }
     for (final item in [
-      ('Driver license', _licenseExpiry),
-      ('Franchise', _franchiseExpiry),
-      ('Vehicle inspection', _inspectionExpiry),
+      (MessageCode.driverLicense, _licenseExpiry),
+      (MessageCode.franchise, _franchiseExpiry),
+      (MessageCode.vehicleInspection, _inspectionExpiry),
     ]) {
       if (item.$2 == null) {
-        issues.add('${item.$1} expiry is not verified.');
+        issues.add(MessageCode.expiryIsNotVerifiedValue((item.$1).toString()));
       } else if (item.$2!.isBefore(start)) {
-        issues.add('${item.$1} is expired.');
+        issues.add(MessageCode.isExpiredValue((item.$1).toString()));
       }
     }
     final completed = driver['completedTripCount'] as int? ?? 0;
     final cancelled = driver['driverCancelledTripCount'] as int? ?? 0;
     if (completed + cancelled >= 5 &&
         cancelled * 100 / (completed + cancelled) > 30) {
-      issues.add('Driver cancellation rate exceeds the 30% matching limit.');
+      issues.add(MessageCode.driverCancellationRateExceedsThe30MatchingLimit);
     }
     final blockedUntil = _date(driver['matchingBlockedUntil']);
     if (blockedUntil != null && blockedUntil.isAfter(DateTime.now())) {
       issues.add(
         driver['matchingBlockedReason']?.toString().trim().isNotEmpty == true
             ? driver['matchingBlockedReason'].toString()
-            : 'Matching is temporarily blocked.',
+            : MessageCode.matchingIsTemporarilyBlocked,
       );
     }
     return issues;
@@ -120,6 +177,13 @@ class _DriverDetailAdminScreenState
 
   Future<void> _saveReview({required bool approve}) async {
     if (_saving) return;
+    if (_reviewNote.text.trim().length < 5) {
+      _message(
+        MessageCode
+            .enterTheReasonForApprovingOrRestoringServiceAtLeastFiveCharacters,
+      );
+      return;
+    }
     final latitude = double.tryParse(_latitude.text.trim());
     final longitude = double.tryParse(_longitude.text.trim());
     final radius = double.tryParse(_radius.text.trim());
@@ -130,7 +194,7 @@ class _DriverDetailAdminScreenState
         longitude == null ||
         radius == null ||
         _area.text.trim().length < 2) {
-      _message('Complete all document and service-area fields.');
+      _message(MessageCode.completeAllDocumentAndServiceAreaFields);
       return;
     }
     setState(() => _saving = true);
@@ -147,16 +211,16 @@ class _DriverDetailAdminScreenState
         approve: approve,
         reviewNote: _reviewNote.text.trim(),
       );
-      await PrototypeSession.syncRemoteState();
+      await AppSession.syncRemoteState();
       if (!mounted) return;
       _message(
         approve
-            ? 'Driver approved and matching enabled.'
-            : 'Compliance review saved.',
+            ? MessageCode.driverApprovedAndMatchingEnabled
+            : MessageCode.complianceReviewSaved,
       );
       if (approve) context.pop();
     } catch (error) {
-      if (mounted) _message('$error');
+      if (mounted) _message(ErrorMessages.forError(error));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -175,16 +239,16 @@ class _DriverDetailAdminScreenState
             ? DateTime.now().add(const Duration(days: 30))
             : null,
       );
-      await PrototypeSession.syncRemoteState();
+      await AppSession.syncRemoteState();
       if (!mounted) return;
       _message(
         status == 'rejected'
-            ? 'Application rejected.'
-            : 'Driver suspended for 30 days.',
+            ? MessageCode.applicationRejected
+            : MessageCode.driverSuspendedFor30Days,
       );
       context.pop();
     } catch (error) {
-      if (mounted) _message('$error');
+      if (mounted) _message(ErrorMessages.forError(error));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -196,29 +260,34 @@ class _DriverDetailAdminScreenState
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          status == 'rejected' ? 'Reject application' : 'Suspend driver',
+          context.message(
+            status == 'rejected'
+                ? MessageCode.rejectApplication
+                : MessageCode.suspendDriver,
+          ),
         ),
         content: TextField(
           controller: controller,
           minLines: 2,
           maxLines: 4,
-          decoration: const InputDecoration(
-            labelText: 'Reason',
-            hintText: 'Explain the decision clearly',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: context.l10n.reason,
+            hintText: context.l10n.explainTheDecisionClearly,
           ),
+          onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+          scrollPadding: const EdgeInsets.all(96),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
               final value = controller.text.trim();
               if (value.length >= 5) Navigator.pop(context, value);
             },
-            child: const Text('Confirm'),
+            child: Text(context.l10n.confirm),
           ),
         ],
       ),
@@ -228,19 +297,22 @@ class _DriverDetailAdminScreenState
   }
 
   void _message(String text) => ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(text), behavior: SnackBarBehavior.floating),
+    SnackBar(
+      content: Text(context.message(text)),
+      behavior: SnackBarBehavior.floating,
+    ),
   );
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<List<Map<String, dynamic>>>(
-      valueListenable: PrototypeSession.adminDrivers,
+      valueListenable: AppSession.adminDrivers,
       builder: (context, drivers, _) {
         final index = drivers.indexWhere((d) => d['id'] == widget.driverId);
         if (index == -1) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Driver compliance')),
-            body: const Center(child: Text('Driver not found')),
+            appBar: AppBar(title: Text(context.l10n.driverCompliance)),
+            body: Center(child: Text(context.l10n.driverNotFound)),
           );
         }
         final driver = drivers[index];
@@ -250,7 +322,7 @@ class _DriverDetailAdminScreenState
         final reliability =
             (driver['reliabilityScore'] as num?)?.toDouble() ?? 100;
         return Scaffold(
-          appBar: AppBar(title: const Text('Driver compliance')),
+          appBar: AppBar(title: Text(context.l10n.driverCompliance)),
           body: ListView(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
             children: [
@@ -271,14 +343,16 @@ class _DriverDetailAdminScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '${driver['name']}',
+                          context.message('${driver['name']}'),
                           style: GoogleFonts.poppins(
                             fontSize: 20,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         Text(
-                          '${driver['email'] ?? ''}\n${driver['phone'] ?? ''}',
+                          context.message(
+                            '${driver['email'] ?? ''}\n${driver['phone'] ?? ''}',
+                          ),
                           style: const TextStyle(
                             color: AppColors.textSecondary,
                           ),
@@ -290,34 +364,50 @@ class _DriverDetailAdminScreenState
                 ],
               ),
               const SizedBox(height: 20),
-              _section('Vehicle and reliability', [
-                _info('Plate number', '${driver['plate'] ?? ''}'),
-                _info('Franchise number', '${driver['franchise'] ?? ''}'),
-                _info(
-                  'Safe capacity',
-                  '${driver['passengerCapacity'] ?? 3} passengers',
+              if (BackendConfig.isConfigured)
+                OutlinedButton(
+                  onPressed: _loadingGcash ? null : _showGcashDetails,
+                  child: Text(context.l10n.gcashDetails),
                 ),
-                _info('Reliability', '${reliability.toStringAsFixed(0)}%'),
+              _section(MessageCode.vehicleAndReliability, [
+                _info(MessageCode.plateNumber, '${driver['plate'] ?? ''}'),
                 _info(
-                  'Completed trips',
+                  MessageCode.franchiseNumber,
+                  '${driver['franchise'] ?? ''}',
+                ),
+                _info(
+                  MessageCode.safeCapacity,
+                  MessageCode.passengersValue(
+                    (driver['passengerCapacity'] ?? 3).toString(),
+                  ),
+                ),
+                _info(
+                  MessageCode.reliability,
+                  '${reliability.toStringAsFixed(0)}%',
+                ),
+                _info(
+                  MessageCode.completedTrips,
                   '${driver['completedTripCount'] ?? 0}',
                 ),
                 _info(
-                  'Driver cancellations',
+                  MessageCode.driverCancellations,
                   '${driver['driverCancelledTripCount'] ?? 0}',
                 ),
               ]),
               const SizedBox(height: 16),
-              _section('Submitted documents', [
+              _section(MessageCode.submittedDocuments, [
                 Row(
                   children: [
                     Expanded(
-                      child: _document('Driver license', driver['licensePath']),
+                      child: _document(
+                        MessageCode.driverLicense,
+                        driver['licensePath'],
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: _document(
-                        'Franchise / OR-CR',
+                        MessageCode.franchiseOrCr,
                         driver['vehicleDocumentPath'],
                       ),
                     ),
@@ -325,29 +415,29 @@ class _DriverDetailAdminScreenState
                 ),
               ]),
               const SizedBox(height: 16),
-              _section('Expiry verification', [
+              _section(MessageCode.expiryVerification, [
                 _dateTile(
-                  'Driver license',
+                  MessageCode.driverLicense,
                   _licenseExpiry,
                   () => _pickDate('license'),
                 ),
                 _dateTile(
-                  'Franchise / OR-CR',
+                  MessageCode.franchiseOrCr,
                   _franchiseExpiry,
                   () => _pickDate('franchise'),
                 ),
                 _dateTile(
-                  'Vehicle inspection',
+                  MessageCode.vehicleInspection,
                   _inspectionExpiry,
                   () => _pickDate('inspection'),
                 ),
               ]),
               const SizedBox(height: 16),
-              _section('Approved service area', [
+              _section(MessageCode.approvedServiceArea, [
                 AppTextField(
                   controller: _area,
-                  label: 'Area name',
-                  hint: 'Bustos, Bulacan',
+                  label: context.l10n.areaName,
+                  hint: context.l10n.bustosBulacan,
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -355,7 +445,7 @@ class _DriverDetailAdminScreenState
                     Expanded(
                       child: AppTextField(
                         controller: _latitude,
-                        label: 'Center latitude',
+                        label: context.l10n.centerLatitude,
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                           signed: true,
@@ -366,7 +456,7 @@ class _DriverDetailAdminScreenState
                     Expanded(
                       child: AppTextField(
                         controller: _longitude,
-                        label: 'Center longitude',
+                        label: context.l10n.centerLongitude,
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                           signed: true,
@@ -378,7 +468,7 @@ class _DriverDetailAdminScreenState
                 const SizedBox(height: 12),
                 AppTextField(
                   controller: _radius,
-                  label: 'Radius (1–30 km)',
+                  label: context.l10n.radius130Km,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
@@ -386,8 +476,8 @@ class _DriverDetailAdminScreenState
                 const SizedBox(height: 12),
                 AppTextField(
                   controller: _reviewNote,
-                  label: 'Review note',
-                  hint: 'Explain anything the driver must correct',
+                  label: context.l10n.reviewNote,
+                  hint: context.l10n.explainAnythingTheDriverMustCorrect,
                 ),
               ]),
               const SizedBox(height: 16),
@@ -403,21 +493,29 @@ class _DriverDetailAdminScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      issues.isEmpty
-                          ? 'Ready for approval'
-                          : 'Matching blockers',
+                      context.message(
+                        issues.isEmpty
+                            ? MessageCode.readyForApproval
+                            : MessageCode.matchingBlockers,
+                      ),
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 6),
                     if (issues.isEmpty)
-                      const Text(
-                        'Documents, dates, service area, and reliability meet the matching rules.',
+                      Text(
+                        context
+                            .l10n
+                            .documentsDatesServiceAreaAndReliabilityMeetTheMatchingRules,
                       )
                     else
                       ...issues.map(
                         (issue) => Padding(
                           padding: const EdgeInsets.only(top: 4),
-                          child: Text('• $issue'),
+                          child: Text(
+                            context.l10n.bulletItem(
+                              context.message((issue).toString()),
+                            ),
+                          ),
                         ),
                       ),
                   ],
@@ -425,7 +523,7 @@ class _DriverDetailAdminScreenState
               ),
               const SizedBox(height: 20),
               AppButton(
-                label: 'Approve and enable matching',
+                label: context.l10n.approveAndEnableMatching,
                 isLoading: _saving,
                 onPressed: issues.isEmpty
                     ? () => _saveReview(approve: true)
@@ -433,7 +531,7 @@ class _DriverDetailAdminScreenState
               ),
               const SizedBox(height: 10),
               AppButton(
-                label: 'Save review without approval',
+                label: context.l10n.saveReviewWithoutApproval,
                 type: AppButtonType.outline,
                 onPressed: _saving ? null : () => _saveReview(approve: false),
               ),
@@ -444,7 +542,7 @@ class _DriverDetailAdminScreenState
                     child: OutlinedButton.icon(
                       onPressed: _saving ? null : () => _setStatus('rejected'),
                       icon: const Icon(Icons.cancel_outlined),
-                      label: const Text('Reject'),
+                      label: Text(context.l10n.reject),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -452,7 +550,7 @@ class _DriverDetailAdminScreenState
                     child: OutlinedButton.icon(
                       onPressed: _saving ? null : () => _setStatus('suspended'),
                       icon: const Icon(Icons.block_outlined),
-                      label: const Text('Suspend'),
+                      label: Text(context.l10n.suspend),
                     ),
                   ),
                 ],
@@ -473,16 +571,22 @@ class _DriverDetailAdminScreenState
         BoxShadow(color: Colors.black.withValues(alpha: .04), blurRadius: 14),
       ],
     ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 12),
-        ...children,
-      ],
+    child: Material(
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.message(title),
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...children,
+        ],
+      ),
     ),
   );
 
@@ -492,13 +596,13 @@ class _DriverDetailAdminScreenState
       children: [
         Expanded(
           child: Text(
-            label,
+            context.message(label),
             style: const TextStyle(color: AppColors.textSecondary),
           ),
         ),
         Flexible(
           child: Text(
-            value,
+            context.message(value),
             textAlign: TextAlign.right,
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
@@ -516,7 +620,7 @@ class _DriverDetailAdminScreenState
       borderRadius: BorderRadius.circular(99),
     ),
     child: Text(
-      status.toUpperCase(),
+      accountStatusLabel(context, status),
       style: TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w700,
@@ -536,9 +640,11 @@ class _DriverDetailAdminScreenState
       date == null ? Icons.event_busy_outlined : Icons.event_available_outlined,
       color: date == null ? AppColors.warning : AppColors.primary,
     ),
-    title: Text(label),
+    title: Text(context.message(label)),
     subtitle: Text(
-      date == null ? 'Not verified' : '${date.month}/${date.day}/${date.year}',
+      context.message(
+        date == null ? MessageCode.notVerified : AppFormatters.dateShort(date),
+      ),
     ),
     trailing: const Icon(Icons.edit_calendar_outlined),
   );
@@ -553,12 +659,12 @@ class _DriverDetailAdminScreenState
                   mode: LaunchMode.externalApplication,
                 ) &&
                 mounted) {
-              _message('Could not open this document.');
+              _message(MessageCode.couldNotOpenThisDocument);
             }
           },
     borderRadius: BorderRadius.circular(14),
     child: Container(
-      height: 110,
+      constraints: const BoxConstraints(minHeight: 110),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.background,
@@ -578,7 +684,11 @@ class _DriverDetailAdminScreenState
           ),
           const SizedBox(height: 8),
           Text(
-            path == null || path.isEmpty ? '$label missing' : 'View $label',
+            context.message(
+              path == null || path.isEmpty
+                  ? MessageCode.missingValue((label).toString())
+                  : MessageCode.viewValue((label).toString()),
+            ),
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),

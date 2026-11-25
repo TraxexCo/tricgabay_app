@@ -1,3 +1,4 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -64,7 +65,7 @@ class _AppTextFieldState extends State<AppTextField> {
     return TextFormField(
       controller: widget.controller,
       initialValue: widget.initialValue,
-      validator: widget.validator,
+      validator: localizeValidator(context, widget.validator),
       keyboardType: widget.keyboardType,
       obscureText: widget.obscureText ? _obscure : false,
       maxLines: widget.obscureText ? 1 : widget.maxLines,
@@ -79,13 +80,17 @@ class _AppTextFieldState extends State<AppTextField> {
       onTap: widget.onTap,
       style: GoogleFonts.poppins(fontSize: 14, color: AppColors.textPrimary),
       decoration: InputDecoration(
-        labelText: widget.label,
-        hintText: widget.hint,
+        constraints: const BoxConstraints(minHeight: 48),
+        labelText: context.message(widget.label),
+        hintText: context.optionalMessage(widget.hint),
         prefixIcon: widget.prefixIcon != null
             ? Icon(widget.prefixIcon, color: AppColors.textHint, size: 20)
             : null,
         suffixIcon: widget.obscureText
             ? IconButton(
+                tooltip: _obscure
+                    ? context.l10n.showValue(context.message(widget.label))
+                    : context.l10n.hideValue(context.message(widget.label)),
                 icon: Icon(
                   _obscure
                       ? Icons.visibility_off_outlined
@@ -96,9 +101,15 @@ class _AppTextFieldState extends State<AppTextField> {
                 onPressed: () => setState(() => _obscure = !_obscure),
               )
             : widget.suffix,
+        suffixIconConstraints: const BoxConstraints(
+          minWidth: 48,
+          minHeight: 48,
+        ),
         counterText: '',
       ),
       autovalidateMode: AutovalidateMode.onUserInteraction,
+      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+      scrollPadding: const EdgeInsets.all(96),
     );
   }
 }

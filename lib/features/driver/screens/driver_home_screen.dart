@@ -1,19 +1,30 @@
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/widgets/map_surface.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/error_messages.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as material show Size;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/widgets/shared_widgets.dart';
 import '../../../core/widgets/web_map_fallback.dart';
 import '../../../models/booking_model.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../core/services/backend_repository.dart';
+import '../../../core/services/driver_availability_controller.dart';
+import '../../../core/services/location_gateway.dart';
+import '../../../core/services/pickup_service_area.dart';
+import '../../../core/services/place_name_service.dart';
+import '../../../core/config/mapbox_config.dart';
 
 class DriverHomeScreen extends ConsumerStatefulWidget {
   const DriverHomeScreen({super.key});
@@ -24,46 +35,80 @@ class DriverHomeScreen extends ConsumerStatefulWidget {
 class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
   MapboxMap? mapboxMap;
   bool _isLocating = false;
+  bool _isChangingAvailability = false;
   String? _locationMessage;
-  StreamSubscription<geo.Position>? _locationSubscription;
+  // The map follows the driver until they pan it; the recenter button
+  // turns following back on.
+  bool _followDriver = true;
+  String? _townName;
+  late final DriverAvailabilityController _availabilityController;
+  PickupServiceArea _serviceArea = const PickupServiceArea(
+    MapboxConfig.bustosLat,
+    MapboxConfig.bustosLng,
+    8,
+  );
 
   geo.LocationSettings get _onlineLocationSettings {
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       return geo.AndroidSettings(
         accuracy: geo.LocationAccuracy.bestForNavigation,
-        distanceFilter: 5,
+        distanceFilter: 0,
         intervalDuration: Duration(seconds: 5),
         foregroundNotificationConfig: geo.ForegroundNotificationConfig(
-          notificationTitle: 'Tric-Gabay driver is online',
-          notificationText: 'Live location is active for trip matching',
+          notificationTitle: currentAppL10n.appDriverIsOnline(AppBrand.name),
+          notificationText: currentAppL10n.liveLocationIsActiveForTripMatching,
           enableWakeLock: true,
         ),
       );
     }
     return const geo.LocationSettings(
       accuracy: geo.LocationAccuracy.bestForNavigation,
-      distanceFilter: 5,
+      distanceFilter: 0,
     );
   }
 
   @override
   void initState() {
     super.initState();
-    if (PrototypeSession.isDriverOnline.value) {
+    _availabilityController = DriverAvailabilityController(
+      location: const GeolocatorLocationGateway(),
+      writeOnline: (value) async {
+        if (BackendConfig.isConfigured) {
+          await BackendRepository.setDriverOnline(value);
+        }
+      },
+      publish: _publishDriverLocation,
+      onPosition: _receiveDriverPosition,
+      currentSettings: const geo.LocationSettings(
+        accuracy: geo.LocationAccuracy.high,
+      ),
+      streamSettings: _onlineLocationSettings,
+    );
+    if (AppSession.isDriverOnline.value) {
       _checkLocationPermission();
+    }
+    if (BackendConfig.isConfigured) unawaited(_loadServiceArea());
+  }
+
+  Future<void> _loadServiceArea() async {
+    try {
+      final area = await BackendRepository.loadPickupServiceArea();
+      if (mounted) setState(() => _serviceArea = area);
+    } catch (_) {
+      // Keep the built-in Bustos centre; the label is only informational.
     }
   }
 
   @override
   void dispose() {
-    _locationSubscription?.cancel();
+    unawaited(_availabilityController.dispose());
     super.dispose();
   }
 
   bool get _hasActiveTrip {
-    final activeId = PrototypeSession.activeDriverBookingId;
+    final activeId = AppSession.activeDriverBookingId;
     if (activeId == null) return false;
-    return PrototypeSession.bookings.value.any(
+    return AppSession.bookings.value.any(
       (booking) =>
           booking.id == activeId &&
           (booking.status == BookingStatus.accepted ||
@@ -71,45 +116,17 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
     );
   }
 
-  Future<void> _checkLocationPermission() async {
-    if (_isLocating) return;
+  Future<bool> _checkLocationPermission() async {
+    if (_isLocating) return false;
     setState(() {
       _isLocating = true;
       _locationMessage = null;
     });
 
     try {
-      final serviceEnabled = await geo.Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        _locationMessage = 'Turn on GPS to share your location.';
-        return;
-      }
-
-      var permission = await geo.Geolocator.checkPermission();
-      if (permission == geo.LocationPermission.denied) {
-        permission = await geo.Geolocator.requestPermission();
-      }
-      if (permission == geo.LocationPermission.deniedForever) {
-        _locationMessage = 'Allow location access in Android settings.';
-        return;
-      }
-      if (permission == geo.LocationPermission.denied) {
-        _locationMessage = 'Location permission is needed to receive rides.';
-        return;
-      }
-
-      final position = await geo.Geolocator.getCurrentPosition(
-        locationSettings: const geo.LocationSettings(
-          accuracy: geo.LocationAccuracy.high,
-        ),
-      );
-      PrototypeSession.userLatitude.value = position.latitude;
-      PrototypeSession.userLongitude.value = position.longitude;
-      _publishDriverLocation(position);
-      _startDriverLocationStream();
-      _updateCamera();
-    } catch (_) {
-      _locationMessage = 'Could not find your location. Tap to try again.';
+      final result = await _availabilityController.resumeSharing();
+      _locationMessage = result.message;
+      return result.success;
     } finally {
       if (mounted) {
         setState(() => _isLocating = false);
@@ -117,16 +134,23 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
     }
   }
 
-  void _startDriverLocationStream() {
-    _locationSubscription?.cancel();
-    _locationSubscription =
-        geo.Geolocator.getPositionStream(
-          locationSettings: _onlineLocationSettings,
-        ).listen((position) {
-          PrototypeSession.userLatitude.value = position.latitude;
-          PrototypeSession.userLongitude.value = position.longitude;
-          _publishDriverLocation(position);
-        });
+  void _receiveDriverPosition(geo.Position position) {
+    AppSession.userLatitude.value = position.latitude;
+    AppSession.userLongitude.value = position.longitude;
+    if (_followDriver) _updateCamera(animate: true);
+    unawaited(_lookUpTown(position.latitude, position.longitude));
+  }
+
+  Future<void> _lookUpTown(double lat, double lng) async {
+    final name = await PlaceNameService.townName(lat, lng);
+    if (mounted && name != null && name != _townName) {
+      setState(() => _townName = name);
+    }
+  }
+
+  void _recenter() {
+    setState(() => _followDriver = true);
+    _updateCamera(animate: true);
   }
 
   Future<void> _publishDriverLocation(geo.Position position) async {
@@ -139,25 +163,26 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
           heading: position.heading,
           speed: position.speed,
           recordedAt: position.timestamp,
+          isMocked: position.isMocked,
         );
         if (mounted &&
             _locationMessage ==
-                'Live location is reconnecting. Keep the app open.') {
+                MessageCode.liveLocationIsReconnectingKeepTheAppOpen) {
           setState(() => _locationMessage = null);
         }
       } catch (_) {
         if (mounted &&
             _locationMessage !=
-                'Live location is reconnecting. Keep the app open.') {
+                MessageCode.liveLocationIsReconnectingKeepTheAppOpen) {
           setState(
             () => _locationMessage =
-                'Live location is reconnecting. Keep the app open.',
+                MessageCode.liveLocationIsReconnectingKeepTheAppOpen,
           );
         }
       }
     }
-    final driverName = PrototypeSession.currentDriverName.value;
-    PrototypeSession.adminDrivers.value = PrototypeSession.adminDrivers.value
+    final driverName = AppSession.currentDriverName.value;
+    AppSession.adminDrivers.value = AppSession.adminDrivers.value
         .map(
           (driver) => driver['name'] == driverName
               ? {
@@ -173,32 +198,83 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
         .toList();
   }
 
+  Future<void> _setDriverAvailability(bool value) async {
+    if (_isChangingAvailability) return;
+    if (!value && _hasActiveTrip) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.finishOrCancelTheActiveTripBeforeGoingOffline,
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isChangingAvailability = true);
+    try {
+      final result = await _availabilityController.setOnline(value);
+      if (!result.success || !mounted) {
+        if (mounted && result.message != null) {
+          setState(() => _locationMessage = result.message);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.message(result.message!))),
+          );
+        }
+        return;
+      }
+      AppSession.isDriverOnline.value = value;
+      _locationMessage = null;
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.message(ErrorMessages.forError(error))),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isChangingAvailability = false);
+    }
+  }
+
   void _onMapCreated(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     mapboxMap.location.updateSettings(
       LocationComponentSettings(enabled: true, pulsingEnabled: true),
     );
-    _updateCamera();
+    mapboxMap.scaleBar.updateSettings(ScaleBarSettings(enabled: false));
+    _updateCamera(zoom: 15);
+    final lat = AppSession.userLatitude.value;
+    final lng = AppSession.userLongitude.value;
+    if (lat != null && lng != null) unawaited(_lookUpTown(lat, lng));
   }
 
-  void _updateCamera() {
-    mapboxMap?.setCamera(
-      CameraOptions(
-        center: Point(
-          coordinates: Position(
-            PrototypeSession.userLongitude.value ?? 120.91,
-            PrototypeSession.userLatitude.value ?? 14.95,
-          ),
+  /// Moves the camera to the driver without touching the zoom the driver
+  /// chose, so pinch-zooming isn't undone by the next GPS update.
+  void _updateCamera({bool animate = false, double? zoom}) {
+    final map = mapboxMap;
+    if (map == null) return;
+    final camera = CameraOptions(
+      center: Point(
+        coordinates: Position(
+          AppSession.userLongitude.value ?? MapboxConfig.bustosLng,
+          AppSession.userLatitude.value ?? MapboxConfig.bustosLat,
         ),
-        zoom: 14.0,
       ),
+      zoom: zoom,
     );
+    if (animate) {
+      map.easeTo(camera, MapAnimationOptions(duration: 600));
+    } else {
+      map.setCamera(camera);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F8FB),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 14, 20, 110),
@@ -214,10 +290,12 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ValueListenableBuilder<String>(
-                          valueListenable: PrototypeSession.currentDriverName,
+                          valueListenable: AppSession.currentDriverName,
                           builder: (context, driverName, _) {
                             return Text(
-                              'Good morning, $driverName',
+                              context.l10n.goodMorningValue(
+                                context.message((driverName).toString()),
+                              ),
                               style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -233,11 +311,14 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                               color: AppColors.success,
                             ),
                             const SizedBox(width: 4),
-                            Text(
-                              'Verified Tric-Gabay driver',
-                              style: GoogleFonts.poppins(
-                                fontSize: 11,
-                                color: AppColors.textSecondary,
+                            Flexible(
+                              child: Text(
+                                context.l10n.verifiedAppDriver(AppBrand.name),
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                             ),
                           ],
@@ -245,22 +326,36 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                       ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => context.push('/driver/notifications'),
-                    icon: const Icon(Icons.notifications_none_rounded),
+                  Semantics(
+                    label: context.l10n.notifications,
+                    button: true,
+                    onTap: () => context.push('/driver/notifications'),
+                    excludeSemantics: true,
+                    child: IconButton(
+                      tooltip: context.l10n.notifications,
+                      onPressed: () => context.push('/driver/notifications'),
+                      icon: const Icon(Icons.notifications_none_rounded),
+                    ),
                   ),
-                  IconButton(
-                    onPressed: () => context.push('/driver/emergency'),
-                    icon: const Icon(
-                      Icons.sos_outlined,
-                      color: AppColors.danger,
+                  Semantics(
+                    label: context.l10n.emergencyHelp,
+                    button: true,
+                    onTap: () => context.push('/driver/emergency'),
+                    excludeSemantics: true,
+                    child: IconButton(
+                      tooltip: context.l10n.emergencyHelp,
+                      onPressed: () => context.push('/driver/emergency'),
+                      icon: const Icon(
+                        Icons.sos_outlined,
+                        color: AppColors.danger,
+                      ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 26),
               ValueListenableBuilder<bool>(
-                valueListenable: PrototypeSession.isDriverOnline,
+                valueListenable: AppSession.isDriverOnline,
                 builder: (context, isOnline, child) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,9 +379,11 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        isOnline
-                                            ? 'You’re ready to ride'
-                                            : 'You’re offline',
+                                        context.message(
+                                          isOnline
+                                              ? MessageCode.youReReadyToRide
+                                              : MessageCode.youReOffline,
+                                        ),
                                         style: GoogleFonts.poppins(
                                           color: Colors.white,
                                           fontSize: 21,
@@ -294,83 +391,82 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                                         ),
                                       ),
                                       Text(
-                                        isOnline
-                                            ? 'We’ll send nearby bookings your way.'
-                                            : 'Go online to start receiving booking requests.',
+                                        context.message(
+                                          isOnline
+                                              ? MessageCode
+                                                    .weLlSendNearbyBookingsYourWay
+                                              : MessageCode
+                                                    .goOnlineToStartReceivingBookingRequests,
+                                        ),
                                         style: GoogleFonts.poppins(
-                                          color: Colors.white70,
-                                          fontSize: 12,
+                                          color: Colors.white,
+                                          fontSize: 14,
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                                Switch.adaptive(
-                                  value: isOnline,
-                                  activeTrackColor: AppColors.success,
-                                  onChanged: (value) async {
-                                    if (!value && _hasActiveTrip) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Finish or cancel the active trip before going offline.',
-                                          ),
-                                          behavior: SnackBarBehavior.floating,
-                                        ),
-                                      );
-                                      return;
-                                    }
-                                    try {
-                                      if (BackendConfig.isConfigured) {
-                                        await BackendRepository.setDriverOnline(
-                                          value,
-                                        );
-                                      }
-                                      PrototypeSession.isDriverOnline.value =
-                                          value;
-                                    } catch (error) {
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(content: Text('$error')),
-                                        );
-                                      }
-                                      return;
-                                    }
-                                    if (value &&
-                                        PrototypeSession.userLatitude.value ==
-                                            null) {
-                                      _checkLocationPermission();
-                                    } else if (value) {
-                                      _startDriverLocationStream();
-                                    } else {
-                                      _locationSubscription?.cancel();
-                                    }
-                                  },
+                                Semantics(
+                                  label: context.l10n.goOnline,
+                                  child: Switch.adaptive(
+                                    value: isOnline,
+                                    activeTrackColor: AppColors.success,
+                                    onChanged: _isChangingAvailability
+                                        ? null
+                                        : _setDriverAvailability,
+                                  ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 20),
                             ValueListenableBuilder<double?>(
-                              valueListenable: PrototypeSession.userLatitude,
+                              valueListenable: AppSession.userLatitude,
                               builder: (context, lat, _) {
+                                final scale = MediaQuery.textScalerOf(
+                                  context,
+                                ).scale(1);
+                                final showsMap = isOnline && lat != null;
                                 return Container(
-                                  height: 108,
+                                  // Online with a fix, the map is the
+                                  // driver's main view; otherwise a slim
+                                  // status panel.
+                                  height: showsMap
+                                      ? (MediaQuery.sizeOf(context).height *
+                                                0.3)
+                                            .clamp(200, 300)
+                                      : 108 * scale,
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: .10),
+                                    // Opaque, so the white status text stays
+                                    // readable wherever the panel sits.
+                                    color: AppColors.darkSurface,
                                     borderRadius: BorderRadius.circular(18),
                                   ),
                                   clipBehavior: Clip.antiAlias,
                                   child: !isOnline
-                                      ? _locationPlaceholder(
-                                          icon: Icons.location_off_outlined,
-                                          title: 'Location sharing is off',
-                                          subtitle:
-                                              'Go online to activate the driver map.',
-                                        )
+                                      ? _isChangingAvailability
+                                            // Getting a GPS fix can take
+                                            // several seconds; show it.
+                                            ? _locationPlaceholder(
+                                                icon: Icons.my_location_rounded,
+                                                title: MessageCode
+                                                    .findingYourLocation,
+                                                subtitle: MessageCode
+                                                    .checkingGpsAndPermission,
+                                                loading: true,
+                                              )
+                                            : _locationPlaceholder(
+                                                icon:
+                                                    Icons.location_off_outlined,
+                                                title: MessageCode
+                                                    .locationSharingIsOff,
+                                                subtitle:
+                                                    // Say why going online failed;
+                                                    // otherwise the switch just
+                                                    // seems to ignore the tap.
+                                                    _locationMessage ??
+                                                    MessageCode
+                                                        .goOnlineToActivateTheDriverMap,
+                                              )
                                       : lat == null
                                       ? InkWell(
                                           onTap: _isLocating
@@ -381,11 +477,14 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                                                 ? Icons.my_location_rounded
                                                 : Icons.gps_off_rounded,
                                             title: _isLocating
-                                                ? 'Finding your location…'
-                                                : 'Location unavailable',
+                                                ? MessageCode
+                                                      .findingYourLocation
+                                                : MessageCode
+                                                      .locationUnavailable,
                                             subtitle:
                                                 _locationMessage ??
-                                                'Checking GPS and permission.',
+                                                MessageCode
+                                                    .checkingGpsAndPermission,
                                             loading: _isLocating,
                                           ),
                                         )
@@ -393,72 +492,94 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                                           children: [
                                             Positioned.fill(
                                               child: kIsWeb
-                                                  ? const WebMapFallback(
-                                                      title:
-                                                          'Bustos town centre',
+                                                  ? WebMapFallback(
+                                                      title: context
+                                                          .l10n
+                                                          .bustosTownCentre,
                                                       compact: true,
                                                     )
-                                                  : MapWidget(
-                                                      onMapCreated:
-                                                          _onMapCreated,
-                                                      styleUri: MapboxStyles
-                                                          .MAPBOX_STREETS,
+                                                  : MapSurface(
+                                                      builder: (context) => MapWidget(
+                                                        onMapCreated:
+                                                            _onMapCreated,
+                                                        styleUri: MapboxStyles
+                                                            .MAPBOX_STREETS,
+                                                        // The map gets every
+                                                        // drag; without this
+                                                        // the page scrolls.
+                                                        gestureRecognizers: {
+                                                          Factory<
+                                                            OneSequenceGestureRecognizer
+                                                          >(
+                                                            EagerGestureRecognizer
+                                                                .new,
+                                                          ),
+                                                        },
+                                                        onScrollListener: (_) {
+                                                          if (_followDriver) {
+                                                            setState(
+                                                              () =>
+                                                                  _followDriver =
+                                                                      false,
+                                                            );
+                                                          }
+                                                        },
+                                                      ),
                                                     ),
                                             ),
-                                            if (!isOnline)
-                                              Container(
-                                                color: Colors.black.withValues(
-                                                  alpha: 0.3,
-                                                ),
-                                              ),
                                             Positioned(
-                                              left: 14,
+                                              left: 12,
                                               bottom: 12,
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 4,
+                                              right: 12,
+                                              child: Row(
+                                                children: [
+                                                  Flexible(
+                                                    child: _mapChip(
+                                                      icon: Icons.place_rounded,
+                                                      label: _areaLabel(
+                                                        context,
+                                                        lat,
+                                                        AppSession
+                                                            .userLongitude
+                                                            .value,
+                                                      ),
+                                                      background: Colors.white,
+                                                      foreground:
+                                                          AppColors.textPrimary,
                                                     ),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.black54,
-                                                  borderRadius:
-                                                      BorderRadius.circular(12),
-                                                ),
-                                                child: Text(
-                                                  'Bustos town centre',
-                                                  style: GoogleFonts.poppins(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 11,
                                                   ),
-                                                ),
+                                                ],
                                               ),
                                             ),
-                                            if (isOnline)
+                                            Positioned(
+                                              right: 12,
+                                              top: 12,
+                                              child: _mapChip(
+                                                icon: Icons
+                                                    .radio_button_checked_rounded,
+                                                label: context
+                                                    .l10n
+                                                    .sharingLocation,
+                                                background: AppColors.success,
+                                                foreground: Colors.white,
+                                              ),
+                                            ),
+                                            if (!_followDriver && !kIsWeb)
                                               Positioned(
                                                 right: 12,
-                                                top: 12,
-                                                child: Container(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 8,
-                                                        vertical: 4,
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                    color: AppColors.success,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          20,
-                                                        ),
-                                                  ),
-                                                  child: Text(
-                                                    'SHARING LOCATION',
-                                                    style: GoogleFonts.poppins(
-                                                      color: Colors.white,
-                                                      fontSize: 8,
-                                                      fontWeight:
-                                                          FontWeight.w700,
+                                                top: 50,
+                                                child: Material(
+                                                  color: Colors.white,
+                                                  shape: const CircleBorder(),
+                                                  elevation: 3,
+                                                  child: IconButton(
+                                                    tooltip: context
+                                                        .l10n
+                                                        .centerOnMyLocation,
+                                                    onPressed: _recenter,
+                                                    icon: const Icon(
+                                                      Icons.my_location_rounded,
+                                                      color: AppColors.primary,
                                                     ),
                                                   ),
                                                 ),
@@ -473,7 +594,7 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Your activity',
+                        context.l10n.yourActivity,
                         style: GoogleFonts.poppins(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
@@ -481,39 +602,44 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                       ),
                       const SizedBox(height: 12),
                       ValueListenableBuilder(
-                        valueListenable: PrototypeSession.bookings,
+                        valueListenable: AppSession.bookings,
                         builder: (context, bookings, child) {
-                          final earnings = PrototypeSession.driverEarnings;
-                          final trips = PrototypeSession.driverTripsCompleted;
-                          return Row(
-                            children: [
-                              _stat(
-                                '₱${earnings.toStringAsFixed(2)}',
-                                'Earnings',
-                                Icons.account_balance_wallet_outlined,
-                                AppColors.primary,
-                              ),
-                              const SizedBox(width: 10),
-                              _stat(
-                                '$trips',
-                                'Completed trips',
-                                Icons.route_outlined,
-                                AppColors.secondary,
-                              ),
-                              const SizedBox(width: 10),
-                              _stat(
-                                isOnline ? 'Online' : 'Offline',
-                                'Availability',
-                                Icons.timer_outlined,
-                                AppColors.success,
-                              ),
-                            ],
+                          final earnings = AppSession.driverEarnings;
+                          final trips = AppSession.driverTripsCompleted;
+                          return IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _stat(
+                                  '₱${AppFormatters.amount(earnings)}',
+                                  MessageCode.earnings,
+                                  Icons.account_balance_wallet_outlined,
+                                  AppColors.primary,
+                                ),
+                                const SizedBox(width: 10),
+                                _stat(
+                                  '$trips',
+                                  MessageCode.completedTrips,
+                                  Icons.route_outlined,
+                                  AppColors.secondary,
+                                ),
+                                const SizedBox(width: 10),
+                                _stat(
+                                  isOnline
+                                      ? MessageCode.online
+                                      : MessageCode.offline,
+                                  MessageCode.availability,
+                                  Icons.timer_outlined,
+                                  AppColors.success,
+                                ),
+                              ],
+                            ),
                           );
                         },
                       ),
                       const SizedBox(height: 25),
                       Text(
-                        'Driver tools',
+                        context.l10n.driverTools,
                         style: GoogleFonts.poppins(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
@@ -523,23 +649,26 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                       _tool(
                         context,
                         Icons.assignment_turned_in_outlined,
-                        'My bookings',
-                        'Review active and completed trips',
+                        MessageCode.myBookings,
+                        MessageCode.reviewActiveAndCompletedTrips,
                         '/driver/bookings',
                       ),
                       _tool(
                         context,
                         Icons.insights_outlined,
-                        'Earnings insights',
-                        'See your daily trip summary',
+                        MessageCode.earningsInsights,
+                        MessageCode.seeYourDailyTripSummary,
                         '/driver/earnings',
                       ),
                       if (isOnline) ...[
                         const SizedBox(height: 16),
                         FilledButton.icon(
-                          onPressed: () => context.push('/driver/bookings'),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const material.Size.fromHeight(52),
+                          ),
+                          onPressed: () => context.go('/driver/bookings'),
                           icon: const Icon(Icons.bolt_rounded),
-                          label: const Text('View booking requests'),
+                          label: Text(context.l10n.viewBookingRequests),
                         ),
                       ],
                     ],
@@ -552,6 +681,65 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
       ),
     );
   }
+
+  /// Where the driver really is: the town from reverse geocoding plus the
+  /// distance to Bustos. The pickup area is a wide circle around Bustos, so
+  /// "inside the area" alone said nothing about the driver's actual town.
+  String _areaLabel(BuildContext context, double lat, double? lng) {
+    final area = _serviceArea;
+    final km = lng == null ? null : area.distanceKmTo(lat, lng);
+    if (km == null) return context.l10n.locationUnavailable;
+    final distance = km < 1
+        ? context.l10n.driverNearBustosCentre
+        : context.l10n.driverOutsideServiceArea(
+            AppFormatters.integer(km.round()),
+          );
+    final parts = [
+      ?_townName,
+      distance,
+      if (km > area.radiusKm) context.l10n.outsideThePickupArea,
+    ];
+    return parts.join('  ·  ');
+  }
+
+  Widget _mapChip({
+    required IconData icon,
+    required String label,
+    required Color background,
+    required Color foreground,
+  }) => Container(
+    padding: const EdgeInsets.fromLTRB(8, 5, 10, 5),
+    decoration: BoxDecoration(
+      color: background,
+      borderRadius: BorderRadius.circular(14),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x290D1B2A),
+          blurRadius: 8,
+          offset: Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: foreground),
+        const SizedBox(width: 5),
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.poppins(
+              color: foreground,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _stat(String value, String label, IconData icon, Color color) =>
       Expanded(
@@ -566,18 +754,23 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(icon, size: 19, color: color),
-              const SizedBox(height: 12),
+              const Spacer(),
+              const SizedBox(height: 10),
               Text(
-                value,
+                context.message(value),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               Text(
-                label,
+                context.message(label),
                 style: GoogleFonts.poppins(
-                  fontSize: 9,
+                  fontSize: 12.5,
+                  height: 1.3,
+                  fontWeight: FontWeight.w500,
                   color: AppColors.textSecondary,
                 ),
               ),
@@ -591,45 +784,47 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
     required String subtitle,
     bool loading = false,
   }) => Center(
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      child: Row(
-        children: [
-          loading
-              ? const SizedBox(
-                  width: 28,
-                  height: 28,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 3,
-                    color: Colors.white,
+    child: SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        child: Row(
+          children: [
+            loading
+                ? const SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: Colors.white,
+                    ),
+                  )
+                : Icon(icon, color: Colors.white, size: 30),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.message(title),
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                )
-              : Icon(icon, color: Colors.white, size: 30),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
+                  Text(
+                    context.message(subtitle),
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.poppins(
-                    color: Colors.white70,
-                    fontSize: 10,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );
@@ -665,16 +860,17 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      context.message(title),
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w700,
-                        fontSize: 13,
+                        fontSize: 14,
                       ),
                     ),
                     Text(
-                      subtitle,
+                      context.message(subtitle),
                       style: GoogleFonts.poppins(
-                        fontSize: 10,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                         color: AppColors.textSecondary,
                       ),
                     ),

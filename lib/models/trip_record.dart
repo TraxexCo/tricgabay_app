@@ -1,11 +1,31 @@
 /// Local transaction metadata. All money is stored in centavos.
-enum TripActor { tourist, driver, admin, system }
+enum TripActor { unknown, tourist, driver, admin, system }
 
 class TripEvent {
   final DateTime at;
   final TripActor actor;
   final String description;
   const TripEvent(this.at, this.actor, this.description);
+
+  /// Who is behind a trip event row from the server.
+  ///
+  /// A person's event carries their role. An event with no role (null or
+  /// empty) was written by the system, such as a scheduled dispatch or the
+  /// expiry of an unmatched booking; `metadata.actor` names it when present
+  /// and a known actor name wins. A role this app version does not know stays
+  /// [TripActor.unknown].
+  static TripActor actorFromRow({String? role, Object? metadata}) {
+    TripActor? named(Object? value) => TripActor.values
+        .where((actor) => actor != TripActor.unknown && actor.name == value)
+        .firstOrNull;
+
+    if (role != null && role.isNotEmpty) {
+      return named(role) ?? TripActor.unknown;
+    }
+    final fromMetadata = metadata is Map ? named(metadata['actor']) : null;
+    return fromMetadata ?? TripActor.system;
+  }
+
   Map<String, dynamic> toMap() => {
     'at': at.toIso8601String(),
     'actor': actor.name,
@@ -13,7 +33,8 @@ class TripEvent {
   };
   factory TripEvent.fromMap(Map<String, dynamic> map) => TripEvent(
     DateTime.parse(map['at']),
-    TripActor.values.byName(map['actor']),
+    TripActor.values.where((actor) => actor.name == map['actor']).firstOrNull ??
+        TripActor.unknown,
     map['description'],
   );
 }

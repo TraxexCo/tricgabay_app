@@ -2,7 +2,7 @@ name: tricgabay_app
 description: "Tric Gabay - Tour Guide & Tricycle Booking App for Bustos, Bulacan"
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.0+8
 
 environment:
   sdk: ^3.12.2
@@ -11,7 +11,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-  cupertino_icons: ^1.0.8
 
   # State Management
   flutter_riverpod: ^2.6.1
@@ -40,12 +39,9 @@ dependencies:
   # UI & Design
   google_fonts: ^6.2.1
   cached_network_image: ^3.4.1
-  lottie: ^3.2.0
-  shimmer: ^3.0.0
   smooth_page_indicator: ^1.2.0
   flutter_rating_bar: ^4.0.1
   fl_chart: ^0.69.0
-  gap: ^3.0.1
 
   # Utilities
   image_picker: ^1.1.2
@@ -57,22 +53,43 @@ dependencies:
   # currently fails under this app's AGP 9 toolchain. 13.1 keeps the same
   # SharePlus API without that regression.
   share_plus: 13.1.0
-  permission_handler: ^11.3.1
   uuid: ^4.5.1
-  timeago: ^3.7.0
+  package_info_plus: ^10.2.2
 
   # Notifications
   flutter_local_notifications: ^18.0.1
+  connectivity_plus: ^7.3.1
 
 dev_dependencies:
+  analyzer: 10.1.0
   flutter_test:
     sdk: flutter
+  # On-device screen renders: integration_test/screens_on_device_test.dart
+  integration_test:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_native_splash: ^2.4.8
+  image: ^4.13.1
 
 flutter:
   uses-material-design: true
+  generate: true
 
   assets:
-    - assets/images/
-    - assets/animations/
-    - assets/icons/
+    - assets/images/tric_gabay_logo.png
+    - assets/optimized_images/
+    - assets/optimized_images/places/
+    - assets/google_fonts/
+
+# Native launch screen. It matches the first Flutter frame (brand blue with
+# the logo centred at 128dp), so launch hands over without a white flash.
+# Regenerate after changes: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#0038A8"
+  image: assets/images/splash_logo.png
+  android_12:
+    color: "#0038A8"
+    image: assets/images/splash_logo_android12.png
+  web: false

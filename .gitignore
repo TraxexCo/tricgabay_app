@@ -52,3 +52,27 @@ app.*.map.json
 /android/key.properties
 *.jks
 *.keystore
+
+# Environment-specific client configuration and local server secrets.
+/config/*.json
+!/config/*.example.json
+/config/*.env
+/config/*.env.*
+!/config/*.env.example
+/supabase/functions/.env*
+!/supabase/functions/.env.example
+/.audit-output/
+
+# Local audit/validation logs
+/.audit-output/
+
+# Secrets that must never be committed (the repository is public).
+.env
+.env.*
+!.env.example
+**/google-services.json
+**/GoogleService-Info.plist
+*.p12
+
+# Local database backups (contain auth hashes and tokens)
+/backups/

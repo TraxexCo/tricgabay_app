@@ -8,13 +8,16 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <application
-        android:label="Tric-Gabay"
+        android:label="${appLabel}"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:usesCleartextTraffic="false"
         android:enableOnBackInvokedCallback="true">
+        <!-- Default off before Dart starts; diagnostics require explicit consent. -->
+        <meta-data android:name="firebase_crashlytics_collection_enabled" android:value="false" />
+        <meta-data android:name="firebase_performance_collection_enabled" android:value="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -37,16 +40,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <!-- Return from the hosted PayMongo test checkout. -->
-            <intent-filter>
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="false" />
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="tricgabay"
-                    android:host="payment-return" />
-                <data
-                    android:scheme="tricgabay"
-                    android:host="auth-callback" />
+                <data android:scheme="https" android:host="${authAppLinkHost}" android:pathPrefix="/auth/reset-password" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
@@ -61,6 +60,11 @@
 
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
+        <package android:name="com.globe.gcash.android"/>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="gcash"/>
+        </intent>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
@@ -74,6 +78,15 @@
         <intent>
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="geo"/>
+        </intent>
+        <!-- Booking screen: email the tourism office, open Google Maps. -->
+        <intent>
+            <action android:name="android.intent.action.SENDTO"/>
+            <data android:scheme="mailto"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
         </intent>
         <!-- url_launcher: share / open URLs -->
         <intent>

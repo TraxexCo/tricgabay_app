@@ -1,3 +1,5 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import 'error_messages.dart';
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -44,7 +46,7 @@ class PushNotificationService {
     } catch (error) {
       // Unit/widget tests and unsupported desktop targets have no native
       // Firebase channel. The rest of the app must remain usable there.
-      debugPrint('Push notifications are unavailable on this target: $error');
+      debugPrint(ErrorMessages.forError(error));
       _coreReady = false;
     }
   }
@@ -57,10 +59,10 @@ class PushNotificationService {
     await initializeCore();
     if (!_coreReady) return;
     try {
-      const channel = AndroidNotificationChannel(
+      final channel = AndroidNotificationChannel(
         'tric_gabay_updates',
-        'Trip updates',
-        description: 'Booking, driver, payment, and safety updates',
+        currentAppL10n.tripUpdates,
+        description: currentAppL10n.bookingDriverPaymentAndSafetyUpdates,
         importance: Importance.high,
         enableVibration: true,
       );
@@ -79,7 +81,7 @@ class PushNotificationService {
           if (route != null) onOpenRoute(route);
         },
       );
-      await _messaging.requestPermission(alert: true, badge: true, sound: true);
+      await _askPermissionOnceSignedIn();
       _foregroundSubscription = FirebaseMessaging.onMessage.listen((message) {
         final notification = message.notification;
         if (notification == null) return;
@@ -89,14 +91,16 @@ class PushNotificationService {
         unawaited(
           _local.show(
             message.messageId.hashCode,
-            notification.title ?? 'Tric-Gabay update',
-            notification.body ?? 'Open Tric-Gabay to view this update.',
-            const NotificationDetails(
+            notification.title ??
+                currentAppL10n.notificationUpdateTitle(AppBrand.name),
+            notification.body ??
+                currentAppL10n.openAppToViewThisUpdate(AppBrand.name),
+            NotificationDetails(
               android: AndroidNotificationDetails(
                 'tric_gabay_updates',
-                'Trip updates',
+                currentAppL10n.tripUpdates,
                 channelDescription:
-                    'Booking, driver, payment, and safety updates',
+                    currentAppL10n.bookingDriverPaymentAndSafetyUpdates,
                 importance: Importance.high,
                 priority: Priority.high,
                 visibility: NotificationVisibility.private,
@@ -132,9 +136,23 @@ class PushNotificationService {
       });
       _active = true;
     } catch (error) {
-      debugPrint('Push notification activation failed: $error');
+      debugPrint(ErrorMessages.forError(error));
       _active = false;
     }
+  }
+
+  static bool _permissionAsked = false;
+
+  // Ask only once someone has signed in: a prompt on the very first screen,
+  // before the person knows what the app is, is usually declined.
+  static Future<void> _askPermissionOnceSignedIn() async {
+    if (_permissionAsked ||
+        !BackendConfig.isConfigured ||
+        BackendConfig.client.auth.currentUser == null) {
+      return;
+    }
+    _permissionAsked = true;
+    await _messaging.requestPermission(alert: true, badge: true, sound: true);
   }
 
   static Future<void> _register(String token) async {
@@ -202,26 +220,34 @@ class PushNotificationService {
       }
       await initializeCore();
       if (!_coreReady) return;
+      await _askPermissionOnceSignedIn();
       _token ??= await _messaging.getToken();
       if (_token != null) await _register(_token!);
     } catch (error) {
-      debugPrint('Push token registration failed: $error');
+      debugPrint(ErrorMessages.forError(error));
     }
   }
 
   static Future<void> deactivate() async {
     final token = _token;
+    final subscriptions = [
+      _tokenSubscription,
+      _foregroundSubscription,
+      _openedSubscription,
+    ];
+    _tokenSubscription = null;
+    _foregroundSubscription = null;
+    _openedSubscription = null;
+    _active = false;
+    final cancellations = [
+      for (final subscription in subscriptions)
+        if (subscription != null) subscription.cancel(),
+    ];
     if (token != null && BackendConfig.isConfigured) {
       try {
         await BackendRepository.revokePushToken(token);
       } catch (_) {}
     }
-    await _tokenSubscription?.cancel();
-    await _foregroundSubscription?.cancel();
-    await _openedSubscription?.cancel();
-    _tokenSubscription = null;
-    _foregroundSubscription = null;
-    _openedSubscription = null;
-    _active = false;
+    await Future.wait(cancellations);
   }
 }

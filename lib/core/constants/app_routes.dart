@@ -16,6 +16,9 @@ class AppRoutes {
   static const String touristHome = '/tourist/home';
   static const String touristSearch = '/tourist/search';
   static const String touristBookings = '/tourist/bookings';
+  // Booking history opened from the account screen: same list, pushed above
+  // the tabs so it has a back button.
+  static const String touristBookingHistory = '/tourist/booking-history';
   static const String touristProfile = '/tourist/profile';
 
   // Tourist detail screens (full-screen, not tab)
@@ -40,6 +43,9 @@ class AppRoutes {
   static const String driverShell = '/driver';
   static const String driverHome = '/driver/home';
   static const String driverBookings = '/driver/bookings';
+  // Trip history opened from the account screen: same list, pushed above
+  // the tabs so it has a back button.
+  static const String driverTripHistory = '/driver/trip-history';
   static const String driverEarnings = '/driver/earnings';
   static const String driverProfile = '/driver/profile';
 
@@ -50,6 +56,7 @@ class AppRoutes {
   static const String driverNotifications = '/driver/notifications';
   static const String driverEditProfile = '/driver/profile/edit';
   static const String driverEmergency = '/driver/emergency';
+  static const String driverFeedback = '/driver/feedback';
 
   // Admin shell
   static const String adminShell = '/admin';
@@ -60,6 +67,8 @@ class AppRoutes {
   static const String manageTourists = '/admin/tourists';
   static const String manageTouristSpots = '/admin/spots';
   static const String spotForm = '/admin/spots/form';
+  static const String managePackages = '/admin/packages';
+  static const String packageForm = '/admin/packages/form';
   static const String monitorBookings = '/admin/bookings';
   static const String fareSettings = '/admin/fare-settings';
   static const String ratingsAndFeedback = '/admin/ratings';

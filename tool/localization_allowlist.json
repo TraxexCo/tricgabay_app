@@ -1,0 +1,1988 @@
+[
+  {
+    "file": "lib/core/widgets/brand_logo_hero.dart",
+    "value": "brand-logo",
+    "kind": "protocol",
+    "reason": "Hero tag linking the launch and sign-in logos; never shown in the interface."
+  },
+  {
+    "file": "lib/core/services/gcash_repository.dart",
+    "value": "gcash-receipts",
+    "kind": "protocol",
+    "reason": "Private Supabase Storage bucket id for GCash receipt screenshots; never shown in the interface."
+  },
+  {
+    "file": "lib/core/services/gcash_repository.dart",
+    "value": "driver-gcash-qr",
+    "kind": "protocol",
+    "reason": "Private Supabase Storage bucket id for driver GCash QR images; never shown in the interface."
+  },
+  {
+    "file": "lib/features/payment/gcash_dispute_panel.dart",
+    "value": "gcash-proof-reference",
+    "kind": "protocol",
+    "reason": "Widget key used by tests to find the reference field; never shown in the interface."
+  },
+  {
+    "file": "lib/features/tourist/screens/gcash_trip_payment.dart",
+    "value": "gcash-qr.png",
+    "kind": "protocol",
+    "reason": "File name given to the shared QR image so GCash's Upload QR can open it."
+  },
+  {
+    "file": "lib/features/tourist/screens/gcash_trip_payment.dart",
+    "value": "gcash-qr.jpg",
+    "kind": "protocol",
+    "reason": "File name given to the shared QR image so GCash's Upload QR can open it."
+  },
+  {
+    "file": "lib/core/constants/app_brand.dart",
+    "value": "Tric Gabay",
+    "kind": "brand",
+    "reason": "Single approved display brand spelling; all interface brand references use this constant."
+  },
+  {
+    "file": "lib/core/l10n/feedback_category.dart",
+    "value": "Bug Report",
+    "kind": "protocol",
+    "reason": "Existing feedback category wire value; UI uses the typed enum label and sends this unchanged."
+  },
+  {
+    "file": "lib/core/l10n/feedback_category.dart",
+    "value": "Suggestion",
+    "kind": "protocol",
+    "reason": "Existing feedback category wire value; UI uses the typed enum label and sends this unchanged."
+  },
+  {
+    "file": "lib/core/l10n/feedback_category.dart",
+    "value": "Driver Concern",
+    "kind": "protocol",
+    "reason": "Existing feedback category wire value; UI uses the typed enum label and sends this unchanged."
+  },
+  {
+    "file": "lib/core/l10n/feedback_category.dart",
+    "value": "Tourist Spot Issue",
+    "kind": "protocol",
+    "reason": "Existing feedback category wire value; UI uses the typed enum label and sends this unchanged."
+  },
+  {
+    "file": "lib/core/l10n/feedback_category.dart",
+    "value": "Other",
+    "kind": "protocol",
+    "reason": "Existing feedback category wire value; UI uses the typed enum label and sends this unchanged."
+  },
+  {
+    "file": "lib/core/services/auth_service.dart",
+    "value": "vehicle-registration.jpg",
+    "kind": "protocol",
+    "reason": "Existing machine identifier or structured exchange field; preserve compatibility and do not translate."
+  },
+  {
+    "file": "lib/core/services/auth_service.dart",
+    "value": "{1}/vehicle-registration.jpg",
+    "kind": "protocol",
+    "reason": "Existing machine identifier or structured exchange field; preserve compatibility and do not translate."
+  },
+  {
+    "file": "lib/core/services/backend_repository.dart",
+    "value": "Bustos, Bulacan",
+    "kind": "data",
+    "reason": "Geographic proper name or composed address entered/selected by the user; preserve location spelling."
+  },
+  {
+    "file": "lib/core/services/backend_repository.dart",
+    "value": "process-paymongo-refund",
+    "kind": "protocol",
+    "reason": "Existing machine identifier or structured exchange field; preserve compatibility and do not translate."
+  },
+  {
+    "file": "lib/core/services/backend_repository.dart",
+    "value": "reconcile-paymongo-payment",
+    "kind": "protocol",
+    "reason": "Existing machine identifier or structured exchange field; preserve compatibility and do not translate."
+  },
+  {
+    "file": "lib/core/services/backend_repository.dart",
+    "value": "create-paymongo-checkout",
+    "kind": "protocol",
+    "reason": "Existing machine identifier or structured exchange field; preserve compatibility and do not translate."
+  },
+  {
+    "file": "lib/core/services/backend_repository.dart",
+    "value": "tric-gabay-session",
+    "kind": "protocol",
+    "reason": "Existing machine identifier or structured exchange field; preserve compatibility and do not translate."
+  },
+  {
+    "file": "lib/core/services/cancellation_policy.dart",
+    "value": "Pending requests and driver cancellations are free. Tourist cancellation after the grace period may incur the published fee. A no-show requires verified driver arrival and the full waiting period.",
+    "kind": "data",
+    "reason": "Versioned legal-policy fallback sent with policy data; translation must not alter the stored terms."
+  },
+  {
+    "file": "lib/core/services/map_route_service.dart",
+    "value": "motorway,toll",
+    "kind": "protocol",
+    "reason": "Existing machine identifier or structured exchange field; preserve compatibility and do not translate."
+  },
+  {
+    "file": "lib/core/services/push_notification_service.dart",
+    "value": "vm:entry-point",
+    "kind": "protocol",
+    "reason": "Existing machine identifier or structured exchange field; preserve compatibility and do not translate."
+  },
+  {
+    "file": "lib/core/widgets/data_rights_screen.dart",
+    "value": "tric-gabay-personal-data.json",
+    "kind": "protocol",
+    "reason": "Existing machine identifier or structured exchange field; preserve compatibility and do not translate."
+  },
+  {
+    "file": "lib/core/widgets/delete_account_button.dart",
+    "value": "delete-account",
+    "kind": "protocol",
+    "reason": "Existing machine identifier or structured exchange field; preserve compatibility and do not translate."
+  },
+  {
+    "file": "lib/features/admin/screens/admin_reports_screen.dart",
+    "value": "booking_reference,status,payment_method,amount_received_php,created_at,completed_at",
+    "kind": "protocol",
+    "reason": "Existing machine identifier or structured exchange field; preserve compatibility and do not translate."
+  },
+  {
+    "file": "lib/features/admin/screens/admin_reports_screen.dart",
+    "value": "tric-gabay-{1}.csv",
+    "kind": "protocol",
+    "reason": "Existing machine identifier or structured exchange field; preserve compatibility and do not translate."
+  },
+  {
+    "file": "lib/features/admin/screens/driver_detail_admin_screen.dart",
+    "value": "Bustos, Bulacan",
+    "kind": "data",
+    "reason": "Geographic proper name or composed address entered/selected by the user; preserve location spelling."
+  },
+  {
+    "file": "lib/features/driver/screens/active_trip_screen.dart",
+    "value": "highways,tolls",
+    "kind": "protocol",
+    "reason": "Existing machine identifier or structured exchange field; preserve compatibility and do not translate."
+  },
+  {
+    "file": "lib/features/driver/screens/driver_edit_profile_screen.dart",
+    "value": "license_expires_on",
+    "kind": "protocol",
+    "reason": "Existing machine identifier or structured exchange field; preserve compatibility and do not translate."
+  },
+  {
+    "file": "lib/features/driver/screens/driver_edit_profile_screen.dart",
+    "value": "franchise_expires_on",
+    "kind": "protocol",
+    "reason": "Existing machine identifier or structured exchange field; preserve compatibility and do not translate."
+  },
+  {
+    "file": "lib/features/driver/screens/driver_edit_profile_screen.dart",
+    "value": "vehicle_inspection_expires_on",
+    "kind": "protocol",
+    "reason": "Existing machine identifier or structured exchange field; preserve compatibility and do not translate."
+  },
+  {
+    "file": "lib/features/tourist/screens/location_picker_screen.dart",
+    "value": "Poblacion",
+    "kind": "data",
+    "reason": "Geographic proper name or composed address entered/selected by the user; preserve location spelling."
+  },
+  {
+    "file": "lib/features/tourist/screens/location_picker_screen.dart",
+    "value": "Buisan",
+    "kind": "data",
+    "reason": "Geographic proper name or composed address entered/selected by the user; preserve location spelling."
+  },
+  {
+    "file": "lib/features/tourist/screens/location_picker_screen.dart",
+    "value": "Camachilihan",
+    "kind": "data",
+    "reason": "Geographic proper name or composed address entered/selected by the user; preserve location spelling."
+  },
+  {
+    "file": "lib/features/tourist/screens/location_picker_screen.dart",
+    "value": "Cambaog",
+    "kind": "data",
+    "reason": "Geographic proper name or composed address entered/selected by the user; preserve location spelling."
+  },
+  {
+    "file": "lib/features/tourist/screens/location_picker_screen.dart",
+    "value": "Catacte",
+    "kind": "data",
+    "reason": "Geographic proper name or composed address entered/selected by the user; preserve location spelling."
+  },
+  {
+    "file": "lib/features/tourist/screens/location_picker_screen.dart",
+    "value": "Liciada",
+    "kind": "data",
+    "reason": "Geographic proper name or composed address entered/selected by the user; preserve location spelling."
+  },
+  {
+    "file": "lib/features/tourist/screens/location_picker_screen.dart",
+    "value": "Malamig",
+    "kind": "data",
+    "reason": "Geographic proper name or composed address entered/selected by the user; preserve location spelling."
+  },
+  {
+    "file": "lib/features/tourist/screens/location_picker_screen.dart",
+    "value": "Malawak",
+    "kind": "data",
+    "reason": "Geographic proper name or composed address entered/selected by the user; preserve location spelling."
+  },
+  {
+    "file": "lib/features/tourist/screens/location_picker_screen.dart",
+    "value": "Talampas",
+    "kind": "data",
+    "reason": "Geographic proper name or composed address entered/selected by the user; preserve location spelling."
+  },
+  {
+    "file": "lib/features/tourist/screens/location_picker_screen.dart",
+    "value": "Tanawan",
+    "kind": "data",
+    "reason": "Geographic proper name or composed address entered/selected by the user; preserve location spelling."
+  },
+  {
+    "file": "lib/features/tourist/screens/location_picker_screen.dart",
+    "value": "Tibagan",
+    "kind": "data",
+    "reason": "Geographic proper name or composed address entered/selected by the user; preserve location spelling."
+  },
+  {
+    "file": "lib/features/tourist/screens/location_picker_screen.dart",
+    "value": "{1}, {2}, Bustos, Bulacan",
+    "kind": "data",
+    "reason": "Geographic proper name or composed address entered/selected by the user; preserve location spelling."
+  },
+  {
+    "file": "lib/features/tourist/screens/location_picker_screen.dart",
+    "value": "Bulacan",
+    "kind": "data",
+    "reason": "Geographic proper name or composed address entered/selected by the user; preserve location spelling."
+  },
+  {
+    "file": "lib/features/tourist/screens/location_picker_screen.dart",
+    "value": "Bustos",
+    "kind": "data",
+    "reason": "Geographic proper name or composed address entered/selected by the user; preserve location spelling."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "bustos-heritage-park",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Bustos Heritage Park",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A central heritage stop in Bustos and the starting point shared by all three {1} tour packages.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "This public park highlights local identity and serves as a convenient orientation point for a tour of Bustos.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Open daily",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Free",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A good first stop for the tour",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Bring water and sun protection",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "sta-cruz-chapel",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Sta. Cruz Chapel",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A neighborhood chapel in Talampas, also mapped as Holy Cross Chapel, and included in the TRIC LAKBAY route.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A local faith stop included in the supplied {1} tour package.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Dress respectfully",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Keep voices low during services",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "sta-monica-chapel",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Sta. Monica Chapel",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A chapel in Bonga Mayor that appears in every supplied tour package.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A recurring faith stop on the official {1} package routes.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Confirm service times before visiting",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "sto-nino-church",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Sto. Nino Church",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The Sto. Nino Parish Church in Poblacion, a landmark stop on TRIC LAKBAY and TRIC TUKLAS.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The parish church is one of the best-known religious landmarks in central Bustos.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Check parish schedule",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Dress modestly",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Avoid disrupting Mass or private prayer",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "zenys-minasa",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Zenny's Minasa Pasalubong",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A local pasalubong stop for Bustos minasa and the final stop in all three supplied packages.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Minasa is a signature local delicacy and a popular take-home treat from Bustos.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Check store hours",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "No entrance fee",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Ask about available box sizes",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Buy near the end of the tour",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "st-peter-chapel",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "St. Peter Chapel",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The Chapel of Saint Peter under Sto. Nino Parish, included in the TRIC SAYA route.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A local Catholic chapel serving the surrounding Bustos community.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Confirm chapel access before visiting",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "sto-nino-chapel",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Sto. Nino Chapel",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A local Sto. Nino faith stop included in the TRIC SAYA package.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "This stop follows the name and route supplied in the tour package document.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "perpetual-help-chapel",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Nuestra Senora Del Perpetuo",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Our Lady of Perpetual Help Chapel at Sitio Pitong Gatang, included in TRIC TUKLAS.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A community chapel under Sto. Nino Parish in Bustos.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "sto-rosario-chapel",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Sto. Rosario Chapel",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A chapel in Bonga Menor and a faith stop on the TRIC TUKLAS route.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A local Catholic chapel serving the Bonga Menor community.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "immaculate-conception-chapel",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Our Lady of Immaculate",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Our Lady of the Immaculate Conception Chapel in Malamig, included in TRIC TUKLAS.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A local Catholic chapel serving the Malamig community.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "galilee-wailing-wall",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Galilee Wailing Wall",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A themed landmark in Bustos and one of the distinctive stops on the TRIC TUKLAS route.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "This attraction is included by name in the supplied tour package document.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Confirm access before visiting",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Allow time for photos",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Bustos Dam Eco Park",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A scenic eco-park located near one of the longest sector dams in the world. Ideal for picnics, photography, and relaxing by the riverbank.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Constructed in 1926, the Bustos Dam was originally built to provide irrigation to local farmlands. It has since become a popular recreational spot.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Best visited during sunrise or sunset",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Great for family picnics",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Always be careful near the water",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Bustos Public Market",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The bustling commercial hub of Bustos, where locals buy fresh produce, meats, and the town's famous local delicacies.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A long-standing trading center that has fueled the local economy, connecting farmers, artisans, and consumers for decades.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Go early in the morning for the freshest produce",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Don't forget to buy Minasa cookies",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Haggling is part of the experience",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Mercado Ancestral House",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A well-preserved heritage stone house featuring intricate Baroque carvings and classic Filipino-Spanish architectural elements.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Dating back to the mid-19th century, this house is a testament to the affluent lifestyle of the early principalia in Bustos.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Exterior viewing only from the public road. Do not enter the property. (Private Property)",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Free (Roadside viewing)",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Best appreciated during daylight",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Respect the privacy of the current residents",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Located in the historic district of Bonga Menor",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "La Florentina Resort",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A popular destination for locals and tourists, offering beautiful swimming pools and modern amenities in a nature-inspired setting.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Developed to cater to the growing demand for leisure facilities in Bustos, it has become a staple venue for family gatherings and events.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "8:00 AM – 5:00 PM (Day Swim)",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Book in advance during summer months",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Ideal for family reunions and team building",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Cottages are available for rent",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Malamig Park Resort",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A family-friendly resort known for its wave pools and exciting water slides, providing a fun and refreshing getaway.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "One of the pioneering wave pool resorts in the area, offering affordable leisure and recreation for Bulakenyos over the years.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Arrive early to secure the best cottages",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Wave pool schedules are announced regularly",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Expect large crowds during the summer",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Galilee Wonderland Resort",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A uniquely themed resort with large pools and various biblical and whimsical statues, perfect for a fun day out.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Formerly known as Galilee Mansion, it was rebranded and expanded to include more attractions, merging recreation with unique thematic elements.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Explore the different themed areas for great photos",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Kid-friendly with specialized kiddie pools",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Event spaces available for booking",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "General Alejo Santos Bridge",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A vital bridge crossing the Angat River, providing a scenic view of the water and surrounding landscapes, especially at sunset.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Named in honor of General Alejo Santos, a WWII hero and former Secretary of National Defense, this bridge is a key infrastructural link in Bulacan.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Perfect spot for sunset photography",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Be mindful of traffic when walking",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Connects Bustos to Baliuag",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Bahay at Yaman ni San Martin de Porres Inc.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A charitable institution and orphanage with stunning architecture inspired by the traditional stone houses of Batanes.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Founded to provide shelter and education to children in need, it grew into a self-sustaining community with beautifully constructed facilities.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "By appointment only",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Donation",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Contact management before visiting",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Donations are welcome and highly appreciated",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Respect the privacy of the children and staff",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Cafe Apolonio and Restaurant sa Bahay Na Bato",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A historic Bahay na Bato turned into a charming restaurant, offering a unique dining experience amidst antique furnishings and classic architecture.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Originally an ancestral house built in the 1850s, it has been carefully preserved and repurposed to showcase the culinary and cultural heritage of Bustos.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Free (Restaurant purchases)",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Check their social media for reopening updates",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A must-visit for heritage enthusiasts when open",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Located in the heritage zone of Bonga Menor",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Cunanan Ancestral House",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "An impressive ancestral home that showcases the typical prosperous lifestyle of Filipino families during the late Spanish and early American periods.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Part of the rich collection of old houses in Bonga Menor, it has withstood the test of time, reflecting the town's glorious past.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Best viewed as part of a heritage walking tour",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Observe the intricate details on the facade",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Please respect the property and do not trespass",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Lopez Ancestral House",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Another jewel in Bustos' crown of ancestral houses, featuring classic wood and stone elements that characterize Philippine colonial architecture.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Once the residence of a prominent local family, it serves as a silent witness to the historical events that shaped the municipality.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Located near the town center",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Great addition to a cultural photography tour",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Appreciate the classic capiz shell windows",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Cafe Portillo Bustos",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A cozy and modern cafe offering a great selection of coffee and pastries, serving as a popular hangout spot for locals and visitors.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Established to provide a contemporary coffee culture experience in Bustos, blending modern tastes with local hospitality.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Perfect place to relax after a day of touring",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Try their signature coffee blends",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A popular study and remote work spot",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "San Isidro Labrador Parish Church - Liciada",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A beautiful parish church serving the spiritual needs of the community in Liciada, known for its peaceful ambiance and dedicated parishioners.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Dedicated to San Isidro Labrador, the patron saint of farmers, reflecting the strong agricultural roots of the local community.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Attend a Sunday mass for the full community experience",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Enjoy the quiet and serene environment",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Located a bit further from the town center",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "El Reloj del Centenario de Bustos (Bustos Clock Tower)",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A prominent clock tower that serves as a modern landmark in Bustos, commemorating the town's history and progress.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Built as part of the centennial celebrations, it stands as a symbol of Bustos' continuous march towards development while honoring its past.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Easily visible from the main roads",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A great meeting point in the town center",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Beautifully lit at night",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Bustos Welcome Arch",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The grand entrance arch of the municipality, greeting visitors with local designs and serving as a boundary marker.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Erected to formally welcome travelers and showcase the pride of Bustosenyos, marking the boundary with neighboring towns.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A classic photo op for road-trippers",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Be careful of traffic when taking photos",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Marks the transition into the town",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Summer Place Resort",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A refreshing local resort that offers a cool escape during the hot summer months, featuring well-maintained pools and recreational facilities.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A favored destination for local excursions and a quick getaway for those wanting to relax without traveling far from town.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Great for casual swimming and small parties",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Inquire about exclusive rentals",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Bring your own food and drinks",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Daily Bread Organic Farm",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A serene organic farm advocating for sustainable agriculture, offering visitors a glimpse into eco-friendly farming practices and fresh produce.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Established to promote healthy living and sustainable farming, it has become an educational destination for nature lovers and students.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Try their fresh organic meals if available",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Wear comfortable walking shoes",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Learn about their composting and farming techniques",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Minasa Festival",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The premier annual cultural festival of Bustos, celebrating the town's famous Minasa cookies with colorful street dances and parades.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Initiated to promote local tourism and the traditional Minasa cookie industry, which dates back to the Spanish era when the cookies were made for the elite.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Every January (Schedule varies)",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Plan your visit around the second week of January",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Expect large crowds and road closures",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Don't miss the street dancing competition",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "tric-lakbay",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "TRIC LAKBAY",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A five-stop Bustos route combining the heritage park, community chapels, the parish church, and a minasa pasalubong stop.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Flexible schedule",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Fixed five-stop itinerary",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Heritage and faith landmarks",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Minasa pasalubong stop",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "tric-saya",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "TRIC SAYA",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A five-stop chapel trail that begins at Bustos Heritage Park and ends with local minasa pasalubong.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Three community chapels",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "tric-tuklas",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "TRIC TUKLAS",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The most complete package, with eight ordered stops covering Bustos heritage, chapels, the parish church, Galilee Wailing Wall, and minasa pasalubong.",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Full day suggested",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Fixed eight-stop itinerary",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Heritage and chapel trail",
+    "kind": "data",
+    "reason": "Owner-supplied place/package catalog content or its stable identifier; proper names and authored records remain data."
+  },
+  {
+    "file": "lib/core/services/place_name_service.dart",
+    "value": "place,locality",
+    "kind": "protocol",
+    "reason": "Mapbox reverse-geocoding feature types query parameter; never shown in the interface."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "Judgefloro",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "JFVelasquez Floro",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "KurteousDerhen",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "Elmer B. Domingo",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "FBenjr123",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "Public domain",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "CC0",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "CC BY-SA 3.0",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "CC BY-SA 4.0",
+    "kind": "data",
+    "reason": "Photographer name or licence from Wikimedia Commons, shown verbatim in the photo credit the licence requires."
+  },
+  {
+    "file": "lib/core/utils/opening_hours.dart",
+    "value": "Mon",
+    "kind": "protocol",
+    "reason": "Stored English opening-hours format kept in the database record; the editor shows localized day names."
+  },
+  {
+    "file": "lib/core/utils/opening_hours.dart",
+    "value": "Tue",
+    "kind": "protocol",
+    "reason": "Stored English opening-hours format kept in the database record; the editor shows localized day names."
+  },
+  {
+    "file": "lib/core/utils/opening_hours.dart",
+    "value": "Wed",
+    "kind": "protocol",
+    "reason": "Stored English opening-hours format kept in the database record; the editor shows localized day names."
+  },
+  {
+    "file": "lib/core/utils/opening_hours.dart",
+    "value": "Thu",
+    "kind": "protocol",
+    "reason": "Stored English opening-hours format kept in the database record; the editor shows localized day names."
+  },
+  {
+    "file": "lib/core/utils/opening_hours.dart",
+    "value": "Fri",
+    "kind": "protocol",
+    "reason": "Stored English opening-hours format kept in the database record; the editor shows localized day names."
+  },
+  {
+    "file": "lib/core/utils/opening_hours.dart",
+    "value": "Sat",
+    "kind": "protocol",
+    "reason": "Stored English opening-hours format kept in the database record; the editor shows localized day names."
+  },
+  {
+    "file": "lib/core/utils/opening_hours.dart",
+    "value": "Sun",
+    "kind": "protocol",
+    "reason": "Stored English opening-hours format kept in the database record; the editor shows localized day names."
+  },
+  {
+    "file": "lib/core/utils/opening_hours.dart",
+    "value": "Open 24 hours, daily",
+    "kind": "protocol",
+    "reason": "Stored English opening-hours format kept in the database record; the editor shows localized day names."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The town's heritage park inside the Municipal Hall compound, where every Tric-Gabay tour begins. It holds the Bulacan Military Area (BMA) monument plaza, the municipal library and museum, and the Arts, Culture and Tourism Center that runs the tours.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Bustos began as a barrio of Baliuag. In 1862 a boat carrying parents, children and godparents to a baptism in Baliuag overturned on the Angat River, and the grief that followed led the people to ask for their own town and parish. Bustos separated from Baliuag on 29 April 1867, was returned to it during the American period, and became a municipality again on 1 January 1916; its first municipal hall opened in 1917 with Leon Prado as mayor.\n\nThe park also remembers the town's role in World War II. The Bulacan Military Area, formed on 3 July 1942, made Bustos the headquarters of the province's guerrillas under Bustos-born Capt. (later General) Alejo Santos. A historical marker for Santos was unveiled here in 2022, and the BMA grounds host the Minasa Festival every January.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Municipal Compound, Brgy. Poblacion, Bustos, Bulacan",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The park grounds are open every day; the museum and tourism center follow office hours",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Ask the tourism staff about the BMA monument and the Bustos centennial exhibit",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Bring water and sun protection for the outdoor plaza",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The Chapel of the Holy Cross (Bisita ng Sta. Cruz) of Barangay Talampas, a community chapel of Sto. Niño Parish and a stop on the TRIC LAKBAY route.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Talampas is one of the old barrios that once lay across the Angat River from Baliuag. Before Bustos had its own parish, families from Talampas, Tanawan and Bonga had to cross the river to reach the church in Baliuag, and it was on one of these crossings in 1862 that a boat carrying children to their baptism capsized. That tragedy led to the founding of the Sto. Niño Parish in 1867.\n\nToday Talampas keeps its own chapel under the parish, dedicated to the Holy Cross. It is run by the barangay's parish pastoral council, which gathers the community for Masses, novenas and the yearly fiesta in honor of the Cross.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Purok 3, Brgy. Talampas, Bustos, Bulacan",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Visits are arranged by the Bustos Tourism Office during tour hours",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Dress modestly and keep voices low if a service is going on",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Sunday and fiesta Mass times are announced by Sto. Niño Parish",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The Chapel of St. Monica (Bisita ni Sta. Monica) of Barangay Bonga Mayor, beside the highway near Tibagan, and the only chapel included in all three tour packages.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Bonga Mayor was one of the two Bonga barrios joined to the new town when Bustos separated from Baliuag in 1867. Its chapel is dedicated to St. Monica, the mother of St. Augustine. The choice reflects the Augustinian roots of the local Church: the Augustinians founded the Sto. Niño Parish of Bustos, and St. Monica and St. Augustine are carved on the main doors of the parish church.\n\nThe chapel serves the families of Bonga Mayor and the neighboring part of Tibagan under the Sto. Niño Parish, which holds Masses here and leads the community's devotions and fiesta.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Gen. Alejo G. Santos Hwy, Brgy. Bonga Mayor, Bustos, Bulacan",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Weekend evening services are held on Saturdays and Sundays",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The chapel faces the busy highway, so stay on the shoulder when taking photos",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Dress modestly inside the chapel",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Sto. Niño Parish Church",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The parish church of the Sto. Niño de Bustos, the town's patron, in Poblacion. Founded in 1867, it was named a Jubilee Church of the Diocese of Malolos for the 500 years of Christianity in the Philippines.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The parish exists because of a tragedy. In 1862 a boat carrying parents, children and godparents to a baptism in Baliuag overturned in the Angat River. The people asked for a parish of their own so no one would have to cross the river again, and chose the Holy Child (Sto. Niño) as patron in memory of the infants who drowned. The Augustinians established the parish in 1867, with Padre Gabriel Alvarez as its first parish priest.\n\nThe church has a facade crowned by Christ the Redeemer, with niches for the Sto. Niño, St. Augustine and the crucified Christ. Its wooden doors are carved with St. Monica and St. Augustine, and its ceiling paintings follow the Sistine Chapel. The parish celebrated its 150th anniversary in 2017 together with the town's centennial, and honors the Sto. Niño every third Sunday of January with the Tugyaw (tugtog at sayaw) street dancing.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Beltran St. cor. C.L. Hilario Hwy, Brgy. Poblacion, Bustos, Bulacan",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Mass: Sundays 6:30 AM, 8:00 AM and 5:00 PM; Monday to Saturday 6:30 AM",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The parish office is closed on Mondays; call (044) 796 2194",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Do not walk around during Mass or private prayer",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A family-run pasalubong store near the Municipal Hall, known for Bustos minasa and other Bulacan delicacies. It is the last stop of all three tour packages.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Minasa are crisp cassava cookies made from cassava flour, egg yolk, yeast, butter and coconut milk. The name comes from the kneading (masa) of the dough. In Spanish times they were baked for well-off Bulakeño families, and local lore links them to the egg yolks left over when egg whites were used in building stone houses. Bustos holds the Minasa Festival every January, and the town's motto is \"Minasa ng kaunlaran!\"\n\nZeny's bakes its minasa in small batches. Maria Elena de Lara learned the recipe from her grandmother, who learned it from the family before her. Besides minasa, the store sells lengua de gato, barquillos and other native treats that visitors and balikbayans bring home.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "7 Tanawan, Bustos, Bulacan (near the Municipal Hall)",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Mon–Fri 7:00 AM–6:00 PM · Sat, Sun 7:00 AM–5:00 PM",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Minasa is fragile; ask for a sturdy box if you are travelling far",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Buy at the end of the tour so the cookies stay crisp",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The Chapel of St. Peter (Bisita ni San Pedro), the community chapel of Barangay San Pedro under Sto. Niño Parish, on the TRIC SAYA route.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "San Pedro takes its name from its patron, St. Peter the Apostle, and its chapel stands at the heart of the barangay along Col. P. Garcia Street. It is one of the chapels of the Sto. Niño Parish, which has served the barrios of Bustos since 1867.\n\nThe chapel's San Pedro parish pastoral council organizes Masses, novenas and the yearly fiesta. The chapel keeps images of St. Peter and other saints that are brought out for the barangay's processions. It is a short ride from the Galilee Wonderland complex on the highway.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Col. P. Garcia St., Brgy. San Pedro, Bustos, Bulacan",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Dress modestly and keep voices low",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The images of the saints are devotional objects, so please do not touch them",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Sto. Niño Chapel",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A small community chapel dedicated to the Sto. Niño, the patron of Bustos, and a stop on the TRIC SAYA route.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Devotion to the Sto. Niño is at the center of Bustos life. The town chose the Holy Child as its patron in memory of the infants who drowned in the Angat River in 1862, the tragedy that led to the founding of the parish and the town in 1867.\n\nNeighborhood chapels like this one keep that devotion close to home. Families gather here to pray to the Holy Child, especially in January, when the whole town celebrates the Sto. Niño feast with processions and the Tugyaw street dancing.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "WWX6+MQX, Bustos, Bulacan",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The busiest time is the Sto. Niño feast every third Sunday of January",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Our Lady of Perpetual Help Chapel",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The Chapel of Our Lady of Perpetual Help (Bisita ng Ina ng Laging Saklolo) in Sitio Pitong Gatang, Poblacion, a short walk from the Heritage Park and a stop on TRIC TUKLAS.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "This is the Poblacion chapel of the Sto. Niño Parish. It is dedicated to Our Mother of Perpetual Help, the Marian devotion whose Wednesday novena is one of the most widely prayed in the Philippines. It serves the families of Sitio Pitong Gatang, a neighborhood of the town center.\n\nInside, a framed icon of the Virgin and Child is set on a carved wooden altar flanked by images of Mary. The Poblacion parish pastoral council keeps the chapel and leads its novenas and devotions.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "67 Domingo St., Sitio Pitong Gatang, Brgy. Poblacion, Bustos, Bulacan",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Wednesday is the traditional day of the Perpetual Help novena",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The chapel is on a narrow street; tricycles drop off at the corner",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The Chapel of the Holy Rosary in Barangay Bonga Menor, a white chapel with a blue spire and a stop on the TRIC TUKLAS route.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Bonga Menor is one of the two Bonga barrios that joined Bustos when it became its own town in 1867. It is the birthplace of Gen. Alejo Santos, who led the Bulacan guerrillas in World War II. It is also home to several of the town's ancestral houses.\n\nThe barangay's chapel is dedicated to Our Lady of the Holy Rosary. It is a rounded white building with a blue conical spire and a bell turret over its gate. It belongs to the Sto. Niño Parish, which celebrates Mass here, and the community gathers in it for the Rosary devotions of October.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Ester Compound, C.L. Hilario St., Brgy. Bonga Menor, Bustos, Bulacan",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "October, the month of the Rosary, is the chapel’s busiest season",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Combine with a look at the ancestral houses of Bonga Menor from the road",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Immaculate Conception Chapel",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The Chapel of the Immaculate Conception (Bisita ng Inmaculada Concepcion) of Barangay Malamig, a community chapel of Sto. Niño Parish on the TRIC TUKLAS route.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Malamig is a farming barangay south of the town center, on the road toward Liciada and Pandi. Its chapel is dedicated to the Immaculate Conception, a devotion close to Bulacan, whose cathedral in Malolos shares the same title.\n\nThe chapel belongs to the Sto. Niño Parish and is cared for by the Malamig parish pastoral council. It is a two-storey cream building with a tall arched entrance, and its blue-and-white interior centers on the crucifix and an image of the Immaculate Conception. The community's biggest celebration is the feast of the Immaculate Conception on 8 December.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Brgy. Malamig, Bustos, Bulacan",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The feast on 8 December draws the most people",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A prayer wall inside Galilee Wonderland Waterpark and Hotel, modelled on Jerusalem's Western Wall, where visitors write prayers on paper and tuck them between the stones.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Galilee opened on 5 March 2004 in San Pedro, Bustos, as Galilee Mansion and Garden Resort, and has since grown into Galilee Wonderland Waterpark and Hotel. The whole complex is built around biblical themes. Its pools and halls carry names such as Noah's Ark, the Jordan River, Mt. Sinai and the Garden of Eden.\n\nThe Wailing Wall follows the Western Wall in Jerusalem, the last remaining wall of the Temple Mount, where pilgrims have long placed written prayers in the cracks. Here visitors can do the same in a quiet corner of the resort, near its church.",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Galilee Wonderland Resort, Gen. Alejo G. Santos Hwy, Brgy. San Pedro, Bustos, Bulacan",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Resort entrance: ₱200 adults, ₱180 kids, ₱160 seniors and PWD",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "The wall is inside the resort, so the resort entrance fee may apply; confirm at the gate",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Bring a pen and a small piece of paper for your prayer",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Respect people who are praying at the wall",
+    "kind": "data",
+    "reason": "Bundled tour-place record (name, description, history, address, hours, fee or tip) mirrored from the tourist_spots table."
+  },
+  {
+    "file": "lib/core/services/place_search_service.dart",
+    "value": "address,street,neighborhood,locality,place",
+    "kind": "protocol",
+    "reason": "Mapbox Geocoding API parameter value, never shown to users."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "Galilee Wonderland",
+    "kind": "data",
+    "reason": "Photo credit for images the business owner allowed the app to use, shown in the photo viewer."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "Used with permission",
+    "kind": "data",
+    "reason": "Photo credit for images the business owner allowed the app to use, shown in the photo viewer."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "Benilda Manlapaz",
+    "kind": "data",
+    "reason": "Photo credit for images the photographer allowed the app to use, shown in the photo viewer."
+  },
+  {
+    "file": "lib/models/place_photos.dart",
+    "value": "Alain Santos",
+    "kind": "data",
+    "reason": "Photo credit for images the photographer allowed the app to use, shown in the photo viewer."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "A five-stop faith trail from Bustos Heritage Park through two chapels and the Sto. Niño Parish Church, ending with local minasa pasalubong.",
+    "kind": "data",
+    "reason": "Bundled tour-package record mirrored from the tour_packages table."
+  },
+  {
+    "file": "lib/models/tourist_spot_model.dart",
+    "value": "Two community chapels and the parish church",
+    "kind": "data",
+    "reason": "Bundled tour-package record mirrored from the tour_packages table."
+  },
+  {
+    "file": "lib/core/widgets/privacy_consent_gate.dart",
+    "value": "Privacy check",
+    "kind": "protocol",
+    "reason": "Developer log label for the privacy check retry; never shown in the interface."
+  },
+  {
+    "file": "lib/core/services/embedded_rows.dart",
+    "value": "Embedded row is {1}, expected an object",
+    "kind": "protocol",
+    "reason": "Developer-facing exception text for an unexpected server response shape; never shown in the interface."
+  },
+  {
+    "file": "lib/core/services/embedded_rows.dart",
+    "value": "Embedded rows are {1}, expected a list, an object or null",
+    "kind": "protocol",
+    "reason": "Developer-facing exception text for an unexpected server response shape; never shown in the interface."
+  },
+  {
+    "file": "lib/features/admin/screens/ratings_feedback_screen.dart",
+    "value": "review-stars-{1}",
+    "kind": "protocol",
+    "reason": "Widget key used by tests to count a review card's filled stars; never shown in the interface."
+  }
+]

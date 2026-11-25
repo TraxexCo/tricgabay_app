@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tricgabay_app/core/prototype/prototype_session.dart';
-import 'package:tricgabay_app/core/services/trip_rules.dart';
+import 'package:tricgabay_app/core/session/app_session.dart';
 import 'package:tricgabay_app/features/admin/screens/fare_settings_screen.dart';
 import 'package:tricgabay_app/features/tourist/screens/booking_detail_screen.dart';
 import 'package:tricgabay_app/models/trip_record.dart';
+import 'package:tricgabay_app/models/booking_model.dart';
 import 'trip_rules_test.dart' show accepted;
 
 void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
-    PrototypeSession.bookings.value = [];
-    PrototypeSession.setAuthenticatedUser(
+    AppSession.bookings.value = [];
+    AppSession.setAuthenticatedUser(
       id: 'u1',
       name: 'Tourist',
       role: 'tourist',
       email: 'tourist@example.test',
     );
-    await PrototypeSession.initialize();
+    await AppSession.initialize();
   });
   Future<void> showSmall(WidgetTester tester, Widget screen) async {
     tester.view.physicalSize = const Size(320, 640);
@@ -43,7 +43,7 @@ void main() {
     'small-screen tourist details expose code, route and cancellation without overflow',
     (tester) async {
       final b = accepted();
-      PrototypeSession.bookings.value = [b];
+      AppSession.bookings.value = [b];
       await showSmall(tester, BookingDetailScreen(bookingId: b.id));
       await tester.scrollUntilVisible(
         find.text('1234'),
@@ -52,7 +52,7 @@ void main() {
       );
       expect(find.text('1234'), findsOneWidget);
       await tester.scrollUntilVisible(
-        find.text('Cancel booking | no charge'),
+        find.text('Cancel booking (no charge)'),
         200,
         scrollable: find.byType(Scrollable).first,
       );
@@ -63,22 +63,24 @@ void main() {
   testWidgets(
     'admin review displays payment hold and reachable decision control on a small screen',
     (tester) async {
-      final b = TripRules.cancel(
-        TripRules.start(accepted(), '1234'),
-        TripActor.driver,
-        'Vehicle breakdown',
+      // A trip the driver ended after pickup: the server holds payment for
+      // an admin review.
+      final started = accepted();
+      final b = started.copyWith(
+        status: BookingStatus.cancelled,
+        trip: started.trip.copyWith(reviewRequired: true),
       );
-      PrototypeSession.bookings.value = [b];
+      AppSession.bookings.value = [b];
       await showSmall(
         tester,
         BookingDetailScreen(bookingId: b.id, viewer: TripActor.admin),
       );
       await tester.scrollUntilVisible(
-        find.text('Review & decide final charge'),
+        find.text('Review and decide final charge'),
         200,
         scrollable: find.byType(Scrollable).first,
       );
-      expect(find.text('Review & decide final charge'), findsOneWidget);
+      expect(find.text('Review and decide final charge'), findsOneWidget);
       expect(find.text('Confirm cash received'), findsNothing);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());

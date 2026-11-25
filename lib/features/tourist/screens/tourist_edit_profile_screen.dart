@@ -1,15 +1,17 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/error_messages.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/shared_widgets.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../core/services/backend_repository.dart';
+import '../../../core/utils/validators.dart';
 
 class TouristEditProfileScreen extends StatefulWidget {
   const TouristEditProfileScreen({super.key});
@@ -24,7 +26,7 @@ class _TouristEditProfileScreenState extends State<TouristEditProfileScreen> {
   bool _isLoading = false;
 
   late final _nameCtrl = TextEditingController(
-    text: PrototypeSession.currentUserName.value,
+    text: AppSession.currentUserName.value,
   );
   late final _phoneCtrl = TextEditingController(text: '');
   late final _emailCtrl = TextEditingController();
@@ -46,7 +48,9 @@ class _TouristEditProfileScreenState extends State<TouristEditProfileScreen> {
       _emailCtrl.text = profile['email'] ?? '';
       setState(() {});
     } catch (error) {
-      if (mounted) AppSnackbar.showError(context, '$error');
+      if (mounted) {
+        AppSnackbar.showError(context, ErrorMessages.forError(error));
+      }
     }
   }
 
@@ -63,19 +67,30 @@ class _TouristEditProfileScreenState extends State<TouristEditProfileScreen> {
       setState(() => _isLoading = true);
       try {
         if (!BackendConfig.isConfigured) {
-          throw StateError('Server setup is incomplete.');
+          throw StateError(MessageCode.serverSetupIsIncomplete);
         }
+        final accountId = BackendConfig.client.auth.currentUser?.id;
+        final savedName = _nameCtrl.text.trim();
         await BackendRepository.updateOwnProfile(
-          fullName: _nameCtrl.text,
+          fullName: savedName,
           phone: _phoneCtrl.text,
           avatarBytes: _pickedImage,
         );
-        PrototypeSession.updateUserName(_nameCtrl.text.trim());
-        if (!mounted) return;
-        AppSnackbar.showSuccess(context, 'Profile updated successfully!');
+        if (!mounted ||
+            accountId == null ||
+            BackendConfig.client.auth.currentUser?.id != accountId) {
+          return;
+        }
+        AppSession.updateAccountName(savedName);
+        AppSnackbar.showSuccess(
+          context,
+          MessageCode.profileUpdatedSuccessfullyLabel,
+        );
         context.pop();
       } catch (error) {
-        if (mounted) AppSnackbar.showError(context, '$error');
+        if (mounted) {
+          AppSnackbar.showError(context, ErrorMessages.forError(error));
+        }
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
@@ -97,18 +112,7 @@ class _TouristEditProfileScreenState extends State<TouristEditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(
-          'Edit Profile',
-          style: GoogleFonts.poppins(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: AppColors.surface,
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
-      ),
+      appBar: AppBar(title: Text(context.l10n.editProfile)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -135,45 +139,42 @@ class _TouristEditProfileScreenState extends State<TouristEditProfileScreen> {
                   Positioned(
                     bottom: 0,
                     right: 0,
-                    child: GestureDetector(
-                      onTap: _pickImage,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(
-                          color: AppColors.secondary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.camera_alt,
-                          color: Colors.white,
-                          size: 24,
-                        ),
+                    child: IconButton(
+                      tooltip: context.l10n.changePhoto,
+                      onPressed: _pickImage,
+                      style: IconButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
                       ),
+                      icon: const Icon(Icons.camera_alt),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 32),
               AppTextField(
-                label: 'Full Name',
+                label: context.l10n.fullName,
                 controller: _nameCtrl,
-                validator: (v) => v!.isEmpty ? 'Required' : null,
+                maxLength: Validators.fullNameMaxLength,
+                validator: Validators.fullName,
               ),
               const SizedBox(height: 16),
               AppTextField(
-                label: 'Phone Number',
+                label: context.l10n.phoneNumber,
                 controller: _phoneCtrl,
-                validator: (v) => v!.isEmpty ? 'Required' : null,
+                maxLength: 11,
+                keyboardType: TextInputType.phone,
+                validator: Validators.phoneNumber,
               ),
               const SizedBox(height: 16),
               AppTextField(
-                label: 'Email',
+                label: context.l10n.email,
                 controller: _emailCtrl,
                 readOnly: true,
               ),
               const SizedBox(height: 40),
               AppButton(
-                label: 'Save Changes',
+                label: context.l10n.saveChanges,
                 isLoading: _isLoading,
                 onPressed: _save,
               ),

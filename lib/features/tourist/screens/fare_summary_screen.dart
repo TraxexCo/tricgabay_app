@@ -1,11 +1,21 @@
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/services/server_clock.dart';
+import '../../../core/services/error_messages.dart';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/shared_widgets.dart';
+import '../../../core/constants/app_routes.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/services/trip_rules.dart';
-import '../../../core/services/backend_repository.dart';
 import '../../../core/config/backend_config.dart';
+import '../../../core/services/backend_repository.dart';
 import '../../../models/booking_model.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/config/tour_schedule.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../payment/outstanding_fare_banner.dart';
 
 class FareSummaryScreen extends StatefulWidget {
   const FareSummaryScreen({super.key});
@@ -17,73 +27,286 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
   bool _busy = false;
   bool _agreed = false;
   PaymentMethod _paymentMethod = PaymentMethod.cash;
-  int _passengerCount = PrototypeSession.passengerCount;
-  DateTime? _scheduledAt = PrototypeSession.scheduledAt;
+  int _passengerCount = AppSession.draft.passengerCount;
+  // Tours run on a chosen day from the tourism office; the tourist picks the
+  // day and a start time inside office hours (see TourSchedule).
+  late List<DateTime> _days = TourSchedule.bookableDays(stopHours: _stopHours);
+  DateTime? _day;
+  DateTime? _scheduledAt;
   late final TextEditingController _luggageNotes;
   late final TextEditingController _accessibilityNeeds;
+
+  /// Opening hours of every stop on the chosen package: tours can only start
+  /// when all of them are open.
+  List<String> get _stopHours {
+    final ids = AppSession.activePackage?.spotIds ?? const <String>[];
+    return [
+      for (final spot in AppSession.allSpots.value)
+        if (ids.contains(spot.id)) spot.openingHours,
+    ];
+  }
+
+  /// Names of the package's stops that are closed on the chosen day; the
+  /// tour leaves them out.
+  List<String> get _skippedStops {
+    final day = _day;
+    final ids = AppSession.activePackage?.spotIds ?? const <String>[];
+    if (day == null) return const [];
+    return [
+      for (final spot in AppSession.allSpots.value)
+        if (ids.contains(spot.id) &&
+            !TourSchedule.isStopOpenOn(day, spot.openingHours))
+          spot.name,
+    ];
+  }
+
   @override
   void initState() {
     super.initState();
-    _luggageNotes = TextEditingController(text: PrototypeSession.luggageNotes);
+    _luggageNotes = TextEditingController(text: AppSession.draft.luggageNotes);
     _accessibilityNeeds = TextEditingController(
-      text: PrototypeSession.accessibilityNeeds,
+      text: AppSession.draft.accessibilityNeeds,
     );
-    PrototypeSession.farePolicy.addListener(_priceChanged);
+    AppSession.farePolicy.addListener(_priceChanged);
+    _restoreSchedule();
+    _checkOnlineDrivers();
+  }
+
+  /// Keeps a still-valid earlier choice; otherwise picks the first open
+  /// start time.
+  void _restoreSchedule() {
+    _days = TourSchedule.bookableDays(stopHours: _stopHours);
+    final previous = AppSession.draft.scheduledAt;
+    if (previous != null) {
+      final local = ServerClock.manila(previous);
+      final day = _days
+          .where(
+            (d) =>
+                d.year == local.year &&
+                d.month == local.month &&
+                d.day == local.day,
+          )
+          .firstOrNull;
+      if (day != null &&
+          TourSchedule.startTimes(
+            day,
+            stopHours: _stopHours,
+          ).contains(previous)) {
+        _day = day;
+        _scheduledAt = previous;
+        return;
+      }
+    }
+    _day = _days.firstOrNull;
+    _scheduledAt = _day == null
+        ? null
+        : TourSchedule.startTimes(_day!, stopHours: _stopHours).firstOrNull;
+  }
+
+  void _pickDay(DateTime day) {
+    final times = TourSchedule.startTimes(day, stopHours: _stopHours);
+    setState(() {
+      _day = day;
+      // Keep the same hour on the new day when it is offered.
+      final hour = _scheduledAt == null
+          ? null
+          : ServerClock.manila(_scheduledAt!).hour;
+      _scheduledAt =
+          times.where((t) => ServerClock.manila(t).hour == hour).firstOrNull ??
+          times.firstOrNull;
+      _agreed = false;
+    });
+  }
+
+  String _dayLabel(BuildContext context, DateTime day) {
+    final today = ServerClock.manila(ServerClock.now());
+    final diff = DateTime(
+      day.year,
+      day.month,
+      day.day,
+    ).difference(DateTime(today.year, today.month, today.day)).inDays;
+    return switch (diff) {
+      0 => context.l10n.today,
+      1 => context.l10n.tomorrow,
+      _ => AppFormatters.weekdayShort(day),
+    };
+  }
+
+  /// The first open days as quick buttons, plus the chosen day if it was
+  /// picked from the calendar further ahead.
+  List<DateTime> get _quickDays {
+    final quick = _days.take(TourSchedule.quickDayCount).toList();
+    final day = _day;
+    if (day != null && !quick.contains(day)) quick.add(day);
+    return quick;
+  }
+
+  /// Hourly starts for the chosen day, plus a custom time if one was set.
+  List<DateTime> get _startOptions {
+    final day = _day;
+    if (day == null) return const [];
+    final options = TourSchedule.startTimes(
+      day,
+      stopHours: _stopHours,
+    ).toList();
+    final chosen = _scheduledAt;
+    if (chosen != null && !options.contains(chosen)) {
+      options
+        ..add(chosen)
+        ..sort();
+    }
+    return options;
+  }
+
+  /// Full calendar: only open tour days (Monday to Friday, not holidays,
+  /// up to a year ahead) can be tapped.
+  Future<void> _openCalendar() async {
+    if (_days.isEmpty) return;
+    final open = _days.toSet();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _day ?? _days.first,
+      firstDate: _days.first,
+      lastDate: _days.last,
+      selectableDayPredicate: (day) =>
+          open.contains(DateTime(day.year, day.month, day.day)),
+      helpText: context.l10n.chooseYourTourDay,
+    );
+    if (picked == null || !mounted) return;
+    _pickDay(DateTime(picked.year, picked.month, picked.day));
+  }
+
+  /// Any start in 15-minute steps, but only inside the hours when every
+  /// stop on the tour is open (and at least an hour from now).
+  Future<void> _pickCustomTime() async {
+    final day = _day;
+    if (day == null) return;
+    final slots = TourSchedule.quarterHourStarts(day, stopHours: _stopHours);
+    if (slots.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.startTimeOutsideHours)),
+      );
+      return;
+    }
+    final picked = await showModalBottomSheet<DateTime>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheet) {
+        final l = sheet.l10n;
+        return SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(sheet).height * .7,
+            ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l.chooseAStartTimeHelp,
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l.startTimeWindowHelp(
+                      AppFormatters.time(ServerClock.manila(slots.first)),
+                      AppFormatters.time(ServerClock.manila(slots.last)),
+                    ),
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final slot in slots)
+                        ChoiceChip(
+                          label: Text(
+                            AppFormatters.time(ServerClock.manila(slot)),
+                          ),
+                          selected: slot == _scheduledAt,
+                          onSelected: (_) => Navigator.pop(sheet, slot),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+    if (picked == null || !mounted) return;
+    if (!TourSchedule.isValidStart(picked, stopHours: _stopHours)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.startTimeOutsideHours)),
+      );
+      return;
+    }
+    setState(() {
+      _scheduledAt = picked;
+      _agreed = false;
+    });
+  }
+
+  Widget _timeChip(
+    String label, {
+    required bool selected,
+    required VoidCallback onTap,
+    IconData? icon,
+  }) => ChoiceChip(
+    avatar: icon == null
+        ? null
+        : Icon(icon, size: 18, color: AppColors.primary),
+    label: Text(label),
+    selected: selected,
+    showCheckmark: false,
+    selectedColor: AppColors.primary,
+    backgroundColor: AppColors.surface,
+    side: BorderSide(color: selected ? AppColors.primary : AppColors.border),
+    labelStyle: GoogleFonts.poppins(
+      fontWeight: FontWeight.w600,
+      color: selected ? Colors.white : AppColors.textPrimary,
+    ),
+    onSelected: _busy ? null : (_) => onTap(),
+  );
+
+  Future<void> _openDirections() async {
+    final uri = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query='
+      '${TourSchedule.meetingPointLat},${TourSchedule.meetingPointLng}',
+    );
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  /// Null until known, or when the count can't be loaded (then no warning).
+  int? _onlineDrivers;
+
+  Future<void> _checkOnlineDrivers() async {
+    if (!BackendConfig.isConfigured) return;
+    try {
+      final count = await BackendRepository.countOnlineDrivers();
+      if (mounted) setState(() => _onlineDrivers = count);
+    } catch (_) {
+      // Informational only; booking still works without it.
+    }
   }
 
   void _priceChanged() {
     if (mounted) setState(() => _agreed = false);
   }
 
-  String _scheduleLabel(BuildContext context) {
-    final value = _scheduledAt;
-    if (value == null) return 'Request a driver now';
-    final local = value.toLocal();
-    final material = MaterialLocalizations.of(context);
-    return '${material.formatMediumDate(local)} at ${material.formatTimeOfDay(TimeOfDay.fromDateTime(local))}';
-  }
-
-  Future<void> _chooseSchedule() async {
-    final now = DateTime.now();
-    final initial = _scheduledAt ?? now.add(const Duration(hours: 2));
-    final date = await showDatePicker(
-      context: context,
-      initialDate: initial,
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 30)),
-      helpText: 'Choose pickup date',
-    );
-    if (date == null || !mounted) return;
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(initial),
-      helpText: 'Choose pickup time',
-    );
-    if (time == null || !mounted) return;
-    final chosen = DateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-    );
-    if (chosen.isBefore(DateTime.now().add(const Duration(hours: 1)))) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Schedule pickup at least 1 hour from now.'),
-        ),
-      );
-      return;
-    }
-    setState(() {
-      _scheduledAt = chosen;
-      _agreed = false;
-    });
-  }
-
   @override
   void dispose() {
-    PrototypeSession.farePolicy.removeListener(_priceChanged);
+    AppSession.farePolicy.removeListener(_priceChanged);
     _luggageNotes.dispose();
     _accessibilityNeeds.dispose();
     super.dispose();
@@ -91,153 +314,289 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-    listenable: Listenable.merge([
-      PrototypeSession.farePolicy,
-      PrototypeSession.itinerary,
-      PrototypeSession.customPickupAddress,
-    ]),
+    listenable: Listenable.merge([AppSession.farePolicy, AppSession.itinerary]),
     builder: (context, _) {
-      final revision = PrototypeSession.farePolicy.value.revision;
-      final spots = PrototypeSession.itinerary.value;
-      final package = PrototypeSession.activePackage;
-      final fare = PrototypeSession.estimatedFare;
+      final revision = AppSession.farePolicy.value.revision;
+      final spots = AppSession.itinerary.value;
+      final package = AppSession.activePackage;
+      final fare = AppSession.estimatedFare;
+      // Only tour packages can be booked.
+      if (package == null) {
+        return Scaffold(
+          appBar: AppBar(title: Text(context.l10n.reviewYourBooking)),
+          body: EmptyStateWidget(
+            icon: Icons.tour_outlined,
+            title: context.l10n.chooseATourPackage,
+            subtitle: context.l10n.chooseATourPackageBody,
+            actionLabel: context.l10n.seeTours,
+            onAction: () => context.go(AppRoutes.tourPackages),
+          ),
+        );
+      }
       return Scaffold(
-        appBar: AppBar(title: const Text('Review your booking')),
+        appBar: AppBar(title: Text(context.l10n.reviewYourBooking)),
         body: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            Text(
-              package?.name ?? 'Custom tour',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.lock_outline),
-                title: const Text('Fixed fare for this route'),
-                subtitle: const Text(
-                  'No distance, waiting or surge additions. Entrance fees and purchases are separate.',
-                ),
-                trailing: Text(
-                  '₱${fare.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+            const OutstandingFareBanner(),
+            // The fare is what the tourist is agreeing to; lead with it.
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+              decoration: BoxDecoration(
+                gradient: AppColors.primaryGradient,
+                borderRadius: BorderRadius.circular(22),
               ),
-            ),
-            const SizedBox(height: 12),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.location_on_outlined),
-                title: const Text('Pickup point'),
-                subtitle: Text(
-                  PrototypeSession.customPickupAddress.value ??
-                      (PrototypeSession.userLatitude.value == null
-                          ? 'Choose an exact pickup point before booking'
-                          : 'Current GPS location'),
-                ),
-                trailing: const Icon(Icons.edit_location_alt_outlined),
-                onTap: () async {
-                  await context.push('/tourist/location-picker');
-                  if (mounted) setState(() {});
-                },
-              ),
-            ),
-            const SizedBox(height: 12),
-            Card(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ListTile(
-                    leading: Icon(
-                      _scheduledAt == null
-                          ? Icons.bolt_rounded
-                          : Icons.event_available_outlined,
+                  Text(
+                    context.message(package.name),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
                     ),
-                    title: Text(
-                      _scheduledAt == null ? 'Book now' : 'Scheduled pickup',
-                    ),
-                    subtitle: Text(_scheduleLabel(context)),
-                    trailing: const Icon(Icons.edit_calendar_outlined),
-                    onTap: _busy ? null : _chooseSchedule,
                   ),
-                  if (_scheduledAt != null)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                      child: Row(
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              'Driver matching begins 30 minutes before pickup.',
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: _busy
-                                ? null
-                                : () => setState(() {
-                                    _scheduledAt = null;
-                                    _agreed = false;
-                                  }),
-                            child: const Text('Use now'),
-                          ),
-                        ],
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 2,
+                    crossAxisAlignment: WrapCrossAlignment.end,
+                    children: [
+                      Text(
+                        context.message('₱${AppFormatters.amount(fare)}'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
+                          height: 1.1,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 5),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.lock_outline,
+                              size: 15,
+                              color: AppColors.secondary,
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                context.l10n.fixedFareForThisRoute,
+                                style: const TextStyle(
+                                  color: AppColors.secondary,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    context
+                        .l10n
+                        .noDistanceWaitingOrSurgeAdditionsEntranceFeesAndPurchasesAreSeparate,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: .85),
+                      fontSize: 13,
+                      height: 1.4,
                     ),
+                  ),
                 ],
               ),
             ),
+            const SizedBox(height: 16),
+            _MeetingPointCard(onDirections: _openDirections),
+            const SizedBox(height: 22),
+            Text(
+              context.l10n.chooseYourTourDay,
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              context.l10n.tourHoursNote,
+              style: GoogleFonts.poppins(
+                fontSize: 12.5,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 10),
+            if (_days.isEmpty)
+              Text(context.l10n.noTourDaysAvailable)
+            else
+              SizedBox(
+                height: 78,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    // The calendar first, so it is seen without scrolling.
+                    _DayChip(
+                      icon: Icons.calendar_month_rounded,
+                      label: context.l10n.moreDates,
+                      date: '',
+                      selected: false,
+                      onTap: _busy ? null : _openCalendar,
+                    ),
+                    for (final day in _quickDays) ...[
+                      const SizedBox(width: 8),
+                      _DayChip(
+                        label: _dayLabel(context, day),
+                        date: AppFormatters.monthDayShort(day),
+                        selected: day == _day,
+                        onTap: _busy ? null : () => _pickDay(day),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            if (_day != null) ...[
+              const SizedBox(height: 16),
+              Text(
+                context.l10n.startTime,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final start in _startOptions)
+                    _timeChip(
+                      AppFormatters.time(ServerClock.manila(start)),
+                      selected: start == _scheduledAt,
+                      onTap: () => setState(() {
+                        _scheduledAt = start;
+                        _agreed = false;
+                      }),
+                    ),
+                  _timeChip(
+                    context.l10n.otherTime,
+                    icon: Icons.schedule_rounded,
+                    selected: false,
+                    onTap: _pickCustomTime,
+                  ),
+                ],
+              ),
+              if (_skippedStops.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Text(
+                  context.l10n.stopsSkippedClosedThatDay(
+                    _skippedStops.join(', '),
+                  ),
+                  style: GoogleFonts.poppins(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.warning,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 10),
+              Text(
+                context.l10n.driverMatchingBegins30MinutesBeforePickup,
+                style: GoogleFonts.poppins(
+                  fontSize: 12.5,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+            if (_day == _days.firstOrNull &&
+                _dayLabel(context, _day ?? DateTime(0)) == context.l10n.today &&
+                _onlineDrivers == 0) ...[
+              const SizedBox(height: 12),
+              _NoticeBox(
+                icon: Icons.wifi_tethering_off_rounded,
+                color: AppColors.warning,
+                background: AppColors.warningLight,
+                title: context.l10n.noDriversOnlineRightNow,
+                body: context.l10n.noDriversForTodayBody,
+              ),
+            ],
             const SizedBox(height: 20),
-            const Text(
-              'Included stops',
+            Text(
+              context.l10n.includedStops,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             if (spots.isEmpty)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(16),
-                child: Text('Select at least one destination first.'),
+                child: Text(context.l10n.selectAtLeastOneDestinationFirst),
               ),
             ...spots.asMap().entries.map(
               (entry) => ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: CircleAvatar(child: Text('${entry.key + 1}')),
-                title: Text(entry.value.name),
+                leading: CircleAvatar(
+                  child: Text(context.message('${entry.key + 1}')),
+                ),
+                title: Text(context.message(entry.value.name)),
               ),
             ),
             const Divider(height: 32),
-            const Text(
-              'Passenger requirements',
+            Text(
+              context.l10n.passengerRequirements,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<int>(
               initialValue: _passengerCount,
-              decoration: const InputDecoration(
-                labelText: 'Passengers',
-                helperText:
-                    'Maximum capacity is checked before offering the booking.',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: context.l10n.passengers,
+                helperText: context
+                    .l10n
+                    .maximumCapacityIsCheckedBeforeOfferingTheBooking,
+                helperMaxLines: 2,
               ),
-              items: const [
-                DropdownMenuItem(value: 1, child: Text('1 passenger')),
-                DropdownMenuItem(value: 2, child: Text('2 passengers')),
-                DropdownMenuItem(value: 3, child: Text('3 passengers')),
+              items: [
+                DropdownMenuItem(
+                  value: 1,
+                  child: Text(context.l10n.onePassenger),
+                ),
+                DropdownMenuItem(
+                  value: 2,
+                  child: Text(context.l10n.twoPassengers),
+                ),
+                DropdownMenuItem(
+                  value: 3,
+                  child: Text(context.l10n.threePassengers),
+                ),
               ],
               onChanged: _busy
                   ? null
                   : (value) => setState(() => _passengerCount = value ?? 1),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
+            _NoticeBox(
+              icon: Icons.groups_2_outlined,
+              color: AppColors.primary,
+              background: AppColors.surfaceVariant,
+              title: context.l10n.groupOfFourOrMore,
+              body: context.l10n.groupOfFourOrMoreBody,
+            ),
+            const SizedBox(height: 16),
             TextField(
               controller: _luggageNotes,
               enabled: !_busy,
               maxLength: 300,
               maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Luggage or bulky items',
-                hintText: 'Example: two backpacks and one folding stroller',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: context.l10n.luggageOrBulkyItems,
+                hintText: context.l10n.exampleTwoBackpacksAndOneFoldingStroller,
               ),
+              onTapOutside: (_) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
+              scrollPadding: const EdgeInsets.all(96),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -245,28 +604,43 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
               enabled: !_busy,
               maxLength: 300,
               maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Accessibility or assistance needs',
-                hintText: 'Example: senior passenger needs extra boarding time',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: context.l10n.accessibilityOrAssistanceNeeds,
+                hintText:
+                    context.l10n.exampleSeniorPassengerNeedsExtraBoardingTime,
               ),
+              onTapOutside: (_) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
+              scrollPadding: const EdgeInsets.all(96),
             ),
             const Divider(height: 32),
             SegmentedButton<PaymentMethod>(
+              direction: MediaQuery.sizeOf(context).width < 460
+                  ? Axis.vertical
+                  : Axis.horizontal,
+              style: ButtonStyle(
+                foregroundColor: const WidgetStatePropertyAll(
+                  Color(0xFF1A1A2E),
+                ),
+                // Poppins like the rest of the app; a bare TextStyle fell
+                // back to the platform font.
+                textStyle: WidgetStatePropertyAll(
+                  GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
               segments: [
-                const ButtonSegment(
+                ButtonSegment(
                   value: PaymentMethod.cash,
                   icon: Icon(Icons.payments_outlined),
-                  label: Text('Cash'),
+                  label: Text(context.l10n.cash),
                 ),
                 ButtonSegment(
-                  value: PaymentMethod.online,
-                  icon: const Icon(Icons.account_balance_wallet_outlined),
-                  label: Text(
-                    BackendConfig.isConfigured
-                        ? 'PayMongo'
-                        : 'PayMongo unavailable',
-                  ),
+                  value: PaymentMethod.gcashDirect,
+                  icon: const Icon(Icons.phone_android_outlined),
+                  label: Text(context.l10n.gcashSendToDriver),
                   enabled: BackendConfig.isConfigured,
                 ),
               ],
@@ -278,17 +652,39 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
             ),
             const SizedBox(height: 10),
             Text(
-              _paymentMethod == PaymentMethod.cash
-                  ? 'Pay the final amount after the trip. Tourist and driver must both confirm the cash handover.'
-                  : 'You will be sent to PayMongo test checkout. Payment is confirmed only after the secure webhook reaches Tric-Gabay.',
+              context.message(switch (_paymentMethod) {
+                PaymentMethod.gcashDirect => context.l10n.gcashAfterTrip,
+                _ =>
+                  MessageCode
+                      .payTheFinalAmountAfterTheTripTouristAndDriverMustBothConfirm,
+              }),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'If plans change',
+            Text(
+              context.l10n.ifPlansChange,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(TripRules.policyText),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  context.message(TripRules.policyText),
+                  // Bold keeps it readable on the tinted box (the
+                  // accessibility contrast check failed at regular weight).
+                  style: const TextStyle(
+                    fontSize: 15,
+                    height: 1.4,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: 12),
             CheckboxListTile(
               contentPadding: EdgeInsets.zero,
@@ -296,8 +692,8 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
               onChanged: _busy
                   ? null
                   : (v) => setState(() => _agreed = v ?? false),
-              title: const Text(
-                'I agree to the fixed fare and cancellation/payment policy.',
+              title: Text(
+                context.l10n.iAgreeToTheFixedFareAndCancellationPaymentPolicy,
               ),
               controlAffinity: ListTileControlAffinity.leading,
             ),
@@ -306,62 +702,324 @@ class _FareSummaryScreenState extends State<FareSummaryScreen> {
         bottomNavigationBar: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: FilledButton(
-              onPressed: _busy || !_agreed || spots.isEmpty
-                  ? null
-                  : () async {
-                      setState(() => _busy = true);
-                      try {
-                        PrototypeSession.passengerCount = _passengerCount;
-                        PrototypeSession.luggageNotes = _luggageNotes.text
-                            .trim();
-                        PrototypeSession.accessibilityNeeds =
-                            _accessibilityNeeds.text.trim();
-                        PrototypeSession.scheduledAt = _scheduledAt;
-                        final booking = await PrototypeSession.createBooking(
-                          paymentMethod: _paymentMethod,
-                          expectedFareRevision: revision,
-                        );
-                        if (_paymentMethod == PaymentMethod.online) {
-                          final checkoutUrl =
-                              await BackendRepository.createCheckout(
-                                booking.id,
-                              );
-                          final opened = await launchUrl(
-                            Uri.parse(checkoutUrl),
-                            mode: LaunchMode.externalApplication,
-                          );
-                          if (!opened) {
-                            throw StateError(
-                              'Could not open the secure PayMongo checkout.',
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // The agreement box is at the end of a long page; say why
+                // the button is disabled instead of leaving it grey.
+                if (!_agreed && !_busy) ...[
+                  Text(
+                    context.l10n.tickTheAgreementToBook,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                FilledButton(
+                  onPressed:
+                      _busy || !_agreed || spots.isEmpty || _scheduledAt == null
+                      ? null
+                      : () async {
+                          setState(() => _busy = true);
+                          try {
+                            AppSession.draft.passengerCount = _passengerCount;
+                            AppSession.draft.luggageNotes = _luggageNotes.text
+                                .trim();
+                            AppSession.draft.accessibilityNeeds =
+                                _accessibilityNeeds.text.trim();
+                            AppSession.draft.scheduledAt = _scheduledAt;
+                            await AppSession.createBooking(
+                              paymentMethod: _paymentMethod,
+                              expectedFareRevision: revision,
                             );
+                            if (context.mounted) {
+                              context.pushReplacement(
+                                '/tourist/booking-confirmation',
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              setState(() => _agreed = false);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    context.message(ErrorMessages.forError(e)),
+                                  ),
+                                ),
+                              );
+                            }
+                          } finally {
+                            if (mounted) setState(() => _busy = false);
                           }
-                        }
-                        if (context.mounted) {
-                          context.pushReplacement(
-                            '/tourist/booking-confirmation',
-                          );
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          setState(() => _agreed = false);
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(SnackBar(content: Text('$e')));
-                        }
-                      } finally {
-                        if (mounted) setState(() => _busy = false);
-                      }
-                    },
-              child: Text(
-                _busy
-                    ? 'Saving booking…'
-                    : 'Book for ₱${fare.toStringAsFixed(2)}',
-              ),
+                        },
+                  child: Text(
+                    context.message(
+                      _busy
+                          ? MessageCode.savingBooking
+                          : MessageCode.bookForValue(
+                              (AppFormatters.amount(fare)).toString(),
+                            ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
       );
     },
+  );
+}
+
+/// A tinted note with an icon, a short title and an explanation.
+class _NoticeBox extends StatelessWidget {
+  const _NoticeBox({
+    required this.icon,
+    required this.color,
+    required this.background,
+    required this.title,
+    required this.body,
+  });
+
+  final IconData icon;
+  final Color color, background;
+  final String title, body;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+    decoration: BoxDecoration(
+      color: background,
+      borderRadius: BorderRadius.circular(14),
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: color, size: 22),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                body,
+                style: const TextStyle(
+                  fontSize: 13,
+                  height: 1.4,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Where every tour starts and ends: the Bustos tourism office.
+class _MeetingPointCard extends StatelessWidget {
+  const _MeetingPointCard({required this.onDirections});
+  final VoidCallback onDirections;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: AppColors.border),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: .1),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.account_balance_rounded,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.l10n.meetingPoint,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  Text(
+                    context.l10n.bustosTourismOffice,
+                    style: GoogleFonts.poppins(
+                      fontSize: 15.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    context.l10n.bustosTourismOfficeAddress,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12.5,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.loop_rounded,
+                size: 20,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  context.l10n.meetingPointExplainer,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12.5,
+                    height: 1.4,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          alignment: WrapAlignment.end,
+          spacing: 4,
+          children: [
+            TextButton.icon(
+              onPressed: () =>
+                  launchUrl(Uri(scheme: 'tel', path: TourSchedule.officePhone)),
+              icon: const Icon(Icons.call_outlined),
+              label: Text(context.l10n.callOffice),
+            ),
+            TextButton.icon(
+              onPressed: () => launchUrl(
+                Uri(scheme: 'mailto', path: TourSchedule.officeEmail),
+              ),
+              icon: const Icon(Icons.mail_outline_rounded),
+              label: Text(context.l10n.emailOffice),
+            ),
+            TextButton.icon(
+              onPressed: onDirections,
+              icon: const Icon(Icons.directions_rounded),
+              label: Text(context.l10n.getDirections),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+/// One day in the tour-day picker: "Today" / "Tomorrow" / weekday + date.
+class _DayChip extends StatelessWidget {
+  const _DayChip({
+    required this.label,
+    required this.date,
+    required this.selected,
+    required this.onTap,
+    this.icon,
+  });
+
+  final String label, date;
+  final bool selected;
+  final VoidCallback? onTap;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    selected: selected,
+    button: true,
+    child: Material(
+      color: selected ? AppColors.primary : AppColors.surface,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 72),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: selected ? AppColors.primary : AppColors.border,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (icon != null)
+                Icon(icon, size: 18, color: AppColors.primary)
+              else
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: selected ? Colors.white : AppColors.textPrimary,
+                  ),
+                ),
+              if (icon != null)
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                  ),
+                ),
+              if (icon == null)
+                Text(
+                  date,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: selected
+                        ? Colors.white.withValues(alpha: .9)
+                        : AppColors.textSecondary,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    ),
   );
 }

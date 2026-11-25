@@ -1,67 +1,89 @@
 import 'package:intl/intl.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/app_localizations_en.dart';
+import '../../l10n/app_localizations_fil.dart';
 
 class AppFormatters {
   AppFormatters._();
+  static String resolvedLocale(String? locale) =>
+      {
+        'fil',
+        'tl',
+      }.contains((locale ?? Intl.defaultLocale ?? 'en').split('_').first)
+      ? 'fil_PH'
+      : 'en_PH';
+  static AppLocalizations _labels(String? locale) =>
+      resolvedLocale(locale).startsWith('fil')
+      ? AppLocalizationsFil()
+      : AppLocalizationsEn();
+  static String currency(num amount, {String? locale}) => NumberFormat.currency(
+    locale: resolvedLocale(locale),
+    name: 'PHP',
+    symbol: '₱',
+    decimalDigits: 2,
+  ).format(amount);
+  static String amount(num amount, {String? locale}) =>
+      NumberFormat('#,##0.00', resolvedLocale(locale)).format(amount);
 
-  static String currency(double amount) {
-    return '₱${NumberFormat('#,##0.00').format(amount)}';
+  /// Editable decimal/CSV protocol values must not gain grouping or a symbol.
+  static String decimalInput(num amount) =>
+      NumberFormat('0.00', 'en_PH').format(amount);
+  static String currencyShort(num amount, {String? locale}) =>
+      NumberFormat.currency(
+        locale: resolvedLocale(locale),
+        name: 'PHP',
+        symbol: '₱',
+        decimalDigits: 0,
+      ).format(amount);
+
+  /// Distances: one decimal place, no unit (the message adds "km").
+  static String distanceKm(num km, {String? locale}) =>
+      NumberFormat('#,##0.0', resolvedLocale(locale)).format(km);
+  static String integer(num value, {String? locale}) =>
+      NumberFormat('#,##0', resolvedLocale(locale)).format(value);
+  static String monthShort(DateTime value, {String? locale}) =>
+      DateFormat.MMM(resolvedLocale(locale)).format(value);
+  static String weekdayShort(DateTime value, {String? locale}) =>
+      DateFormat.E(resolvedLocale(locale)).format(value);
+  static String monthDayShort(DateTime value, {String? locale}) =>
+      DateFormat.MMMd(resolvedLocale(locale)).format(value);
+  static String monthDay(DateTime value, {String? locale}) =>
+      DateFormat.Md(resolvedLocale(locale)).format(value);
+  static String date(DateTime value, {String? locale}) =>
+      DateFormat.yMMMMd(resolvedLocale(locale)).format(value);
+  static String dateShort(DateTime value, {String? locale}) =>
+      DateFormat.yMMMd(resolvedLocale(locale)).format(value);
+  static String weekdayDate(DateTime value, {String? locale}) =>
+      DateFormat.MMMMEEEEd(resolvedLocale(locale)).format(value);
+  static String time(DateTime value, {String? locale}) =>
+      DateFormat.jm(resolvedLocale(locale)).format(value);
+  static String dateTime(DateTime value, {String? locale}) =>
+      DateFormat.yMMMd(resolvedLocale(locale)).add_jm().format(value);
+  static String philippineDateTime(DateTime instant, {String? locale}) =>
+      _labels(locale).philippineDateTime(
+        dateTime(instant.toUtc().add(const Duration(hours: 8)), locale: locale),
+        _labels(locale).philippineTime,
+      );
+  static String distance(num metres, {String? locale}) => metres < 1000
+      ? '${NumberFormat('0', resolvedLocale(locale)).format(metres)} m'
+      : '${NumberFormat('0.0', resolvedLocale(locale)).format(metres / 1000)} km';
+  static String duration(int minutes, {String? locale}) {
+    final l = _labels(locale), hours = minutes ~/ 60, remainder = minutes % 60;
+    if (hours == 0) return l.minutesDuration(minutes);
+    return remainder == 0
+        ? l.hoursDuration(hours)
+        : l.hoursMinutesDuration(hours, remainder);
   }
 
-  static String currencyShort(double amount) {
-    return '₱${NumberFormat('#,##0').format(amount)}';
-  }
-
-  static String date(DateTime date) {
-    return DateFormat('MMMM d, yyyy').format(date);
-  }
-
-  static String dateShort(DateTime date) {
-    return DateFormat('MMM d, yyyy').format(date);
-  }
-
-  static String time(DateTime time) {
-    return DateFormat('h:mm a').format(time);
-  }
-
-  static String dateTime(DateTime dateTime) {
-    return DateFormat('MMM d, yyyy • h:mm a').format(dateTime);
-  }
-
-  static String distance(double meters) {
-    if (meters < 1000) {
-      return '${meters.round()} m';
-    }
-    return '${(meters / 1000).toStringAsFixed(1)} km';
-  }
-
-  static String duration(int minutes) {
-    if (minutes < 60) return '$minutes min';
-    final hours = minutes ~/ 60;
-    final mins = minutes % 60;
-    return mins == 0 ? '${hours}h' : '${hours}h ${mins}m';
-  }
-
-  static String phoneDisplay(String phone) {
-    if (phone.length != 11) return phone;
-    return '${phone.substring(0, 4)} ${phone.substring(4, 7)} ${phone.substring(7)}';
-  }
-
-  static String bookingId(String id) {
-    return '#${id.substring(0, 8).toUpperCase()}';
-  }
-
+  static String bookingId(String id) =>
+      '#${id.substring(0, id.length < 8 ? id.length : 8).toUpperCase()}';
   static String initials(String name) {
-    final parts = name.trim().split(' ');
-    if (parts.isEmpty) return '?';
-    if (parts.length == 1) return parts[0][0].toUpperCase();
-    return '${parts[0][0]}${parts.last[0]}'.toUpperCase();
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (name.trim().isEmpty) return '?';
+    return '${parts.first[0]}${parts.length > 1 ? parts.last[0] : ''}'
+        .toUpperCase();
   }
 
-  static String rating(double rating) {
-    return rating.toStringAsFixed(1);
-  }
-
-  static String tripCount(int count) {
-    return '$count ${count == 1 ? 'trip' : 'trips'}';
-  }
+  static String rating(num value, {String? locale}) =>
+      NumberFormat('0.0', resolvedLocale(locale)).format(value);
 }

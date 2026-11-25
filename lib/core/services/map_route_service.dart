@@ -1,3 +1,6 @@
+import 'package:tricgabay_app/core/l10n/message_codes.g.dart';
+import 'dart:async';
+import 'error_messages.dart';
 import 'package:dio/dio.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' hide Response;
 
@@ -21,19 +24,34 @@ class MapRoutePlan {
   int get etaMinutes => (durationSeconds / 60).ceil().clamp(1, 999);
 
   String get distanceLabel => distanceMeters < 1000
-      ? '${distanceMeters.round()} m'
-      : '${(distanceMeters / 1000).toStringAsFixed(1)} km';
+      ? MessageCode.distanceMeters(distanceMeters.round().toString())
+      : MessageCode.distanceKilometers(
+          (distanceMeters / 1000).toStringAsFixed(1),
+        );
 }
 
 class MapRouteService {
   MapRouteService._();
 
-  static final Dio _dio = Dio(
+  static final _cache = <String, ({DateTime at, MapRoutePlan plan})>{};
+  static final _inFlight = <String, Future<MapRoutePlan>>{};
+  static Duration _routeDeadline = const Duration(seconds: 10);
+  static Dio _dio = Dio(
     BaseOptions(
       connectTimeout: const Duration(seconds: 8),
       receiveTimeout: const Duration(seconds: 8),
     ),
   );
+
+  static void configureForTesting(
+    Dio client, {
+    Duration deadline = const Duration(seconds: 10),
+  }) {
+    _dio = client;
+    _routeDeadline = deadline;
+    _cache.clear();
+    _inFlight.clear();
+  }
 
   /// Returns a road route that prefers local roads suitable for a tricycle.
   ///
@@ -43,57 +61,107 @@ class MapRouteService {
   static Future<MapRoutePlan> tricyclePreferred(
     List<Position> waypoints,
   ) async {
-    if (waypoints.length < 2) {
-      throw ArgumentError('At least two route points are required.');
+    if (waypoints.length < 2 || waypoints.length > 25) {
+      throw ArgumentError(
+        MessageCode.directionsRequireBetween2And25Coordinates,
+      );
     }
     final coordinates = waypoints
         .map((point) => '${point.lng},${point.lat}')
         .join(';');
-    Response<Map<String, dynamic>>? response;
-    Object? lastError;
-    for (var attempt = 0; attempt < 2; attempt++) {
-      try {
-        response = await _dio.get<Map<String, dynamic>>(
-          'https://api.mapbox.com/directions/v5/mapbox/driving-traffic/$coordinates',
-          queryParameters: {
-            'access_token': MapboxConfig.publicToken,
-            'geometries': 'geojson',
-            'overview': 'full',
-            'steps': 'true',
-            'language': 'en',
-            if (waypoints.length == 2) 'alternatives': 'true',
-            'exclude': 'motorway,toll',
-          },
-        );
-        break;
-      } catch (error) {
-        lastError = error;
-        if (attempt == 0) {
-          await Future<void>.delayed(const Duration(milliseconds: 700));
-        }
+    final cached = _cache[coordinates];
+    if (cached != null &&
+        DateTime.now().difference(cached.at) < const Duration(minutes: 5)) {
+      return cached.plan;
+    }
+    final existing = _inFlight[coordinates];
+    if (existing != null) return existing;
+    final request = _fetchRoute(
+      coordinates,
+      alternatives: waypoints.length == 2,
+    );
+    _inFlight[coordinates] = request;
+    try {
+      return await request;
+    } finally {
+      if (identical(_inFlight[coordinates], request)) {
+        _inFlight.remove(coordinates);
       }
     }
-    if (response == null) throw StateError('Route unavailable: $lastError');
-    final routes = response.data?['routes'] as List<dynamic>?;
-    if (routes == null || routes.isEmpty) {
-      throw StateError('No local-road route was returned.');
-    }
-
-    final plans =
-        routes
-            .map((raw) => _parseRoute(Map<String, dynamic>.from(raw as Map)))
-            .toList()
-          ..sort((a, b) {
-            if (a.restrictionViolation != b.restrictionViolation) {
-              return a.restrictionViolation ? 1 : -1;
-            }
-            return a.durationSeconds.compareTo(b.durationSeconds);
-          });
-    return plans.first;
   }
 
-  static MapRoutePlan _parseRoute(Map<String, dynamic> route) {
-    final geometry = Map<String, dynamic>.from(route['geometry'] as Map);
+  static Future<MapRoutePlan> _fetchRoute(
+    String coordinates, {
+    required bool alternatives,
+  }) async {
+    final budget = Stopwatch()..start();
+    final deadline = _routeDeadline;
+    Response<Map<String, dynamic>>? response;
+    for (var attempt = 0; attempt < 2; attempt++) {
+      final remaining = deadline - budget.elapsed;
+      if (remaining <= Duration.zero) break;
+      final token = CancelToken();
+      try {
+        response = await _dio
+            .get<Map<String, dynamic>>(
+              'https://api.mapbox.com/directions/v5/mapbox/driving-traffic/$coordinates',
+              queryParameters: {
+                'access_token': MapboxConfig.publicToken,
+                'geometries': 'geojson',
+                'overview': 'full',
+                'steps': 'true',
+                'language': 'en',
+                if (alternatives) 'alternatives': 'true',
+                'exclude': 'motorway,toll',
+              },
+              cancelToken: token,
+            )
+            .timeout(
+              remaining,
+              onTimeout: () {
+                token.cancel();
+                throw TimeoutException(null, deadline);
+              },
+            );
+        break;
+      } catch (error) {
+        ErrorMessages.forError(error);
+        final status = error is DioException
+            ? error.response?.statusCode
+            : null;
+        if (status != null && status < 500) break;
+        const backoff = Duration(milliseconds: 350);
+        if (attempt != 0 || budget.elapsed + backoff >= deadline) break;
+        await Future<void>.delayed(backoff);
+      }
+    }
+    if (response == null) {
+      throw const ClientOperationException(ClientFailure.routeUnavailable);
+    }
+    final routes = response.data?['routes'] as List<dynamic>?;
+    if (routes == null || routes.isEmpty) {
+      throw StateError(MessageCode.noLocalRoadRouteWasReturned);
+    }
+
+    final candidates = routes.map((raw) => _parseRoute(raw as Map)).iterator;
+    candidates.moveNext();
+    var best = candidates.current;
+    while (candidates.moveNext()) {
+      final candidate = candidates.current;
+      final preferred =
+          candidate.restrictionViolation != best.restrictionViolation
+          ? !candidate.restrictionViolation
+          : candidate.durationSeconds.compareTo(best.durationSeconds) < 0;
+      if (preferred) best = candidate;
+    }
+    _cache.remove(coordinates);
+    if (_cache.length >= 32) _cache.remove(_cache.keys.first);
+    _cache[coordinates] = (at: DateTime.now(), plan: best);
+    return best;
+  }
+
+  static MapRoutePlan _parseRoute(Map<dynamic, dynamic> route) {
+    final geometry = route['geometry'] as Map;
     final rawCoordinates = geometry['coordinates'] as List<dynamic>;
     final legs = (route['legs'] as List<dynamic>? ?? const []);
     final notices = <dynamic>[

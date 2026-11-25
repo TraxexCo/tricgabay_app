@@ -1,10 +1,12 @@
+import '../../../models/place_photos.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/widgets/shared_widgets.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 
 class PhotoGalleryScreen extends StatefulWidget {
   final String spotId;
@@ -27,14 +29,14 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final spot = PrototypeSession.allSpots.value
+    final spot = AppSession.allSpots.value
         .where((s) => s.id == widget.spotId && s.isActive)
         .firstOrNull;
     if (spot == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Photos')),
-        body: const Center(
-          child: Text('This attraction is no longer available.'),
+        appBar: AppBar(title: Text(context.l10n.photos)),
+        body: Center(
+          child: Text(context.l10n.thisAttractionIsNoLongerAvailable),
         ),
       );
     }
@@ -47,103 +49,135 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
           backgroundColor: Colors.transparent,
           iconTheme: const IconThemeData(color: Colors.white),
         ),
-        body: const EmptyStateWidget(
+        body: EmptyStateWidget(
           icon: Icons.image_not_supported,
-          title: 'No photos available',
+          title: context.l10n.noPhotosAvailable,
         ),
       );
     }
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: GestureDetector(
-        onTap: () => setState(() => _showUI = !_showUI),
-        child: Stack(
-          children: [
-            PageView.builder(
-              controller: _pageCtrl,
-              itemCount: totalImages,
-              onPageChanged: (index) => setState(() => _currentIndex = index),
-              itemBuilder: (context, index) {
-                return Center(
-                  child: SafeAppImage(
-                    path: spot.imageUrls[index],
-                    width: double.infinity,
-                    height: double.infinity,
-                    fit: BoxFit.contain,
-                  ),
-                );
-              },
-            ),
-            if (_showUI)
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).padding.top,
-                    left: 8,
-                    right: 8,
-                    bottom: 8,
-                  ),
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.black87, Colors.transparent],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
+      body: Semantics(
+        button: true,
+        label: context.l10n.togglePhotoControls,
+        child: GestureDetector(
+          onTap: () => setState(() => _showUI = !_showUI),
+          child: Stack(
+            children: [
+              PageView.builder(
+                controller: _pageCtrl,
+                itemCount: totalImages,
+                onPageChanged: (index) => setState(() => _currentIndex = index),
+                itemBuilder: (context, index) {
+                  return Center(
+                    child: SafeAppImage(
+                      path: spot.imageUrls[index],
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.contain,
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white),
-                        onPressed: () => context.pop(),
+                  );
+                },
+              ),
+              if (_showUI)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).padding.top,
+                      left: 8,
+                      right: 8,
+                      bottom: 8,
+                    ),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.black87, Colors.transparent],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
                       ),
-                      const Spacer(),
-                      Text(
-                        '${_currentIndex + 1} / $totalImages',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 16,
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          tooltip: context.l10n.close,
+                          icon: const Icon(Icons.close, color: Colors.white),
+                          onPressed: () => context.pop(),
                         ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.share, color: Colors.white),
-                        onPressed: () {
-                          SharePlus.instance.share(
-                            ShareParams(
-                              text:
-                                  'Check out ${spot.name} in Bustos, Bulacan! 🏝️',
-                              subject: spot.name,
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            if (_showUI)
-              Positioned(
-                bottom: 40,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: SmoothPageIndicator(
-                    controller: _pageCtrl,
-                    count: totalImages,
-                    effect: const WormEffect(
-                      dotHeight: 8,
-                      dotWidth: 8,
-                      activeDotColor: Colors.white,
-                      dotColor: Colors.white30,
+                        const Spacer(),
+                        Text(
+                          context.message(
+                            '${_currentIndex + 1} / $totalImages',
+                          ),
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          tooltip: context.l10n.share,
+                          icon: const Icon(Icons.share, color: Colors.white),
+                          onPressed: () {
+                            SharePlus.instance.share(
+                              ShareParams(
+                                text: context.l10n.checkOutInBustosBulacanValue(
+                                  context.message((spot.name).toString()),
+                                ),
+                                subject: spot.name,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ),
-          ],
+              if (_showUI &&
+                  PlacePhotos.creditFor(spot.imageUrls[_currentIndex]) != null)
+                Positioned(
+                  bottom: 64,
+                  left: 16,
+                  right: 16,
+                  child: Text(
+                    context.l10n.photoCreditValue(
+                      PlacePhotos.creditFor(
+                        spot.imageUrls[_currentIndex],
+                      )!.author,
+                      PlacePhotos.creditFor(
+                        spot.imageUrls[_currentIndex],
+                      )!.licence,
+                    ),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 12,
+                      shadows: const [Shadow(blurRadius: 6)],
+                    ),
+                  ),
+                ),
+              if (_showUI)
+                Positioned(
+                  bottom: 40,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: SmoothPageIndicator(
+                      controller: _pageCtrl,
+                      count: totalImages,
+                      effect: const WormEffect(
+                        dotHeight: 8,
+                        dotWidth: 8,
+                        activeDotColor: Colors.white,
+                        dotColor: Colors.white30,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,3 +1,5 @@
+import 'package:tricgabay_app/core/l10n/message_codes.g.dart';
+
 class CancellationPolicy {
   final int version;
   final int freeCancellationMinutes;
@@ -26,7 +28,9 @@ class CancellationPolicy {
   }) {
     final value = int.tryParse(raw.trim());
     if (value == null || value < minimum || value > maximum) {
-      throw FormatException('$label must be between $minimum and $maximum.');
+      throw FormatException(
+        MessageCode.fieldMustBeBetween(label, minimum, maximum),
+      );
     }
     return value;
   }

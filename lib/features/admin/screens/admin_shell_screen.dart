@@ -1,8 +1,9 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/role_navigation_bar.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 
 class AdminShellScreen extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -14,11 +15,9 @@ class AdminShellScreen extends StatefulWidget {
 
 class _AdminShellScreenState extends State<AdminShellScreen> {
   final List<int> _tabHistory = [0];
-  DateTime? _lastBackPressed;
 
   void _rememberTab(int index) {
     if (_tabHistory.last == index) return;
-    _tabHistory.remove(index);
     _tabHistory.add(index);
   }
 
@@ -29,13 +28,13 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
       3 => 'operations',
       _ => null,
     };
-    if (required != null && !PrototypeSession.hasAdminCapability(required)) {
+    if (required != null && !AppSession.hasAdminCapability(required)) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Your administrator role does not include this area.',
+              context.l10n.yourAdministratorRoleDoesNotIncludeThisArea,
             ),
             behavior: SnackBarBehavior.floating,
           ),
@@ -54,60 +53,49 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
       widget.navigationShell.goBranch(_tabHistory.last);
       return;
     }
-    final now = DateTime.now();
-    if (_lastBackPressed != null &&
-        now.difference(_lastBackPressed!) < const Duration(seconds: 2)) {
-      SystemNavigator.pop();
-      return;
-    }
-    _lastBackPressed = now;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('Press back again to exit'),
-          behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 2),
-        ),
-      );
   }
 
   @override
   Widget build(BuildContext context) {
     _rememberTab(widget.navigationShell.currentIndex);
     return PopScope(
-      canPop: false,
+      canPop:
+          _tabHistory.length == 1 && widget.navigationShell.currentIndex == 0,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) _handleBack();
       },
-      child: Scaffold(
-        body: widget.navigationShell,
-        extendBody: true,
-        bottomNavigationBar: RoleNavigationBar(
-          currentIndex: widget.navigationShell.currentIndex,
-          onSelected: _selectTab,
-          destinations: const [
-            RoleNavigationDestination(
-              icon: Icons.space_dashboard_outlined,
-              selectedIcon: Icons.space_dashboard,
-              label: 'Overview',
-            ),
-            RoleNavigationDestination(
-              icon: Icons.verified_user_outlined,
-              selectedIcon: Icons.verified_user,
-              label: 'Drivers',
-            ),
-            RoleNavigationDestination(
-              icon: Icons.map_outlined,
-              selectedIcon: Icons.map,
-              label: 'Places',
-            ),
-            RoleNavigationDestination(
-              icon: Icons.bar_chart_outlined,
-              selectedIcon: Icons.bar_chart,
-              label: 'Reports',
-            ),
-          ],
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        // Home tabs have light tops; keep the status-bar icons dark.
+        value: SystemUiOverlayStyle.dark,
+        child: Scaffold(
+          body: widget.navigationShell,
+          extendBody: true,
+          bottomNavigationBar: RoleNavigationBar(
+            currentIndex: widget.navigationShell.currentIndex,
+            onSelected: _selectTab,
+            destinations: [
+              RoleNavigationDestination(
+                icon: Icons.space_dashboard_outlined,
+                selectedIcon: Icons.space_dashboard,
+                label: context.l10n.overview,
+              ),
+              RoleNavigationDestination(
+                icon: Icons.verified_user_outlined,
+                selectedIcon: Icons.verified_user,
+                label: context.l10n.drivers,
+              ),
+              RoleNavigationDestination(
+                icon: Icons.map_outlined,
+                selectedIcon: Icons.map,
+                label: context.l10n.places,
+              ),
+              RoleNavigationDestination(
+                icon: Icons.bar_chart_outlined,
+                selectedIcon: Icons.bar_chart,
+                label: context.l10n.reports,
+              ),
+            ],
+          ),
         ),
       ),
     );

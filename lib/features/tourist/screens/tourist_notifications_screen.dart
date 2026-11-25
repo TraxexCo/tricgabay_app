@@ -1,8 +1,9 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/widgets/shared_widgets.dart';
 
 class TouristNotificationsScreen extends StatelessWidget {
@@ -14,7 +15,7 @@ class TouristNotificationsScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          'Notifications',
+          context.l10n.notifications,
           style: GoogleFonts.poppins(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.bold,
@@ -23,20 +24,21 @@ class TouristNotificationsScreen extends StatelessWidget {
         backgroundColor: AppColors.surface,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
         actions: [
-          TextButton(
-            onPressed: () => PrototypeSession.markAllNotificationsRead(),
-            child: const Text('Mark all read'),
+          IconButton(
+            tooltip: context.l10n.markAllRead,
+            onPressed: () => AppSession.markAllNotificationsRead(),
+            icon: const Icon(Icons.done_all),
           ),
         ],
       ),
       body: ValueListenableBuilder<List<NotificationItem>>(
-        valueListenable: PrototypeSession.notifications,
+        valueListenable: AppSession.notifications,
         builder: (context, items, _) {
           if (items.isEmpty) {
-            return const EmptyStateWidget(
+            return EmptyStateWidget(
               icon: Icons.notifications_off_rounded,
-              title: 'No notifications yet',
-              subtitle: 'When you get notifications, they will appear here.',
+              title: context.l10n.noNotificationsYet,
+              subtitle: context.l10n.whenYouGetNotificationsTheyWillAppearHere,
             );
           }
 
@@ -49,9 +51,10 @@ class TouristNotificationsScreen extends StatelessWidget {
 
           return ListView(
             children: [
-              if (today.isNotEmpty) ..._buildSection(context, 'Today', today),
+              if (today.isNotEmpty)
+                ..._buildSection(context, MessageCode.today, today),
               if (earlier.isNotEmpty)
-                ..._buildSection(context, 'Earlier', earlier),
+                ..._buildSection(context, MessageCode.earlier, earlier),
             ],
           );
         },
@@ -68,7 +71,7 @@ class TouristNotificationsScreen extends StatelessWidget {
       Padding(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
         child: Text(
-          title,
+          context.message(title),
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w700,
             fontSize: 13,
@@ -103,7 +106,7 @@ class _NotificationTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        PrototypeSession.markNotificationRead(item.id);
+        AppSession.markNotificationRead(item.id);
         if (item.routePath != null) context.push(item.routePath!);
       },
       child: Container(
@@ -129,7 +132,7 @@ class _NotificationTile extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          item.title,
+                          context.message(item.title),
                           style: GoogleFonts.poppins(
                             fontWeight: item.isRead
                                 ? FontWeight.w500
@@ -151,7 +154,7 @@ class _NotificationTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    item.subtitle,
+                    context.message(item.subtitle),
                     style: GoogleFonts.poppins(
                       color: AppColors.textSecondary,
                       fontSize: 12,
@@ -159,7 +162,7 @@ class _NotificationTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _timeAgo(item.time),
+                    context.message(_timeAgo(item.time)),
                     style: GoogleFonts.poppins(
                       color: AppColors.textSecondary,
                       fontSize: 11,

@@ -1,10 +1,14 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import 'dart:async';
+import '../../../core/widgets/remote_page_controls.dart';
 import 'package:flutter/material.dart';
+import '../../../core/motion/motion_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/empty_state_widget.dart';
@@ -19,9 +23,12 @@ class ManageDriversScreen extends ConsumerStatefulWidget {
 
 class _ManageDriversScreenState extends ConsumerState<ManageDriversScreen> {
   final _search = TextEditingController();
+  Timer? _debounce;
+  String _query = '';
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _search.dispose();
     super.dispose();
   }
@@ -35,7 +42,7 @@ class _ManageDriversScreenState extends ConsumerState<ManageDriversScreen> {
   }
 
   List<Map<String, dynamic>> _matching(List<Map<String, dynamic>> drivers) {
-    final query = _search.text.trim().toLowerCase();
+    final query = _query;
     if (query.isEmpty) return drivers;
     return drivers.where((driver) {
       return [
@@ -52,14 +59,15 @@ class _ManageDriversScreenState extends ConsumerState<ManageDriversScreen> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        bottomNavigationBar: const RemotePageControls(directory: true),
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          title: const Text('Driver compliance'),
-          bottom: const TabBar(
+          title: Text(context.l10n.driverCompliance),
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Review'),
-              Tab(text: 'Active'),
-              Tab(text: 'Blocked'),
+              Tab(text: context.l10n.review),
+              Tab(text: context.l10n.active),
+              Tab(text: context.l10n.blocked),
             ],
           ),
         ),
@@ -69,15 +77,22 @@ class _ManageDriversScreenState extends ConsumerState<ManageDriversScreen> {
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
               child: AppTextField(
                 controller: _search,
-                label: 'Search drivers',
-                hint: 'Name, plate, franchise, or service area',
+                label: context.l10n.searchDrivers,
+                hint: context.l10n.namePlateFranchiseOrServiceArea,
                 prefixIcon: Icons.search,
-                onChanged: (_) => setState(() {}),
+                onChanged: (value) {
+                  _debounce?.cancel();
+                  final query = value.trim().toLowerCase();
+                  if (query == _query) return;
+                  _debounce = Timer(const Duration(milliseconds: 250), () {
+                    if (mounted) setState(() => _query = query);
+                  });
+                },
               ),
             ),
             Expanded(
               child: ValueListenableBuilder<List<Map<String, dynamic>>>(
-                valueListenable: PrototypeSession.adminDrivers,
+                valueListenable: AppSession.adminDrivers,
                 builder: (context, allDrivers, _) {
                   final drivers = _matching(allDrivers);
                   final review = drivers
@@ -95,9 +110,9 @@ class _ManageDriversScreenState extends ConsumerState<ManageDriversScreen> {
                   final blocked = drivers.where(_isBlocked).toList();
                   return TabBarView(
                     children: [
-                      _list(review, 'No drivers awaiting review'),
-                      _list(active, 'No eligible active drivers'),
-                      _list(blocked, 'No blocked drivers'),
+                      _list(review, MessageCode.noDriversAwaitingReview),
+                      _list(active, MessageCode.noEligibleActiveDrivers),
+                      _list(blocked, MessageCode.noBlockedDrivers),
                     ],
                   );
                 },
@@ -114,70 +129,95 @@ class _ManageDriversScreenState extends ConsumerState<ManageDriversScreen> {
       return EmptyStateWidget(
         icon: Icons.badge_outlined,
         title: emptyTitle,
-        subtitle: 'Driver compliance records will appear here.',
+        subtitle: context.l10n.driverComplianceRecordsWillAppearHere,
       );
     }
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 104),
       itemCount: drivers.length,
-      itemBuilder: (context, index) {
-        final driver = drivers[index];
-        final reliability =
-            (driver['reliabilityScore'] as num?)?.toDouble() ?? 100;
-        final blocked = _isBlocked(driver);
-        return AppCard(
-          margin: const EdgeInsets.only(bottom: 12),
-          onTap: () => context.push('/admin/drivers/${driver['id']}'),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor:
-                      (blocked ? AppColors.danger : AppColors.primary)
-                          .withValues(alpha: .10),
-                  child: Text(
-                    driver['name'].toString().isEmpty
-                        ? '?'
-                        : driver['name'].toString()[0],
-                    style: TextStyle(
-                      color: blocked ? AppColors.danger : AppColors.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${driver['name']}',
-                        style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
-                      ),
-                      Text(
-                        '${driver['plate'] ?? ''} • ${driver['serviceAreaName'] ?? 'Area unverified'}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 12,
+      itemBuilder: (context, index) => FadeSlideIn.staggered(
+        index: index,
+        child: Builder(
+          builder: (context) {
+            final driver = drivers[index];
+            final reliability =
+                (driver['reliabilityScore'] as num?)?.toDouble() ?? 100;
+            final blocked = _isBlocked(driver);
+            return AppCard(
+              margin: const EdgeInsets.only(bottom: 12),
+              onTap: () => context.push('/admin/drivers/${driver['id']}'),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor:
+                          (blocked ? AppColors.danger : AppColors.primary)
+                              .withValues(alpha: .10),
+                      child: Text(
+                        context.message(
+                          driver['name'].toString().isEmpty
+                              ? '?'
+                              : driver['name'].toString()[0],
+                        ),
+                        style: TextStyle(
+                          color: blocked ? AppColors.danger : AppColors.primary,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${reliability.toStringAsFixed(0)}% reliability • ${driver['passengerCapacity'] ?? 3} seats',
-                        style: const TextStyle(fontSize: 11),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.message('${driver['name']}'),
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          Text(
+                            context.l10n.twoPartDetails(
+                              context.message(
+                                (driver['plate'] ?? '').toString(),
+                              ),
+                              context.message(
+                                (driver['serviceAreaName'] ??
+                                        MessageCode.areaUnverified)
+                                    .toString(),
+                              ),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            context.l10n.reliabilitySeatsValue(
+                              context.message(
+                                (reliability.toStringAsFixed(0)).toString(),
+                              ),
+                              context.message(
+                                (driver['passengerCapacity'] ?? 3).toString(),
+                              ),
+                            ),
+                            style: const TextStyle(fontSize: 11),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    const Icon(Icons.chevron_right_rounded),
+                  ],
                 ),
-                const Icon(Icons.chevron_right_rounded),
-              ],
-            ),
-          ),
-        );
-      },
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

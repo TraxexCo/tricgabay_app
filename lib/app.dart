@@ -1,8 +1,14 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import 'core/widgets/shared_widgets.dart';
+import 'core/widgets/data_rights_screen.dart';
+import 'features/admin/screens/data_requests_admin_screen.dart';
+import 'features/admin/screens/emergency_contacts_admin_screen.dart';
+import 'features/driver/screens/driver_application_pending_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'core/constants/app_routes.dart';
-import 'core/prototype/prototype_session.dart';
+import 'core/session/app_session.dart';
 import 'models/trip_record.dart';
 
 // Auth screens
@@ -23,7 +29,6 @@ import 'features/tourist/screens/tourist_bookings_screen.dart';
 import 'features/tourist/screens/tourist_profile_screen.dart';
 import 'features/tourist/screens/tourist_spot_info_screen.dart';
 import 'features/tourist/screens/photo_gallery_screen.dart';
-import 'features/tourist/screens/itinerary_builder_screen.dart';
 import 'features/tourist/screens/fare_summary_screen.dart';
 import 'features/tourist/screens/booking_confirmation_screen.dart';
 import 'features/tourist/screens/find_driver_screen.dart';
@@ -37,7 +42,6 @@ import 'features/tourist/screens/emergency_screen.dart';
 import 'features/tourist/screens/feedback_screen.dart';
 import 'features/tourist/screens/tour_packages_screen.dart';
 import 'features/tourist/screens/tour_package_detail_screen.dart';
-import 'features/tourist/screens/location_picker_screen.dart';
 
 // Driver screens
 import 'features/driver/screens/driver_shell_screen.dart';
@@ -53,7 +57,9 @@ import 'features/driver/screens/driver_emergency_screen.dart';
 
 // Admin screens
 import 'features/admin/screens/admin_shell_screen.dart';
-import 'features/admin/screens/admin_login_screen.dart';
+import 'models/tourist_spot_model.dart';
+import 'features/admin/screens/manage_packages_screen.dart';
+import 'features/admin/screens/package_form_screen.dart';
 import 'features/admin/screens/admin_dashboard_screen.dart';
 import 'features/admin/screens/manage_drivers_screen.dart';
 import 'features/admin/screens/driver_detail_admin_screen.dart';
@@ -66,6 +72,7 @@ import 'features/admin/screens/ratings_feedback_screen.dart';
 import 'features/admin/screens/send_announcement_screen.dart';
 import 'features/admin/screens/admin_reports_screen.dart';
 import 'features/admin/screens/admin_live_map_screen.dart';
+import 'features/admin/screens/gcash_disputes_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _touristNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'tourist');
@@ -76,10 +83,51 @@ final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: AppRoutes.splash,
   debugLogDiagnostics: kDebugMode,
-  refreshListenable: PrototypeSession.authRevision,
+  refreshListenable: AppSession.authRevision,
+  // An old or broken link gets a plain explanation, never a raw router error.
+  errorBuilder: (context, state) => Scaffold(
+    appBar: AppBar(),
+    body: EmptyStateWidget(
+      icon: Icons.link_off_rounded,
+      title: context.l10n.pageNotFoundTitle,
+      subtitle: context.l10n.pageNotFoundBody,
+      actionLabel: context.l10n.goToStart,
+      onAction: () => context.go(AppRoutes.splash),
+    ),
+  ),
   redirect: (context, state) {
     final path = state.uri.path;
-    final role = PrototypeSession.authenticatedRole;
+    final role = AppSession.authenticatedRole;
+    // Authentication may finish while a root consent/version overlay is shown.
+    // Route from session state rather than relying on a login widget's lifetime.
+    if (role != null &&
+        (path == AppRoutes.login || path == AppRoutes.adminLogin)) {
+      return switch (role) {
+        'tourist' => '/tourist/home',
+        'driver' => '/driver/home',
+        'driver_pending' => '/driver/application-pending',
+        'admin' => AppRoutes.adminDashboard,
+        _ => null,
+      };
+    }
+    if (role == 'driver_pending' &&
+        !const {
+          '/driver/application-pending',
+          '/driver/data-rights',
+        }.contains(path) &&
+        path != AppRoutes.resetPassword) {
+      return '/driver/application-pending';
+    }
+    if (role == 'driver_pending' &&
+        const {
+          '/driver/application-pending',
+          '/driver/data-rights',
+        }.contains(path)) {
+      return null;
+    }
+    if (role == 'driver' && path == '/driver/application-pending') {
+      return '/driver/home';
+    }
     final protectedRole = path.startsWith('/tourist/')
         ? 'tourist'
         : path.startsWith('/driver/')
@@ -89,46 +137,65 @@ final appRouter = GoRouter(
         : null;
     if (protectedRole == null || role == protectedRole) {
       if (role == 'admin') {
-        final requiredCapability = switch (path) {
-          final value when value.startsWith('/admin/drivers') =>
+        final requiredCapabilities = switch (path) {
+          final value when value.startsWith('/admin/drivers') => [
             'driver_compliance',
-          final value when value.startsWith('/admin/spots') => 'content',
-          final value when value.startsWith('/admin/fare-settings') =>
+          ],
+          final value
+              when value.startsWith('/admin/spots') ||
+                  value.startsWith('/admin/packages') =>
+            ['content'],
+          final value when value.startsWith('/admin/fare-settings') => [
             'finance',
+          ],
           final value
               when value.startsWith('/admin/tourists') ||
                   value.startsWith('/admin/announcements') ||
-                  value.startsWith('/admin/ratings') =>
-            'support',
+                  value.startsWith('/admin/ratings') ||
+                  value.startsWith('/admin/data-requests') =>
+            ['support'],
+          final value when value.startsWith('/admin/booking') => [
+            'operations',
+            'finance',
+          ],
+          final value when value.startsWith('/admin/gcash-disputes') => [
+            'operations',
+            'finance',
+          ],
           final value
-              when value.startsWith('/admin/booking') ||
+              when value.startsWith('/admin/emergency-contacts') ||
                   value.startsWith('/admin/live-map') ||
                   value.startsWith('/admin/reports') =>
-            'operations',
+            ['operations'],
           _ => null,
         };
-        if (requiredCapability != null &&
-            !PrototypeSession.hasAdminCapability(requiredCapability)) {
+        if (requiredCapabilities != null &&
+            !requiredCapabilities.any(AppSession.hasAdminCapability)) {
           return AppRoutes.adminDashboard;
         }
       }
       return null;
     }
-    return protectedRole == 'admin' ? AppRoutes.adminLogin : AppRoutes.login;
+    return AppRoutes.login;
   },
   routes: [
+    GoRoute(
+      path: '/driver/application-pending',
+      builder: (context, state) => const DriverApplicationPendingScreen(),
+    ),
     // ─── Auth ───────────────────────────────────────────────
     GoRoute(
       path: AppRoutes.splash,
-      builder: (context, state) => const SplashScreen(),
+      pageBuilder: (context, state) => _launchFade(state, const SplashScreen()),
     ),
     GoRoute(
       path: AppRoutes.onboarding,
-      builder: (context, state) => const OnboardingScreen(),
+      pageBuilder: (context, state) =>
+          _launchFade(state, const OnboardingScreen()),
     ),
     GoRoute(
       path: AppRoutes.login,
-      builder: (context, state) => const LoginScreen(),
+      pageBuilder: (context, state) => _launchFade(state, const LoginScreen()),
     ),
     GoRoute(
       path: AppRoutes.registerRole,
@@ -194,8 +261,10 @@ final appRouter = GoRouter(
 
     // ─── Tourist Full-Screen Routes ──────────────────────────
     GoRoute(
-      path: '/tourist/location-picker',
-      builder: (context, state) => const LocationPickerScreen(),
+      path: AppRoutes.touristBookingHistory,
+      builder: (context, state) => const TouristBookingsScreen(
+        initialTab: TouristBookingsScreen.pastTab,
+      ),
     ),
     GoRoute(
       path: '/tourist/spot/:spotId',
@@ -207,9 +276,10 @@ final appRouter = GoRouter(
       builder: (context, state) =>
           PhotoGalleryScreen(spotId: state.pathParameters['spotId']!),
     ),
+    // Custom tours were removed; old links open the package list.
     GoRoute(
       path: AppRoutes.itineraryBuilder,
-      builder: (context, state) => const ItineraryBuilderScreen(),
+      redirect: (context, state) => AppRoutes.tourPackages,
     ),
     GoRoute(
       path: AppRoutes.fareSummary,
@@ -312,6 +382,12 @@ final appRouter = GoRouter(
 
     // ─── Driver Full-Screen Routes ────────────────────────────
     GoRoute(
+      path: AppRoutes.driverTripHistory,
+      builder: (context, state) => const DriverBookingsScreen(
+        initialTab: DriverBookingsScreen.historyTab,
+      ),
+    ),
+    GoRoute(
       path: '/driver/bookings/:bookingId',
       builder: (context, state) => BookingDetailScreen(
         bookingId: state.pathParameters['bookingId']!,
@@ -347,11 +423,17 @@ final appRouter = GoRouter(
       path: AppRoutes.driverEmergency,
       builder: (context, state) => const DriverEmergencyScreen(),
     ),
+    GoRoute(
+      path: AppRoutes.driverFeedback,
+      builder: (context, state) => const FeedbackScreen(forDriver: true),
+    ),
 
     // ─── Admin ────────────────────────────────────────────────
+    // Admins now sign in on the shared sign-in screen; old links to the
+    // separate admin sign-in page land there.
     GoRoute(
       path: AppRoutes.adminLogin,
-      builder: (context, state) => const AdminLoginScreen(),
+      redirect: (context, state) => AppRoutes.login,
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
@@ -406,6 +488,15 @@ final appRouter = GoRouter(
       builder: (context, state) => SpotFormScreen(spot: state.extra as dynamic),
     ),
     GoRoute(
+      path: AppRoutes.managePackages,
+      builder: (context, state) => const ManagePackagesScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.packageForm,
+      builder: (context, state) =>
+          PackageFormScreen(package: state.extra as TourPackageModel?),
+    ),
+    GoRoute(
       path: AppRoutes.monitorBookings,
       builder: (context, state) => const MonitorBookingsScreen(),
     ),
@@ -422,8 +513,49 @@ final appRouter = GoRouter(
       builder: (context, state) => const SendAnnouncementScreen(),
     ),
     GoRoute(
+      path: '/tourist/data-rights',
+      builder: (context, state) => const DataRightsScreen(),
+    ),
+    GoRoute(
+      path: '/driver/data-rights',
+      builder: (context, state) => const DataRightsScreen(),
+    ),
+    GoRoute(
+      path: '/admin/data-requests',
+      builder: (context, state) => const DataRequestsAdminScreen(),
+    ),
+    GoRoute(
+      path: '/admin/emergency-contacts',
+      builder: (context, state) => const EmergencyContactsAdminScreen(),
+    ),
+    GoRoute(
       path: '/admin/live-map',
       builder: (context, state) => const AdminLiveMapScreen(),
     ),
+    GoRoute(
+      path: '/admin/gcash-disputes',
+      builder: (context, state) => const GcashDisputesScreen(),
+    ),
+    GoRoute(
+      path: '/admin/gcash-disputes/:bookingId',
+      builder: (context, state) => GcashDisputeDetailScreen(
+        bookingId: state.pathParameters['bookingId']!,
+      ),
+    ),
   ],
 );
+
+/// Launch hand-off: a slow cross-fade so the logo can fly (Hero) from the
+/// splash into the sign-in header while the form assembles underneath.
+CustomTransitionPage<void> _launchFade(GoRouterState state, Widget child) =>
+    CustomTransitionPage<void>(
+      key: state.pageKey,
+      child: child,
+      transitionDuration: const Duration(milliseconds: 700),
+      // The splash leaves quickly so its tagline never ghosts over the form.
+      reverseTransitionDuration: const Duration(milliseconds: 200),
+      transitionsBuilder: (context, animation, _, child) => FadeTransition(
+        opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+        child: child,
+      ),
+    );

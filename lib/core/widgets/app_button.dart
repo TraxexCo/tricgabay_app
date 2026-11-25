@@ -1,5 +1,8 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
+import '../motion/motion.dart';
+import '../motion/motion_widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 enum AppButtonType { primary, secondary, outline, danger, ghost }
@@ -32,16 +35,31 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: isFullWidth ? double.infinity : null,
-      height: _height,
-      child: _buildButton(),
+    final enabled = onPressed != null && !isLoading;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: context.message(label),
+      value: isLoading ? context.l10n.loading : null,
+      liveRegion: isLoading,
+      onTap: enabled ? onPressed : null,
+      child: ExcludeSemantics(
+        child: SizedBox(
+          width: isFullWidth ? double.infinity : null,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: _height),
+            child: enabled
+                ? PressableScale(child: _buildButton(context))
+                : _buildButton(context),
+          ),
+        ),
+      ),
     );
   }
 
   double get _height {
     return switch (size) {
-      AppButtonSize.small => 40,
+      AppButtonSize.small => 48,
       AppButtonSize.medium => 52,
       AppButtonSize.large => 58,
     };
@@ -55,10 +73,10 @@ class AppButton extends StatelessWidget {
     };
   }
 
-  Widget _buildButton() {
-    if (type == AppButtonType.outline) return _outlinedButton();
-    if (type == AppButtonType.ghost) return _textButton();
-    return _elevatedButton();
+  Widget _buildButton(BuildContext context) {
+    if (type == AppButtonType.outline) return _outlinedButton(context);
+    if (type == AppButtonType.ghost) return _textButton(context);
+    return _elevatedButton(context);
   }
 
   Color get _backgroundColor {
@@ -79,7 +97,23 @@ class AppButton extends StatelessWidget {
     };
   }
 
-  Widget get _content {
+  /// Cross-fades between the label and the spinner so loading reads as a
+  /// change of state on the same button.
+  Widget _content(BuildContext context) => AnimatedSwitcher(
+    duration: Motion.of(context, Motion.medium),
+    switchInCurve: Motion.enter,
+    switchOutCurve: Motion.exit,
+    transitionBuilder: (child, animation) => FadeTransition(
+      opacity: animation,
+      child: ScaleTransition(
+        scale: Tween<double>(begin: .85, end: 1).animate(animation),
+        child: child,
+      ),
+    ),
+    child: KeyedSubtree(key: ValueKey(isLoading), child: _contentFor(context)),
+  );
+
+  Widget _contentFor(BuildContext context) {
     if (isLoading) {
       return SizedBox(
         width: 20,
@@ -101,11 +135,14 @@ class AppButton extends StatelessWidget {
           Icon(prefixIcon, size: _fontSize + 2),
           const SizedBox(width: 8),
         ],
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: _fontSize,
-            fontWeight: FontWeight.w600,
+        Flexible(
+          child: Text(
+            context.message(label),
+            style: GoogleFonts.poppins(
+              fontSize: _fontSize,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
           ),
         ),
         if (suffixIcon != null) ...[
@@ -116,7 +153,7 @@ class AppButton extends StatelessWidget {
     );
   }
 
-  Widget _elevatedButton() {
+  Widget _elevatedButton(BuildContext context) {
     final radius = BorderRadius.circular(16);
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -146,17 +183,19 @@ class AppButton extends StatelessWidget {
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(borderRadius: radius),
           elevation: 0,
-          padding: EdgeInsets.zero,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         ),
-        child: _content,
+        child: _content(context),
       ),
     );
   }
 
-  Widget _outlinedButton() {
+  Widget _outlinedButton(BuildContext context) {
     return OutlinedButton(
       onPressed: isLoading ? null : onPressed,
       style: OutlinedButton.styleFrom(
+        // Filled white so it stays readable over maps and dark scrims.
+        backgroundColor: AppColors.surface,
         foregroundColor: type == AppButtonType.danger
             ? AppColors.danger
             : AppColors.primary,
@@ -167,21 +206,21 @@ class AppButton extends StatelessWidget {
           width: 1.5,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       ),
-      child: _content,
+      child: _content(context),
     );
   }
 
-  Widget _textButton() {
+  Widget _textButton(BuildContext context) {
     return TextButton(
       onPressed: isLoading ? null : onPressed,
       style: TextButton.styleFrom(
         foregroundColor: AppColors.primary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       ),
-      child: _content,
+      child: _content(context),
     );
   }
 }

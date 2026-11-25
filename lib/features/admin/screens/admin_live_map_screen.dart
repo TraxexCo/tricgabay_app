@@ -1,3 +1,6 @@
+import 'package:tricgabay_app/core/widgets/map_surface.dart';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import '../../../core/widgets/remote_page_controls.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -5,8 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/widgets/web_map_fallback.dart';
+import '../../../core/utils/map_coordinate_validator.dart';
 
 class AdminLiveMapScreen extends StatefulWidget {
   const AdminLiveMapScreen({super.key});
@@ -23,7 +27,7 @@ class _AdminLiveMapScreenState extends State<AdminLiveMapScreen> {
   void initState() {
     super.initState();
     _initPinImage();
-    PrototypeSession.adminDrivers.addListener(_updateMarkers);
+    AppSession.adminDrivers.addListener(_updateMarkers);
   }
 
   Future<void> _initPinImage() async {
@@ -64,7 +68,7 @@ class _AdminLiveMapScreenState extends State<AdminLiveMapScreen> {
 
   @override
   void dispose() {
-    PrototypeSession.adminDrivers.removeListener(_updateMarkers);
+    AppSession.adminDrivers.removeListener(_updateMarkers);
     super.dispose();
   }
 
@@ -77,7 +81,7 @@ class _AdminLiveMapScreenState extends State<AdminLiveMapScreen> {
   void _updateMarkers() async {
     if (_pointAnnotationManager == null || _pinImage == null) return;
 
-    final drivers = PrototypeSession.adminDrivers.value;
+    final drivers = AppSession.adminDrivers.value;
     final activeDrivers = drivers
         .where((d) => d['status'] == 'active')
         .toList();
@@ -88,8 +92,14 @@ class _AdminLiveMapScreenState extends State<AdminLiveMapScreen> {
 
     List<PointAnnotationOptions> options = [];
     for (var driver in activeDrivers) {
-      double lat = (driver['lat'] as num?)?.toDouble() ?? 14.9500;
-      double lng = (driver['lng'] as num?)?.toDouble() ?? 120.9200;
+      if (!MapCoordinateValidator.isValid(
+        latitude: driver['lat'],
+        longitude: driver['lng'],
+      )) {
+        continue;
+      }
+      final lat = MapCoordinateValidator.finiteNumber(driver['lat'])!;
+      final lng = MapCoordinateValidator.finiteNumber(driver['lng'])!;
 
       options.add(
         PointAnnotationOptions(
@@ -110,9 +120,10 @@ class _AdminLiveMapScreenState extends State<AdminLiveMapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: const RemotePageControls(directory: true),
       appBar: AppBar(
         title: Text(
-          'Live Driver Tracking',
+          context.l10n.liveDriverTracking,
           style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 18),
         ),
         backgroundColor: Colors.white,
@@ -121,16 +132,19 @@ class _AdminLiveMapScreenState extends State<AdminLiveMapScreen> {
         centerTitle: true,
       ),
       body: kIsWeb
-          ? const WebMapFallback(
-              title: 'Live driver tracking',
-              subtitle:
-                  'The interactive operations map is available in the mobile app.',
+          ? WebMapFallback(
+              title: context.l10n.liveDriverTracking,
+              subtitle: context
+                  .l10n
+                  .theInteractiveOperationsMapIsAvailableInTheMobileApp,
             )
-          : MapWidget(
-              onMapCreated: _onMapCreated,
-              viewport: CameraViewportState(
-                center: Point(coordinates: Position(120.9200, 14.9500)),
-                zoom: 13.0,
+          : MapSurface(
+              builder: (context) => MapWidget(
+                onMapCreated: _onMapCreated,
+                viewport: CameraViewportState(
+                  center: Point(coordinates: Position(120.9200, 14.9500)),
+                  zoom: 13.0,
+                ),
               ),
             ),
     );

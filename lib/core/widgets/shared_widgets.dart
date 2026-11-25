@@ -1,6 +1,11 @@
+import 'dart:async';
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
+import '../../models/booking_model.dart';
+import '../l10n/record_labels.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../constants/app_colors.dart';
+import '../motion/motion.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppLogo extends StatelessWidget {
@@ -8,6 +13,46 @@ class AppLogo extends StatelessWidget {
   final bool showShadow;
 
   const AppLogo({super.key, this.size = 56, this.showShadow = false});
+
+  static const _asset = 'assets/images/tric_gabay_logo.png';
+
+  /// The exact image this logo draws at [size], so callers can precache it
+  /// and the logo never flashes blank while decoding.
+  static ImageProvider provider(BuildContext context, double size) =>
+      providerFor(MediaQuery.devicePixelRatioOf(context), size);
+
+  static ImageProvider providerFor(double devicePixelRatio, double size) =>
+      ResizeImage.resizeIfNeeded(
+        null,
+        (size * devicePixelRatio).ceil(),
+        const AssetImage(_asset),
+      );
+
+  /// Decodes the launch-size logo before the first frame, so the hand-over
+  /// from the phone's launch screen never shows an empty circle. Gives up
+  /// quietly after two seconds.
+  static Future<void> warmUp(double size) {
+    final views = WidgetsBinding.instance.platformDispatcher.views;
+    if (views.isEmpty) return Future.value();
+    final done = Completer<void>();
+    final stream = providerFor(
+      views.first.devicePixelRatio,
+      size,
+    ).resolve(ImageConfiguration.empty);
+    late final ImageStreamListener listener;
+    listener = ImageStreamListener(
+      (_, _) {
+        if (!done.isCompleted) done.complete();
+      },
+      onError: (_, _) {
+        if (!done.isCompleted) done.complete();
+      },
+    );
+    stream.addListener(listener);
+    return done.future
+        .timeout(const Duration(seconds: 2), onTimeout: () {})
+        .whenComplete(() => stream.removeListener(listener));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +74,8 @@ class AppLogo extends StatelessWidget {
             : null,
       ),
       clipBehavior: Clip.antiAlias,
-      child: Image.asset(
-        'assets/images/tric_gabay_logo.png',
+      child: Image(
+        image: provider(context, size),
         fit: BoxFit.cover,
         alignment: Alignment.center,
       ),
@@ -53,7 +98,20 @@ class SafeAppImage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final imageWidth = width ?? constraints.maxWidth;
+      final pixelWidth = imageWidth.isFinite && imageWidth > 0
+          ? (imageWidth * MediaQuery.devicePixelRatioOf(context) / 64)
+                    .ceil()
+                    .clamp(1, 24) *
+                64
+          : null;
+      return _image(context, pixelWidth);
+    },
+  );
+
+  Widget _image(BuildContext context, int? pixelWidth) {
     if (path.isEmpty) {
       return Container(
         width: width,
@@ -73,11 +131,11 @@ class SafeAppImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
-        placeholder: (context, url) => Container(
+        memCacheWidth: pixelWidth,
+        placeholder: (context, url) => SizedBox(
           width: width,
           height: height,
-          color: const Color(0xFFE8EEF2),
-          child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          child: const ColoredBox(color: Color(0xFFE8EEF2)),
         ),
         errorWidget: (context, url, error) => Container(
           width: width,
@@ -93,10 +151,11 @@ class SafeAppImage extends StatelessWidget {
       );
     }
     return Image.asset(
-      path,
+      optimizedPhotoAsset(path),
       width: width,
       height: height,
       fit: fit,
+      cacheWidth: pixelWidth,
       errorBuilder: (context, error, stackTrace) => Container(
         width: width,
         height: height,
@@ -112,36 +171,49 @@ class SafeAppImage extends StatelessWidget {
   }
 }
 
+/// Keep older catalog rows and APKs compatible with the original asset paths.
+String optimizedPhotoAsset(String path) =>
+    path.startsWith('assets/images/') && path.endsWith('.jpg')
+    ? 'assets/optimized_images/${path.split('/').last.replaceFirst('.jpg', '.webp')}'
+    : path;
+
 class LoadingOverlay extends StatelessWidget {
   final String? message;
   const LoadingOverlay({super.key, this.message});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black54,
-      child: Center(
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      label: context.message(message ?? MessageCode.loading),
+      child: ExcludeSemantics(
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircularProgressIndicator(color: AppColors.primary),
-              if (message != null) ...[
-                const SizedBox(height: 16),
-                Text(
-                  message!,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ],
+          color: Colors.black54,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(color: AppColors.primary),
+                  if (message != null) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      context.message(message!),
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -170,43 +242,57 @@ class EmptyStateWidget extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // The icon pops in and the text follows, so an empty list reads
+              // as a deliberate state rather than a blank screen.
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.6, end: 1),
+                duration: Motion.of(context, Motion.long),
+                curve: Motion.pop,
+                builder: (context, scale, child) =>
+                    Transform.scale(scale: scale, child: child),
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 48, color: AppColors.primary),
+                ),
               ),
-              child: Icon(icon, size: 48, color: AppColors.primary),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              title,
-              style: GoogleFonts.poppins(
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: 20),
               Text(
-                subtitle!,
+                context.message(title),
                 style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  color: AppColors.textSecondary,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  context.message(subtitle!),
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              if (actionLabel != null) ...[
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: onAction,
+                  child: Text(context.message(actionLabel!)),
+                ),
+              ],
             ],
-            if (actionLabel != null) ...[
-              const SizedBox(height: 24),
-              ElevatedButton(onPressed: onAction, child: Text(actionLabel!)),
-            ],
-          ],
+          ),
         ),
       ),
     );
@@ -217,32 +303,38 @@ class StatusBadge extends StatelessWidget {
   final String label;
   final Color color;
   final Color? textColor;
+  final BookingStatus? bookingStatus;
 
   const StatusBadge({
     super.key,
     required this.label,
     required this.color,
     this.textColor,
+    this.bookingStatus,
   });
 
-  factory StatusBadge.bookingStatus(String status) {
-    final (color, text) = switch (status.toLowerCase()) {
-      'scheduled' => (AppColors.infoLight, AppColors.info),
-      'pending' => (AppColors.warningLight, AppColors.warning),
-      'accepted' => (AppColors.successLight, AppColors.success),
-      'replacementpending' ||
-      'replacement_pending' => (AppColors.dangerLight, AppColors.danger),
-      'ongoing' => (AppColors.infoLight, AppColors.info),
-      'completed' => (const Color(0xFFEDE7F6), const Color(0xFF8E44AD)),
-      'cancelled' => (AppColors.dangerLight, AppColors.danger),
+  factory StatusBadge.bookingStatus(BookingStatus status) {
+    final (color, text) = switch (status) {
+      BookingStatus.scheduled => (AppColors.infoLight, AppColors.info),
+      BookingStatus.pending => (AppColors.warningLight, AppColors.warning),
+      BookingStatus.accepted => (AppColors.successLight, AppColors.success),
+      BookingStatus.replacementPending => (
+        AppColors.dangerLight,
+        AppColors.danger,
+      ),
+      BookingStatus.ongoing => (AppColors.infoLight, AppColors.info),
+      BookingStatus.completed => (
+        const Color(0xFFEDE7F6),
+        const Color(0xFF8E44AD),
+      ),
+      BookingStatus.cancelled => (AppColors.dangerLight, AppColors.danger),
       _ => (AppColors.surfaceVariant, AppColors.textSecondary),
     };
     return StatusBadge(
-      label: status == 'replacementPending'
-          ? 'REPLACEMENT NEEDED'
-          : status.toUpperCase(),
+      label: MessageCode.unknown,
       color: color,
       textColor: text,
+      bookingStatus: status,
     );
   }
 
@@ -262,67 +354,30 @@ class StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.poppins(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          color: textColor ?? AppColors.textPrimary,
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
-  }
-}
-
-class SectionHeader extends StatelessWidget {
-  final String title;
-  final String? actionLabel;
-  final VoidCallback? onAction;
-
-  const SectionHeader({
-    super.key,
-    required this.title,
-    this.actionLabel,
-    this.onAction,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: GoogleFonts.poppins(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+    final displayLabel = bookingStatus == null
+        ? context.message(label)
+        : bookingStatusLabel(context, bookingStatus!);
+    return Semantics(
+      label: context.l10n.statusValue(displayLabel),
+      readOnly: true,
+      child: ExcludeSemantics(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(20),
           ),
-        ),
-        if (actionLabel != null)
-          TextButton(
-            onPressed: onAction,
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
-              minimumSize: Size.zero,
-            ),
-            child: Text(
-              actionLabel!,
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primary,
-              ),
+          child: Text(
+            displayLabel,
+            style: GoogleFonts.poppins(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: textColor ?? AppColors.textPrimary,
+              letterSpacing: 0.5,
             ),
           ),
-      ],
+        ),
+      ),
     );
   }
 }
@@ -382,24 +437,41 @@ class AppCard extends StatelessWidget {
 }
 
 class AppSnackbar {
-  static void showSuccess(BuildContext context, String message) {
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.success,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
+  static void showSuccess(BuildContext context, String message) =>
+      _show(context, message, AppColors.success);
 
-  static void showError(BuildContext context, String message) {
+  static void showError(BuildContext context, String message) =>
+      _show(context, message, AppColors.danger);
+
+  static void _show(BuildContext context, String message, Color color) {
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
+    final success = color == AppColors.success;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.danger,
+        backgroundColor: success ? AppColors.primaryDark : color,
         behavior: SnackBarBehavior.floating,
+        content: Row(
+          children: [
+            Icon(
+              success
+                  ? Icons.check_circle_rounded
+                  : Icons.error_outline_rounded,
+              color: success ? AppColors.secondary : Colors.white,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                context.message(message),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

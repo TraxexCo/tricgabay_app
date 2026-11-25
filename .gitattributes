@@ -1,0 +1,5 @@
+# The localization export (tool/export_localization.dart) writes CSV rows that
+# end in CRLF, while a few quoted values contain a bare LF (for example
+# "Agreed\n₱{value}"). The localization gate compares the file byte for byte, so
+# git must store and check it out exactly as written: no line-ending conversion.
+docs/localization-review.csv -text

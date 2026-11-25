@@ -1,3 +1,7 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import 'package:tricgabay_app/core/utils/formatters.dart';
+import 'package:tricgabay_app/core/widgets/map_surface.dart';
+import '../../../core/services/error_messages.dart';
 import 'dart:ui' as ui;
 import 'dart:async';
 
@@ -10,18 +14,27 @@ import 'package:geolocator/geolocator.dart' as geo;
 
 import '../../../core/config/mapbox_config.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/prototype/prototype_session.dart';
+import '../../../core/session/app_session.dart';
 import '../../../models/tourist_spot_model.dart';
-import '../../../core/utils/app_translations.dart';
+import '../tours_for_spot.dart';
+
+import '../../../core/navigation/launch_preferences.dart';
 import '../../../core/widgets/shared_widgets.dart';
 import '../../../core/widgets/web_map_fallback.dart';
+import '../spot_filters.dart';
+part 'tourist_home_cards.dart';
+part 'tourist_home_sections.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Screen
 // ─────────────────────────────────────────────────────────────────────────────
 
 class TouristHomeScreen extends StatefulWidget {
-  const TouristHomeScreen({super.key});
+  final Widget? mapPlaceholder;
+  const TouristHomeScreen({super.key}) : mapPlaceholder = null;
+  @visibleForTesting
+  const TouristHomeScreen.withMapPlaceholder({super.key, required Widget map})
+    : mapPlaceholder = map;
 
   @override
   State<TouristHomeScreen> createState() => _TouristHomeScreenState();
@@ -30,15 +43,101 @@ class TouristHomeScreen extends StatefulWidget {
 class _TouristHomeScreenState extends State<TouristHomeScreen> {
   MapboxMap? _mapboxMap;
   PointAnnotationManager? _annotationManager;
-  PointAnnotationManager? _driverAnnotationManager;
   StreamSubscription<geo.Position>? _positionSubscription;
 
   /// Maps annotation.id → TouristSpotModel so we can look up which spot was tapped.
   final Map<String, TouristSpotModel> _annotationSpotMap = {};
 
-  final List<TouristSpotModel> _spots = PrototypeSession.allSpots.value;
-  String _selectedCategory = 'All';
+  List<TouristSpotModel> get _spots => AppSession.allSpots.value;
+  String _selectedCategory = MessageCode.all;
   late List<TouristSpotModel> _filteredSpots;
+  final _pinBitmaps = <Color, Future<Uint8List>>{};
+  List<TouristSpotModel>? _pendingPins;
+  bool _updatingPins = false;
+
+  static const _labelZoom = 15.0;
+  bool _showPinLabels = false;
+
+  void _onCameraChanged(CameraChangedEventData event) {
+    final show = event.cameraState.zoom >= _labelZoom;
+    if (show == _showPinLabels) return;
+    _showPinLabels = show;
+    unawaited(_recreatePins(_filteredSpots));
+  }
+
+  // How far the Explore sheet is pulled up, as a fraction of the screen.
+  // Null until the tourist drags it; the resting height is used then.
+  // Map buttons and the legend ride just above it.
+  final _sheetExtent = ValueNotifier<double?>(null);
+  final _mapSearchCtrl = TextEditingController();
+  final _mapSearchFocus = FocusNode();
+
+  List<TouristSpotModel> get _mapSearchResults =>
+      filterSpots(_spots, MessageCode.all, query: _mapSearchCtrl.text);
+
+  void _onMapSearchChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// Picks a search result: flies the map to the place and opens its card.
+  void _openSpotFromSearch(TouristSpotModel spot) {
+    _mapSearchFocus.unfocus();
+    _mapSearchCtrl.clear();
+    _mapboxMap?.easeTo(
+      CameraOptions(
+        center: Point(coordinates: Position(spot.longitude, spot.latitude)),
+        zoom: 16,
+      ),
+      MapAnimationOptions(duration: 700),
+    );
+    _showSpotBottomSheet(spot);
+  }
+
+  double _sheetMinExtent = 0.3;
+  double _sheetInitialExtent = 0.46;
+  double _sheetMaxExtent = 0.85;
+
+  /// The sheet runs behind the floating menu bar to the bottom of the
+  /// screen. Its resting height shows the header, the filters and one full
+  /// row of spot cards; collapsed, it still shows the header and filters
+  /// above the menu bar.
+  void _measureSheet(double height) {
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+    final menuBar = MediaQuery.paddingOf(context).bottom;
+    final header = 104 + 44 * scale;
+    final collapsed = (menuBar + header) / height;
+    final resting = (menuBar + header + _spotRowHeight(context) + 8) / height;
+    // Fully open, the sheet stops just under the greeting row.
+    final greeting = MediaQuery.paddingOf(context).top + 28 + 58 * scale;
+    _sheetMaxExtent = ((height - greeting) / height).clamp(0.65, 0.92);
+    _sheetMinExtent = collapsed.clamp(0.18, 0.5);
+    _sheetInitialExtent = resting.clamp(_sheetMinExtent, 0.55);
+  }
+
+  /// Places [overlay] just above the sheet. `compact` is true when the map
+  /// strip between the search bar and the sheet is too short for the
+  /// stacked map buttons.
+  Widget _aboveSheet(Widget Function(double bottom, bool compact) overlay) {
+    return ValueListenableBuilder<double?>(
+      valueListenable: _sheetExtent,
+      builder: (context, dragged, _) => LayoutBuilder(
+        builder: (context, constraints) {
+          final extent = dragged ?? _sheetInitialExtent;
+          // Out of the way while the sheet covers most of the map.
+          if (extent > _sheetInitialExtent + 0.08) {
+            return const SizedBox.shrink();
+          }
+          final bottom = constraints.maxHeight * extent + 14;
+          final topBar =
+              MediaQuery.paddingOf(context).top +
+              84 +
+              84 * MediaQuery.textScalerOf(context).scale(1);
+          final compact = constraints.maxHeight - bottom - topBar < 180;
+          return Stack(children: [overlay(bottom, compact)]);
+        },
+      ),
+    );
+  }
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
 
@@ -46,24 +145,29 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
   void initState() {
     super.initState();
     _filteredSpots = _spots;
-    PrototypeSession.focusedSpotId.addListener(_onFocusedSpotChanged);
-    _startLocationTracking();
+    AppSession.allSpots.addListener(_catalogChanged);
+    AppSession.focusedSpotId.addListener(_onFocusedSpotChanged);
+    _mapSearchCtrl.addListener(_onMapSearchChanged);
+    if (widget.mapPlaceholder == null) _startLocationTracking();
   }
 
   @override
   void dispose() {
-    PrototypeSession.focusedSpotId.removeListener(_onFocusedSpotChanged);
+    _sheetExtent.dispose();
+    _mapSearchCtrl.dispose();
+    _mapSearchFocus.dispose();
+    AppSession.allSpots.removeListener(_catalogChanged);
+    AppSession.focusedSpotId.removeListener(_onFocusedSpotChanged);
     _annotationManager?.deleteAll();
-    _driverAnnotationManager?.deleteAll();
     _positionSubscription?.cancel();
-    PrototypeSession.adminDrivers.removeListener(_updateDriverPins);
     super.dispose();
   }
 
   void _onFocusedSpotChanged() async {
-    final spotId = PrototypeSession.focusedSpotId.value;
+    final spotId = AppSession.focusedSpotId.value;
     if (spotId != null) {
-      final spot = _spots.firstWhere((s) => s.id == spotId);
+      final spot = _spots.where((s) => s.id == spotId).firstOrNull;
+      if (spot == null) return;
       // Wait for navigation stack to settle
       await Future.delayed(const Duration(milliseconds: 300));
       if (!mounted) return;
@@ -74,7 +178,7 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
         ),
       );
       _showSpotBottomSheet(spot);
-      PrototypeSession.focusedSpotId.value = null;
+      AppSession.focusedSpotId.value = null;
     }
   }
 
@@ -111,12 +215,6 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
     );
 
     await _addSpotAnnotations(mapboxMap);
-
-    // Driver annotations
-    _driverAnnotationManager = await mapboxMap.annotations
-        .createPointAnnotationManager();
-    PrototypeSession.adminDrivers.addListener(_updateDriverPins);
-    _updateDriverPins();
   }
 
   Future<void> _addSpotAnnotations(MapboxMap mapboxMap) async {
@@ -128,24 +226,7 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
     // Register tap listener using tapEvents method API (v2.30)
     manager.tapEvents(onTap: _onAnnotationTapped);
 
-    // Create one pin per tourist spot
-    for (final spot in _spots) {
-      final bitmap = await _buildPinBitmap(_categoryColor(spot.category));
-      final annotation = await manager.create(
-        PointAnnotationOptions(
-          geometry: Point(coordinates: Position(spot.longitude, spot.latitude)),
-          image: bitmap,
-          iconSize: 1.0,
-          iconAnchor: IconAnchor.BOTTOM,
-        ),
-      );
-      _annotationSpotMap[annotation.id] = spot;
-    }
-  }
-
-  Future<void> _updateDriverPins() async {
-    // Deliberately disabled for Midterms:
-    // We remove them to avoid cluttering the tourism map.
+    await _recreatePins(_filteredSpots);
   }
 
   void _onAnnotationTapped(PointAnnotation annotation) {
@@ -158,7 +239,9 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
         center: Point(coordinates: Position(spot.longitude, spot.latitude)),
         zoom: MapboxConfig.spotZoom,
       ),
-      MapAnimationOptions(duration: 900),
+      MapAnimationOptions(
+        duration: MediaQuery.disableAnimationsOf(context) ? 0 : 900,
+      ),
     );
 
     _showSpotBottomSheet(spot);
@@ -169,570 +252,70 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: PrototypeSession.isFilipino,
+      valueListenable: AppSession.isFilipino,
       builder: (context, isFilipino, _) => Scaffold(
-        body: Stack(
-          children: [
-            // ── Full-screen Mapbox map ───────────────────────────────────────
-            kIsWeb
-                ? const WebMapFallback()
-                : MapWidget(
-                    styleUri: MapboxConfig.mapStyle,
-                    onMapCreated: _onMapCreated,
-                    viewport: CameraViewportState(
-                      center: Point(
-                        coordinates: Position(
-                          MapboxConfig.bustosLng,
-                          MapboxConfig.bustosLat,
-                        ),
-                      ),
-                      zoom: MapboxConfig.defaultZoom,
-                    ),
-                  ),
-
-            // ── Top bar ───────────────────────────────────────────────────
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final scale = MediaQuery.textScalerOf(context);
+            final needsScrolling =
+                constraints.maxHeight < 500 || scale.scale(14) > 18;
+            final canvasHeight = needsScrolling
+                ? constraints.maxHeight.clamp(
+                    480 + scale.scale(300),
+                    double.infinity,
+                  )
+                : constraints.maxHeight;
+            _measureSheet(canvasHeight);
+            return SingleChildScrollView(
+              child: SizedBox(
+                height: canvasHeight,
+                child: Stack(
                   children: [
-                    // Greeting row
-                    Row(
-                      children: [
-                        const AppLogo(size: 46, showShadow: true),
-                        const SizedBox(width: 11),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ValueListenableBuilder<String>(
-                                valueListenable:
-                                    PrototypeSession.currentUserName,
-                                builder: (ctx, name, _) {
-                                  final hour = DateTime.now().hour;
-                                  String greeting = context.tr(
-                                    'Good morning',
-                                    'Magandang umaga',
-                                  );
-                                  if (hour >= 12 && hour < 17) {
-                                    greeting = context.tr(
-                                      'Good afternoon',
-                                      'Magandang hapon',
-                                    );
-                                  }
-                                  if (hour >= 17) {
-                                    greeting = context.tr(
-                                      'Good evening',
-                                      'Magandang gabi',
-                                    );
-                                  }
-                                  return Text(
-                                    '$greeting, $name',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
+                    // ── Full-screen Mapbox map ───────────────────────────────────────
+                    widget.mapPlaceholder ??
+                        (kIsWeb
+                            ? const WebMapFallback()
+                            : MapSurface(
+                                builder: (context) => MapWidget(
+                                  styleUri: MapboxConfig.mapStyle,
+                                  onMapCreated: _onMapCreated,
+                                  onCameraChangeListener: _onCameraChanged,
+                                  viewport: CameraViewportState(
+                                    center: Point(
+                                      coordinates: Position(
+                                        MapboxConfig.bustosLng,
+                                        MapboxConfig.bustosLat,
+                                      ),
                                     ),
-                                  );
-                                },
-                              ),
-                              Text(
-                                'Bustos, Bulacan',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        _mapButton(
-                          Icons.notifications_none_rounded,
-                          () => context.push('/tourist/notifications'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    // Search bar
-                    GestureDetector(
-                      onTap: () => context.go('/tourist/search'),
-                      child: Container(
-                        height: 54,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x220D1B2A),
-                              blurRadius: 18,
-                              offset: Offset(0, 6),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.search_rounded,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                context.tr(
-                                  'Where would you like to go?',
-                                  'Saan mo gusto pumunta?',
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.poppins(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                            const Icon(
-                              Icons.tune_rounded,
-                              color: AppColors.textSecondary,
-                              size: 20,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Material(
-                        color: Colors.white,
-                        elevation: 2,
-                        shadowColor: const Color(0x220D1B2A),
-                        borderRadius: BorderRadius.circular(18),
-                        child: InkWell(
-                          onTap: () => context.go('/tourist/search'),
-                          borderRadius: BorderRadius.circular(18),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 9,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.format_list_bulleted_rounded,
-                                  color: AppColors.primary,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 7),
-                                Text(
-                                  context.tr('List view', 'Listahan'),
-                                  style: GoogleFonts.poppins(
-                                    color: AppColors.textPrimary,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
+                                    zoom: MapboxConfig.defaultZoom,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                              )),
+
+                    // ── Top bar ───────────────────────────────────────────────────
+                    _topBar(),
+
+                    // ── Left-side Map Legend ──────────────────────────────────────
+                    _aboveSheet(_mapLegend),
+
+                    // ── Right-side map controls ───────────────────────────────────
+                    _aboveSheet(_mapControls),
+
+                    // ── Bottom draggable sheet ────────────────────────────────────
+                    // Runs behind the floating menu bar to the screen edge;
+                    // its list is padded so the last cards clear the bar.
+                    NotificationListener<DraggableScrollableNotification>(
+                      onNotification: (n) {
+                        _sheetExtent.value = n.extent;
+                        return false;
+                      },
+                      child: _exploreSheet(),
                     ),
                   ],
                 ),
               ),
-            ),
-
-            // ── Left-side Map Legend ──────────────────────────────────────
-            Positioned(
-              left: 16,
-              bottom: 300,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.95),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x180D1B2A),
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.location_on_rounded,
-                          color: AppColors.primary,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          context.tr('Tourist Spot', 'Lugar ng Turista'),
-                          style: GoogleFonts.poppins(
-                            color: AppColors.textPrimary,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // ── Right-side map controls ───────────────────────────────────
-            Positioned(
-              right: 16,
-              bottom: 300,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _mapButton(
-                    Icons.my_location_rounded,
-                    _flyToMyLocation,
-                    tooltip: context.tr('My location', 'Aking lokasyon'),
-                  ),
-                  const SizedBox(height: 10),
-                  _mapButton(
-                    Icons.center_focus_strong_rounded,
-                    () {
-                      _mapboxMap?.setCamera(
-                        CameraOptions(
-                          center: Point(
-                            coordinates: Position(
-                              MapboxConfig.bustosLng,
-                              MapboxConfig.bustosLat,
-                            ),
-                          ),
-                          zoom: MapboxConfig.defaultZoom,
-                        ),
-                      );
-                    },
-                    tooltip: context.tr('Reset map', 'I-reset ang mapa'),
-                  ),
-                  const SizedBox(height: 10),
-                  _mapButton(
-                    Icons.sos_rounded,
-                    () => context.push('/tourist/emergency'),
-                    foreground: AppColors.danger,
-                    tooltip: context.tr('Emergency', 'Emergency'),
-                  ),
-                ],
-              ),
-            ),
-
-            // ── Bottom draggable sheet ────────────────────────────────────
-            DraggableScrollableSheet(
-              initialChildSize: 0.36,
-              minChildSize: 0.22,
-              maxChildSize: 0.86,
-              builder: (ctx, ctrl) => Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF5F7FC),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0x280D1B2A),
-                      blurRadius: 24,
-                      offset: Offset(0, -4),
-                    ),
-                  ],
-                ),
-                child: ListView(
-                  controller: ctrl,
-                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 120),
-                  children: [
-                    // Drag handle
-                    Center(
-                      child: Container(
-                        width: 36,
-                        height: 4,
-                        margin: const EdgeInsets.only(bottom: 14),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFCED6E0),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-
-                    // Section header — Explore Bustos
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            context.tr(
-                              'Explore Bustos',
-                              'Mga Kalapit na Lugar',
-                            ),
-                            style: GoogleFonts.poppins(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          Text(
-                            '${_filteredSpots.length} ${context.tr('spots', 'mga lugar')}',
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              color: AppColors.success,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Category filter chips
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        children:
-                            [
-                                  'All',
-                                  'Church',
-                                  'Heritage',
-                                  'Farms/Nature',
-                                  'Market',
-                                  'Resorts',
-                                  'Food & Cafes',
-                                  'Events',
-                                ]
-                                .map(
-                                  (cat) => Padding(
-                                    padding: const EdgeInsets.only(right: 8),
-                                    child: ChoiceChip(
-                                      label: Text(cat),
-                                      selected: _selectedCategory == cat,
-                                      showCheckmark: false,
-                                      onSelected: (selected) {
-                                        setState(() => _selectedCategory = cat);
-                                        _filterPins(cat);
-                                      },
-                                      selectedColor: AppColors.primary,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 8,
-                                      ),
-                                      labelStyle: TextStyle(
-                                        color: _selectedCategory == cat
-                                            ? Colors.white
-                                            : AppColors.textSecondary,
-                                        fontSize: 13,
-                                        fontWeight: _selectedCategory == cat
-                                            ? FontWeight.w700
-                                            : FontWeight.w500,
-                                      ),
-                                      backgroundColor: AppColors.surface,
-                                      shape: const StadiumBorder(),
-                                      side: BorderSide(
-                                        color: _selectedCategory == cat
-                                            ? AppColors.primary
-                                            : Colors.grey.shade300,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Horizontal spot cards
-                    SizedBox(
-                      height: 168,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.only(left: 20, right: 8),
-                        itemCount: _filteredSpots.length,
-                        itemBuilder: (_, i) => _SpotCard(
-                          spot: _filteredSpots[i],
-                          onTap: () {
-                            // Fly map to spot then open sheet
-                            _mapboxMap?.flyTo(
-                              CameraOptions(
-                                center: Point(
-                                  coordinates: Position(
-                                    _filteredSpots[i].longitude,
-                                    _filteredSpots[i].latitude,
-                                  ),
-                                ),
-                                zoom: MapboxConfig.spotZoom,
-                              ),
-                              MapAnimationOptions(duration: 900),
-                            );
-                            _showSpotBottomSheet(_filteredSpots[i]);
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Build itinerary CTA
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: GestureDetector(
-                        onTap: () {
-                          PrototypeSession.startCustomItinerary();
-                          context.push('/tourist/itinerary');
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            gradient: AppColors.primaryGradient,
-                            borderRadius: BorderRadius.circular(22),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x440038A8),
-                                blurRadius: 18,
-                                offset: Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(11),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: .18),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: const Icon(
-                                  Icons.route_rounded,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(width: 13),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    ValueListenableBuilder<
-                                      List<TouristSpotModel>
-                                    >(
-                                      valueListenable:
-                                          PrototypeSession.itinerary,
-                                      builder: (context, itinerary, child) {
-                                        return Text(
-                                          itinerary.isEmpty
-                                              ? context.tr(
-                                                  "Build a day you'll remember",
-                                                  "Bumuo ng Itinerary",
-                                                )
-                                              : '${context.tr("Build Your Day", "Bumuo ng Itinerary")} (${itinerary.length} ${context.tr("stops", "stops")})',
-                                          style: GoogleFonts.poppins(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 15,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                    Text(
-                                      context.tr(
-                                        'Choose places, see your fare, book a ride.',
-                                        'Pumili ng mga lugar, tingnan ang pamasahe, mag-book ng sakay.',
-                                      ),
-                                      style: GoogleFonts.poppins(
-                                        color: Colors.white.withValues(
-                                          alpha: .85,
-                                        ),
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const Icon(
-                                Icons.arrow_forward_rounded,
-                                color: Colors.white,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 22),
-
-                    // Plan your trip section
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            context.tr('Plan your trip', 'Planuhin ang biyahe'),
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () => context.go('/tourist/search'),
-                            child: Text(context.tr('Explore', 'Tuklasin')),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    SizedBox(
-                      height: 120,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.only(left: 20, right: 8),
-                        children: [
-                          _actionCard(
-                            context,
-                            Icons.auto_awesome_outlined,
-                            context.tr('Tour packages', 'Mga Tour Package'),
-                            context.tr(
-                              'Ready-made trips',
-                              'Handang mga biyahe',
-                            ),
-                            '/tourist/tour-packages',
-                            AppColors.secondary,
-                          ),
-                          _actionCard(
-                            context,
-                            Icons.favorite_outline_rounded,
-                            context.tr('Saved places', 'Mga Paborito'),
-                            context.tr(
-                              'Places you saved',
-                              'Lugar na naka-save',
-                            ),
-                            '/tourist/favorites',
-                            const Color(0xFFE8675D),
-                          ),
-                          _actionCard(
-                            context,
-                            Icons.receipt_long_outlined,
-                            context.tr('My bookings', 'Aking bookings'),
-                            context.tr('Ride updates', 'Mga update sa sakay'),
-                            '/tourist/bookings',
-                            AppColors.primary,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
@@ -750,19 +333,46 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
         permission == geo.LocationPermission.whileInUse;
   }
 
+  /// Before Android's own prompt, say once why the map wants location. A
+  /// "Not now" is remembered; the my-location button can still ask later.
+  Future<bool> _explainLocationFirst() async {
+    if (!await geo.Geolocator.isLocationServiceEnabled()) return false;
+    final permission = await geo.Geolocator.checkPermission();
+    if (permission == geo.LocationPermission.always ||
+        permission == geo.LocationPermission.whileInUse) {
+      return true;
+    }
+    if (permission == geo.LocationPermission.deniedForever) return false;
+    if (await LaunchPreferences.locationExplained()) return false;
+    // Let the first frame and any sign-in prompts settle first.
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    if (!mounted || !(ModalRoute.of(context)?.isCurrent ?? true)) return false;
+    final allow = await showModalBottomSheet<bool>(
+      context: context,
+      useRootNavigator: true,
+      builder: (context) => const _LocationExplainerSheet(),
+    );
+    await LaunchPreferences.markLocationExplained();
+    return allow == true;
+  }
+
   Future<void> _startLocationTracking() async {
-    if (!await _ensureLocationPermission()) return;
-    await _positionSubscription?.cancel();
-    _positionSubscription =
-        geo.Geolocator.getPositionStream(
-          locationSettings: const geo.LocationSettings(
-            accuracy: geo.LocationAccuracy.high,
-            distanceFilter: 8,
-          ),
-        ).listen((position) {
-          PrototypeSession.userLatitude.value = position.latitude;
-          PrototypeSession.userLongitude.value = position.longitude;
-        });
+    try {
+      if (!await _explainLocationFirst() || !mounted) return;
+      if (!await _ensureLocationPermission() || !mounted) return;
+      _positionSubscription =
+          geo.Geolocator.getPositionStream(
+            locationSettings: const geo.LocationSettings(
+              accuracy: geo.LocationAccuracy.high,
+              distanceFilter: 8,
+            ),
+          ).listen((position) {
+            AppSession.userLatitude.value = position.latitude;
+            AppSession.userLongitude.value = position.longitude;
+          }, onError: (Object error) => ErrorMessages.forError(error));
+    } catch (error) {
+      ErrorMessages.forError(error);
+    }
   }
 
   Widget _mapButton(
@@ -770,75 +380,20 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
     VoidCallback onTap, {
     Color foreground = AppColors.textPrimary,
     String? tooltip,
-  }) => Material(
-    color: Colors.white,
-    shape: const CircleBorder(),
-    elevation: 3,
-    child: IconButton(
-      onPressed: onTap,
-      tooltip: tooltip,
-      icon: Icon(icon, color: foreground),
-      splashRadius: 24,
-    ),
-  );
-
-  Widget _actionCard(
-    BuildContext context,
-    IconData icon,
-    String title,
-    String subtitle,
-    String route,
-    Color color,
-  ) => SizedBox(
-    width: 152,
-    child: Padding(
-      padding: const EdgeInsets.only(right: 12),
-      child: GestureDetector(
-        onTap: () => context.push(route),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFFDCE5F2), width: 1.2),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x180D1B2A),
-                blurRadius: 12,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(9),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: .13),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, size: 20, color: color),
-              ),
-              const Spacer(),
-              Text(
-                title,
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              Text(
-                subtitle,
-                style: GoogleFonts.poppins(
-                  fontSize: 10,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
+  }) => Semantics(
+    label: tooltip,
+    button: true,
+    onTap: onTap,
+    excludeSemantics: true,
+    child: Material(
+      color: Colors.white,
+      shape: const CircleBorder(),
+      elevation: 3,
+      child: IconButton(
+        onPressed: onTap,
+        tooltip: context.optionalMessage(tooltip),
+        icon: Icon(icon, color: foreground),
+        splashRadius: 24,
       ),
     ),
   );
@@ -848,9 +403,9 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
       if (!await geo.Geolocator.isLocationServiceEnabled()) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
-                'Location services are disabled. Please enable GPS.',
+                context.l10n.locationServicesAreDisabledPleaseEnableGps,
               ),
             ),
           );
@@ -860,94 +415,126 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
       if (!await _ensureLocationPermission()) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
-                'Location permission denied. Enable it in Settings.',
+                context.l10n.locationPermissionDeniedEnableItInSettings,
               ),
             ),
           );
         }
         return;
       }
-      final pos = await geo.Geolocator.getCurrentPosition(
-        locationSettings: const geo.LocationSettings(
-          accuracy: geo.LocationAccuracy.high,
-        ),
-      );
-      PrototypeSession.userLatitude.value = pos.latitude;
-      PrototypeSession.userLongitude.value = pos.longitude;
-      await _mapboxMap?.setCamera(
+      void flyTo(double lat, double lng) => _mapboxMap?.easeTo(
         CameraOptions(
-          center: Point(coordinates: Position(pos.longitude, pos.latitude)),
+          center: Point(coordinates: Position(lng, lat)),
           zoom: 15.0,
         ),
+        MapAnimationOptions(duration: 500),
       );
+      // Move at once to the position we already have (live tracking or the
+      // phone's last fix); a fresh GPS fix takes 2-3 seconds and only
+      // refines it.
+      var lat = AppSession.userLatitude.value;
+      var lng = AppSession.userLongitude.value;
+      if (lat == null || lng == null) {
+        final last = await geo.Geolocator.getLastKnownPosition();
+        lat = last?.latitude;
+        lng = last?.longitude;
+      }
+      final hadPosition = lat != null && lng != null;
+      if (hadPosition) flyTo(lat, lng);
+      final geo.Position pos;
+      try {
+        pos = await geo.Geolocator.getCurrentPosition(
+          locationSettings: const geo.LocationSettings(
+            accuracy: geo.LocationAccuracy.high,
+            timeLimit: Duration(seconds: 10),
+          ),
+        );
+      } catch (_) {
+        // Already showing the known position; a slow fix isn't an error.
+        if (hadPosition) return;
+        rethrow;
+      }
+      AppSession.userLatitude.value = pos.latitude;
+      AppSession.userLongitude.value = pos.longitude;
+      if (!mounted) return;
+      final moved =
+          !hadPosition ||
+          (pos.latitude - lat).abs() > 0.0005 ||
+          (pos.longitude - lng).abs() > 0.0005;
+      if (moved) flyTo(pos.latitude, pos.longitude);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Could not get location: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.message(ErrorMessages.forError(e)))),
+        );
       }
     }
   }
 
+  void _catalogChanged() => _filterPins(_selectedCategory);
+
   void _filterPins(String category) {
-    final filtered = category == 'All'
-        ? _spots
-        : _spots.where((s) {
-            if (category == 'Church') {
-              return s.category == SpotCategory.church;
-            }
-            if (category == 'Heritage') {
-              return s.category == SpotCategory.heritage;
-            }
-            if (category == 'Farms/Nature') {
-              return s.category == SpotCategory.nature ||
-                  s.name.toLowerCase().contains('farm') ||
-                  s.name.toLowerCase().contains('park');
-            }
-            if (category == 'Market') {
-              return s.category == SpotCategory.market;
-            }
-            if (category == 'Resorts') {
-              return s.name.toLowerCase().contains('resort');
-            }
-            if (category == 'Food & Cafes') {
-              return s.name.toLowerCase().contains('cafe');
-            }
-            if (category == 'Events') {
-              return s.name.toLowerCase().contains('festival') ||
-                  s.name.toLowerCase().contains('event');
-            }
-            return true;
-          }).toList();
-    setState(() => _filteredSpots = filtered);
+    final filtered = filterSpots(_spots, category);
+    setState(() {
+      _selectedCategory = category;
+      _filteredSpots = filtered;
+    });
     _recreatePins(filtered);
   }
 
   Future<void> _recreatePins(List<TouristSpotModel> spots) async {
-    if (_mapboxMap == null) return;
-    _annotationSpotMap.clear();
-    await _annotationManager?.deleteAll();
-    for (final spot in spots) {
-      final bitmap = await _buildPinBitmap(_categoryColor(spot.category));
-      final annotation = await _annotationManager?.create(
-        PointAnnotationOptions(
-          geometry: Point(coordinates: Position(spot.longitude, spot.latitude)),
-          image: bitmap,
-          iconSize: 1.0,
-          iconAnchor: IconAnchor.BOTTOM,
-          textField: spot.name,
-          textOffset: [0.0, 0.5],
-          textColor: AppColors.textPrimary.toARGB32(),
-          textHaloColor: Colors.white.toARGB32(),
-          textHaloWidth: 1.5,
-          textSize: 12.0,
-        ),
-      );
-      if (annotation != null) {
-        _annotationSpotMap[annotation.id] = spot;
+    _pendingPins = spots;
+    if (_annotationManager == null || _updatingPins) return;
+    _updatingPins = true;
+    try {
+      while (mounted && _pendingPins != null) {
+        final batch = _pendingPins!;
+        _pendingPins = null;
+        final manager = _annotationManager!;
+        final options = await Future.wait(
+          batch.map((spot) async {
+            final color = _categoryColor(spot.category);
+            return PointAnnotationOptions(
+              geometry: Point(
+                coordinates: Position(spot.longitude, spot.latitude),
+              ),
+              image: await _pinBitmaps.putIfAbsent(
+                color,
+                () => _buildPinBitmap(color),
+              ),
+              iconSize: 1.0,
+              iconAnchor: IconAnchor.BOTTOM,
+              // Names only when zoomed in: at town level 29 labels pile
+              // into an unreadable cluster in the centre.
+              textField: _showPinLabels ? spot.name : null,
+              textOffset: [0.0, 0.5],
+              textColor: AppColors.textPrimary.toARGB32(),
+              textHaloColor: Colors.white.toARGB32(),
+              textHaloWidth: 1.5,
+              textSize: 12.0,
+            );
+          }),
+        );
+        if (!mounted) return;
+        if (_pendingPins != null) continue;
+        _annotationSpotMap.clear();
+        await manager.deleteAll();
+        if (!mounted || options.isEmpty) continue;
+        final created = await manager.createMulti(options);
+        for (var index = 0; index < created.length; index++) {
+          final annotation = created[index];
+          if (annotation != null) {
+            _annotationSpotMap[annotation.id] = batch[index];
+          }
+        }
       }
+    } catch (error) {
+      _pinBitmaps.clear();
+      ErrorMessages.forError(error);
+    } finally {
+      _updatingPins = false;
     }
   }
 }
@@ -955,435 +542,3 @@ class _TouristHomeScreenState extends State<TouristHomeScreen> {
 // ─────────────────────────────────────────────────────────────────────────────
 // Horizontal spot card
 // ─────────────────────────────────────────────────────────────────────────────
-
-class _SpotCard extends StatelessWidget {
-  const _SpotCard({required this.spot, required this.onTap});
-
-  final TouristSpotModel spot;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 148,
-        margin: const EdgeInsets.only(right: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x1A0D1B2A),
-              blurRadius: 14,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Thumbnail
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(18),
-              ),
-              child: SafeAppImage(
-                path: spot.imageUrls.isNotEmpty ? spot.imageUrls.first : '',
-                height: 96,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-            // Info
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    spot.name,
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _categoryColor(
-                            spot.category,
-                          ).withValues(alpha: .12),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          spot.categoryLabel,
-                          style: GoogleFonts.poppins(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w600,
-                            color: _categoryColor(spot.category),
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      Icon(
-                        Icons.near_me_rounded,
-                        size: 11,
-                        color: AppColors.textSecondary,
-                      ),
-                      Text(
-                        ' ${spot.distanceFromTown}km',
-                        style: GoogleFonts.poppins(
-                          fontSize: 9,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Spot info bottom sheet (shown on pin tap or card tap)
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _SpotInfoSheet extends StatelessWidget {
-  const _SpotInfoSheet({required this.spot});
-  final TouristSpotModel spot;
-
-  @override
-  Widget build(BuildContext context) {
-    final catColor = _categoryColor(spot.category);
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.88;
-    return SafeArea(
-      top: false,
-      minimum: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: maxHeight),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x330D1B2A),
-                blurRadius: 30,
-                offset: Offset(0, -6),
-              ),
-            ],
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Handle
-                Container(
-                  width: 36,
-                  height: 4,
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFCED6E0),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-
-                // Hero image
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Stack(
-                      children: [
-                        SafeAppImage(
-                          path: spot.imageUrls.isNotEmpty
-                              ? spot.imageUrls.first
-                              : '',
-                          height: 180,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                        // Category badge overlay
-                        Positioned(
-                          top: 12,
-                          left: 12,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: catColor,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              spot.categoryLabel,
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Close button
-                        Positioned(
-                          top: 12,
-                          right: 12,
-                          child: GestureDetector(
-                            onTap: () => Navigator.pop(context),
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: .45),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.close_rounded,
-                                color: Colors.white,
-                                size: 18,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Info body
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        spot.name,
-                        style: GoogleFonts.poppins(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      // Meta row
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.access_time_rounded,
-                            size: 14,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              spot.openingHours,
-                              style: GoogleFonts.poppins(
-                                fontSize: 11,
-                                color: AppColors.textSecondary,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Icon(
-                            Icons.payments_rounded,
-                            size: 14,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            spot.entranceFee,
-                            style: GoogleFonts.poppins(
-                              fontSize: 11,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        spot.description,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                          height: 1.5,
-                        ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 16),
-                      // Action buttons
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                context.push('/tourist/spot/${spot.id}');
-                              },
-                              icon: const Icon(
-                                Icons.info_outline_rounded,
-                                size: 16,
-                              ),
-                              label: Text(
-                                'View Details',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.primary,
-                                side: const BorderSide(
-                                  color: AppColors.primary,
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: spot.isTemporarilyClosed
-                                  ? null
-                                  : () {
-                                      PrototypeSession.startCustomItinerary();
-                                      PrototypeSession.toggleItinerary(
-                                        spot,
-                                      ); // ADD THE SPOT FIRST
-                                      Navigator.pop(context);
-                                      context.push('/tourist/itinerary');
-                                    },
-                              icon: const Icon(Icons.add_rounded, size: 16),
-                              label: Text(
-                                spot.isTemporarilyClosed
-                                    ? 'Closed'
-                                    : 'Add to Trip',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                elevation: 0,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Pin bitmap builder — draws a coloured teardrop pin with dart:ui
-// ─────────────────────────────────────────────────────────────────────────────
-
-Future<Uint8List> _buildPinBitmap(Color color) async {
-  const double w = 48;
-  const double h = 64;
-  const double cx = w / 2;
-  const double r = 19.0; // circle radius
-
-  final recorder = ui.PictureRecorder();
-  final canvas = Canvas(recorder, const Rect.fromLTWH(0, 0, w, h));
-
-  // Drop shadow
-  final shadowPaint = Paint()
-    ..color = Colors.black.withValues(alpha: 0.22)
-    ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 4.0);
-  canvas.drawOval(Rect.fromLTWH(cx - 14, h - 10, 28, 10), shadowPaint);
-
-  // Teardrop path: circle top + triangle pointer at bottom
-  final path = Path()
-    ..addOval(Rect.fromCircle(center: Offset(cx, r), radius: r));
-
-  final pointerPath = Path()
-    ..moveTo(cx - 7, r + 12)
-    ..quadraticBezierTo(cx, h - 2, cx + 7, r + 12)
-    ..close();
-
-  // Fill
-  final fill = Paint()
-    ..color = color
-    ..style = PaintingStyle.fill;
-  canvas.drawPath(path, fill);
-  canvas.drawPath(pointerPath, fill);
-
-  // White border
-  final border = Paint()
-    ..color = Colors.white
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 3;
-  canvas.drawPath(path, border);
-  canvas.drawPath(pointerPath, border);
-
-  // White inner dot
-  canvas.drawCircle(
-    Offset(cx, r),
-    8,
-    Paint()
-      ..color = Colors.white.withValues(alpha: .85)
-      ..style = PaintingStyle.fill,
-  );
-
-  final picture = recorder.endRecording();
-  final img = await picture.toImage(w.toInt(), h.toInt());
-  final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
-  return byteData!.buffer.asUint8List();
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Category helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-Color _categoryColor(SpotCategory cat) => switch (cat) {
-  SpotCategory.church => const Color(0xFFCE1126), // red
-  SpotCategory.nature => const Color(0xFF27AE60), // green
-  SpotCategory.market => const Color(0xFFD4A017), // gold
-  SpotCategory.heritage => const Color(0xFF0038A8), // brand blue
-  SpotCategory.park => const Color(0xFF8E44AD), // purple
-  SpotCategory.other => const Color(0xFF6B7280), // gray
-};

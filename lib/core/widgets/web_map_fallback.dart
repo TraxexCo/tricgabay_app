@@ -1,3 +1,4 @@
+import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -11,8 +12,8 @@ class WebMapFallback extends StatelessWidget {
 
   const WebMapFallback({
     super.key,
-    this.title = 'Bustos tour map',
-    this.subtitle = 'Interactive maps are available in the mobile app.',
+    this.title = MessageCode.bustosTourMap,
+    this.subtitle = MessageCode.interactiveMapsAreAvailableInTheMobileApp,
     this.compact = false,
   });
 
@@ -58,7 +59,7 @@ class WebMapFallback extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          title,
+                          context.message(title),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
@@ -70,7 +71,7 @@ class WebMapFallback extends StatelessWidget {
                         if (!compact) ...[
                           const SizedBox(height: 2),
                           Text(
-                            subtitle,
+                            context.message(subtitle),
                             style: GoogleFonts.poppins(
                               fontSize: 10,
                               color: AppColors.textSecondary,

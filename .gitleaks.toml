@@ -1,0 +1,28 @@
+title = "Tric Gabay source and history secret scan"
+[extend]
+useDefault = true
+[allowlist]
+description = "Generated build outputs and tool caches; source, fixtures, ignored environment files and Git history are still scanned."
+paths = ['''(^|/)(build|\.git|\.dart_tool|\.gradle|node_modules|\.audit-output|ephemeral)/''']
+
+[[rules]]
+id = "generic-api-key"
+[[rules.allowlists]]
+description = "Generated ARB message identifiers misread as keys after password prose; values are not exempted"
+condition = "AND"
+regexTarget = "secret"
+paths = ['''(^|/)lib/l10n/app_(en|fil)[.]arb$''']
+regexes = ['''^(label|operations|finalLabel|statusLabel|tripError|privacyLabel)[0-9]+$''']
+
+[[rules.allowlists]]
+description = "Reviewed synthetic scheduler unit-test token"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)supabase/functions/tests/scheduler_auth_test[.]ts$''']
+regexes = ['''const token = ["'](0123456789abcdef){2}["'];''']
+[[rules.allowlists]]
+description = "Reviewed audit prose about API acceptance, not an API key"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)docs/(archive/)?engineering-audit-2026-10-23[.]md$''']
+regexes = ['''Brevo sender verification, API acceptance, bounce/delivery status, and branding in received clients[.]''']
