@@ -896,9 +896,6 @@ class AppLocalizationsFil extends AppLocalizations {
   String get checkRoadRestrictions => 'Suriin ang mga paghihigpit sa daan';
 
   @override
-  String get checkYourEmail => 'Tingnan ang email mo';
-
-  @override
   String get chooseABarangayAndEnterTheExactAddressBelow =>
       'Pumili ng barangay at ilagay sa ibaba ang eksaktong address';
 
@@ -1633,10 +1630,6 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get enterYourEmail => 'Ilagay ang iyong email';
-
-  @override
-  String get enterYourEmailAndWeWillSendYouALinkToResetYour =>
-      'Ilagay ang email mo at magpapadala kami ng link para palitan ang password.';
 
   @override
   String get enterYourFullName => 'Ilagay ang iyong buong pangalan';
@@ -3580,9 +3573,6 @@ class AppLocalizationsFil extends AppLocalizations {
   String get sendRefundToPaymongo => 'Ipadala ang refund sa PayMongo?';
 
   @override
-  String get sendResetLink => 'Ipadala ang Reset Link';
-
-  @override
   String get sep => 'Set';
 
   @override
@@ -4027,7 +4017,7 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get thisPasswordResetLinkIsInvalidOrExpiredRequestANewOne =>
-      'Hindi wasto o expired na ang link sa pagpapalit ng password. Humiling ng bago.';
+      'Nag-expire na ang pag-reset ng password na ito. Humingi ng bagong code.';
 
   @override
   String get thisPickupPinIsOutsideTheServiceAreaMoveThePinCloserTo =>
@@ -4327,10 +4317,6 @@ class AppLocalizationsFil extends AppLocalizations {
   String get useAtLeast8Characters => 'Gumamit ng hindi bababa sa 8 character';
 
   @override
-  String get useAtLeastEightCharactersAvoidAPasswordYouUseOnAnotherService =>
-      'Gumamit ng hindi bababa sa walong karakter. Iwasang gamitin ang password mo sa ibang serbisyo.';
-
-  @override
   String get useLettersSpacesHyphensApostrophesOrPeriodsInYourName =>
       'Gumamit ng mga titik, puwang, gitling, kudlit o tuldok sa pangalan';
 
@@ -4494,10 +4480,6 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get wed => 'Miy';
-
-  @override
-  String get weHaveSentPasswordRecoveryInstructionsToYourEmail =>
-      'Ipinadala na namin sa email mo ang mga tagubilin sa pagpapalit ng password.';
 
   @override
   String get welcomeBack => 'Maligayang pagbabalik';
@@ -4737,10 +4719,6 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get signInDidNotComplete => 'Hindi natapos ang pag-sign in.';
-
-  @override
-  String get authResetConfigurationRequired =>
-      'Hindi pa nakaayos ang pagbawi ng password para sa bersyong ito.';
 
   @override
   String get pickupRecoveryFailed =>
@@ -5777,5 +5755,60 @@ class AppLocalizationsFil extends AppLocalizations {
   @override
   String ratingOutOfFiveValue(String value) {
     return '$value sa 5 bituin';
+  }
+
+  @override
+  String get verifyYourEmail => 'I-verify ang iyong email';
+
+  @override
+  String get enterSixDigitCodeEmailed =>
+      'Ilagay ang 6-digit na code na ipinadala namin sa email mo';
+
+  @override
+  String codeSentToValue(String value) {
+    return 'Nagpadala kami ng code sa $value.';
+  }
+
+  @override
+  String get sixDigitCode => '6-digit na code';
+
+  @override
+  String get verifyCode => 'I-verify';
+
+  @override
+  String get resendCode => 'Ipadala muli ang code';
+
+  @override
+  String resendCodeInValue(String value) {
+    return 'Ipadala muli ang code sa loob ng ${value}s';
+  }
+
+  @override
+  String get newCodeSent => 'May bagong code na papunta sa email mo.';
+
+  @override
+  String get codeWrongOrExpired =>
+      'Mali o expired na ang code na iyon. Suriin ito, o humingi ng bago.';
+
+  @override
+  String get codeRateLimited =>
+      'Napakaraming subok. Maghintay ng ilang minuto, saka subukan muli.';
+
+  @override
+  String get enterAllSixDigits => 'Ilagay ang lahat ng 6 na digit.';
+
+  @override
+  String get neverShareThisCode => 'Huwag ibigay ang code na ito kaninuman.';
+
+  @override
+  String get sendResetCode => 'Ipadala ang code';
+
+  @override
+  String get enterYourEmailAndWeWillSendYouA6DigitCode =>
+      'Ilagay ang iyong email at padadalhan ka namin ng 6-digit na code para i-reset ang iyong password.';
+
+  @override
+  String resetCodeSentNeutral(String value) {
+    return 'Kung may account para sa $value, nagpadala kami ng 6-digit na code doon.';
   }
 }

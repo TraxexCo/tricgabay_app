@@ -12,9 +12,12 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 
+import '../../../core/constants/app_routes.dart';
 import '../post_auth_route.dart';
+import 'verify_email_code_screen.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/config/backend_config.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show AuthException;
 import '../../../core/services/auth_service.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -31,7 +34,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isLoading = false;
   String _role = 'tourist';
 
-  void _login() async {
+  Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
     if (!BackendConfig.isConfigured) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -65,6 +68,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       context.go(routeForProfile(profile));
     } catch (error) {
       if (!mounted) return;
+      // The account exists but its email was never confirmed (for example the
+      // user left the code screen after signing up): let them enter a code,
+      // asking for a fresh one if needed, then sign in again.
+      if (error is AuthException && error.code == 'email_not_confirmed') {
+        final verified = await context.push<bool>(
+          AppRoutes.verifyEmail,
+          extra: VerifyEmailArgs(_emailCtrl.text.trim(), codeJustSent: false),
+        );
+        if (!mounted) return;
+        if (verified == true) await _login();
+        return;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.message(ErrorMessages.forError(error)))),
       );

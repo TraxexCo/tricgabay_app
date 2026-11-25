@@ -12,9 +12,7 @@ val buildDefines = (project.findProperty("dart-defines") as? String).orEmpty().s
     val pair = String(Base64.getDecoder().decode(it)).split("=", limit = 2)
     pair.first() to pair.getOrElse(1) { "" }
 }
-val appLinkHost = buildDefines["AUTH_APP_LINK_HOST"]?.lowercase()
-    ?.takeIf { it.matches(Regex("[a-z0-9][a-z0-9.-]*[a-z0-9]")) } ?: "unconfigured.invalid"
-val requiredReleaseDefines = listOf("APP_ENV", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "MAPBOX_PUBLIC_TOKEN", "FIREBASE_API_KEY", "FIREBASE_APP_ID", "FIREBASE_MESSAGING_SENDER_ID", "FIREBASE_PROJECT_ID", "AUTH_APP_LINK_HOST")
+val requiredReleaseDefines = listOf("APP_ENV", "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "MAPBOX_PUBLIC_TOKEN", "FIREBASE_API_KEY", "FIREBASE_APP_ID", "FIREBASE_MESSAGING_SENDER_ID", "FIREBASE_PROJECT_ID")
 val requestedTasks = gradle.startParameter.taskNames.map { it.substringAfterLast(":").lowercase() }
 val requestedFlavors = listOf("dev", "staging", "production").filter { flavor ->
     requestedTasks.any { it.contains(flavor + "debug") || it.contains(flavor + "release") }
@@ -37,7 +35,6 @@ android {
     }
 
     defaultConfig {
-        manifestPlaceholders["authAppLinkHost"] = appLinkHost
         applicationId = "com.tricgabay.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
@@ -90,7 +87,6 @@ android {
                 if (missing.isNotEmpty()) throw GradleException("Missing release configuration: " + missing.joinToString(", "))
                 if (buildDefines["APP_ENV"] != flavor) throw GradleException("APP_ENV must match the Android flavor: " + flavor)
                 if (!buildDefines["SUPABASE_URL"]!!.startsWith("https://") || !buildDefines["MAPBOX_PUBLIC_TOKEN"]!!.startsWith("pk.")) throw GradleException("Invalid release service configuration")
-                if (appLinkHost == "unconfigured.invalid") throw GradleException("A verified HTTPS authentication domain is required")
                 if (!signingPropertiesFile.exists() && System.getenv("ALLOW_DEBUG_RELEASE_SIGNING") != "true") throw GradleException("Release signing is not configured. Configure the release keystore before distribution.")
             }
         }

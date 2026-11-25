@@ -8,7 +8,7 @@ Written 2026-11-26 from a read-only audit of the repo, the release APK and the h
 
 - The client receives **the APK and the Supabase account**. The source repo stays with the owner.
 - The hosted project is `xcsrjuqzwequmeqzedzd` (name `tric-gabay`, region ap-northeast-2, **Free plan**). It already sits in its own organization, named `Tric-Gabay`.
-- The APK has these values compiled in (checked in the release build): `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (anon), `MAPBOX_PUBLIC_TOKEN`, the Firebase client options (`FIREBASE_API_KEY`, `FIREBASE_APP_ID`, `FIREBASE_MESSAGING_SENDER_ID`, `FIREBASE_PROJECT_ID`) and `AUTH_APP_LINK_HOST`. Changing any of them means **rebuilding and re-delivering the APK**.
+- The APK has these values compiled in (checked in the release build): `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (anon), `MAPBOX_PUBLIC_TOKEN`, the Firebase client options (`FIREBASE_API_KEY`, `FIREBASE_APP_ID`, `FIREBASE_MESSAGING_SENDER_ID`, `FIREBASE_PROJECT_ID`). Changing any of them means **rebuilding and re-delivering the APK**.
 
 ### Rebuild or not: it depends on how the project moves
 
@@ -38,7 +38,7 @@ Route A is the recommended one. Supabase describes project transfer as moving a 
 ### Risk: auth emails
 
 - **Current state (checked 2026-11-26 on the public auth settings endpoint): Confirm email is OFF** (`mailer_autoconfirm` true), and sign-up is open. A new tourist is signed in at sign-up and goes straight to the tourist home (app build 9 and later; builds before that still showed "Confirm your email" and sent the user to login).
-- Supabase's built-in email sender only delivers to addresses that belong to the organization's team, and it is rate-limited. It is meant for testing. With Confirm email off, sign-up no longer needs it. **If Confirm email is turned back on without custom SMTP, a real new tourist or driver will never receive the confirmation email** and cannot sign in. Password reset has the same dependency (it also needs the real auth domain).
+- Supabase's built-in email sender only delivers to addresses that belong to the organization's team, and it is rate-limited. It is meant for testing. With Confirm email off, sign-up no longer needs it. **If Confirm email is turned back on without custom SMTP, a real new tourist or driver will never receive the confirmation email** and cannot sign in. Password reset has the same dependency: in build 1.0.0+10 it emails a 6-digit code, which also needs custom SMTP.
 - Whether custom SMTP is configured could not be read from here. Check it in the dashboard (Authentication, SMTP settings) before turning Confirm email on, and before telling the client the app is ready for the public.
 - The existing test accounts are not affected, because they were created directly.
 
@@ -101,18 +101,18 @@ What to tell the client:
 
 - They own the database, accounts, storage and bills of the Supabase project. They have no way to change the app itself.
 - Maps, push notifications and booking emails run on **your** third-party accounts for now. Say which of those you will keep paying for, for how long, and what happens if you stop (maps and search go dark, pushes stop, booking emails stop; the rest of the app still works).
-- The interim APK is **debug-signed** and its password-reset link is a placeholder. Password reset in the app does not work until the "Later" items are done.
+- The interim APK is **debug-signed**. Builds before 1.0.0+10 use an emailed link for password reset, which needs a domain that does not exist, so reset does not work in them. Build 1.0.0+10 uses a 6-digit emailed code instead (see `docs/EMAIL_OTP_SETUP.md`); it works once custom SMTP and the two email templates are set up.
 - Moving any of those accounts to them later means a rebuilt APK.
 
 ## Later
 
-1. **Real SMTP (Brevo).** Verify a sender domain. In Supabase, Authentication, SMTP settings, point Auth at Brevo so confirmation and reset emails reach any address. Use the same domain for the booking-email secrets.
-2. **A real auth domain.** Choose it (for example `auth.<their-domain>`). Host `https://<domain>/.well-known/assetlinks.json` for package `com.tricgabay.app` with the **release key's** SHA-256. Serve a page at `https://<domain>/auth/reset-password`. In Supabase, set the Site URL and add that URL to the Redirect URLs.
-3. **Decide on Confirm email and test it.** It is off today (see the risk above). If you want it on again, do it only after items 1 and 2, then do a full sign-up with a real inbox and check that the link works. The app handles both settings (build 9 and later).
+1. **Real SMTP (Brevo)** and the two code email templates. Steps and the exact template text are in `docs/EMAIL_OTP_SETUP.md`. Until then Supabase's built-in sender only emails your own team.
+2. **No auth domain is needed any more.** Sign-up confirmation and password reset use a 6-digit emailed code (build 1.0.0+10), so the domain, `assetlinks.json`, the reset web page and `AUTH_APP_LINK_HOST` are gone. If you want a verified sender domain for the emails, that is a Brevo setting (see `docs/EMAIL_OTP_SETUP.md`).
+3. **Decide on Confirm email and test it.** It is off today (see the risk above). If you want sign-up to need a code, turn it on only after items 1 and 2 of `docs/EMAIL_OTP_SETUP.md`, then run its test checklist with a real inbox. The app handles both settings.
 4. **Create the real upload keystore** (run it yourself in a terminal; it asks for the keystore password and the key password, and you type them there):
    `keytool -genkeypair -v -keystore C:\Users\Prince\keys\tricgabay-upload.jks -alias tricgabay -keyalg RSA -keysize 2048 -validity 10000`
    Then put the same two passwords in `android\key.properties` (gitignored). Back up the `.jks` file and both passwords outside the repo. Losing them means no more updates under that key.
-5. **Rebuild with `--flavor production`:** put the real `AUTH_APP_LINK_HOST` in `config/production.json`, rename `android\key.properties.unused` back to `key.properties` with the real passwords, then:
+5. **Rebuild with `--flavor production`:** rename `android\key.properties.unused` back to `key.properties` with the real passwords, then:
    `flutter build apk --release --flavor production --dart-define-from-file=config/production.json`
 6. **Tidy-ups:** delete the three PayMongo secrets and the two inactive PayMongo cron jobs; enable leaked-password protection (Supabase Auth setting, currently off).
 

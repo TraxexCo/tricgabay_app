@@ -881,9 +881,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkRoadRestrictions => 'Check road restrictions';
 
   @override
-  String get checkYourEmail => 'Check your email';
-
-  @override
   String get chooseABarangayAndEnterTheExactAddressBelow =>
       'Choose a barangay and enter the exact address below';
 
@@ -1607,10 +1604,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterYourEmail => 'Enter your email';
-
-  @override
-  String get enterYourEmailAndWeWillSendYouALinkToResetYour =>
-      'Enter your email and we will send you a link to reset your password.';
 
   @override
   String get enterYourFullName => 'Enter your full name';
@@ -3523,9 +3516,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendRefundToPaymongo => 'Send refund to PayMongo?';
 
   @override
-  String get sendResetLink => 'Send reset link';
-
-  @override
   String get sep => 'Sep';
 
   @override
@@ -3961,7 +3951,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get thisPasswordResetLinkIsInvalidOrExpiredRequestANewOne =>
-      'This password-reset link is invalid or expired. Request a new one.';
+      'This password reset has expired. Ask for a new code.';
 
   @override
   String get thisPickupPinIsOutsideTheServiceAreaMoveThePinCloserTo =>
@@ -4255,10 +4245,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get useAtLeast8Characters => 'Use at least 8 characters';
 
   @override
-  String get useAtLeastEightCharactersAvoidAPasswordYouUseOnAnotherService =>
-      'Use at least eight characters. Avoid a password you use on another service.';
-
-  @override
   String get useLettersSpacesHyphensApostrophesOrPeriodsInYourName =>
       'Use letters, spaces, hyphens, apostrophes or periods in your name';
 
@@ -4417,10 +4403,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get wed => 'Wed';
-
-  @override
-  String get weHaveSentPasswordRecoveryInstructionsToYourEmail =>
-      'We have sent password recovery instructions to your email.';
 
   @override
   String get welcomeBack => 'Welcome back';
@@ -4664,10 +4646,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signInDidNotComplete => 'Sign-in did not complete.';
-
-  @override
-  String get authResetConfigurationRequired =>
-      'Password recovery is not configured for this build.';
 
   @override
   String get pickupRecoveryFailed =>
@@ -5694,5 +5672,60 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String ratingOutOfFiveValue(String value) {
     return '$value out of 5 stars';
+  }
+
+  @override
+  String get verifyYourEmail => 'Verify your email';
+
+  @override
+  String get enterSixDigitCodeEmailed =>
+      'Enter the 6-digit code we emailed you';
+
+  @override
+  String codeSentToValue(String value) {
+    return 'We sent a code to $value.';
+  }
+
+  @override
+  String get sixDigitCode => '6-digit code';
+
+  @override
+  String get verifyCode => 'Verify';
+
+  @override
+  String get resendCode => 'Resend code';
+
+  @override
+  String resendCodeInValue(String value) {
+    return 'Resend code in ${value}s';
+  }
+
+  @override
+  String get newCodeSent => 'A new code is on its way.';
+
+  @override
+  String get codeWrongOrExpired =>
+      'That code is wrong or has expired. Check it, or ask for a new one.';
+
+  @override
+  String get codeRateLimited =>
+      'Too many tries. Wait a few minutes, then try again.';
+
+  @override
+  String get enterAllSixDigits => 'Enter all 6 digits.';
+
+  @override
+  String get neverShareThisCode => 'Never share this code with anyone.';
+
+  @override
+  String get sendResetCode => 'Send code';
+
+  @override
+  String get enterYourEmailAndWeWillSendYouA6DigitCode =>
+      'Enter your email and we will send you a 6-digit code to reset your password.';
+
+  @override
+  String resetCodeSentNeutral(String value) {
+    return 'If an account exists for $value, we sent a 6-digit code to it.';
   }
 }

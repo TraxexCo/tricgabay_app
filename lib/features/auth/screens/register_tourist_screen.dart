@@ -11,7 +11,9 @@ import '../../../core/widgets/app_text_field.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/session/app_session.dart';
+import '../../../core/constants/app_routes.dart';
 import '../post_auth_route.dart';
+import 'verify_email_code_screen.dart';
 
 class RegisterTouristScreen extends ConsumerStatefulWidget {
   const RegisterTouristScreen({super.key});
@@ -63,9 +65,20 @@ class _RegisterTouristScreenState extends ConsumerState<RegisterTouristScreen> {
       );
       if (!mounted) return;
       // Confirm email off: the server already signed the new account in, so
-      // go straight into the app. Otherwise (no session) the user has to
-      // confirm the email and sign in.
-      if (outcome == SignUpOutcome.signedIn) {
+      // go straight into the app. Otherwise (no session) the user confirms
+      // the email with the 6-digit code we just sent, which also signs them
+      // in. Leaving that screen sends them to the login screen instead.
+      var signedIn = outcome == SignUpOutcome.signedIn;
+      if (!signedIn) {
+        signedIn =
+            await context.push<bool>(
+              AppRoutes.verifyEmail,
+              extra: VerifyEmailArgs(_emailCtrl.text.trim()),
+            ) ??
+            false;
+        if (!mounted) return;
+      }
+      if (signedIn) {
         final profile = await AuthService.restoreSession();
         if (profile != null) {
           AppSession.setAuthenticatedUser(

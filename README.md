@@ -90,7 +90,6 @@ git-ignored config file.
    | `MAPBOX_PUBLIC_TOKEN` | Mapbox account, Tokens (a public `pk.` token) |
    | `FIREBASE_API_KEY`, `FIREBASE_APP_ID`, `FIREBASE_MESSAGING_SENDER_ID`, `FIREBASE_PROJECT_ID` | Firebase console, Project settings → your Android app |
    | `APP_ENV` | `dev`, `staging` or `production`; must match the Android flavor you build |
-   | `AUTH_APP_LINK_HOST` | The domain used for password-reset links |
 
 4. Set up the database: apply `supabase/migrations/` to your Supabase project
    (`supabase db push`).

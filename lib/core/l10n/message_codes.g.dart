@@ -173,8 +173,6 @@ abstract final class MessageCode {
   static const auditedRouteChangesRequireTheConfiguredServer =
       '@l10n/auditedRouteChangesRequireTheConfiguredServer';
   static const aug = '@l10n/aug';
-  static const authResetConfigurationRequired =
-      '@l10n/authResetConfigurationRequired';
   static const availability = '@l10n/availability';
   static String avatarCleanupPendingForObjectValue(String value) =>
       encodeMessage('avatarCleanupPendingForObjectValue', [value]);
@@ -306,7 +304,6 @@ abstract final class MessageCode {
   static String checkOutInBustosBulacanValue(String value) =>
       encodeMessage('checkOutInBustosBulacanValue', [value]);
   static const checkRoadRestrictions = '@l10n/checkRoadRestrictions';
-  static const checkYourEmail = '@l10n/checkYourEmail';
   static const checkingGpsAndPermission = '@l10n/checkingGpsAndPermission';
   static const checkoutCouldNotBeCreated = '@l10n/checkoutCouldNotBeCreated';
   static const chooseABarangayAndEnterTheExactAddressBelow =
@@ -351,8 +348,12 @@ abstract final class MessageCode {
   static const closeTemporarily = '@l10n/closeTemporarily';
   static const closed = '@l10n/closed';
   static const closureReason = '@l10n/closureReason';
+  static const codeRateLimited = '@l10n/codeRateLimited';
   static const codeReissueCouldNotBeConfirmed =
       '@l10n/codeReissueCouldNotBeConfirmed';
+  static String codeSentToValue(String value) =>
+      encodeMessage('codeSentToValue', [value]);
+  static const codeWrongOrExpired = '@l10n/codeWrongOrExpired';
   static String compactCurrency(String value) =>
       encodeMessage('compactCurrency', [value]);
   static const completeAllDocumentAndServiceAreaFields =
@@ -684,12 +685,14 @@ abstract final class MessageCode {
   static const enterAValidPhoneNumber = '@l10n/enterAValidPhoneNumber';
   static const enterAValidPrice = '@l10n/enterAValidPrice';
   static const enterAddress = '@l10n/enterAddress';
+  static const enterAllSixDigits = '@l10n/enterAllSixDigits';
   static const enterAnAdminEmail = '@l10n/enterAnAdminEmail';
   static const enterDescription = '@l10n/enterDescription';
   static const enterDriverApp = '@l10n/enterDriverApp';
   static const enterHistory = '@l10n/enterHistory';
   static const enterPesosWithAtMostTwoDecimalPlaces =
       '@l10n/enterPesosWithAtMostTwoDecimalPlaces';
+  static const enterSixDigitCodeEmailed = '@l10n/enterSixDigitCodeEmailed';
   static const enterThePickupAddressBelow = '@l10n/enterThePickupAddressBelow';
   static const enterTheReasonForApprovingOrRestoringServiceAtLeastFiveCharacters =
       '@l10n/enterTheReasonForApprovingOrRestoringServiceAtLeastFiveCharacters';
@@ -699,8 +702,8 @@ abstract final class MessageCode {
   static const enterYourAnnouncementDetailsHere =
       '@l10n/enterYourAnnouncementDetailsHere';
   static const enterYourEmail = '@l10n/enterYourEmail';
-  static const enterYourEmailAndWeWillSendYouALinkToResetYour =
-      '@l10n/enterYourEmailAndWeWillSendYouALinkToResetYour';
+  static const enterYourEmailAndWeWillSendYouA6DigitCode =
+      '@l10n/enterYourEmailAndWeWillSendYouA6DigitCode';
   static const enterYourFullName = '@l10n/enterYourFullName';
   static const enterYourPassword = '@l10n/enterYourPassword';
   static const entranceFee = '@l10n/entranceFee';
@@ -1163,8 +1166,10 @@ abstract final class MessageCode {
   static const navigate = '@l10n/navigate';
   static const needHelpRightNow = '@l10n/needHelpRightNow';
   static const needsReview = '@l10n/needsReview';
+  static const neverShareThisCode = '@l10n/neverShareThisCode';
   static String newBookingsUseTheseFaresValue(String value) =>
       encodeMessage('newBookingsUseTheseFaresValue', [value]);
+  static const newCodeSent = '@l10n/newCodeSent';
   static const newPackage = '@l10n/newPackage';
   static const newPassword = '@l10n/newPassword';
   static const newPlace = '@l10n/newPlace';
@@ -1623,6 +1628,11 @@ abstract final class MessageCode {
   static String requestedOnValue(String date) =>
       encodeMessage('requestedOnValue', [date]);
   static const requests = '@l10n/requests';
+  static const resendCode = '@l10n/resendCode';
+  static String resendCodeInValue(String value) =>
+      encodeMessage('resendCodeInValue', [value]);
+  static String resetCodeSentNeutral(String value) =>
+      encodeMessage('resetCodeSentNeutral', [value]);
   static const resetMap = '@l10n/resetMap';
   static const resolve = '@l10n/resolve';
   static const resolvePaymentReview = '@l10n/resolvePaymentReview';
@@ -1724,7 +1734,7 @@ abstract final class MessageCode {
   static const sendRefundRequestToPaymongo =
       '@l10n/sendRefundRequestToPaymongo';
   static const sendRefundToPaymongo = '@l10n/sendRefundToPaymongo';
-  static const sendResetLink = '@l10n/sendResetLink';
+  static const sendResetCode = '@l10n/sendResetCode';
   static const sendSupportMessage = '@l10n/sendSupportMessage';
   static const sep = '@l10n/sep';
   static const serverConnectionRequired = '@l10n/serverConnectionRequired';
@@ -1761,6 +1771,7 @@ abstract final class MessageCode {
   static const signInFirst = '@l10n/signInFirst';
   static const signOut = '@l10n/signOut';
   static const signUp = '@l10n/signUp';
+  static const sixDigitCode = '@l10n/sixDigitCode';
   static const skip = '@l10n/skip';
   static String someInformationCouldNotRefreshDetailValue(String detail) =>
       encodeMessage('someInformationCouldNotRefreshDetailValue', [detail]);
@@ -2076,8 +2087,6 @@ abstract final class MessageCode {
       encodeMessage('uploadValue', [value]);
   static const uploading = '@l10n/uploading';
   static const useAtLeast8Characters = '@l10n/useAtLeast8Characters';
-  static const useAtLeastEightCharactersAvoidAPasswordYouUseOnAnotherService =
-      '@l10n/useAtLeastEightCharactersAvoidAPasswordYouUseOnAnotherService';
   static const useDeviceLanguage = '@l10n/useDeviceLanguage';
   static const useLettersSpacesHyphensApostrophesOrPeriodsInYourName =
       '@l10n/useLettersSpacesHyphensApostrophesOrPeriodsInYourName';
@@ -2103,9 +2112,11 @@ abstract final class MessageCode {
   static const verifiedPickupArrivalIsRequiredBeforeReportingANoShow =
       '@l10n/verifiedPickupArrivalIsRequiredBeforeReportingANoShow';
   static const verifiedTourist = '@l10n/verifiedTourist';
+  static const verifyCode = '@l10n/verifyCode';
   static const verifyLocalAgencyNumbers = '@l10n/verifyLocalAgencyNumbers';
   static const verifyPickup = '@l10n/verifyPickup';
   static const verifyPickupCodeStart = '@l10n/verifyPickupCodeStart';
+  static const verifyYourEmail = '@l10n/verifyYourEmail';
   static const viewActiveDriversOnTheMap = '@l10n/viewActiveDriversOnTheMap';
   static const viewAll = '@l10n/viewAll';
   static const viewAndManageTouristAccounts =
@@ -2140,8 +2151,6 @@ abstract final class MessageCode {
       '@l10n/waitingForTheTouristToChooseDoNotProceedToPickup';
   static const waitingPeriodCompleted = '@l10n/waitingPeriodCompleted';
   static const waived = '@l10n/waived';
-  static const weHaveSentPasswordRecoveryInstructionsToYourEmail =
-      '@l10n/weHaveSentPasswordRecoveryInstructionsToYourEmail';
   static const weLlSendNearbyBookingsYourWay =
       '@l10n/weLlSendNearbyBookingsYourWay';
   static const weWillRemindYouAndStartMatching30MinutesBeforePickup =
