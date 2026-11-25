@@ -12,7 +12,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 
-import '../../../core/constants/app_routes.dart';
+import '../post_auth_route.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../core/services/auth_service.dart';
@@ -62,15 +62,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       );
       await AppSession.syncRemoteState();
       if (!mounted) return;
-      context.go(
-        profile.applicationPending
-            ? '/driver/application-pending'
-            : switch (profile.role) {
-                AppRole.admin => AppRoutes.adminDashboard,
-                AppRole.driver => '/driver/home',
-                _ => '/tourist/home',
-              },
-      );
+      context.go(routeForProfile(profile));
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
