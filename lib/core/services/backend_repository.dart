@@ -262,7 +262,7 @@ class BackendRepository {
     booking_offers(driver_id,status,expires_at),
     booking_route_changes(id,requested_by,requested_role,change_type,target_stop_id,proposed_order,reason,created_at,status),
     trip_events(created_at,actor_role,description,metadata),payments(status,amount_centavos),
-    cash_confirmations(direction,actor_role),booking_reviews(rating,review)
+    cash_confirmations(direction,actor_role),booking_reviews(rating,review,created_at)
   ''');
     if (bookingId != null) query = query.eq('id', bookingId);
     // Give PostgreSQL an indexed participant predicate; RLS still enforces
@@ -492,6 +492,9 @@ class BackendRepository {
                   ? null
                   : (reviews.first['rating'] as num).toDouble(),
               driverReview: reviews.isEmpty ? null : reviews.first['review'],
+              driverReviewedAt: reviews.isEmpty
+                  ? null
+                  : _date(reviews.first['created_at']),
               freeCancellationMinutes:
                   policy['free_cancellation_minutes'] as int? ?? 5,
               acceptedCancellationPercent:

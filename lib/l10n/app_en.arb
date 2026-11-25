@@ -966,7 +966,6 @@
   "goOnlineToStartReceivingBookingRequests": "Go online to start receiving booking requests.",
   "goOnlineWithAnApprovedAccountAndFinishYourCurrentTripToAccept": "Go online with an approved account and finish your current trip to accept a new request.",
   "goOnlineWithAnApprovedDriverAccountFirst": "Go online with an approved driver account first.",
-  "greatRideVeryKnowledgeableAboutBustos": "Great ride, very knowledgeable about Bustos!",
   "headingTo": "Heading to",
   "headingToPickup": "Heading to pickup",
   "help": "Help",
@@ -1321,7 +1320,6 @@
   "noPendingRequest": "No pending request",
   "noPhotosAvailable": "No photos available",
   "noRecentBookings": "No recent bookings",
-  "noReviewsFound": "No reviews found.",
   "noShowFee": "No-show fee",
   "noSpotsFound": "No spots found",
   "noSystemFeedbackFound": "No system feedback found.",
@@ -2834,5 +2832,9 @@
   "@startTimeWindowHelp": {"placeholders": {"first": {"type": "String"}, "last": {"type": "String"}}},
   "hoursCloseAfterOpen": "Closing time must be later than opening time.",
   "stopsSkippedClosedThatDay": "Skipped on this day because it is closed: {stops}",
-  "@stopsSkippedClosedThatDay": {"placeholders": {"stops": {"type": "String"}}}
+  "@stopsSkippedClosedThatDay": {"placeholders": {"stops": {"type": "String"}}},
+  "noReviewsYet": "No reviews yet",
+  "noReviewsYetBody": "Reviews from completed tours appear here.",
+  "ratingOutOfFiveValue": "{value} out of 5 stars",
+  "@ratingOutOfFiveValue": {"placeholders": {"value": {"type": "String"}}}
 }

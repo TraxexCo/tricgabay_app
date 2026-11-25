@@ -966,7 +966,6 @@
   "goOnlineToStartReceivingBookingRequests": "Mag-online upang makatanggap ng mga kahilingan ng reserbasyon.",
   "goOnlineWithAnApprovedAccountAndFinishYourCurrentTripToAccept": "Mag-online gamit ang aprubadong account at tapusin ang kasalukuyang biyahe bago tumanggap ng bagong kahilingan.",
   "goOnlineWithAnApprovedDriverAccountFirst": "Mag-online muna gamit ang aprubadong account ng drayber.",
-  "greatRideVeryKnowledgeableAboutBustos": "Magandang biyahe, mahusay ang kaalaman tungkol sa Bustos!",
   "headingTo": "Papunta sa",
   "headingToPickup": "Papunta sa Sunduan",
   "help": "Tulong",
@@ -1321,7 +1320,6 @@
   "noPendingRequest": "Walang Naghihintay na Kahilingan",
   "noPhotosAvailable": "Walang available na larawan",
   "noRecentBookings": "Walang kamakailang reserbasyon",
-  "noReviewsFound": "Walang nakitang review.",
   "noShowFee": "Bayad sa hindi pagsipot",
   "noSpotsFound": "Walang nakitang pasyalan",
   "noSystemFeedbackFound": "Walang nakitang feedback sa sistema.",
@@ -2834,5 +2832,9 @@
   "@startTimeWindowHelp": {"placeholders": {"first": {"type": "String"}, "last": {"type": "String"}}},
   "hoursCloseAfterOpen": "Dapat mas huli ang oras ng pagsasara kaysa sa oras ng pagbubukas.",
   "stopsSkippedClosedThatDay": "Laktaw sa araw na ito dahil sarado: {stops}",
-  "@stopsSkippedClosedThatDay": {"placeholders": {"stops": {"type": "String"}}}
+  "@stopsSkippedClosedThatDay": {"placeholders": {"stops": {"type": "String"}}},
+  "noReviewsYet": "Wala pang review",
+  "noReviewsYetBody": "Dito lalabas ang mga review mula sa mga natapos na tour.",
+  "ratingOutOfFiveValue": "{value} sa 5 bituin",
+  "@ratingOutOfFiveValue": {"placeholders": {"value": {"type": "String"}}}
 }

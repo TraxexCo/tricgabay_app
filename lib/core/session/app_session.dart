@@ -1199,7 +1199,13 @@ class AppSession {
     // second tap would then hit "already rated").
     bookings.value = [
       for (final b in bookings.value)
-        b.id == id ? b.copyWith(driverRating: rating.roundToDouble()) : b,
+        b.id == id
+            ? b.copyWith(
+                driverRating: rating.roundToDouble(),
+                driverReview: review.trim(),
+                driverReviewedAt: DateTime.now(),
+              )
+            : b,
     ];
     unawaited(syncRemoteState().catchError((Object _) {}));
     return bookingById(id);

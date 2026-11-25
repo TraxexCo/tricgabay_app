@@ -1978,5 +1978,11 @@
     "value": "Embedded rows are {1}, expected a list, an object or null",
     "kind": "protocol",
     "reason": "Developer-facing exception text for an unexpected server response shape; never shown in the interface."
+  },
+  {
+    "file": "lib/features/admin/screens/ratings_feedback_screen.dart",
+    "value": "review-stars-{1}",
+    "kind": "protocol",
+    "reason": "Widget key used by tests to count a review card's filled stars; never shown in the interface."
   }
 ]

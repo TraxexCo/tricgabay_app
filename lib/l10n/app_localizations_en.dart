@@ -1931,10 +1931,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Go online with an approved driver account first.';
 
   @override
-  String get greatRideVeryKnowledgeableAboutBustos =>
-      'Great ride, very knowledgeable about Bustos!';
-
-  @override
   String get headingTo => 'Heading to';
 
   @override
@@ -2506,9 +2502,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noRecentBookings => 'No recent bookings';
-
-  @override
-  String get noReviewsFound => 'No reviews found.';
 
   @override
   String get noShowFee => 'No-show fee';
@@ -5696,5 +5689,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String stopsSkippedClosedThatDay(String stops) {
     return 'Skipped on this day because it is closed: $stops';
+  }
+
+  @override
+  String get noReviewsYet => 'No reviews yet';
+
+  @override
+  String get noReviewsYetBody => 'Reviews from completed tours appear here.';
+
+  @override
+  String ratingOutOfFiveValue(String value) {
+    return '$value out of 5 stars';
   }
 }

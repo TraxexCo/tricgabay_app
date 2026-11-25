@@ -1958,10 +1958,6 @@ class AppLocalizationsFil extends AppLocalizations {
       'Mag-online muna gamit ang aprubadong account ng drayber.';
 
   @override
-  String get greatRideVeryKnowledgeableAboutBustos =>
-      'Magandang biyahe, mahusay ang kaalaman tungkol sa Bustos!';
-
-  @override
   String get headingTo => 'Papunta sa';
 
   @override
@@ -2543,9 +2539,6 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get noRecentBookings => 'Walang kamakailang reserbasyon';
-
-  @override
-  String get noReviewsFound => 'Walang nakitang review.';
 
   @override
   String get noShowFee => 'Bayad sa hindi pagsipot';
@@ -5778,5 +5771,17 @@ class AppLocalizationsFil extends AppLocalizations {
   @override
   String stopsSkippedClosedThatDay(String stops) {
     return 'Laktaw sa araw na ito dahil sarado: $stops';
+  }
+
+  @override
+  String get noReviewsYet => 'Wala pang review';
+
+  @override
+  String get noReviewsYetBody =>
+      'Dito lalabas ang mga review mula sa mga natapos na tour.';
+
+  @override
+  String ratingOutOfFiveValue(String value) {
+    return '$value sa 5 bituin';
   }
 }

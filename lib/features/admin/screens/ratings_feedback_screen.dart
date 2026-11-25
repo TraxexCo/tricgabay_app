@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/session/app_session.dart';
 import '../../../models/booking_model.dart';
+import '../reviewed_bookings.dart';
 
 class RatingsFeedbackScreen extends ConsumerWidget {
   const RatingsFeedbackScreen({super.key});
@@ -35,99 +36,28 @@ class RatingsFeedbackScreen extends ConsumerWidget {
   }
 
   Widget _buildReviewsList(BuildContext context) {
-    final reviews = AppSession.bookings.value
-        .where((b) => b.status == BookingStatus.completed)
-        .toList();
+    return ValueListenableBuilder<List<BookingModel>>(
+      valueListenable: AppSession.bookings,
+      builder: (context, bookings, child) {
+        final reviews = reviewedBookings(bookings);
 
-    if (reviews.isEmpty) {
-      return EmptyStateWidget(
-        icon: Icons.star_outline_rounded,
-        title: context.l10n.noReviewsFound,
-      );
-    }
+        if (reviews.isEmpty) {
+          return EmptyStateWidget(
+            icon: Icons.star_outline_rounded,
+            title: context.l10n.noReviewsYet,
+            subtitle: context.l10n.noReviewsYetBody,
+          );
+        }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: reviews.length,
-      itemBuilder: (context, index) => FadeSlideIn.staggered(
-        index: index,
-        child: Builder(
-          builder: (context) {
-            final review = reviews[index];
-            return AppCard(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          context.message(review.touristName),
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Row(
-                          children: List.generate(
-                            5,
-                            (i) => Icon(
-                              Icons.star,
-                              size: 16,
-                              color: i < 4 ? AppColors.secondary : Colors.grey,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      context.l10n.driverValue(
-                        context.message(
-                          (review.driverName ?? MessageCode.unknown).toString(),
-                        ),
-                      ),
-                      style: GoogleFonts.poppins(
-                        color: AppColors.textSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      context.l10n.greatRideVeryKnowledgeableAboutBustos,
-                      style: GoogleFonts.poppins(),
-                    ),
-                    const SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        onPressed: () =>
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  context.l10n.reviewFlaggedForFollowUp,
-                                ),
-                              ),
-                            ),
-                        icon: const Icon(
-                          Icons.flag,
-                          size: 16,
-                          color: AppColors.danger,
-                        ),
-                        label: Text(
-                          context.l10n.flag,
-                          style: TextStyle(color: AppColors.danger),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ),
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: reviews.length,
+          itemBuilder: (context, index) => FadeSlideIn.staggered(
+            index: index,
+            child: _ReviewCard(booking: reviews[index]),
+          ),
+        );
+      },
     );
   }
 
@@ -192,6 +122,98 @@ class RatingsFeedbackScreen extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// One tourist review: who wrote it, the real rating, the real text (nothing at
+/// all when the tourist left none), the driver and the booking reference.
+class _ReviewCard extends StatelessWidget {
+  const _ReviewCard({required this.booking});
+
+  final BookingModel booking;
+
+  @override
+  Widget build(BuildContext context) {
+    final stars = starCount(booking.driverRating ?? 0);
+    final text = (booking.driverReview ?? '').trim();
+    return AppCard(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    context.message(booking.touristName),
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Semantics(
+                  label: context.l10n.ratingOutOfFiveValue('$stars'),
+                  excludeSemantics: true,
+                  child: Row(
+                    key: Key('review-stars-${booking.id}'),
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(
+                      5,
+                      (i) => Icon(
+                        Icons.star,
+                        size: 16,
+                        color: i < stars ? AppColors.secondary : Colors.grey,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Text(
+              context.l10n.driverValue(
+                context.message(
+                  (booking.driverName ?? MessageCode.unknown).toString(),
+                ),
+              ),
+              style: GoogleFonts.poppins(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+              ),
+            ),
+            Text(
+              context.l10n.bookingReferenceValue(
+                booking.id.split('-').first.toUpperCase(),
+              ),
+              style: GoogleFonts.poppins(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+              ),
+            ),
+            if (text.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(text, style: GoogleFonts.poppins()),
+            ],
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(context.l10n.reviewFlaggedForFollowUp),
+                  ),
+                ),
+                icon: const Icon(Icons.flag, size: 16, color: AppColors.danger),
+                label: Text(
+                  context.l10n.flag,
+                  style: TextStyle(color: AppColors.danger),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

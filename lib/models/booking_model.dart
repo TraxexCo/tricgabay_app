@@ -166,6 +166,9 @@ class BookingModel {
   final String? cancellationReason;
   final double? driverRating;
   final String? driverReview;
+
+  /// When the tourist's review was saved; null until there is one.
+  final DateTime? driverReviewedAt;
   final int freeCancellationMinutes;
   final int acceptedCancellationPercent;
   final int driverWaitMinutes;
@@ -243,6 +246,7 @@ class BookingModel {
     this.cancellationReason,
     this.driverRating,
     this.driverReview,
+    this.driverReviewedAt,
     this.freeCancellationMinutes = 5,
     this.acceptedCancellationPercent = 20,
     this.driverWaitMinutes = 10,
@@ -335,6 +339,9 @@ class BookingModel {
       cancellationReason: map['cancellationReason'],
       driverRating: (map['driverRating'] as num?)?.toDouble(),
       driverReview: map['driverReview'],
+      driverReviewedAt: map['driverReviewedAt'] != null
+          ? DateTime.parse(map['driverReviewedAt'])
+          : null,
       freeCancellationMinutes: map['freeCancellationMinutes'] ?? 5,
       acceptedCancellationPercent: map['acceptedCancellationPercent'] ?? 20,
       driverWaitMinutes: map['driverWaitMinutes'] ?? 10,
@@ -381,6 +388,7 @@ class BookingModel {
     'cancellationReason': cancellationReason,
     'driverRating': driverRating,
     'driverReview': driverReview,
+    'driverReviewedAt': driverReviewedAt?.toIso8601String(),
     'freeCancellationMinutes': freeCancellationMinutes,
     'acceptedCancellationPercent': acceptedCancellationPercent,
     'driverWaitMinutes': driverWaitMinutes,
@@ -425,6 +433,7 @@ class BookingModel {
     String? cancellationReason,
     double? driverRating,
     String? driverReview,
+    DateTime? driverReviewedAt,
     int? freeCancellationMinutes,
     int? acceptedCancellationPercent,
     int? driverWaitMinutes,
@@ -471,6 +480,7 @@ class BookingModel {
       cancellationReason: cancellationReason ?? this.cancellationReason,
       driverRating: driverRating ?? this.driverRating,
       driverReview: driverReview ?? this.driverReview,
+      driverReviewedAt: driverReviewedAt ?? this.driverReviewedAt,
       freeCancellationMinutes:
           freeCancellationMinutes ?? this.freeCancellationMinutes,
       acceptedCancellationPercent:

@@ -3438,12 +3438,6 @@ abstract class AppLocalizations {
   /// **'Go online with an approved driver account first.'**
   String get goOnlineWithAnApprovedDriverAccountFirst;
 
-  /// No description provided for @greatRideVeryKnowledgeableAboutBustos.
-  ///
-  /// In en, this message translates to:
-  /// **'Great ride, very knowledgeable about Bustos!'**
-  String get greatRideVeryKnowledgeableAboutBustos;
-
   /// No description provided for @headingTo.
   ///
   /// In en, this message translates to:
@@ -4435,12 +4429,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No recent bookings'**
   String get noRecentBookings;
-
-  /// No description provided for @noReviewsFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No reviews found.'**
-  String get noReviewsFound;
 
   /// No description provided for @noShowFee.
   ///
@@ -9826,6 +9814,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Skipped on this day because it is closed: {stops}'**
   String stopsSkippedClosedThatDay(String stops);
+
+  /// No description provided for @noReviewsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews yet'**
+  String get noReviewsYet;
+
+  /// No description provided for @noReviewsYetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews from completed tours appear here.'**
+  String get noReviewsYetBody;
+
+  /// No description provided for @ratingOutOfFiveValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} out of 5 stars'**
+  String ratingOutOfFiveValue(String value);
 }
 
 class _AppLocalizationsDelegate
