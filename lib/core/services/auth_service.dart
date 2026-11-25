@@ -4,6 +4,7 @@ import 'image_upload_validator.dart';
 import '../config/auth_link_config.dart';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/backend_config.dart';
@@ -13,6 +14,18 @@ import '../utils/validators.dart';
 enum AppRole { tourist, driver, admin }
 
 enum DriverRegistrationOutcome { awaitingEmailConfirmation, submitted }
+
+/// What sign-up leaves the user with.
+///
+/// With "Confirm email" off, Supabase returns a session straight away and the
+/// user can go into the app. With it on, no session comes back until the user
+/// confirms the email, so they must go to the login screen.
+enum SignUpOutcome { signedIn, awaitingEmailConfirmation }
+
+/// The outcome for the [session] a sign-up (or the client afterwards) holds.
+SignUpOutcome signUpOutcomeFor(Session? session) => session == null
+    ? SignUpOutcome.awaitingEmailConfirmation
+    : SignUpOutcome.signedIn;
 
 class SignedInProfile {
   final String id;
@@ -149,7 +162,19 @@ class AuthService {
     }
   }
 
-  static Future<void> registerTourist({
+  /// Replaces the network sign-up call in tests.
+  @visibleForTesting
+  static Future<AuthResponse> Function({
+    required String email,
+    required String password,
+    required Map<String, dynamic> data,
+  })?
+  signUpOverride;
+
+  /// Creates the tourist account. Returns [SignUpOutcome.signedIn] when the
+  /// server returned a session (Confirm email off), otherwise
+  /// [SignUpOutcome.awaitingEmailConfirmation].
+  static Future<SignUpOutcome> registerTourist({
     required String privacyVersion,
     required String privacyLanguage,
     required String name,
@@ -160,17 +185,22 @@ class AuthService {
     if (privacyVersion.trim().isEmpty) {
       throw const AuthException(MessageCode.privacyNoticeAcceptanceIsRequired);
     }
-    await _client.auth.signUp(
-      email: email.trim(),
-      password: password,
-      data: {
-        'full_name': name.trim(),
-        'phone': Validators.normalizePhone(phone),
-        'privacy_notice_version': privacyVersion,
-        'privacy_notice_language': privacyLanguage,
-        'requested_role': AppRole.tourist.name,
-      },
-    );
+    final data = <String, dynamic>{
+      'full_name': name.trim(),
+      'phone': Validators.normalizePhone(phone),
+      'privacy_notice_version': privacyVersion,
+      'privacy_notice_language': privacyLanguage,
+      'requested_role': AppRole.tourist.name,
+    };
+    final override = signUpOverride;
+    final response = override != null
+        ? await override(email: email.trim(), password: password, data: data)
+        : await _client.auth.signUp(
+            email: email.trim(),
+            password: password,
+            data: data,
+          );
+    return signUpOutcomeFor(response.session);
   }
 
   static Future<DriverRegistrationOutcome> registerDriver({
@@ -242,7 +272,8 @@ class AuthService {
     if (authenticatedUser == null) {
       throw const AuthException(MessageCode.registrationDidNotComplete);
     }
-    if (_client.auth.currentSession == null) {
+    if (signUpOutcomeFor(_client.auth.currentSession) ==
+        SignUpOutcome.awaitingEmailConfirmation) {
       return DriverRegistrationOutcome.awaitingEmailConfirmation;
     }
     final consent = await PrivacyService.status();

@@ -10,6 +10,8 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/session/app_session.dart';
+import '../post_auth_route.dart';
 
 class RegisterTouristScreen extends ConsumerStatefulWidget {
   const RegisterTouristScreen({super.key});
@@ -51,7 +53,7 @@ class _RegisterTouristScreenState extends ConsumerState<RegisterTouristScreen> {
     if (consent == null || !mounted) return;
     setState(() => _isLoading = true);
     try {
-      await AuthService.registerTourist(
+      final outcome = await AuthService.registerTourist(
         privacyVersion: consent.version,
         privacyLanguage: consent.shownLanguage!,
         name: _nameCtrl.text,
@@ -59,6 +61,27 @@ class _RegisterTouristScreenState extends ConsumerState<RegisterTouristScreen> {
         phone: _phoneCtrl.text,
         password: _passwordCtrl.text,
       );
+      if (!mounted) return;
+      // Confirm email off: the server already signed the new account in, so
+      // go straight into the app. Otherwise (no session) the user has to
+      // confirm the email and sign in.
+      if (outcome == SignUpOutcome.signedIn) {
+        final profile = await AuthService.restoreSession();
+        if (profile != null) {
+          AppSession.setAuthenticatedUser(
+            id: profile.id,
+            name: profile.name,
+            role: profile.applicationPending
+                ? 'driver_pending'
+                : profile.role.name,
+            email: profile.email,
+            plateNumber: profile.plateNumber,
+          );
+          await AppSession.syncRemoteState();
+          if (mounted) context.go(routeForProfile(profile));
+          return;
+        }
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
