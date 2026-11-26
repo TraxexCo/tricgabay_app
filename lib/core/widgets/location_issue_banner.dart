@@ -26,25 +26,30 @@ class LocationIssueBanner extends StatelessWidget {
         if (!DriverLocationGuard.restoredNotice.value) {
           return const SizedBox.shrink();
         }
-        return Material(
-          color: scheme.primaryContainer,
-          child: SafeArea(
-            bottom: false,
-            child: Semantics(
-              liveRegion: true,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.check_circle_outline),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(context.l10n.locationIsBackYouAreOnlineAgain),
-                    ),
-                  ],
+        return SizedBox(
+          width: double.infinity,
+          child: Material(
+            color: scheme.primaryContainer,
+            child: SafeArea(
+              bottom: false,
+              child: Semantics(
+                liveRegion: true,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle_outline),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          context.l10n.locationIsBackYouAreOnlineAgain,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -53,36 +58,70 @@ class LocationIssueBanner extends StatelessWidget {
       }
       final l10n = context.l10n;
       final serviceOff = issue == LocationIssue.serviceOff;
-      return Material(
-        color: scheme.errorContainer,
-        child: SafeArea(
-          bottom: false,
-          child: Semantics(
-            liveRegion: true,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              child: Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(
-                    serviceOff
-                        ? l10n.locationOffBannerMessage
-                        : l10n.locationPermissionBannerMessage,
-                  ),
-                  TextButton(
-                    onPressed: DriverLocationGuard.openSettingsForIssue,
-                    child: Text(
+      return SizedBox(
+        width: double.infinity,
+        child: Material(
+          color: scheme.errorContainer,
+          child: SafeArea(
+            bottom: false,
+            child: Semantics(
+              liveRegion: true,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
+                child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
                       serviceOff
-                          ? l10n.openLocationSettings
-                          : l10n.openAppSettings,
+                          ? l10n.locationOffBannerMessage
+                          : l10n.locationPermissionBannerMessage,
                     ),
-                  ),
-                ],
+                    TextButton(
+                      onPressed: DriverLocationGuard.openSettingsForIssue,
+                      child: Text(
+                        serviceOff
+                            ? l10n.openLocationSettings
+                            : l10n.openAppSettings,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
       );
     },
+  );
+}
+
+/// Wraps the app body under the banner. While the banner is visible it already
+/// covers the status bar, so the screens below must not add the same top
+/// inset a second time (that left a blank gap under the banner).
+class LocationBannerBody extends StatelessWidget {
+  final Widget child;
+  const LocationBannerBody({super.key, required this.child});
+
+  static bool get bannerVisible =>
+      !ConsentState.blocked.value &&
+      (DriverLocationGuard.issue.value != LocationIssue.none ||
+          DriverLocationGuard.restoredNotice.value);
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([
+      DriverLocationGuard.issue,
+      DriverLocationGuard.restoredNotice,
+      ConsentState.blocked,
+    ]),
+    // Same widget type either way, so the screens keep their state.
+    builder: (context, _) => MediaQuery.removePadding(
+      context: context,
+      removeTop: bannerVisible,
+      child: child,
+    ),
   );
 }

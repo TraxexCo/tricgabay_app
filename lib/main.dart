@@ -224,9 +224,11 @@ class _TricGabayAppState extends State<TricGabayApp>
                   const LocationIssueBanner(),
                   if (error != null) _RefreshNotice(error: error),
                   Expanded(
-                    child: MinimumVersionGate(
-                      child: PrivacyConsentGate(
-                        child: child ?? const SizedBox.shrink(),
+                    child: LocationBannerBody(
+                      child: MinimumVersionGate(
+                        child: PrivacyConsentGate(
+                          child: child ?? const SizedBox.shrink(),
+                        ),
                       ),
                     ),
                   ),

@@ -15,9 +15,9 @@ import 'package:tricgabay_app/core/widgets/location_issue_banner.dart';
 import 'package:tricgabay_app/features/driver/screens/incoming_booking_screen.dart';
 import 'package:tricgabay_app/l10n/app_localizations.dart';
 
-import 'location_services_test.dart' show FakeLocationGateway;
+import 'location_services_test.dart' show FakeLocationGateway, positionAt;
 
-Widget host(Widget child) => MaterialApp(
+Widget host(Widget child, {bool scaffold = true}) => MaterialApp(
   localizationsDelegates: const [
     AppLocalizations.delegate,
     GlobalMaterialLocalizations.delegate,
@@ -25,7 +25,7 @@ Widget host(Widget child) => MaterialApp(
     GlobalCupertinoLocalizations.delegate,
   ],
   supportedLocales: const [Locale('en'), Locale('fil')],
-  home: Scaffold(body: child),
+  home: scaffold ? Scaffold(body: child) : Material(child: child),
 );
 
 void main() {
@@ -245,6 +245,88 @@ void main() {
       expect(find.text('Open location settings'), findsNothing);
       ConsentState.blocked.value = false;
       DriverLocationGuard.stop();
+    });
+  });
+
+  group('banner layout', () {
+    late FakeLocationGateway location;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      location = FakeLocationGateway();
+      await ActiveTripTrackingService.configureForTesting(
+        location: location,
+        publisher: (_) async {},
+      );
+    });
+
+    tearDown(() async {
+      await DriverLocationGuard.resetAfterTesting();
+      await ActiveTripTrackingService.resetAfterTesting();
+      await location.close();
+    });
+
+    testWidgets('banner is full width and screens below drop the top inset', (
+      tester,
+    ) async {
+      double? bodyTopInset;
+      await tester.pumpWidget(
+        host(
+          scaffold: false,
+          MediaQuery(
+            data: const MediaQueryData(
+              size: Size(400, 800),
+              padding: EdgeInsets.only(top: 40),
+            ),
+            child: Column(
+              children: [
+                const LocationIssueBanner(),
+                Expanded(
+                  child: LocationBannerBody(
+                    child: Builder(
+                      builder: (context) {
+                        bodyTopInset = MediaQuery.paddingOf(context).top;
+                        return const SizedBox.expand();
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(bodyTopInset, 40); // no banner: normal status-bar inset
+      DriverLocationGuard.start(
+        shouldShare: () => true,
+        isOnline: () => true,
+        setOnline: (_) async {},
+        onOnlineRestored: (_) {},
+        location: location,
+        interval: const Duration(milliseconds: 30),
+      );
+      location.setServiceEnabled(false);
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 150)),
+      );
+      await tester.pump();
+      expect(find.text('Open location settings'), findsOneWidget);
+      expect(
+        tester.getSize(find.byType(LocationIssueBanner)).width,
+        tester.view.physicalSize.width / tester.view.devicePixelRatio,
+      );
+      expect(bodyTopInset, 0); // the banner already covers the status bar
+      location.autoEmit = () => positionAt(DateTime.now(), accuracy: 20);
+      location.setServiceEnabled(true);
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 150)),
+      );
+      await tester.pump();
+      expect(find.text('Open location settings'), findsNothing);
+      expect(bodyTopInset, 40);
+      DriverLocationGuard.stop();
+      // Let any fix-wait timeout started by the last check run out.
+      await tester.pump(const Duration(seconds: 15));
     });
   });
 
