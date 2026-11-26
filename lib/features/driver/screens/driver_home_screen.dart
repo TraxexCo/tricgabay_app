@@ -16,6 +16,7 @@ import 'package:geolocator/geolocator.dart' as geo;
 import '../../../core/constants/app_colors.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/widgets/shared_widgets.dart';
+import '../../../core/widgets/sharing_location_chip.dart';
 import '../../../core/widgets/web_map_fallback.dart';
 import '../../../models/booking_model.dart';
 import '../../../core/config/backend_config.dart';
@@ -575,15 +576,8 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
                                             Positioned(
                                               right: 12,
                                               top: 12,
-                                              child: _mapChip(
-                                                icon: Icons
-                                                    .radio_button_checked_rounded,
-                                                label: context
-                                                    .l10n
-                                                    .sharingLocation,
-                                                background: AppColors.success,
-                                                foreground: Colors.white,
-                                              ),
+                                              child:
+                                                  const SharingLocationChip(),
                                             ),
                                             if (!_followDriver && !kIsWeb)
                                               Positioned(

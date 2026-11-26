@@ -12,6 +12,7 @@ import 'package:tricgabay_app/core/services/battery_optimization_service.dart';
 import 'package:tricgabay_app/core/services/consent_state.dart';
 import 'package:tricgabay_app/core/services/driver_location_guard.dart';
 import 'package:tricgabay_app/core/widgets/location_issue_banner.dart';
+import 'package:tricgabay_app/core/widgets/sharing_location_chip.dart';
 import 'package:tricgabay_app/features/driver/screens/incoming_booking_screen.dart';
 import 'package:tricgabay_app/l10n/app_localizations.dart';
 
@@ -327,6 +328,39 @@ void main() {
       DriverLocationGuard.stop();
       // Let any fix-wait timeout started by the last check run out.
       await tester.pump(const Duration(seconds: 15));
+    });
+  });
+
+  group('sharing location chip', () {
+    testWidgets('green while location works, red when it is off or denied', (
+      tester,
+    ) async {
+      final issue = ValueNotifier<LocationIssue>(LocationIssue.none);
+      await tester.pumpWidget(host(SharingLocationChip(issue: issue)));
+      expect(find.text('Sharing location'), findsOneWidget);
+      expect(find.text('Location sharing is off'), findsNothing);
+
+      issue.value = LocationIssue.serviceOff;
+      await tester.pump();
+      expect(find.text('Sharing location'), findsNothing);
+      expect(find.text('Location sharing is off'), findsOneWidget);
+
+      issue.value = LocationIssue.none;
+      await tester.pump();
+      expect(find.text('Sharing location'), findsOneWidget);
+
+      issue.value = LocationIssue.permissionDeniedForever;
+      await tester.pump();
+      expect(find.text('Location sharing is off'), findsOneWidget);
+    });
+
+    testWidgets('follows the location guard by default', (tester) async {
+      DriverLocationGuard.issue.value = LocationIssue.permissionDenied;
+      await tester.pumpWidget(host(const SharingLocationChip()));
+      expect(find.text('Location sharing is off'), findsOneWidget);
+      DriverLocationGuard.issue.value = LocationIssue.none;
+      await tester.pump();
+      expect(find.text('Sharing location'), findsOneWidget);
     });
   });
 
