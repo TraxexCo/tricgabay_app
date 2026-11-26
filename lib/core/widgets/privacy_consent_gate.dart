@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/backend_config.dart';
 import '../session/app_session.dart';
 import '../services/privacy_service.dart';
+import '../services/consent_state.dart';
 import '../services/transient_retry.dart';
 import '../services/error_messages.dart';
 import '../services/telemetry_service.dart';
@@ -60,6 +61,7 @@ class _PrivacyConsentGateState extends State<PrivacyConsentGate>
     WidgetsBinding.instance.removeObserver(this);
     AppSession.authRevision.removeListener(_authChanged);
     _auth?.cancel();
+    ConsentState.blocked.value = false;
     super.dispose();
   }
 
@@ -142,11 +144,21 @@ class _PrivacyConsentGateState extends State<PrivacyConsentGate>
     }
   }
 
+  void _setBlocked(bool value) {
+    if (ConsentState.blocked.value == value) return;
+    // The gate builds while screens underneath may be listening; publish the
+    // change after the frame instead of during it.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ConsentState.blocked.value = value;
+    });
+  }
+
   @override
   Widget build(BuildContext context) => FutureBuilder<PrivacyState?>(
     future: _future,
     builder: (context, snapshot) {
       if (snapshot.connectionState != ConnectionState.done && !_loadedOnce) {
+        _setBlocked(true);
         return RetainedGate(
           barrier: LaunchBarrier(
             semanticsLabel: context.l10n.privacyLoadingLabel,
@@ -158,8 +170,10 @@ class _PrivacyConsentGateState extends State<PrivacyConsentGate>
           (snapshot.data == null ||
               snapshot.data!.accepted ||
               snapshot.data!.notice.version == _acceptedVersion)) {
+        _setBlocked(false);
         return RetainedGate(child: widget.child);
       }
+      _setBlocked(true);
       final notice = snapshot.data?.notice;
       final checked = _checked && _checkedVersion == notice?.version;
       return RetainedGate(

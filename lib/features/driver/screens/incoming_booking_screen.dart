@@ -3,13 +3,17 @@ import 'package:tricgabay_app/core/widgets/map_surface.dart';
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
 import '../../../core/services/error_messages.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import '../../../core/config/mapbox_config.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/services/server_clock.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_card.dart';
@@ -55,267 +59,280 @@ class IncomingBookingScreen extends ConsumerWidget {
           );
         }
 
-        return Scaffold(
-          backgroundColor: const Color(0xFF102A43),
-          // Fill the screen; sized to the card, the map stopped two-thirds
-          // of the way down on tall phones.
-          body: Stack(
-            fit: StackFit.expand,
-            children: [
-              Positioned.fill(
-                child: kIsWeb
-                    ? WebMapFallback(
-                        title: context.l10n.incomingPickup,
-                        subtitle:
-                            context.l10n.openTheMobileAppForTheInteractiveRoute,
-                      )
-                    : MapSurface(
-                        builder: (context) => MapWidget(
-                          styleUri: MapboxConfig.mapStyle,
-                          // The scale bar drew over the status bar.
-                          onMapCreated: (map) => map.scaleBar.updateSettings(
-                            ScaleBarSettings(enabled: false),
-                          ),
-                          viewport: CameraViewportState(
-                            center: Point(
-                              coordinates: Position(
-                                booking.pickupLng,
-                                booking.pickupLat,
-                              ),
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          // Dark screen: light status-bar icons so the clock stays readable.
+          value: SystemUiOverlayStyle.light,
+          child: Scaffold(
+            backgroundColor: const Color(0xFF102A43),
+            // Fill the screen; sized to the card, the map stopped two-thirds
+            // of the way down on tall phones.
+            body: Stack(
+              fit: StackFit.expand,
+              children: [
+                Positioned.fill(
+                  child: kIsWeb
+                      ? WebMapFallback(
+                          title: context.l10n.incomingPickup,
+                          subtitle: context
+                              .l10n
+                              .openTheMobileAppForTheInteractiveRoute,
+                        )
+                      : MapSurface(
+                          builder: (context) => MapWidget(
+                            styleUri: MapboxConfig.mapStyle,
+                            // The scale bar drew over the status bar.
+                            onMapCreated: (map) => map.scaleBar.updateSettings(
+                              ScaleBarSettings(enabled: false),
                             ),
-                            zoom: 15.0,
-                            pitch: 0.0,
-                            bearing: 0.0,
+                            viewport: CameraViewportState(
+                              center: Point(
+                                coordinates: Position(
+                                  booking.pickupLng,
+                                  booking.pickupLat,
+                                ),
+                              ),
+                              zoom: 15.0,
+                              pitch: 0.0,
+                              bearing: 0.0,
+                            ),
                           ),
                         ),
-                      ),
-              ),
-              Positioned.fill(
-                child: Container(color: Colors.black.withValues(alpha: 0.4)),
-              ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 24),
-                        Text(
-                          context.l10n.newRideRequest,
-                          style: GoogleFonts.poppins(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                ),
+                Positioned.fill(
+                  child: Container(color: Colors.black.withValues(alpha: 0.4)),
+                ),
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 24),
+                          Text(
+                            context.l10n.newRideRequest,
+                            style: GoogleFonts.poppins(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                        Text(
-                          context.l10n.aNearbyTouristIsLookingForADriver,
-                          style: GoogleFonts.poppins(
-                            color: Colors.white70,
-                            fontSize: 13,
+                          Text(
+                            context.l10n.aNearbyTouristIsLookingForADriver,
+                            style: GoogleFonts.poppins(
+                              color: Colors.white70,
+                              fontSize: 13,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 32),
-                        AppCard(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    backgroundColor: AppColors.primary
-                                        .withValues(alpha: 0.1),
-                                    child: Text(
-                                      context.message(
-                                        booking.touristName.isNotEmpty
-                                            ? booking.touristName[0]
-                                                  .toUpperCase()
-                                            : AppBrand.initial,
-                                      ),
-                                      style: const TextStyle(
-                                        color: AppColors.primary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          context.message(booking.touristName),
-                                          style: GoogleFonts.poppins(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                          ),
+                          if (booking.offerExpiresAt != null) ...[
+                            const SizedBox(height: 8),
+                            OfferCountdown(expiresAt: booking.offerExpiresAt!),
+                          ],
+                          const SizedBox(height: 32),
+                          AppCard(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    CircleAvatar(
+                                      backgroundColor: AppColors.primary
+                                          .withValues(alpha: 0.1),
+                                      child: Text(
+                                        context.message(
+                                          booking.touristName.isNotEmpty
+                                              ? booking.touristName[0]
+                                                    .toUpperCase()
+                                              : AppBrand.initial,
                                         ),
-                                      ],
+                                        style: const TextStyle(
+                                          color: AppColors.primary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                     ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            context.message(
+                                              booking.touristName,
+                                            ),
+                                            style: GoogleFonts.poppins(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.success.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      // Was always "Cash"; the driver needs to
+                                      // know whether to expect cash or GCash.
+                                      child: Text(
+                                        booking.paymentMethod ==
+                                                PaymentMethod.gcashDirect
+                                            ? context.l10n.gcashSendToDriver
+                                            : context.l10n.cash,
+                                        style: GoogleFonts.poppins(
+                                          color: AppColors.success,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(height: 32),
+                                _buildLocationRow(
+                                  context,
+                                  Icons.my_location,
+                                  booking.pickupAddress,
+                                  AppColors.primary,
+                                ),
+                                const SizedBox(height: 16),
+                                _buildLocationRow(
+                                  context,
+                                  Icons.groups_2_outlined,
+                                  MessageCode.passengerCount(
+                                    booking.passengerCount,
                                   ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.success.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    // Was always "Cash"; the driver needs to
-                                    // know whether to expect cash or GCash.
-                                    child: Text(
-                                      booking.paymentMethod ==
-                                              PaymentMethod.gcashDirect
-                                          ? context.l10n.gcashSendToDriver
-                                          : context.l10n.cash,
-                                      style: GoogleFonts.poppins(
-                                        color: AppColors.success,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                                  AppColors.primary,
+                                ),
+                                if (booking.luggageNotes.isNotEmpty) ...[
+                                  const SizedBox(height: 12),
+                                  _buildLocationRow(
+                                    context,
+                                    Icons.luggage_outlined,
+                                    booking.luggageNotes,
+                                    AppColors.secondary,
                                   ),
                                 ],
-                              ),
-                              const Divider(height: 32),
-                              _buildLocationRow(
-                                context,
-                                Icons.my_location,
-                                booking.pickupAddress,
-                                AppColors.primary,
-                              ),
-                              const SizedBox(height: 16),
-                              _buildLocationRow(
-                                context,
-                                Icons.groups_2_outlined,
-                                MessageCode.passengerCount(
-                                  booking.passengerCount,
-                                ),
-                                AppColors.primary,
-                              ),
-                              if (booking.luggageNotes.isNotEmpty) ...[
-                                const SizedBox(height: 12),
+                                if (booking.accessibilityNeeds.isNotEmpty) ...[
+                                  const SizedBox(height: 12),
+                                  _buildLocationRow(
+                                    context,
+                                    Icons.accessible_outlined,
+                                    booking.accessibilityNeeds,
+                                    AppColors.success,
+                                  ),
+                                ],
+                                const SizedBox(height: 16),
+                                // Which tour, so the driver knows the route
+                                // before accepting.
                                 _buildLocationRow(
                                   context,
-                                  Icons.luggage_outlined,
-                                  booking.luggageNotes,
-                                  AppColors.secondary,
+                                  Icons.route_rounded,
+                                  AppSession.bookingTitle(booking),
+                                  AppColors.danger,
+                                ),
+                                const SizedBox(height: 24),
+                                Text(
+                                  context.message(
+                                    '₱ ${AppFormatters.amount(booking.totalFareCents / 100)}',
+                                  ),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                Text(
+                                  context.l10n.agreedFixedFare,
+                                  style: GoogleFonts.poppins(
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
                               ],
-                              if (booking.accessibilityNeeds.isNotEmpty) ...[
-                                const SizedBox(height: 12),
-                                _buildLocationRow(
-                                  context,
-                                  Icons.accessible_outlined,
-                                  booking.accessibilityNeeds,
-                                  AppColors.success,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: AppButton(
+                                  label: context.l10n.decline,
+                                  onPressed: () async {
+                                    try {
+                                      await AppSession.declineDriverOffer(
+                                        booking.id,
+                                      );
+                                      if (context.mounted) context.pop();
+                                    } catch (error) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              context.message(
+                                                ErrorMessages.forError(error),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  type: AppButtonType.outline,
                                 ),
-                              ],
-                              const SizedBox(height: 16),
-                              // Which tour, so the driver knows the route
-                              // before accepting.
-                              _buildLocationRow(
-                                context,
-                                Icons.route_rounded,
-                                AppSession.bookingTitle(booking),
-                                AppColors.danger,
                               ),
-                              const SizedBox(height: 24),
-                              Text(
-                                context.message(
-                                  '₱ ${AppFormatters.amount(booking.totalFareCents / 100)}',
-                                ),
-                                style: GoogleFonts.poppins(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              Text(
-                                context.l10n.agreedFixedFare,
-                                style: GoogleFonts.poppins(
-                                  color: AppColors.textSecondary,
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: AppButton(
+                                  label: context.l10n.accept,
+                                  onPressed: () async {
+                                    // Accepting updates the booking list, which
+                                    // rebuilds this screen without this button;
+                                    // keep the navigator from before the await.
+                                    final router = GoRouter.of(context);
+                                    final messenger = ScaffoldMessenger.of(
+                                      context,
+                                    );
+                                    try {
+                                      await AppSession.acceptBooking(
+                                        booking.id,
+                                      );
+                                      router.pushReplacement(
+                                        '/driver/trip/${booking.id}',
+                                      );
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        messenger.showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              context.message(
+                                                ErrorMessages.forError(e),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        const SizedBox(height: 24),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AppButton(
-                                label: context.l10n.decline,
-                                onPressed: () async {
-                                  try {
-                                    await AppSession.declineDriverOffer(
-                                      booking.id,
-                                    );
-                                    if (context.mounted) context.pop();
-                                  } catch (error) {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            context.message(
-                                              ErrorMessages.forError(error),
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  }
-                                },
-                                type: AppButtonType.outline,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: AppButton(
-                                label: context.l10n.accept,
-                                onPressed: () async {
-                                  // Accepting updates the booking list, which
-                                  // rebuilds this screen without this button;
-                                  // keep the navigator from before the await.
-                                  final router = GoRouter.of(context);
-                                  final messenger = ScaffoldMessenger.of(
-                                    context,
-                                  );
-                                  try {
-                                    await AppSession.acceptBooking(booking.id);
-                                    router.pushReplacement(
-                                      '/driver/trip/${booking.id}',
-                                    );
-                                  } catch (e) {
-                                    if (context.mounted) {
-                                      messenger.showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            context.message(
-                                              ErrorMessages.forError(e),
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -341,6 +358,55 @@ class IncomingBookingScreen extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Counts down to the moment the offer is withdrawn from this driver.
+class OfferCountdown extends StatefulWidget {
+  final DateTime expiresAt;
+  const OfferCountdown({super.key, required this.expiresAt});
+
+  @override
+  State<OfferCountdown> createState() => _OfferCountdownState();
+}
+
+class _OfferCountdownState extends State<OfferCountdown> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final remaining = widget.expiresAt.difference(ServerClock.now());
+    final l10n = context.l10n;
+    final text = remaining.isNegative || remaining == Duration.zero
+        ? l10n.offerHasExpired
+        : l10n.offerExpiresInTime(
+            '${remaining.inMinutes}:${(remaining.inSeconds % 60).toString().padLeft(2, '0')}',
+          );
+    return Semantics(
+      liveRegion: false,
+      child: Text(
+        text,
+        style: GoogleFonts.poppins(
+          color: remaining.inSeconds <= 20 ? Colors.amberAccent : Colors.white,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }

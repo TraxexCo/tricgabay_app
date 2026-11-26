@@ -1,7 +1,11 @@
 import 'package:tricgabay_app/core/l10n/app_l10n.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/services/battery_optimization_service.dart';
+import '../../../core/services/consent_state.dart';
 import '../../../core/widgets/role_navigation_bar.dart';
 
 class DriverShellScreen extends StatefulWidget {
@@ -14,6 +18,42 @@ class DriverShellScreen extends StatefulWidget {
 
 class _DriverShellScreenState extends State<DriverShellScreen> {
   final List<int> _tabHistory = [0];
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_offerBatteryExemption());
+  }
+
+  /// One-time prompt: phones that restrict background apps can pause the
+  /// driver's live location. Asked once, after the privacy notice, and the
+  /// status stays available from the account page.
+  Future<void> _offerBatteryExemption() async {
+    await ConsentState.whenClear();
+    if (!mounted || !await BatteryOptimizationService.shouldPrompt()) return;
+    if (!mounted) return;
+    await BatteryOptimizationService.markPrompted();
+    if (!mounted) return;
+    final l10n = context.l10n;
+    final open = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.batteryPromptTitle),
+        content: Text(l10n.batteryPromptBody(AppBrand.name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.batteryPromptNotNow),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.batteryPromptOpenSettings),
+          ),
+        ],
+      ),
+    );
+    if (open == true) await BatteryOptimizationService.openSettings();
+  }
 
   void _rememberTab(int index) {
     if (_tabHistory.last == index) return;

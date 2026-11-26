@@ -190,6 +190,16 @@ abstract final class MessageCode {
   static const backToLogin = '@l10n/backToLogin';
   static const bad = '@l10n/bad';
   static const barangay = '@l10n/barangay';
+  static const batteryOptimizationRestricted =
+      '@l10n/batteryOptimizationRestricted';
+  static const batteryOptimizationTitle = '@l10n/batteryOptimizationTitle';
+  static const batteryOptimizationUnknown = '@l10n/batteryOptimizationUnknown';
+  static const batteryOptimizationUnrestricted =
+      '@l10n/batteryOptimizationUnrestricted';
+  static const batteryPromptBody = '@l10n/batteryPromptBody';
+  static const batteryPromptNotNow = '@l10n/batteryPromptNotNow';
+  static const batteryPromptOpenSettings = '@l10n/batteryPromptOpenSettings';
+  static const batteryPromptTitle = '@l10n/batteryPromptTitle';
   static const blocked = '@l10n/blocked';
   static const blockedCheckoutExpiry = '@l10n/blockedCheckoutExpiry';
   static const bongaMayor = '@l10n/bongaMayor';
@@ -930,6 +940,8 @@ abstract final class MessageCode {
   static String goodMorningValue(String value) =>
       encodeMessage('goodMorningValue', [value]);
   static const gpsAccuracyTooLow = '@l10n/gpsAccuracyTooLow';
+  static const gpsSignalIsWeakTryAgainOutsideOrNearAWindow =
+      '@l10n/gpsSignalIsWeakTryAgainOutsideOrNearAWindow';
   static const groupOfFourOrMore = '@l10n/groupOfFourOrMore';
   static const groupOfFourOrMoreBody = '@l10n/groupOfFourOrMoreBody';
   static const headingTo = '@l10n/headingTo';
@@ -1068,8 +1080,13 @@ abstract final class MessageCode {
   static const localRoadsArePreferredFollowRoadSignsAndYourApprovedTodaOrLgu =
       '@l10n/localRoadsArePreferredFollowRoadSignsAndYourApprovedTodaOrLgu';
   static const locationExplainerTitle = '@l10n/locationExplainerTitle';
+  static const locationIsBackYouAreOnlineAgain =
+      '@l10n/locationIsBackYouAreOnlineAgain';
   static const locationIsUnavailableRightNowCheckYourSettingsAndTryAgain =
       '@l10n/locationIsUnavailableRightNowCheckYourSettingsAndTryAgain';
+  static const locationOffBannerMessage = '@l10n/locationOffBannerMessage';
+  static const locationPermissionBannerMessage =
+      '@l10n/locationPermissionBannerMessage';
   static const locationPermissionDeniedEnableItInSettings =
       '@l10n/locationPermissionDeniedEnableItInSettings';
   static const locationPermissionIsNeededToReceiveRides =
@@ -1242,6 +1259,9 @@ abstract final class MessageCode {
   static const oct = '@l10n/oct';
   static const offThePlannedRouteNavigationIsRecalculatingFollowLegalLocalRoadsAndStop =
       '@l10n/offThePlannedRouteNavigationIsRecalculatingFollowLegalLocalRoadsAndStop';
+  static String offerExpiresInTime(String time) =>
+      encodeMessage('offerExpiresInTime', [time]);
+  static const offerHasExpired = '@l10n/offerHasExpired';
   static const officialEmergencyNumbersFromMunicipalityPortal =
       '@l10n/officialEmergencyNumbersFromMunicipalityPortal';
   static const offline = '@l10n/offline';
@@ -1301,11 +1321,13 @@ abstract final class MessageCode {
   static const onlyUnvisitedStopsMoveTheOtherParticipantMustApproveBeforeNavigationChanges =
       '@l10n/onlyUnvisitedStopsMoveTheOtherParticipantMustApproveBeforeNavigationChanges';
   static const openAPaymentReview = '@l10n/openAPaymentReview';
+  static const openAppSettings = '@l10n/openAppSettings';
   static const openAppStore = '@l10n/openAppStore';
   static const openAppToViewThisUpdate = '@l10n/openAppToViewThisUpdate';
   static const openBookingDetails = '@l10n/openBookingDetails';
   static const openDialer = '@l10n/openDialer';
   static const openDriverSearch = '@l10n/openDriverSearch';
+  static const openLocationSettings = '@l10n/openLocationSettings';
   static const openReviews = '@l10n/openReviews';
   static String openReviewsValue(String value) =>
       encodeMessage('openReviewsValue', [value]);

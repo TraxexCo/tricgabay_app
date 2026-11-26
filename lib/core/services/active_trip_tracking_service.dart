@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/backend_config.dart';
 import 'backend_repository.dart';
+import 'consent_state.dart';
 import 'location_gateway.dart';
 
 enum TrackingHealth {
@@ -16,6 +17,19 @@ enum TrackingHealth {
   permissionRequired,
   locationDisabled,
   degraded,
+}
+
+enum FreshFixFailure { none, locationDisabled, permissionDenied, weakSignal }
+
+/// Outcome of asking the device for a brand-new position.
+class FreshFixResult {
+  final geo.Position? position;
+  final FreshFixFailure failure;
+  const FreshFixResult._(this.position, this.failure);
+  const FreshFixResult.ok(geo.Position position)
+    : this._(position, FreshFixFailure.none);
+  const FreshFixResult.failed(FreshFixFailure failure) : this._(null, failure);
+  bool get ok => position != null;
 }
 
 /// Owns driver tracking independently from any screen so navigation or widget
@@ -37,6 +51,21 @@ class ActiveTripTrackingService {
       SharedPreferences.getInstance;
   static DateTime? _lastAcceptedAt;
   static const _recoveryKey = 'active_driver_tracking_booking_v1';
+
+  /// A phone that sits still can go 30-50 s between fixes, which is longer
+  /// than the server's 60 s freshness window allows for arrival. While a trip
+  /// is active the service therefore asks for a fresh fix itself whenever the
+  /// stream has been quiet.
+  static const defaultHeartbeatInterval = Duration(seconds: 15);
+  static const arrivalFixTimeout = Duration(seconds: 12);
+
+  /// Server rule for arrival (unchanged): accuracy at most 100 m.
+  static const arrivalMaxAccuracyMeters = 100.0;
+  static const _arrivalMaxFixAge = Duration(seconds: 15);
+  static Duration _heartbeatInterval = defaultHeartbeatInterval;
+  static Duration _heartbeatFixTimeout = const Duration(seconds: 10);
+  static Timer? _heartbeat;
+  static bool _heartbeatBusy = false;
 
   static String? get bookingId => _bookingId;
 
@@ -78,6 +107,8 @@ class ActiveTripTrackingService {
       }
       var permission = await _location.checkPermission();
       if (permission == geo.LocationPermission.denied) {
+        // Never show the system prompt over the privacy notice.
+        await ConsentState.whenClear();
         permission = await _location.requestPermission();
       }
       if (permission != geo.LocationPermission.always &&
@@ -95,9 +126,113 @@ class ActiveTripTrackingService {
             _handleSample,
             onError: (_) => health.value = TrackingHealth.degraded,
           );
+      _startHeartbeat();
     } finally {
       _starting = false;
     }
+  }
+
+  static void _startHeartbeat() {
+    _heartbeat?.cancel();
+    _heartbeat = Timer.periodic(
+      _heartbeatInterval,
+      (_) => unawaited(_heartbeatTick()),
+    );
+  }
+
+  static Future<void> _heartbeatTick() async {
+    if (_bookingId == null || _heartbeatBusy) return;
+    final last = lastPublishedAt.value;
+    final quietFor = last == null ? null : DateTime.now().difference(last);
+    // The stream is delivering often enough; nothing to add.
+    if (quietFor != null &&
+        quietFor < _heartbeatInterval - const Duration(seconds: 2)) {
+      return;
+    }
+    _heartbeatBusy = true;
+    try {
+      final result = await publishFreshFix(
+        timeout: _heartbeatFixTimeout,
+        maxAccuracyMeters: 200,
+        maxFixAge: const Duration(seconds: 30),
+      );
+      if (result.ok) {
+        health.value = TrackingHealth.live;
+      } else {
+        health.value = switch (result.failure) {
+          FreshFixFailure.locationDisabled => TrackingHealth.locationDisabled,
+          FreshFixFailure.permissionDenied => TrackingHealth.permissionRequired,
+          _ => TrackingHealth.degraded,
+        };
+      }
+    } catch (_) {
+      health.value = TrackingHealth.degraded;
+    } finally {
+      _heartbeatBusy = false;
+    }
+  }
+
+  /// Asks the device for a brand-new position and waits up to [timeout] for
+  /// one that is recent and accurate enough. Never returns an old fix.
+  static Future<FreshFixResult> acquireFreshFix({
+    Duration timeout = arrivalFixTimeout,
+    double maxAccuracyMeters = arrivalMaxAccuracyMeters,
+    Duration maxFixAge = _arrivalMaxFixAge,
+  }) async {
+    if (!await _location.isServiceEnabled()) {
+      return const FreshFixResult.failed(FreshFixFailure.locationDisabled);
+    }
+    final permission = await _location.checkPermission();
+    if (permission != geo.LocationPermission.always &&
+        permission != geo.LocationPermission.whileInUse) {
+      return const FreshFixResult.failed(FreshFixFailure.permissionDenied);
+    }
+    try {
+      final sample = await _location
+          .positionStream(
+            settings: const geo.LocationSettings(
+              accuracy: geo.LocationAccuracy.bestForNavigation,
+              distanceFilter: 0,
+            ),
+          )
+          .firstWhere(
+            (candidate) =>
+                isUsableLocationSample(candidate) &&
+                candidate.accuracy <= maxAccuracyMeters &&
+                DateTime.now().difference(candidate.timestamp) <= maxFixAge,
+          )
+          .timeout(timeout);
+      return FreshFixResult.ok(sample);
+    } catch (_) {
+      return const FreshFixResult.failed(FreshFixFailure.weakSignal);
+    }
+  }
+
+  /// Gets a fresh fix and publishes it before returning, so the server holds
+  /// a current position when the caller's next request is checked against it.
+  /// Throws if the fix was good but publishing failed.
+  static Future<FreshFixResult> publishFreshFix({
+    Duration timeout = arrivalFixTimeout,
+    double maxAccuracyMeters = arrivalMaxAccuracyMeters,
+    Duration maxFixAge = _arrivalMaxFixAge,
+  }) async {
+    final result = await acquireFreshFix(
+      timeout: timeout,
+      maxAccuracyMeters: maxAccuracyMeters,
+      maxFixAge: maxFixAge,
+    );
+    final sample = result.position;
+    if (sample == null) return result;
+    if (BackendConfig.isConfigured || _publisherOverridden) {
+      await _publisher(sample);
+      lastPublishedAt.value = DateTime.now();
+    }
+    final previous = _lastAcceptedAt;
+    if (previous == null || sample.timestamp.isAfter(previous)) {
+      _lastAcceptedAt = sample.timestamp;
+    }
+    position.value = sample;
+    return result;
   }
 
   static Future<String?> recoveryBookingId() async {
@@ -141,6 +276,8 @@ class ActiveTripTrackingService {
       bookingId == null ? stop() : start(bookingId);
 
   static Future<void> stop() async {
+    _heartbeat?.cancel();
+    _heartbeat = null;
     await _subscription?.cancel();
     _subscription = null;
     _bookingId = null;
@@ -155,11 +292,15 @@ class ActiveTripTrackingService {
   static Future<void> configureForTesting({
     required LocationGateway location,
     required Future<void> Function(geo.Position position) publisher,
+    Duration heartbeatInterval = defaultHeartbeatInterval,
+    Duration heartbeatFixTimeout = const Duration(seconds: 10),
   }) async {
     await stop();
     _location = location;
     _publisher = publisher;
     _publisherOverridden = true;
+    _heartbeatInterval = heartbeatInterval;
+    _heartbeatFixTimeout = heartbeatFixTimeout;
   }
 
   @visibleForTesting
@@ -169,6 +310,9 @@ class ActiveTripTrackingService {
     _publisher = _publishPosition;
     _publisherOverridden = false;
     _preferences = SharedPreferences.getInstance;
+    _heartbeatInterval = defaultHeartbeatInterval;
+    _heartbeatFixTimeout = const Duration(seconds: 10);
+    _heartbeatBusy = false;
     lastPublishedAt.value = null;
   }
 }

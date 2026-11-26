@@ -4842,7 +4842,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyLocationBody =>
-      'Location supports pickup and navigation. Background location is requested only for driver service.';
+      'Location supports pickup and navigation. Drivers share location only while online or on an active trip, with a notification showing. The app does not use background location.';
 
   @override
   String get privacyChoiceTitle => 'You stay in control';
@@ -5728,4 +5728,62 @@ class AppLocalizationsEn extends AppLocalizations {
   String resetCodeSentNeutral(String value) {
     return 'If an account exists for $value, we sent a 6-digit code to it.';
   }
+
+  @override
+  String get gpsSignalIsWeakTryAgainOutsideOrNearAWindow =>
+      'GPS signal is weak. Try again outside or near a window.';
+
+  @override
+  String get locationOffBannerMessage =>
+      'Location is off. Turn it on so your trip keeps updating.';
+
+  @override
+  String get locationPermissionBannerMessage =>
+      'Location permission is off. Allow it so your trip keeps updating.';
+
+  @override
+  String get openLocationSettings => 'Open location settings';
+
+  @override
+  String get openAppSettings => 'Open app settings';
+
+  @override
+  String get locationIsBackYouAreOnlineAgain =>
+      'Location is back. You are online again.';
+
+  @override
+  String get batteryPromptTitle => 'Keep location running';
+
+  @override
+  String batteryPromptBody(String brandName) {
+    return 'Some phones stop apps in the background to save battery, which can pause your live location. Allow $brandName to run without battery restrictions.';
+  }
+
+  @override
+  String get batteryPromptOpenSettings => 'Open battery settings';
+
+  @override
+  String get batteryPromptNotNow => 'Not now';
+
+  @override
+  String get batteryOptimizationTitle => 'Battery optimization';
+
+  @override
+  String get batteryOptimizationUnrestricted =>
+      'Not restricted. Live location can keep running.';
+
+  @override
+  String get batteryOptimizationRestricted =>
+      'Restricted. Tap to open settings.';
+
+  @override
+  String get batteryOptimizationUnknown => 'Tap to open battery settings.';
+
+  @override
+  String offerExpiresInTime(String time) {
+    return 'Offer expires in $time';
+  }
+
+  @override
+  String get offerHasExpired => 'This offer has expired.';
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/services/battery_optimization_service.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -109,6 +110,7 @@ class DriverProfileScreen extends StatelessWidget {
           onTap: () => context.push(AppRoutes.driverFeedback),
         ),
         const AccountLanguageTile(),
+        const _BatteryOptimizationTile(),
         AccountMenuTile(
           icon: Icons.download_outlined,
           title: l10n.myData,
@@ -117,6 +119,59 @@ class DriverProfileScreen extends StatelessWidget {
         ),
         const DeleteAccountButton(),
       ],
+    );
+  }
+}
+
+/// Shows whether Android's battery optimization limits the app and opens the
+/// system screen to change it. Re-reads the status when the driver returns.
+class _BatteryOptimizationTile extends StatefulWidget {
+  const _BatteryOptimizationTile();
+
+  @override
+  State<_BatteryOptimizationTile> createState() =>
+      _BatteryOptimizationTileState();
+}
+
+class _BatteryOptimizationTileState extends State<_BatteryOptimizationTile>
+    with WidgetsBindingObserver {
+  BatteryStatus _status = BatteryStatus.unknown;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _refresh();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _refresh();
+  }
+
+  Future<void> _refresh() async {
+    final status = await BatteryOptimizationService.status();
+    if (mounted) setState(() => _status = status);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return AccountMenuTile(
+      icon: Icons.battery_saver_outlined,
+      title: l10n.batteryOptimizationTitle,
+      subtitle: switch (_status) {
+        BatteryStatus.unrestricted => l10n.batteryOptimizationUnrestricted,
+        BatteryStatus.restricted => l10n.batteryOptimizationRestricted,
+        BatteryStatus.unknown => l10n.batteryOptimizationUnknown,
+      },
+      onTap: () => BatteryOptimizationService.openSettings(),
     );
   }
 }

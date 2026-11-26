@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart' as geo;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tricgabay_app/core/services/active_trip_tracking_service.dart';
 import 'package:tricgabay_app/core/services/driver_availability_controller.dart';
+import 'package:tricgabay_app/core/services/driver_location_guard.dart';
 import 'package:tricgabay_app/core/services/location_gateway.dart';
 
 void main() {
@@ -266,6 +267,283 @@ void main() {
       },
     );
   });
+
+  group('fresh fix for arrival', () {
+    late FakeLocationGateway location;
+    late List<geo.Position> published;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      location = FakeLocationGateway();
+      published = [];
+      await ActiveTripTrackingService.configureForTesting(
+        location: location,
+        publisher: (sample) async => published.add(sample),
+      );
+    });
+
+    tearDown(() async {
+      await ActiveTripTrackingService.resetAfterTesting();
+      await location.close();
+    });
+
+    const shortWait = Duration(milliseconds: 150);
+
+    test('returns a fresh accurate fix and publishes it first', () async {
+      location.autoEmit = () => positionAt(DateTime.now(), accuracy: 20);
+      final result = await ActiveTripTrackingService.publishFreshFix(
+        timeout: shortWait,
+      );
+      expect(result.ok, isTrue);
+      expect(published, hasLength(1));
+      expect(ActiveTripTrackingService.lastPublishedAt.value, isNotNull);
+    });
+
+    test('accuracy over the 100 m server limit is a weak signal', () async {
+      location.autoEmit = () => positionAt(DateTime.now(), accuracy: 101);
+      final result = await ActiveTripTrackingService.publishFreshFix(
+        timeout: shortWait,
+      );
+      expect(result.failure, FreshFixFailure.weakSignal);
+      expect(published, isEmpty);
+    });
+
+    test('accuracy exactly 100 m is accepted', () async {
+      location.autoEmit = () => positionAt(DateTime.now(), accuracy: 100);
+      final result = await ActiveTripTrackingService.publishFreshFix(
+        timeout: shortWait,
+      );
+      expect(result.ok, isTrue);
+    });
+
+    test('an old fix is never reused', () async {
+      location.autoEmit = () => positionAt(
+        DateTime.now().subtract(const Duration(seconds: 40)),
+        accuracy: 10,
+      );
+      final result = await ActiveTripTrackingService.publishFreshFix(
+        timeout: shortWait,
+      );
+      expect(result.failure, FreshFixFailure.weakSignal);
+      expect(published, isEmpty);
+    });
+
+    test('no signal at all times out as a weak signal', () async {
+      final result = await ActiveTripTrackingService.publishFreshFix(
+        timeout: shortWait,
+      );
+      expect(result.failure, FreshFixFailure.weakSignal);
+    });
+
+    test('location off and permission lost are named separately', () async {
+      location.serviceEnabled = false;
+      expect(
+        (await ActiveTripTrackingService.acquireFreshFix(
+          timeout: shortWait,
+        )).failure,
+        FreshFixFailure.locationDisabled,
+      );
+      location.serviceEnabled = true;
+      location.permission = geo.LocationPermission.denied;
+      expect(
+        (await ActiveTripTrackingService.acquireFreshFix(
+          timeout: shortWait,
+        )).failure,
+        FreshFixFailure.permissionDenied,
+      );
+    });
+  });
+
+  group('trip heartbeat', () {
+    late FakeLocationGateway location;
+    late List<geo.Position> published;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      location = FakeLocationGateway();
+      published = [];
+      await ActiveTripTrackingService.configureForTesting(
+        location: location,
+        publisher: (sample) async => published.add(sample),
+        heartbeatInterval: const Duration(milliseconds: 60),
+        heartbeatFixTimeout: const Duration(milliseconds: 80),
+      );
+    });
+
+    tearDown(() async {
+      await ActiveTripTrackingService.resetAfterTesting();
+      await location.close();
+    });
+
+    test(
+      'a still phone still publishes: the heartbeat asks for its own fix',
+      () async {
+        await ActiveTripTrackingService.start('booking-1');
+        expect(location.streamRequests, 1);
+        // The device stream stays silent (driver not moving) ...
+        location.autoEmit = () => positionAt(DateTime.now(), accuracy: 30);
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+        // ... yet the service opened extra fresh-fix requests and published.
+        expect(location.streamRequests, greaterThan(1));
+        expect(published, isNotEmpty);
+        expect(ActiveTripTrackingService.health.value, TrackingHealth.live);
+      },
+    );
+
+    test('the heartbeat stops with the trip', () async {
+      await ActiveTripTrackingService.start('booking-1');
+      await ActiveTripTrackingService.stop();
+      final requests = location.streamRequests;
+      location.autoEmit = () => positionAt(DateTime.now(), accuracy: 30);
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      expect(location.streamRequests, requests);
+      expect(published, isEmpty);
+    });
+
+    test('a failed heartbeat marks tracking degraded, not stopped', () async {
+      await ActiveTripTrackingService.start('booking-1');
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      expect(ActiveTripTrackingService.health.value, TrackingHealth.degraded);
+      expect(ActiveTripTrackingService.bookingId, 'booking-1');
+    });
+
+    test('location switched off during the trip is reported', () async {
+      await ActiveTripTrackingService.start('booking-1');
+      location.serviceEnabled = false;
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      expect(
+        ActiveTripTrackingService.health.value,
+        TrackingHealth.locationDisabled,
+      );
+    });
+  });
+
+  group('driver location guard', () {
+    late FakeLocationGateway location;
+    var shouldShare = true;
+    var online = true;
+    late List<bool> writes;
+    late List<bool> restored;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      shouldShare = true;
+      online = true;
+      writes = [];
+      restored = [];
+      location = FakeLocationGateway();
+      await ActiveTripTrackingService.configureForTesting(
+        location: location,
+        publisher: (_) async {},
+      );
+    });
+
+    tearDown(() async {
+      await DriverLocationGuard.resetAfterTesting();
+      await ActiveTripTrackingService.resetAfterTesting();
+      await location.close();
+    });
+
+    void startGuard() => DriverLocationGuard.start(
+      shouldShare: () => shouldShare,
+      isOnline: () => online,
+      setOnline: (value) async => writes.add(value),
+      onOnlineRestored: restored.add,
+      location: location,
+      interval: const Duration(milliseconds: 40),
+    );
+
+    Future<void> until(bool Function() condition) async {
+      for (var i = 0; i < 60 && !condition(); i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+    }
+
+    test('location off while online shows the banner state', () async {
+      location.serviceEnabled = false;
+      startGuard();
+      await until(
+        () => DriverLocationGuard.issue.value == LocationIssue.serviceOff,
+      );
+      expect(DriverLocationGuard.issue.value, LocationIssue.serviceOff);
+      await DriverLocationGuard.openSettingsForIssue();
+      expect(location.openedLocationSettings, 1);
+    });
+
+    test('lost permission opens the app settings instead', () async {
+      location.permission = geo.LocationPermission.deniedForever;
+      startGuard();
+      await until(
+        () =>
+            DriverLocationGuard.issue.value ==
+            LocationIssue.permissionDeniedForever,
+      );
+      await DriverLocationGuard.openSettingsForIssue();
+      expect(location.openedAppSettings, 1);
+      expect(location.openedLocationSettings, 0);
+    });
+
+    test('an offline driver with working location sees nothing', () async {
+      shouldShare = false;
+      online = false;
+      location.serviceEnabled = false;
+      startGuard();
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(DriverLocationGuard.issue.value, LocationIssue.none);
+    });
+
+    test(
+      'driver put offline because fixes stopped is restored automatically',
+      () async {
+        location.serviceEnabled = false;
+        startGuard();
+        await until(
+          () => DriverLocationGuard.issue.value == LocationIssue.serviceOff,
+        );
+        // The server's heartbeat check puts the driver offline meanwhile.
+        online = false;
+        shouldShare = false;
+        location.autoEmit = () => positionAt(DateTime.now(), accuracy: 25);
+        location.setServiceEnabled(true);
+        await until(() => writes.isNotEmpty);
+        expect(writes, [true]);
+        expect(restored, [true]);
+        expect(DriverLocationGuard.issue.value, LocationIssue.none);
+        expect(DriverLocationGuard.restoredNotice.value, isTrue);
+        // And only once.
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+        expect(writes, [true]);
+      },
+    );
+
+    test('a driver who chose to go offline is never put back online', () async {
+      location.serviceEnabled = false;
+      startGuard();
+      await until(
+        () => DriverLocationGuard.issue.value == LocationIssue.serviceOff,
+      );
+      online = false;
+      shouldShare = false;
+      await DriverLocationGuard.driverChoseOffline();
+      location.autoEmit = () => positionAt(DateTime.now(), accuracy: 25);
+      location.setServiceEnabled(true);
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      expect(writes, isEmpty);
+    });
+
+    test('no restore until a real fix proves location works again', () async {
+      location.serviceEnabled = false;
+      startGuard();
+      await until(
+        () => DriverLocationGuard.issue.value == LocationIssue.serviceOff,
+      );
+      online = false;
+      shouldShare = false;
+      location.setServiceEnabled(true); // switch is on, but no fix arrives
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      expect(writes, isEmpty);
+    });
+  });
 }
 
 geo.Position positionAt(DateTime timestamp, {double accuracy = 5}) =>
@@ -314,6 +592,12 @@ class FakeLocationGateway implements LocationGateway {
   int cancelCount = 0;
   void Function()? onCurrentPosition;
   final _stream = StreamController<geo.Position>.broadcast();
+  final _serviceChanges = StreamController<bool>.broadcast();
+
+  /// When set, every new position stream receives this sample right away.
+  geo.Position Function()? autoEmit;
+  int openedLocationSettings = 0;
+  int openedAppSettings = 0;
 
   @override
   Future<geo.LocationPermission> checkPermission() async => permission;
@@ -335,7 +619,30 @@ class FakeLocationGateway implements LocationGateway {
 
   void emit(geo.Position value) => _stream.add(value);
 
-  Future<void> close() => _stream.close();
+  Future<void> close() async {
+    await _stream.close();
+    await _serviceChanges.close();
+  }
+
+  void setServiceEnabled(bool value) {
+    serviceEnabled = value;
+    _serviceChanges.add(value);
+  }
+
+  @override
+  Stream<bool> serviceEnabledChanges() => _serviceChanges.stream;
+
+  @override
+  Future<bool> openLocationSettings() async {
+    openedLocationSettings++;
+    return true;
+  }
+
+  @override
+  Future<bool> openAppSettings() async {
+    openedAppSettings++;
+    return true;
+  }
 
   @override
   Future<bool> isServiceEnabled() async => serviceEnabled;
@@ -345,6 +652,12 @@ class FakeLocationGateway implements LocationGateway {
     required geo.LocationSettings settings,
   }) {
     streamRequests++;
+    final build = autoEmit;
+    if (build != null) {
+      Timer(Duration.zero, () {
+        if (!_stream.isClosed) _stream.add(build());
+      });
+    }
     return _stream.stream.doOnCancel(() => cancelCount++);
   }
 

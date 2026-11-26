@@ -20,7 +20,9 @@ import '../../../core/widgets/web_map_fallback.dart';
 import '../../../models/booking_model.dart';
 import '../../../core/config/backend_config.dart';
 import '../../../core/services/backend_repository.dart';
+import '../../../core/services/consent_state.dart';
 import '../../../core/services/driver_availability_controller.dart';
+import '../../../core/services/driver_location_guard.dart';
 import '../../../core/services/location_gateway.dart';
 import '../../../core/services/pickup_service_area.dart';
 import '../../../core/services/place_name_service.dart';
@@ -85,8 +87,14 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
       streamSettings: _onlineLocationSettings,
     );
     if (AppSession.isDriverOnline.value) {
-      _checkLocationPermission();
+      // Never raise the system permission prompt over the privacy notice.
+      unawaited(
+        ConsentState.whenClear().then((_) {
+          if (mounted) _checkLocationPermission();
+        }),
+      );
     }
+    AppSession.isDriverOnline.addListener(_onlineStateChanged);
     if (BackendConfig.isConfigured) unawaited(_loadServiceArea());
   }
 
@@ -101,8 +109,20 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
 
   @override
   void dispose() {
+    AppSession.isDriverOnline.removeListener(_onlineStateChanged);
     unawaited(_availabilityController.dispose());
     super.dispose();
+  }
+
+  /// The app can put the driver back online by itself once location returns;
+  /// start sharing again so the home screen keeps publishing.
+  void _onlineStateChanged() {
+    if (AppSession.isDriverOnline.value &&
+        !_availabilityController.isSharing &&
+        !_availabilityController.isBusy &&
+        mounted) {
+      unawaited(_checkLocationPermission());
+    }
   }
 
   bool get _hasActiveTrip {
@@ -225,6 +245,7 @@ class _DriverHomeScreenState extends ConsumerState<DriverHomeScreen> {
         return;
       }
       AppSession.isDriverOnline.value = value;
+      if (!value) unawaited(DriverLocationGuard.driverChoseOffline());
       _locationMessage = null;
     } catch (error) {
       if (mounted) {
