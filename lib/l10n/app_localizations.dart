@@ -8398,7 +8398,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyLocationBody.
   ///
   /// In en, this message translates to:
-  /// **'Location supports pickup and navigation. Background location is requested only for driver service.'**
+  /// **'Location supports pickup and navigation. Drivers share location only while online or on an active trip, with a notification showing. The app does not use background location.'**
   String get privacyLocationBody;
 
   /// No description provided for @privacyChoiceTitle.
@@ -9874,6 +9874,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'If an account exists for {value}, we sent a 6-digit code to it.'**
   String resetCodeSentNeutral(String value);
+
+  /// No description provided for @gpsSignalIsWeakTryAgainOutsideOrNearAWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS signal is weak. Try again outside or near a window.'**
+  String get gpsSignalIsWeakTryAgainOutsideOrNearAWindow;
+
+  /// No description provided for @locationOffBannerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is off. Turn it on so your trip keeps updating.'**
+  String get locationOffBannerMessage;
+
+  /// No description provided for @locationPermissionBannerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is off. Allow it so your trip keeps updating.'**
+  String get locationPermissionBannerMessage;
+
+  /// No description provided for @openLocationSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open location settings'**
+  String get openLocationSettings;
+
+  /// No description provided for @openAppSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open app settings'**
+  String get openAppSettings;
+
+  /// No description provided for @locationIsBackYouAreOnlineAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is back. You are online again.'**
+  String get locationIsBackYouAreOnlineAgain;
+
+  /// No description provided for @batteryPromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep location running'**
+  String get batteryPromptTitle;
+
+  /// No description provided for @batteryPromptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Some phones stop apps in the background to save battery, which can pause your live location. Allow {brandName} to run without battery restrictions.'**
+  String batteryPromptBody(String brandName);
+
+  /// No description provided for @batteryPromptOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open battery settings'**
+  String get batteryPromptOpenSettings;
+
+  /// No description provided for @batteryPromptNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get batteryPromptNotNow;
+
+  /// No description provided for @batteryOptimizationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery optimization'**
+  String get batteryOptimizationTitle;
+
+  /// No description provided for @batteryOptimizationUnrestricted.
+  ///
+  /// In en, this message translates to:
+  /// **'Not restricted. Live location can keep running.'**
+  String get batteryOptimizationUnrestricted;
+
+  /// No description provided for @batteryOptimizationRestricted.
+  ///
+  /// In en, this message translates to:
+  /// **'Restricted. Tap to open settings.'**
+  String get batteryOptimizationRestricted;
+
+  /// No description provided for @batteryOptimizationUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to open battery settings.'**
+  String get batteryOptimizationUnknown;
+
+  /// No description provided for @offerExpiresInTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer expires in {time}'**
+  String offerExpiresInTime(String time);
+
+  /// No description provided for @offerHasExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This offer has expired.'**
+  String get offerHasExpired;
 }
 
 class _AppLocalizationsDelegate

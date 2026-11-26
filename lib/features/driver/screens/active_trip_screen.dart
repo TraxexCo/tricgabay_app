@@ -327,6 +327,9 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
           );
         }
         final isAccepted = booking.status == BookingStatus.accepted;
+        // The status pill sits under the status bar; everything else on the
+        // map hangs below it so nothing overlaps on phones with tall bars.
+        final topInset = MediaQuery.paddingOf(context).top;
 
         return Scaffold(
           body: Stack(
@@ -360,7 +363,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
                       ),
               ),
               Positioned(
-                top: 92,
+                top: topInset + 76,
                 left: 16,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -416,7 +419,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
               ),
               if (_offRoute)
                 Positioned(
-                  top: 142,
+                  top: topInset + 126,
                   left: 16,
                   right: 16,
                   child: Material(
@@ -476,7 +479,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
                 ),
               ),
               Positioned(
-                top: 100,
+                top: topInset + 76,
                 right: 16,
                 child: FloatingActionButton(
                   tooltip: context.l10n.emergencyHelp,
@@ -488,7 +491,7 @@ class _ActiveTripScreenState extends ConsumerState<ActiveTripScreen> {
                 ),
               ),
               Positioned(
-                top: 158,
+                top: topInset + 134,
                 right: 16,
                 child: FloatingActionButton.small(
                   tooltip: context.l10n.resetMap,

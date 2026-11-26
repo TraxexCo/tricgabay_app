@@ -4918,7 +4918,7 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get privacyLocationBody =>
-      'Ginagamit ang lokasyon para sa sunduan at nabigasyon. Hinihingi lang ang lokasyon sa background para sa serbisyo ng drayber.';
+      'Ginagamit ang lokasyon para sa sunduan at nabigasyon. Nagbabahagi lang ng lokasyon ang mga drayber habang online o may aktibong biyahe, may nakikitang notification. Hindi gumagamit ang app ng background location.';
 
   @override
   String get privacyChoiceTitle => 'Ikaw ang may kontrol';
@@ -5811,4 +5811,63 @@ class AppLocalizationsFil extends AppLocalizations {
   String resetCodeSentNeutral(String value) {
     return 'Kung may account para sa $value, nagpadala kami ng 6-digit na code doon.';
   }
+
+  @override
+  String get gpsSignalIsWeakTryAgainOutsideOrNearAWindow =>
+      'Mahina ang GPS signal. Subukan muli sa labas o malapit sa bintana.';
+
+  @override
+  String get locationOffBannerMessage =>
+      'Naka-off ang lokasyon. I-on ito para patuloy na ma-update ang biyahe mo.';
+
+  @override
+  String get locationPermissionBannerMessage =>
+      'Naka-off ang pahintulot sa lokasyon. Payagan ito para patuloy na ma-update ang biyahe mo.';
+
+  @override
+  String get openLocationSettings => 'Buksan ang location settings';
+
+  @override
+  String get openAppSettings => 'Buksan ang app settings';
+
+  @override
+  String get locationIsBackYouAreOnlineAgain =>
+      'Bumalik na ang lokasyon. Online ka na ulit.';
+
+  @override
+  String get batteryPromptTitle => 'Panatilihing gumagana ang lokasyon';
+
+  @override
+  String batteryPromptBody(String brandName) {
+    return 'Humihinto ang ilang telepono sa mga app sa background para makatipid ng baterya, na maaaring magpahinto sa live na lokasyon mo. Payagan ang $brandName na tumakbo nang walang limitasyon sa baterya.';
+  }
+
+  @override
+  String get batteryPromptOpenSettings => 'Buksan ang battery settings';
+
+  @override
+  String get batteryPromptNotNow => 'Hindi muna';
+
+  @override
+  String get batteryOptimizationTitle => 'Battery optimization';
+
+  @override
+  String get batteryOptimizationUnrestricted =>
+      'Walang limitasyon. Maaaring magpatuloy ang live na lokasyon.';
+
+  @override
+  String get batteryOptimizationRestricted =>
+      'May limitasyon. I-tap para buksan ang settings.';
+
+  @override
+  String get batteryOptimizationUnknown =>
+      'I-tap para buksan ang battery settings.';
+
+  @override
+  String offerExpiresInTime(String time) {
+    return 'Mag-e-expire ang alok sa $time';
+  }
+
+  @override
+  String get offerHasExpired => 'Nag-expire na ang alok na ito.';
 }

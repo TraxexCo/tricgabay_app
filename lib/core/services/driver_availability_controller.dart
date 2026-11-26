@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:geolocator/geolocator.dart' as geo;
 
+import 'consent_state.dart';
 import 'location_gateway.dart';
 
 enum DriverAvailabilityFailure {
@@ -117,6 +118,7 @@ class DriverAvailabilityController {
     }
     var permission = await location.checkPermission();
     if (permission == geo.LocationPermission.denied) {
+      await ConsentState.whenClear();
       permission = await location.requestPermission();
     }
     if (permission == geo.LocationPermission.deniedForever) {

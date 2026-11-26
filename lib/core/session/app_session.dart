@@ -990,6 +990,19 @@ class AppSession {
 
   static Future<BookingModel> reportPickupArrival(String id) async {
     _requireServer();
+    // The server checks the driver's last published position (150 m, 60 s,
+    // 100 m accuracy). Publish a brand-new fix first so a phone that sat still
+    // does not fail on an old row.
+    final fix = await ActiveTripTrackingService.publishFreshFix();
+    if (!fix.ok) {
+      throw StateError(switch (fix.failure) {
+        FreshFixFailure.locationDisabled =>
+          MessageCode.turnOnGpsToShareYourLocation,
+        FreshFixFailure.permissionDenied =>
+          MessageCode.locationPermissionBannerMessage,
+        _ => MessageCode.gpsSignalIsWeakTryAgainOutsideOrNearAWindow,
+      });
+    }
     await BackendRepository.rpc('report_pickup_arrival', {'p_booking_id': id});
     await _refreshAfterWrite();
     return bookingById(id);
@@ -1231,6 +1244,8 @@ class AppSession {
     return _serial(() async {
       _requireServer();
       await BackendRepository.rpc('accept_booking', {'p_booking_id': id});
+      // Track from the moment the offer is accepted, whichever screen opens.
+      unawaited(ActiveTripTrackingService.start(id).catchError((Object _) {}));
       await _refreshAfterWrite();
       return bookingById(id);
     });

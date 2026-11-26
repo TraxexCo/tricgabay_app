@@ -169,6 +169,14 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'backToLogin' => l.backToLogin,
     'bad' => l.bad,
     'barangay' => l.barangay,
+    'batteryOptimizationRestricted' => l.batteryOptimizationRestricted,
+    'batteryOptimizationTitle' => l.batteryOptimizationTitle,
+    'batteryOptimizationUnknown' => l.batteryOptimizationUnknown,
+    'batteryOptimizationUnrestricted' => l.batteryOptimizationUnrestricted,
+    'batteryPromptBody' => l.batteryPromptBody(AppBrand.name),
+    'batteryPromptNotNow' => l.batteryPromptNotNow,
+    'batteryPromptOpenSettings' => l.batteryPromptOpenSettings,
+    'batteryPromptTitle' => l.batteryPromptTitle,
     'blocked' => l.blocked,
     'blockedCheckoutExpiry' => l.blockedCheckoutExpiry,
     'bongaMayor' => l.bongaMayor,
@@ -823,6 +831,8 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'goodMorning' => l.goodMorning,
     'goodMorningValue' => l.goodMorningValue(text(0)),
     'gpsAccuracyTooLow' => l.gpsAccuracyTooLow,
+    'gpsSignalIsWeakTryAgainOutsideOrNearAWindow' =>
+      l.gpsSignalIsWeakTryAgainOutsideOrNearAWindow,
     'groupOfFourOrMore' => l.groupOfFourOrMore,
     'groupOfFourOrMoreBody' => l.groupOfFourOrMoreBody,
     'headingTo' => l.headingTo,
@@ -941,8 +951,11 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'localRoadsArePreferredFollowRoadSignsAndYourApprovedTodaOrLgu' =>
       l.localRoadsArePreferredFollowRoadSignsAndYourApprovedTodaOrLgu,
     'locationExplainerTitle' => l.locationExplainerTitle,
+    'locationIsBackYouAreOnlineAgain' => l.locationIsBackYouAreOnlineAgain,
     'locationIsUnavailableRightNowCheckYourSettingsAndTryAgain' =>
       l.locationIsUnavailableRightNowCheckYourSettingsAndTryAgain,
+    'locationOffBannerMessage' => l.locationOffBannerMessage,
+    'locationPermissionBannerMessage' => l.locationPermissionBannerMessage,
     'locationPermissionDeniedEnableItInSettings' =>
       l.locationPermissionDeniedEnableItInSettings,
     'locationPermissionIsNeededToReceiveRides' =>
@@ -1093,6 +1106,8 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'oct' => l.oct,
     'offThePlannedRouteNavigationIsRecalculatingFollowLegalLocalRoadsAndStop' =>
       l.offThePlannedRouteNavigationIsRecalculatingFollowLegalLocalRoadsAndStop,
+    'offerExpiresInTime' => l.offerExpiresInTime(text(0)),
+    'offerHasExpired' => l.offerHasExpired,
     'officialEmergencyNumbersFromMunicipalityPortal' =>
       l.officialEmergencyNumbersFromMunicipalityPortal,
     'offline' => l.offline,
@@ -1141,11 +1156,13 @@ String resolveTypedMessage(AppLocalizations l, String key, List<dynamic> args) {
     'onlyUnvisitedStopsMoveTheOtherParticipantMustApproveBeforeNavigationChanges' =>
       l.onlyUnvisitedStopsMoveTheOtherParticipantMustApproveBeforeNavigationChanges,
     'openAPaymentReview' => l.openAPaymentReview,
+    'openAppSettings' => l.openAppSettings,
     'openAppStore' => l.openAppStore,
     'openAppToViewThisUpdate' => l.openAppToViewThisUpdate(AppBrand.name),
     'openBookingDetails' => l.openBookingDetails,
     'openDialer' => l.openDialer,
     'openDriverSearch' => l.openDriverSearch,
+    'openLocationSettings' => l.openLocationSettings,
     'openReviews' => l.openReviews,
     'openReviewsValue' => l.openReviewsValue(text(0)),
     'openTheMobileAppForTheInteractiveRoute' =>

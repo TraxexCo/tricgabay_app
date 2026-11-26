@@ -5,6 +5,10 @@ import 'core/l10n/locale_controller.dart';
 import 'core/widgets/responsive_app_frame.dart';
 import 'core/services/connectivity_monitor.dart';
 import 'core/widgets/offline_banner.dart';
+import 'core/widgets/location_issue_banner.dart';
+import 'core/services/active_trip_tracking_service.dart';
+import 'core/services/backend_repository.dart';
+import 'core/services/driver_location_guard.dart';
 import 'core/widgets/privacy_consent_gate.dart';
 import 'l10n/app_localizations.dart';
 import 'core/widgets/minimum_version_gate.dart';
@@ -118,6 +122,19 @@ class _TricGabayAppState extends State<TricGabayApp>
         }
       });
     }
+    DriverLocationGuard.start(
+      shouldShare: () =>
+          AppSession.authenticatedRole == 'driver' &&
+          (AppSession.isDriverOnline.value ||
+              ActiveTripTrackingService.bookingId != null),
+      isOnline: () => AppSession.isDriverOnline.value,
+      setOnline: (online) async {
+        if (BackendConfig.isConfigured) {
+          await BackendRepository.setDriverOnline(online);
+        }
+      },
+      onOnlineRestored: (online) => AppSession.isDriverOnline.value = online,
+    );
     // Notification details are children of the current signed-in context.
     // Pushing preserves a sensible Android Back destination instead of
     // replacing the entire navigation history.
@@ -128,6 +145,7 @@ class _TricGabayAppState extends State<TricGabayApp>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _connectivity.dispose();
+    DriverLocationGuard.stop();
     _authSubscription?.cancel();
     super.dispose();
   }
@@ -141,6 +159,7 @@ class _TricGabayAppState extends State<TricGabayApp>
       _leftAt ??= DateTime.now();
     }
     if (state == AppLifecycleState.resumed) {
+      unawaited(DriverLocationGuard.evaluate());
       // A glance at the notification shade or a quick app switch keeps
       // everything as it was; only a real absence refreshes the data.
       final leftAt = _leftAt;
@@ -202,11 +221,14 @@ class _TricGabayAppState extends State<TricGabayApp>
                     monitor: _connectivity,
                     retry: AppSession.syncRemoteState,
                   ),
+                  const LocationIssueBanner(),
                   if (error != null) _RefreshNotice(error: error),
                   Expanded(
-                    child: MinimumVersionGate(
-                      child: PrivacyConsentGate(
-                        child: child ?? const SizedBox.shrink(),
+                    child: LocationBannerBody(
+                      child: MinimumVersionGate(
+                        child: PrivacyConsentGate(
+                          child: child ?? const SizedBox.shrink(),
+                        ),
                       ),
                     ),
                   ),

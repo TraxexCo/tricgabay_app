@@ -18,6 +18,15 @@ abstract interface class LocationGateway {
 
   /// The phone's most recent fix, if it has one (no waiting).
   Future<geo.Position?> lastKnownPosition();
+
+  /// Emits whenever the phone's location switch is turned on or off.
+  Stream<bool> serviceEnabledChanges();
+
+  /// Opens the system location switch screen.
+  Future<bool> openLocationSettings();
+
+  /// Opens this app's system settings page (permissions).
+  Future<bool> openAppSettings();
 }
 
 class GeolocatorLocationGateway implements LocationGateway {
@@ -47,6 +56,18 @@ class GeolocatorLocationGateway implements LocationGateway {
   @override
   Future<geo.Position?> lastKnownPosition() =>
       geo.Geolocator.getLastKnownPosition();
+
+  @override
+  Stream<bool> serviceEnabledChanges() =>
+      geo.Geolocator.getServiceStatusStream().map(
+        (status) => status == geo.ServiceStatus.enabled,
+      );
+
+  @override
+  Future<bool> openLocationSettings() => geo.Geolocator.openLocationSettings();
+
+  @override
+  Future<bool> openAppSettings() => geo.Geolocator.openAppSettings();
 }
 
 bool isUsableLocationSample(
